@@ -1,6 +1,5 @@
 package com.minierp.backend.global.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -9,13 +8,17 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.sql.DataSource;
 import java.util.Optional;
 
 @Configuration
-@EnableJpaAuditing
-@ConditionalOnBean(DataSource.class)
+@EnableJpaAuditing(dateTimeProviderRef = "auditingDateTimeProvider")
 public class JpaAuditingConfig {
+
+    @Bean
+    public org.springframework.data.auditing.DateTimeProvider auditingDateTimeProvider(java.time.Clock clock) {
+        return () -> Optional.of(java.time.LocalDateTime.now(clock));
+    }
+
 
     @Bean
     public AuditorAware<String> auditorProvider() {
