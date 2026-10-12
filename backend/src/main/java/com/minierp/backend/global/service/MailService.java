@@ -50,6 +50,15 @@ public class MailService {
         }
     }
 
+    public void sendInvitationMail(String toEmail,String link) {
+        String from=resolveFromAddress();
+        if(from==null || from.isBlank()) throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE,"메일 발신 주소 설정이 필요합니다.");
+        SimpleMailMessage message=new SimpleMailMessage();
+        message.setTo(toEmail);message.setFrom(from);message.setSubject("[WorkFlow] 첫 비밀번호 설정");
+        message.setText("아래 링크에서 첫 비밀번호를 설정해 주세요. 유효시간은 24시간입니다.\n\n"+link);
+        mailSender.send(message);
+    }
+
     private String resolveFromAddress() {
         if (fromAddress != null && !fromAddress.isBlank()) {
             return fromAddress;

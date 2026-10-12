@@ -12,8 +12,9 @@ public class LoginResponseDto {
     private final String tokenType;
     private final long expiresIn;
     private final UserResponseDto user;
+    private final boolean mustChangePassword;
 
-    public static LoginResponseDto of(String accessToken, long expiresIn, UserResponseDto user) {
-        return new LoginResponseDto(accessToken, "Bearer", expiresIn, user);
+    public static LoginResponseDto of(String accessToken, long expiresIn, UserResponseDto user, boolean mustChangePassword) {
+        return new LoginResponseDto(accessToken, "Bearer", expiresIn, user, mustChangePassword);
     }
 }

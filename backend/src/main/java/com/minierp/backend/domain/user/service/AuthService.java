@@ -37,43 +37,21 @@ public class AuthService {
     private final MailService mailService;
     private final PasswordResetStoreService passwordResetStoreService;
 
-    @Transactional
-    public UserResponseDto signup(SignupRequestDto requestDto) {
-        if (userRepository.existsByLoginId(requestDto.getId())) {
-            throw new BusinessException(ErrorCode.LOGIN_ID_ALREADY_EXISTS);
-        }
-        if (userRepository.existsByUserEmail(requestDto.getEmail())) {
-            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
-        }
-
-        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
-        User user = User.create(
-                requestDto.getName(),
-                requestDto.getId(),
-                requestDto.getEmail(),
-                encodedPassword,
-                requestDto.getDepartmentCode(),
-                requestDto.getPosition()
-        );
-
-        User savedUser = userRepository.save(user);
-        return UserResponseDto.from(savedUser);
-    }
-
     @Transactional(readOnly = true)
     public LoginResponseDto login(LoginRequestDto requestDto) {
         User user = userRepository.findByLoginId(requestDto.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
-        if (!passwordEncoder.matches(requestDto.getPassword(), user.getUserPw())) {
+        if (user.getUserPw() == null || !passwordEncoder.matches(requestDto.getPassword(), user.getUserPw())) {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(user.getId()), user.getUserRole().name());
+        if (!user.isActive()) throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
+        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(user.getId()), user.getTokenVersion());
         return LoginResponseDto.of(
                 accessToken,
                 jwtTokenProvider.getAccessTokenExpirationSeconds(),
-                UserResponseDto.from(user)
+                UserResponseDto.from(user), user.isMustChangePassword()
         );
     }
 
@@ -159,14 +137,18 @@ public class AuthService {
     }
 
     private void validatePasswordPolicy(String password) {
-        boolean hasUpperCase = password.matches(".*[A-Z].*");
-        boolean hasLowerCase = password.matches(".*[a-z].*");
-        boolean hasDigit = password.matches(".*\\d.*");
-        boolean hasSpecialChar = password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
+        com.minierp.backend.global.security.PasswordPolicy.validate(password);
+    }
 
-        if (!hasUpperCase || !hasLowerCase || !hasDigit || !hasSpecialChar) {
-            throw new BusinessException(ErrorCode.PASSWORD_POLICY_VIOLATION,
-                    "비밀번호는 대문자, 소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
-        }
+    @Transactional
+    public LoginResponseDto changePassword(Long userId, String currentPassword, String newPassword) {
+        User user=userRepository.findByIdForUpdate(userId).orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if(user.getUserPw()==null || !passwordEncoder.matches(currentPassword,user.getUserPw())) throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        validatePasswordPolicy(newPassword);
+        if(passwordEncoder.matches(newPassword,user.getUserPw())) throw new BusinessException(ErrorCode.PASSWORD_POLICY_VIOLATION);
+        user.updatePassword(passwordEncoder.encode(newPassword));
+        userRepository.flush();
+        return LoginResponseDto.of(jwtTokenProvider.generateAccessToken(userId.toString(),user.getTokenVersion()),
+                jwtTokenProvider.getAccessTokenExpirationSeconds(),UserResponseDto.from(user),user.isMustChangePassword());
     }
 }
