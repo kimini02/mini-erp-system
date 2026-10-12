@@ -89,7 +89,7 @@ MariaDB 테스트는 Docker가 실행 중일 때 `mariadb:10.11` 임시 컨테�
 
 새 MariaDB 테스트는 `com.minierp.backend.support.MariaDbIntegrationTest`를 상속하고 이름을 `*Test`로 끝내세요. 각 테스트 클래스는 빈 DB에서 시작하며, 클래스 종료 시 Spring 컨텍스트와 컨테이너를 정리합니다. 클래스 내 테스트 간 데이터 정리가 필요하면 `@Transactional` 롤백 또는 명시적 정리를 사용하세요. 이 공통 베이스를 쓰는 테스트 클래스는 병렬 실행하지 마세요. 기존 `integration` 프로필의 H2 설정은 유지합니다.
 
-2026-10-12 기준 변경 전 기존 테스트 88개 중 7개가 실패했습니다. M0 범위 밖 원인과 동일 실패 여부는 `docs/troubleshooting/M0-2-mariadb-tests.md`에 기록합니다.
+M0-4에서 날짜에 의존하던 실패를 해결했습니다. 알려진 특근 요청 버그 테스트 1개만 이유를 명시해 비활성화하며, 처리 단계와 복구 조건은 `docs/known-issues.md`를 참고하세요. 이전 실패 기록은 `docs/troubleshooting/M0-2-mariadb-tests.md`에 보존합니다.
 
 ## 최초 관리소장 계정 (M0)
 

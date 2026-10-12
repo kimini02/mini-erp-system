@@ -30,7 +30,7 @@ Docker를 실행해야 MariaDB 테스트가 실제 수행된다. 두 번째 명�
 2. `Task.isOverdue(LocalDate today)`로 엔티티에 기준 날짜를 전달한다. 테스트는 fixed Clock에서 기준일을 계산하고 프로젝트·업무 날짜는 그 기준일의 상대 날짜로 만든다. 기존 프로젝트·업무 관련 다른 테스트의 고정 날짜도 상대 날짜로 정리해 날짜 데이터에 달력 날짜가 남지 않게 했다.
 3. `FixedClockTestConfiguration`의 @Primary Clock과 `TestClocks`를 제공했다. 통합 테스트와 MariaDB 공통 베이스에서 가져오며 `test.clock.instant`로 JVM을 다시 실행할 때 기준 시각을 바꿀 수 있다.
 4. 캘린더 테스트는 승인된 특근 엔티티를 저장해 조회 준비 데이터를 만든다. 연차 신청·승인 경로는 그대로 검증하고 특근 조회도 유지한다. 월 경계에서 빠지지 않도록 각 일정의 연·월로 조회한다.
-5. 특근 신청 버그의 비활성화와 남은 문제의 처리 단계는 별도 2번 커밋으로 관리한다.
+5. 특근 신청 테스트 하나에 요청된 @Disabled 사유를 지정했다. docs/known-issues.md에 남은 특근 DTO 불일치(M2), 부서 데이터 범위(M1), 연차 승인 동시성(M2)의 근거·복구 조건을 기록했다. 운영 특근 버그는 수정하지 않았다.
 
 ### now() 변경 위치
 | 위치 (backend/src/main/java/com/minierp/backend 기준) | 변경 |
@@ -54,3 +54,17 @@ Docker를 실행해야 MariaDB 테스트가 실제 수행된다. 두 번째 명�
 1번(시계) 작업 검증: Java 17 + Docker에서 총 **107개, 성공 106개, 실패 1개, 오류 0개, 건너뜀 0개**. 남은 실패는 approveOvertime_shouldReturnApprovedStatus 하나뿐이다.
 
 추가된 ClockBehaviorTest는 3회 실행된다. 운영 시계의 Asia/Seoul 시간대와 UTC 날짜 경계를 검증하고, changingFixedDatePreservesPastRequestAndOverdueRules를 두 고정 시각에서 실행해 연차·특근 과거 신청 거부 및 업무 지연/완료 판정이 유지됨을 확인했다. 고정 시각 리터럴은 Clock의 기준점을 지정하는 곳에만 남겼으며 업무 날짜 데이터는 기준일에서 계산한다. CoreApiIntegrationTest는 성공·오류 응답의 timestamp도 주입된 Clock과 일치하는지 검사한다.
+
++
++### 최종 결과 (2번 작업 포함)
++Java 17.0.16 + Docker 실행 상태에서 두 번 모두 Maven 종료 코드 0:
++
++| 실행 조건 | 총 | 성공 | 실패 | 오류 | 건너뜀 |
++| --- | ---: | ---: | ---: | ---: | ---: |
++| 기본 Clock.fixed (2026-04-06T00:00:00Z) | 107 | 106 | 0 | 0 | 1 |
++| Clock.fixed=2026-12-31T15:00:00Z, JVM 시간대 UTC | 107 | 106 | 0 | 0 | 1 |
++
++두 번째 실행의 한국 날짜는 2027-01-01이다. Surefire 실행 속성에서 java.version=17.0.16, user.timezone=UTC, test.clock.instant 값을 확인했다. 두 실행 모두 유일한 건너뜀은 `CoreApiIntegrationTest.approveOvertime_shouldReturnApprovedStatus`이며 사유는 `M2에서 수정 — docs/known-issues.md 참고`다. MariaDbMigrationTest 3개와 InitialAdminMariaDbTest 1개는 실제 컨테이너에서 실행됐다.
++
++새 라이브러리 없이 변경 전 104개에 ClockBehaviorTest의 3회 실행을 추가했다. 운영 코드의 인자 없는 LocalDate.now()/LocalDateTime.now()/LocalTime.now() 및 인자 없는 isOverdue() 호출이 남지 않았음을 검색으로 확인했다. 금지된 frontend 및 다음 단계 설계 문서 10/11/12는 변경·커밋하지 않았다.
++
