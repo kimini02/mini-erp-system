@@ -60,6 +60,9 @@ import static org.mockito.Mockito.verify;
 @Transactional
 class ProjectServiceTest {
 
+    @MockBean
+    private com.minierp.backend.global.permission.PermissionAccess permissionAccess;
+
     @Autowired
     private ProjectService projectService;
 

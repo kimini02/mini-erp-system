@@ -49,6 +49,9 @@ import static org.mockito.BDDMockito.given;
 @Transactional
 class DashboardServiceTest {
 
+    @MockBean
+    private com.minierp.backend.global.permission.PermissionAccess permissionAccess;
+
     @Autowired
     private DashboardService dashboardService;
 

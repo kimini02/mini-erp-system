@@ -56,6 +56,9 @@ import static org.mockito.Mockito.verify;
 @Transactional
 class TaskServiceTest {
 
+    @MockBean
+    private com.minierp.backend.global.permission.PermissionAccess permissionAccess;
+
     @Autowired
     private TaskService taskService;
 
