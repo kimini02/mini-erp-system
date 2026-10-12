@@ -76,6 +76,15 @@ public class User extends BaseEntity {
         return new User(userName, loginId, userEmail, encodedPassword, departmentCode, positionName, UserRole.USER);
     }
 
+    public static User createInitialAdmin(String userName, String loginId, String userEmail, String encodedPassword) {
+        User admin = new User(userName, loginId, userEmail, encodedPassword,
+                DepartmentCode.values()[0].getCode(), "관리소장", UserRole.ADMIN);
+        admin.totalAnnualLeave = BigDecimal.ZERO;
+        admin.usedAnnualLeave = BigDecimal.ZERO;
+        admin.remainingAnnualLeave = BigDecimal.ZERO;
+        return admin;
+    }
+
     public void updateProfile(String userName, String departmentCode, String positionName) {
         this.userName = userName;
         this.departmentCode = departmentCode;

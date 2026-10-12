@@ -90,3 +90,25 @@ MariaDB 테스트는 Docker가 실행 중일 때 `mariadb:10.11` 임시 컨테�
 새 MariaDB 테스트는 `com.minierp.backend.support.MariaDbIntegrationTest`를 상속하고 이름을 `*Test`로 끝내세요. 각 테스트 클래스는 빈 DB에서 시작하며, 클래스 종료 시 Spring 컨텍스트와 컨테이너를 정리합니다. 클래스 내 테스트 간 데이터 정리가 필요하면 `@Transactional` 롤백 또는 명시적 정리를 사용하세요. 이 공통 베이스를 쓰는 테스트 클래스는 병렬 실행하지 마세요. 기존 `integration` 프로필의 H2 설정은 유지합니다.
 
 2026-10-12 기준 변경 전 기존 테스트 88개 중 7개가 실패했습니다. M0 범위 밖 원인과 동일 실패 여부는 `docs/troubleshooting/M0-2-mariadb-tests.md`에 기록합니다.
+
+## 최초 관리소장 계정 (M0)
+
+최초 기동 전에 다음 환경변수 네 개를 모두 주입하세요. 실제 비밀번호는 명령문·설정 파일·저장소에 적지 말고, 배포 환경의 비밀값 주입 기능이나 터미널의 숨김 입력을 사용하세요.
+
+| 환경변수 | 저장 항목 |
+| --- | --- |
+| `INITIAL_ADMIN_LOGIN_ID` | `login_id` |
+| `INITIAL_ADMIN_NAME` | `user_name` |
+| `INITIAL_ADMIN_EMAIL` | `user_email` |
+| `INITIAL_ADMIN_PASSWORD` | 기존 BCrypt로 암호화한 `user_pw` |
+
+앱 시작 시 `user_role=ADMIN`이 없을 때만 생성합니다. 직급은 관리소장, 부서는 현재 `DepartmentCode` 첫 값, 연차 세 수치는 모두 0입니다. 하나라도 누락·빈 값이면 경고만 남기고 계정은 만들지 않습니다. 이미 관리자가 있으면 환경값을 읽거나 계정·비밀번호를 변경하지 않습니다.
+
+관리자가 없는데 입력한 아이디·이메일이 일반 계정과 중복되면 기존 BusinessException 오류로 기동을 중단합니다. 기존 계정을 승격하거나 덮어쓰지 않으므로 사용하지 않는 값을 지정하세요. 최초 설치는 한 앱 인스턴스로 실행하세요. 여러 인스턴스의 동시 최초 생성은 이번 단계에서 보장하지 않습니다. 초기 생성 후에는 주입한 초기 비밀번호 환경변수를 제거할 수 있습니다.
+
+```bash
+cd backend
+./mvnw -Dtest=InitialAdminInitializerTest,InitialAdminMariaDbTest,MariaDbMigrationTest test
+```
+
+첫 테스트는 Docker 없이 실행되며, 나머지는 실제 MariaDB의 생성·로그인·중복 방지와 초기 스키마를 확인합니다.
