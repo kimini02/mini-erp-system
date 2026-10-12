@@ -230,7 +230,7 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 | `GET /api/v1/users` | 목록·검색 | EMPLOYEE V | O |
 | `GET /api/v1/users/{id}` | 상세 | EMPLOYEE V (본인은 로그인만) | O |
 | `GET /api/v1/users/login-id-preview` | 등록 화면의 아이디 미리보기 | EMPLOYEE C | - |
-| `POST /api/v1/users` | 등록 + 초대 메일 | EMPLOYEE C | - |
+| `POST /api/v1/users` | 등록 + 초대 메일 | EMPLOYEE C (사원 외 역할을 함께 주면 ROLE U도) | - |
 | `PATCH /api/v1/users/{id}` | 이름·이메일·부서·직급 수정 | EMPLOYEE U | O |
 | `PATCH /api/v1/users/{id}/status` | 재직·휴직·퇴사 | EMPLOYEE U | O |
 | `PUT /api/v1/users/{id}/roles` | 역할 지정 (전체 교체) | ROLE U | - |
@@ -280,7 +280,8 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 - 처리 순서(한 트랜잭션): `login_id_sequences`의 입사연도 행을 `SELECT … FOR UPDATE` → 번호 +1 → 사용자 저장(비밀번호는 비워 둠) → 역할 저장. 행이 없으면 새로 만듭니다.
 - 초대 메일은 **커밋 뒤**에 보냅니다. 메일이 꺼져 있거나 실패하면 `invitationSent: false`, 사원은 그대로 등록됩니다(나중에 다시 보내기).
 - `users.user_pw`는 NULL을 허용하도록 바꿉니다(초대 전 계정).
-- 에러: `409 EMAIL_ALREADY_EXISTS`, `404 DEPARTMENT_NOT_FOUND`, `404 POSITION_NOT_FOUND`, `404 ROLE_NOT_FOUND`, `422 ROLE_REQUIRED`(역할 0개)
+- **권한 상승 방지** (2026-10-12 추가): `roleCodes`에 `EMPLOYEE` 말고 다른 역할이 하나라도 있으면 `ROLE U` 권한도 있어야 합니다. 없으면 `403 ACCESS_DENIED`. 사원 관리만 맡은 인사 담당(EMPLOYEE C)이 관리소장 역할을 붙여 계정을 만드는 것을 막습니다. 화면은 역할 권한이 없으면 역할 선택을 숨기고 `["EMPLOYEE"]`로 보냅니다.
+- 에러: `409 EMAIL_ALREADY_EXISTS`, `404 DEPARTMENT_NOT_FOUND`, `404 POSITION_NOT_FOUND`, `404 ROLE_NOT_FOUND`, `422 ROLE_REQUIRED`(역할 0개), `403 ACCESS_DENIED`(위 권한 상승)
 
 ### 5.4 수정 · 상태 · 역할
 - `PATCH /api/v1/users/{id}` `{ "departmentId": 8, "positionId": 3 }`
