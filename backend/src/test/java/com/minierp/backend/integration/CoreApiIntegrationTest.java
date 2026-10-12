@@ -82,7 +82,7 @@ class CoreApiIntegrationTest {
         attendanceRepository.deleteAllInBatch();
         overtimeRequestRepository.deleteAllInBatch();
         leaveRequestRepository.deleteAllInBatch();
-        userRepository.deleteAllInBatch();
+        userRepository.deleteAll();
 
         adminUser = User.create(
                 "관리소장",
@@ -109,7 +109,7 @@ class CoreApiIntegrationTest {
                 "user01",
                 "user01@test.com",
                 passwordEncoder.encode("Password123!"),
-                "03",
+                "02",
                 "사원"
         );
 
