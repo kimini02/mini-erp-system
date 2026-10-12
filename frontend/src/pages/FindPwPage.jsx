@@ -133,7 +133,6 @@ export default function FindPwPage() {
       links={[
         { label: '로그인', onClick: () => navigate('/login') },
         { label: '아이디 찾기', onClick: () => navigate('/find-id') },
-        { label: '회원가입', onClick: () => navigate('/signup') },
       ]}
     />
   );

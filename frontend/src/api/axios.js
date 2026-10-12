@@ -1,35 +1,64 @@
 import axios from 'axios';
 
+export const TOKEN_KEY = 'user_token';
+export const USER_KEY = 'user_info';
+
 /**
- * 1. Axios 인스턴스 생성 (가장 먼저 수행되어야 함)
- * baseURL에 /api/v1을 포함하여 모든 요청이 백엔드 API 경로를 기본으로 하도록 설정합니다.
+ * 모든 API 요청이 쓰는 axios 인스턴스.
+ * - baseURL: VITE_API_BASE_URL (기본 http://localhost:8080/api/v1)
+ * - VITE_USE_MOCK=true 이면 M1 API(조직·권한)는 명세와 같은 모양의 가짜 응답을 씁니다.
  */
 const instance = axios.create({
-  baseURL: 'http://localhost:8080/api/v1', // 팀원이 알려준 API 기본 경로
-  timeout: 5000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 });
 
-/**
- * 2. 요청 인터셉터 설정
- * 생성된 'instance'를 사용하여 모든 요청 전에 실행될 로직을 정의합니다.
- * 로컬 스토리지에 토큰이 있다면 헤더에 자동으로 포함시킵니다.
- */
-instance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('user_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
+// 가짜 서버: `npm run dev:mock` 또는 VITE_USE_MOCK=true 일 때만 불러옵니다(배포 빌드에는 포함되지 않음).
+// 명세에 없는 요청(연차·프로젝트 등 기존 API)은 실제 서버로 보냅니다.
+if (import.meta.env.MODE === 'mock' || import.meta.env.VITE_USE_MOCK === 'true') {
+  const realAdapter = axios.getAdapter(instance.defaults.adapter);
+  instance.defaults.adapter = async (config) => {
+    const { handleMock } = await import('./mock');
+    return handleMock(config, realAdapter);
+  };
+}
+
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+const isAuthRequest = (config) => (config?.url || '').startsWith('/auth/');
+
+instance.interceptors.response.use(
+  (response) => response,
   (error) => {
+    const status = error.response?.status;
+    const code = error.response?.data?.error?.code;
+
+    // 토큰 만료·무효(퇴사 처리, 비밀번호 변경 등): 저장된 로그인 정보를 지우고 로그인 화면으로
+    if (status === 401 && !isAuthRequest(error.config)) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      if (window.location.pathname !== '/login') {
+        window.location.assign(`/login?reason=${code === 'TOKEN_REVOKED' ? 'revoked' : 'expired'}`);
+      }
+    }
+
+    // 첫 로그인 비밀번호 변경 전에는 다른 API를 쓸 수 없습니다.
+    if (status === 403 && code === 'PASSWORD_CHANGE_REQUIRED' && window.location.pathname !== '/me/password') {
+      window.location.assign('/me/password');
+    }
+
     return Promise.reject(error);
   }
 );
 
-// 3. 외부 파일(authStore.js 등)에서 이 설정을 사용할 수 있도록 내보냅니다.
 export default instance;

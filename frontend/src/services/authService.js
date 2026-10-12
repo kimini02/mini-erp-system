@@ -18,18 +18,6 @@ axios.interceptors.request.use((config) => {
 });
 
 /**
- * 회원가입 API 호출 함수
- */
-export const signup = async (userData) => {
-  try {
-    const response = await axios.post(`${AUTH_URL}/signup`, userData);
-    return response.data;
-  } catch (error) {
-    throw error.response ? error.response.data : new Error('네트워크 오류');
-  }
-};
-
-/**
  * 로그인 API 호출 함수
  */
 export const login = async (userId, password) => {

@@ -19,7 +19,7 @@ const ProjectManagement = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { basePath } = getRoleInfo(user);
-  const goCreate = () => navigate(`${basePath}/task-create`);
+  const goCreate = () => navigate(`${basePath}/projects/new`);
 
   return (
     <>
