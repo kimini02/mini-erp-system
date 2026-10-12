@@ -42,6 +42,11 @@ public class InitialAdminInitializer implements ApplicationRunner {
             return;
         }
 
+        if (!com.minierp.backend.global.security.PasswordPolicy.accepts(password)) {
+            log.warn("최초 관리자 생성 생략: 초기 비밀번호가 비밀번호 정책을 만족하지 않습니다.");
+            return;
+        }
+
         // Never elevate an existing non-admin account or overwrite its password.
         if (userRepository.existsByLoginId(loginId)) {
             throw new BusinessException(ErrorCode.LOGIN_ID_ALREADY_EXISTS);

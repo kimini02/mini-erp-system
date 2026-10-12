@@ -21,7 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class InitialAdminMariaDbTest extends MariaDbIntegrationTest {
-    private static final String PASSWORD = UUID.randomUUID().toString();
+    private static final String PASSWORD = "Aa1!" + UUID.randomUUID().toString().substring(0,12);
 
     @DynamicPropertySource
     static void adminProperties(DynamicPropertyRegistry registry) {
@@ -44,6 +44,8 @@ class InitialAdminMariaDbTest extends MariaDbIntegrationTest {
         assertThat(admin.getUserName()).isEqualTo("최초 관리소장");
         assertThat(admin.getUserEmail()).isEqualTo("bootstrap@example.test");
         assertThat(admin.getUserRole()).isEqualTo(UserRole.ADMIN);
+        assertThat(admin.isMustChangePassword()).isTrue();
+        assertThat(admin.roleCodeList()).containsExactly("CHIEF");
         assertThat(admin.getPositionName()).isEqualTo("관리소장");
         assertThat(admin.getDepartmentCode()).isEqualTo(DepartmentCode.values()[0].getCode());
         assertThat(admin.getTotalAnnualLeave()).isZero();
