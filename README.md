@@ -74,3 +74,19 @@ MariaDB **10.11**, Java **17**을 사용합니다. 스키마는 Flyway `V1__init
 4. `cd backend` 후 `./mvnw spring-boot:run`을 실행합니다. Flyway V1 적용, EntityManagerFactory 초기화, `Started BackendApplication` 로그를 확인합니다.
 
 빈 스키마만 지원하며, `baseline-on-migrate` 또는 `ddl-auto=update`로 검증 오류를 우회하지 않습니다. 이후 스키마 변경은 V2부터 새 마이그레이션으로 추가합니다.
+
+## 백엔드 테스트 (M0)
+
+`backend/`에서 Java 17로 실행합니다.
+
+```bash
+./mvnw test                                  # 기존 H2·단위 테스트 + MariaDB 테스트
+./mvnw -Dtest=MariaDbMigrationTest test       # 빈 DB → Flyway → validate
+./mvnw -Dtest=CoreApiIntegrationTest test     # 기존 H2 통합 테스트
+```
+
+MariaDB 테스트는 Docker가 실행 중일 때 `mariadb:10.11` 임시 컨테이너를 사용하며 개발용 DB에 접속하지 않습니다. 처음 실행할 때는 이미지와 테스트 의존성을 내려받을 수 있어야 합니다. Docker를 사용할 수 없으면 해당 테스트만 **skipped**로 표시됩니다. Docker를 찾은 뒤 이미지 다운로드·마이그레이션·기동에 실패하면 테스트 실패로 처리합니다.
+
+새 MariaDB 테스트는 `com.minierp.backend.support.MariaDbIntegrationTest`를 상속하고 이름을 `*Test`로 끝내세요. 각 테스트 클래스는 빈 DB에서 시작하며, 클래스 종료 시 Spring 컨텍스트와 컨테이너를 정리합니다. 클래스 내 테스트 간 데이터 정리가 필요하면 `@Transactional` 롤백 또는 명시적 정리를 사용하세요. 이 공통 베이스를 쓰는 테스트 클래스는 병렬 실행하지 마세요. 기존 `integration` 프로필의 H2 설정은 유지합니다.
+
+2026-10-12 기준 변경 전 기존 테스트 88개 중 7개가 실패했습니다. M0 범위 밖 원인과 동일 실패 여부는 `docs/troubleshooting/M0-2-mariadb-tests.md`에 기록합니다.
