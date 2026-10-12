@@ -1,5 +1,15 @@
 package com.minierp.backend.integration;
 
+import com.minierp.backend.support.FixedClockTestConfiguration;
+import com.minierp.backend.domain.overtime.entity.OvertimeRequest;
+import org.springframework.context.annotation.Import;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.DayOfWeek;
+import static java.time.temporal.TemporalAdjusters.next;
+import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minierp.backend.domain.approval.repository.LeaveRequestRepository;
@@ -28,6 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Import(FixedClockTestConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("integration")
@@ -54,12 +65,19 @@ class CoreApiIntegrationTest {
     @Autowired
     private AttendanceRepository attendanceRepository;
 
+    @Autowired
+    private Clock clock;
+
+    private LocalDate workDate;
+    private LocalDate overtimeDate;
     private User adminUser;
     private User leaderUser;
     private User normalUser;
 
     @BeforeEach
     void setUp() {
+        workDate = LocalDate.now(clock).with(next(DayOfWeek.WEDNESDAY));
+        overtimeDate = workDate.with(next(DayOfWeek.SATURDAY));
         attendanceRepository.deleteAllInBatch();
         overtimeRequestRepository.deleteAllInBatch();
         leaveRequestRepository.deleteAllInBatch();
@@ -113,7 +131,8 @@ class CoreApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.data.tokenType").value("Bearer"));
+                .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
+                .andExpect(result -> assertTimestamp(result));
     }
 
     @Test
@@ -140,11 +159,11 @@ class CoreApiIntegrationTest {
                         .content("""
                                 {
                                   "appType": "ANNUAL",
-                                  "startDate": "2026-04-08",
-                                  "endDate": "2026-04-08",
+                                  "startDate": "%s",
+                                  "endDate": "%s",
                                   "requestReason": "병원 진료"
                                 }
-                                """))
+                                """.formatted(workDate, workDate)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andReturn();
@@ -171,12 +190,12 @@ class CoreApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "overtimeDate": "2026-04-11",
+                                  "overtimeDate": "%s",
                                   "startTime": "09:00:00",
                                   "endTime": "12:00:00",
                                   "reason": "주말 긴급 작업"
                                 }
-                                """))
+                                """.formatted(overtimeDate)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andReturn();
@@ -197,19 +216,31 @@ class CoreApiIntegrationTest {
         String userToken = loginAndGetToken("user01", "Password123!");
         String leaderToken = loginAndGetToken("leader01", "Password123!");
 
-        Long leaveId = createLeave(userToken, "2026-04-08", "2026-04-08");
+        Long leaveId = createLeave(userToken, workDate.toString(), workDate.toString());
         approveLeave(leaderToken, leaveId);
 
-        Long overtimeId = createOvertime(userToken, "2026-04-11");
-        approveOvertime(leaderToken, overtimeId);
+        // Calendar retrieval needs approved data, not the broken overtime request contract (M2).
+        OvertimeRequest overtime = OvertimeRequest.builder()
+                .requester(normalUser).overtimeDate(overtimeDate)
+                .startTime(LocalTime.of(9, 0)).endTime(LocalTime.of(12, 0))
+                .reason("캘린더 조회 검증").build();
+        overtime.approve(leaderUser);
+        overtimeRequestRepository.saveAndFlush(overtime);
 
         mockMvc.perform(get("/api/v1/calendar/events")
                         .header("Authorization", bearer(userToken))
-                        .param("year", "2026")
-                        .param("month", "4"))
+                        .param("year", String.valueOf(workDate.getYear()))
+                        .param("month", String.valueOf(workDate.getMonthValue())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data[*].type", hasItems("LEAVE", "OVERTIME")));
+                .andExpect(jsonPath("$.data[*].type", hasItems("LEAVE")));
+
+        mockMvc.perform(get("/api/v1/calendar/events")
+                        .header("Authorization", bearer(userToken))
+                        .param("year", String.valueOf(overtimeDate.getYear()))
+                        .param("month", String.valueOf(overtimeDate.getMonthValue())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].type", hasItems("OVERTIME")));
     }
 
     @Test
@@ -222,17 +253,17 @@ class CoreApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "workDate": "2026-04-09",
+                                  "workDate": "%s",
                                   "clockInTime": "08:55:00"
                                 }
-                                """))
+                                """.formatted(workDate)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.attStatus").value("NORMAL"));
 
         mockMvc.perform(patch("/api/v1/attendance/check-out")
                         .header("Authorization", bearer(userToken))
-                        .param("workDate", "2026-04-09")
+                        .param("workDate", workDate.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -255,11 +286,11 @@ class CoreApiIntegrationTest {
                         .content("""
                                 {
                                   "appType": "ANNUAL",
-                                  "startDate": "2026-04-10",
-                                  "endDate": "2026-04-10",
+                                  "startDate": "%s",
+                                  "endDate": "%s",
                                   "requestReason": "1차 신청"
                                 }
-                                """))
+                                """.formatted(workDate, workDate)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true));
 
@@ -269,14 +300,15 @@ class CoreApiIntegrationTest {
                         .content("""
                                 {
                                   "appType": "ANNUAL",
-                                  "startDate": "2026-04-10",
-                                  "endDate": "2026-04-10",
+                                  "startDate": "%s",
+                                  "endDate": "%s",
                                   "requestReason": "중복 신청"
                                 }
-                                """))
+                                """.formatted(workDate, workDate)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error.code").value("DUPLICATE_RESOURCE"));
+                .andExpect(jsonPath("$.error.code").value("DUPLICATE_RESOURCE"))
+                .andExpect(result -> assertTimestamp(result));
     }
 
     @Test
@@ -290,15 +322,15 @@ class CoreApiIntegrationTest {
                         .content("""
                                 {
                                   "appType": "HALF_MORNING",
-                                  "startDate": "2026-04-10",
-                                  "endDate": "2026-04-12",
+                                  "startDate": "%s",
+                                  "endDate": "%s",
                                   "requestReason": "반차 테스트"
                                 }
-                                """))
+                                """.formatted(workDate, workDate.plusDays(2))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.startDate").value("2026-04-10"))
-                .andExpect(jsonPath("$.data.endDate").value("2026-04-10"));
+                .andExpect(jsonPath("$.data.startDate").value(workDate.toString()))
+                .andExpect(jsonPath("$.data.endDate").value(workDate.toString()));
     }
 
     @Test
@@ -312,11 +344,11 @@ class CoreApiIntegrationTest {
                         .content("""
                                 {
                                   "appType": "ANNUAL",
-                                  "startDate": "2026-04-14",
-                                  "endDate": "2026-04-14",
+                                  "startDate": "%s",
+                                  "endDate": "%s",
                                   "requestReason": "취소 테스트"
                                 }
-                                """))
+                                """.formatted(workDate, workDate)))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -354,31 +386,6 @@ class CoreApiIntegrationTest {
                 .andExpect(jsonPath("$.data.appStatus").value("APPROVED"));
     }
 
-    private Long createOvertime(String userToken, String overtimeDate) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/v1/overtime")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "overtimeDate": "%s",
-                                  "startTime": "09:00:00",
-                                  "endTime": "12:00:00",
-                                  "reason": "테스트 특근"
-                                }
-                                """.formatted(overtimeDate)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        return readLong(result, "data", "id");
-    }
-
-    private void approveOvertime(String approverToken, Long overtimeId) throws Exception {
-        mockMvc.perform(patch("/api/v1/overtime/{id}/approve", overtimeId)
-                        .header("Authorization", bearer(approverToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.status").value("APPROVED"));
-    }
-
     private String loginAndGetToken(String loginId, String password) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -399,6 +406,12 @@ class CoreApiIntegrationTest {
     private Long readLong(MvcResult mvcResult, String parent, String field) throws Exception {
         JsonNode json = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
         return json.path(parent).path(field).asLong();
+    }
+
+    private void assertTimestamp(MvcResult result) throws Exception {
+        String timestamp = objectMapper.readTree(result.getResponse().getContentAsString())
+                .path("timestamp").asText();
+        assertThat(LocalDateTime.parse(timestamp)).isEqualTo(LocalDateTime.now(clock));
     }
 
     private String bearer(String accessToken) {

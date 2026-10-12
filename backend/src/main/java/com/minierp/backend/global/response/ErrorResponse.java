@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,12 +16,12 @@ public class ErrorResponse {
     private final ErrorBody error;
     private final LocalDateTime timestamp;
 
-    public static ErrorResponse of(ErrorCode errorCode) {
-        return new ErrorResponse(false, new ErrorBody(errorCode.name(), errorCode.getMessage()), LocalDateTime.now());
+    public static ErrorResponse of(Clock clock, ErrorCode errorCode) {
+        return new ErrorResponse(false, new ErrorBody(errorCode.name(), errorCode.getMessage()), LocalDateTime.now(clock));
     }
 
-    public static ErrorResponse of(ErrorCode errorCode, String message) {
-        return new ErrorResponse(false, new ErrorBody(errorCode.name(), message), LocalDateTime.now());
+    public static ErrorResponse of(Clock clock, ErrorCode errorCode, String message) {
+        return new ErrorResponse(false, new ErrorBody(errorCode.name(), message), LocalDateTime.now(clock));
     }
 
     @Getter

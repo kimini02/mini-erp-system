@@ -1,5 +1,8 @@
 package com.minierp.backend.global.exception;
 
+import java.time.Clock;
+import lombok.RequiredArgsConstructor;
+
 import com.minierp.backend.global.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +15,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * 전역 예외 처리기 — BusinessException + ErrorCode 조합으로 일관된 응답 포맷 제공
  */
+@RequiredArgsConstructor
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final Clock clock;
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
         ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity
                 .status(errorCode.getStatus())
-                .body(ErrorResponse.of(errorCode, e.getMessage()));
+                .body(ErrorResponse.of(clock, errorCode, e.getMessage()));
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class, IllegalArgumentException.class})
@@ -28,7 +34,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
         return ResponseEntity
                 .status(errorCode.getStatus())
-                .body(ErrorResponse.of(errorCode, extractValidationMessage(e)));
+                .body(ErrorResponse.of(clock, errorCode, extractValidationMessage(e)));
     }
 
     @ExceptionHandler(Exception.class)
@@ -36,7 +42,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity
                 .status(errorCode.getStatus())
-                .body(ErrorResponse.of(errorCode));
+                .body(ErrorResponse.of(clock, errorCode));
     }
 
     private String extractValidationMessage(Exception e) {

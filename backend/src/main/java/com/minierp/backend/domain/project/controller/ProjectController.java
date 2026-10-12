@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.project.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.project.dto.AssignableMemberDto;
 import com.minierp.backend.domain.project.dto.LeaderSummaryDto;
 import com.minierp.backend.domain.project.dto.MemberRequestDto;
@@ -40,6 +42,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectController {
 
+    private final Clock clock;
+
     private final ProjectService projectService;
     private final CurrentUserResolver currentUserResolver;
 
@@ -50,7 +54,7 @@ public class ProjectController {
     ) {
         ProjectResponseDto response = projectService.createProject(request, currentUserResolver.resolveUserRole(authentication));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "프로젝트가 생성되었습니다."));
+                .body(ApiResponse.success(clock, response, "프로젝트가 생성되었습니다."));
     }
 
     @GetMapping
@@ -59,7 +63,7 @@ public class ProjectController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "프로젝트 목록 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "프로젝트 목록 조회가 완료되었습니다."));
     }
 
     @PutMapping("/{projectId}")
@@ -73,7 +77,7 @@ public class ProjectController {
                 request,
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "프로젝트가 수정되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "프로젝트가 수정되었습니다."));
     }
 
     @PatchMapping("/{projectId}/leader")
@@ -87,7 +91,7 @@ public class ProjectController {
                 request.getLeaderId(),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "프로젝트 팀장이 변경되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "프로젝트 팀장이 변경되었습니다."));
     }
 
     @PostMapping("/{projectId}/members")
@@ -103,7 +107,7 @@ public class ProjectController {
                 currentUserResolver.resolveUserRole(authentication)
         );
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "프로젝트 팀원이 배정되었습니다."));
+                .body(ApiResponse.success(clock, response, "프로젝트 팀원이 배정되었습니다."));
     }
 
     @DeleteMapping("/{projectId}/members/{userId}")
@@ -118,7 +122,7 @@ public class ProjectController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.successMessage("프로젝트 팀원 배정이 해제되었습니다."));
+        return ResponseEntity.ok(ApiResponse.successMessage(clock, "프로젝트 팀원 배정이 해제되었습니다."));
     }
 
     @GetMapping("/{projectId}/members")
@@ -131,7 +135,7 @@ public class ProjectController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "프로젝트 팀원 목록 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "프로젝트 팀원 목록 조회가 완료되었습니다."));
     }
 
     // 프로젝트에 배정되지 않은 팀원
@@ -145,7 +149,7 @@ public class ProjectController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "배정 가능한 팀원 목록 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "배정 가능한 팀원 목록 조회가 완료되었습니다."));
     }
 
     // 프로젝트에 이미 배정된 팀원 중, Task에 배정 가능한 사람
@@ -159,7 +163,7 @@ public class ProjectController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "배정 가능한 팀원 목록 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "배정 가능한 팀원 목록 조회가 완료되었습니다."));
     }
 
     @GetMapping("/permissions/{userId}")
@@ -172,7 +176,7 @@ public class ProjectController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "사용자 프로젝트 권한 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "사용자 프로젝트 권한 조회가 완료되었습니다."));
     }
 
     @PutMapping("/permissions/{userId}")
@@ -187,13 +191,13 @@ public class ProjectController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(null, "프로젝트 권한이 저장되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, null, "프로젝트 권한이 저장되었습니다."));
     }
 
     @GetMapping("/leaders")
     public ResponseEntity<ApiResponse<List<LeaderSummaryDto>>> getLeaders(Authentication authentication) {
         List<LeaderSummaryDto> response = projectService.getLeaders(currentUserResolver.resolveUserRole(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "팀장 목록 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "팀장 목록 조회가 완료되었습니다."));
     }
 
     @GetMapping("/{projectId}/progress")
@@ -206,6 +210,6 @@ public class ProjectController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "프로젝트 진행률 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "프로젝트 진행률 조회가 완료되었습니다."));
     }
 }

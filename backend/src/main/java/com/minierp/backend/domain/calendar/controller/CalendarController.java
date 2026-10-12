@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.calendar.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.calendar.dto.CalendarEventResponseDto;
 import com.minierp.backend.domain.calendar.service.CalendarService;
 import com.minierp.backend.global.response.ApiResponse;
@@ -15,6 +17,8 @@ import java.util.List;
 @RequestMapping("/api/v1/calendar")
 @RequiredArgsConstructor
 public class CalendarController {
+
+    private final Clock clock;
 
     private final CalendarService calendarService;
     private final CurrentUserResolver currentUserResolver;
@@ -34,6 +38,6 @@ public class CalendarController {
                 year,
                 month
         );
-        return ResponseEntity.ok(ApiResponse.success(events, "캘린더 이벤트 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, events, "캘린더 이벤트 조회가 완료되었습니다."));
     }
 }

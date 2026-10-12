@@ -1,12 +1,13 @@
 package com.minierp.backend.domain.project.entity;
 
+import com.minierp.backend.support.TestClocks;
+
 import com.minierp.backend.domain.user.entity.User;
 import com.minierp.backend.global.entity.Priority;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,8 +19,8 @@ class ProjectMemberTest {
         Project project = Project.create(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM
         );
         User user = createUser();

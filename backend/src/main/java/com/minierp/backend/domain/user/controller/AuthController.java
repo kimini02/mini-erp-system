@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.user.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.user.dto.FindIdRequestDto;
 import com.minierp.backend.domain.user.dto.FindIdResponseDto;
 import com.minierp.backend.domain.user.dto.LoginRequestDto;
@@ -28,6 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private final Clock clock;
+
     private final AuthService authService;
 
     @PostMapping("/signup")
@@ -35,36 +39,36 @@ public class AuthController {
         UserResponseDto response = authService.signup(requestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "회원가입이 완료되었습니다"));
+                .body(ApiResponse.success(clock, response, "회원가입이 완료되었습니다"));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid @RequestBody LoginRequestDto requestDto) {
         LoginResponseDto response = authService.login(requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response, "로그인이 성공하였습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "로그인이 성공하였습니다"));
     }
 
     @PostMapping("/find-id/request")
     public ResponseEntity<ApiResponse<FindIdResponseDto>> findId(@Valid @RequestBody FindIdRequestDto requestDto) {
         FindIdResponseDto response = authService.findId(requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response, "아이디를 찾았습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "아이디를 찾았습니다"));
     }
 
     @PostMapping("/password/reset/request")
     public ResponseEntity<ApiResponse<PasswordResetRequestResponseDto>> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDto requestDto) {
         PasswordResetRequestResponseDto response = authService.requestPasswordReset(requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 
     @PostMapping("/password/reset/verify")
     public ResponseEntity<ApiResponse<PasswordResetVerifyResponseDto>> verifyPasswordReset(@Valid @RequestBody PasswordResetVerifyDto requestDto) {
         PasswordResetVerifyResponseDto response = authService.verifyPasswordReset(requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 
     @PostMapping("/password/reset/confirm")
     public ResponseEntity<ApiResponse<PasswordResetConfirmResponseDto>> confirmPasswordReset(@Valid @RequestBody PasswordResetConfirmDto requestDto) {
         PasswordResetConfirmResponseDto response = authService.confirmPasswordReset(requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 }

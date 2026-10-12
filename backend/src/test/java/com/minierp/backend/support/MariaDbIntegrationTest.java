@@ -1,6 +1,7 @@
 package com.minierp.backend.support;
 
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -15,6 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Do not run subclasses in parallel: the inherited container is shared.
  * Closing each context prevents cached connections to a stopped container.
  */
+@Import(FixedClockTestConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("mariadb")
 @TestPropertySource(properties = {

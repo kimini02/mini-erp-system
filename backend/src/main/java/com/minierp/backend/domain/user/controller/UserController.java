@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.user.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.user.dto.UserListResponseDto;
 import com.minierp.backend.domain.user.dto.UserResponseDto;
 import com.minierp.backend.domain.user.dto.UserRoleUpdateRequestDto;
@@ -27,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final Clock clock;
+
     private final UserService userService;
     private final CurrentUserResolver currentUserResolver;
 
@@ -39,7 +43,7 @@ public class UserController {
             Authentication authentication
     ) {
         UserListResponseDto response = userService.getUsers(page, size, role, search, currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "목록 조회가 완료되었습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "목록 조회가 완료되었습니다"));
     }
 
     @GetMapping("/{userId}")
@@ -48,7 +52,7 @@ public class UserController {
                 userId,
                 currentUserResolver.resolveUserId(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 
     @PutMapping("/{userId}")
@@ -62,7 +66,7 @@ public class UserController {
                 requestDto,
                 currentUserResolver.resolveUserId(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "사용자 정보가 수정되었습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "사용자 정보가 수정되었습니다"));
     }
 
     @PatchMapping("/{userId}/role")
@@ -72,6 +76,6 @@ public class UserController {
             @Valid @RequestBody UserRoleUpdateRequestDto requestDto
     ) {
         UserRoleUpdateResponseDto response = userService.updateUserRole(userId, requestDto.getRole());
-        return ResponseEntity.ok(ApiResponse.success(response, "사용자 권한이 변경되었습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "사용자 권한이 변경되었습니다"));
     }
 }

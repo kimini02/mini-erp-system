@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.dashboard.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.dashboard.dto.AdminDashboardResponseDto;
 import com.minierp.backend.domain.dashboard.dto.DashboardProjectDto;
 import com.minierp.backend.domain.dashboard.dto.DashboardResponseDto;
@@ -24,6 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DashboardController {
 
+    private final Clock clock;
+
     private final DashboardService dashboardService;
     private final CurrentUserResolver currentUserResolver;
 
@@ -33,7 +37,7 @@ public class DashboardController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "대시보드 진행률 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "대시보드 진행률 조회가 완료되었습니다."));
     }
 
     @GetMapping("/admin-summary")
@@ -42,7 +46,7 @@ public class DashboardController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "관리자 대시보드 통계 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "관리자 대시보드 통계 조회가 완료되었습니다."));
     }
 
     @GetMapping("/projects")
@@ -51,6 +55,6 @@ public class DashboardController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "대시보드 프로젝트 현황 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "대시보드 프로젝트 현황 조회가 완료되었습니다."));
     }
 }

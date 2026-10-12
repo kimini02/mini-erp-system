@@ -112,3 +112,18 @@ cd backend
 ```
 
 첫 테스트는 Docker 없이 실행되며, 나머지는 실제 MariaDB의 생성·로그인·중복 방지와 초기 스키마를 확인합니다.
+
+### 테스트에서 시계를 고정·변경하는 방법 (M0-4)
+
+운영 `ClockConfig`는 서버 기본 시간대와 관계없이 `Asia/Seoul` 시스템 시계를 제공합니다. 날짜가 필요한 서비스에는 `Clock`을 생성자로 주입하고 `LocalDate.now(clock)` 등을 사용하세요. 엔티티에는 `Task.isOverdue(today)`처럼 기준 날짜를 인자로 전달합니다.
+
+Spring 테스트에는 `@Import(FixedClockTestConfiguration.class)`를 붙이면 `@Primary`인 `Clock.fixed`가 사용됩니다. 순수 단위 테스트는 `TestClocks.fixed()` / `TestClocks.today()`를 사용하고 날짜 데이터는 기준일에 일수를 더하거나 빼서 만드세요. 기본 고정 시각은 `TestClocks` 한 곳에 정의되어 있습니다. 새로운 지각·결근 테스트는 고정 시계나 `Clock.offset(fixedClock, duration)`을 직접 주입해 경계를 검증할 수 있습니다.
+
+```bash
+cd backend
+./mvnw test
+# 한국 날짜 2027-01-01 00:00, JVM 기본 시간대 UTC에서도 동일 검증
+./mvnw -Dtest.clock.instant=2026-12-31T15:00:00Z -Duser.timezone=UTC test
+```
+
+`test.clock.instant`는 테스트 전용 속성이며 운영 시계를 고정하지 않습니다. 공휴일 정책을 검증하는 테스트는 의도한 근무일·공휴일에 맞는 데이터를 선택해야 합니다. JWT 유효기간과 JPA 자동 생성·수정 시각은 기존 동작을 유지하며 이 업무용 Clock의 제어 대상에 포함하지 않았습니다.

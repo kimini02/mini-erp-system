@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.task.service;
 
+import com.minierp.backend.support.TestClocks;
+
 import com.minierp.backend.domain.project.entity.Project;
 import com.minierp.backend.domain.project.repository.ProjectMemberRepository;
 import com.minierp.backend.domain.project.repository.ProjectRepository;
@@ -37,7 +39,6 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import java.lang.reflect.Constructor;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,7 +85,7 @@ class TaskServiceTest {
                 projectId,
                 "내 업무 화면 구현",
                 "React 페이지 및 API 연동",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 TaskStatus.TODO,
                 Priority.HIGH,
                 List.of(10L, 11L)
@@ -119,7 +120,7 @@ class TaskServiceTest {
                 1L,
                 "내 업무 화면 구현",
                 "React 페이지 및 API 연동",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 TaskStatus.TODO,
                 Priority.HIGH,
                 List.of(10L, 10L)
@@ -142,7 +143,7 @@ class TaskServiceTest {
                 projectId,
                 "내 업무 화면 구현",
                 "React 페이지 및 API 연동",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 TaskStatus.TODO,
                 Priority.HIGH,
                 List.of(userId)
@@ -168,7 +169,7 @@ class TaskServiceTest {
                 projectId,
                 "내 업무 화면 구현",
                 "React 페이지 및 API 연동",
-                LocalDate.of(2026, 5, 10),
+                TestClocks.today().plusDays(34),
                 TaskStatus.TODO,
                 Priority.HIGH,
                 List.of(10L)
@@ -255,7 +256,7 @@ class TaskServiceTest {
                 TaskUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 4, 10),
+                        TestClocks.today().plusDays(4),
                         Priority.HIGH
                 ),
                 1L,
@@ -264,7 +265,7 @@ class TaskServiceTest {
 
         assertThat(task.getTaskTitle()).isEqualTo("수정된 제목");
         assertThat(task.getTaskContent()).isEqualTo("수정된 내용");
-        assertThat(task.getEndDate()).isEqualTo(LocalDate.of(2026, 4, 10));
+        assertThat(task.getEndDate()).isEqualTo(TestClocks.today().plusDays(4));
         assertThat(task.getPriority()).isEqualTo(Priority.HIGH);
         assertThat(response.getTaskTitle()).isEqualTo("수정된 제목");
     }
@@ -284,7 +285,7 @@ class TaskServiceTest {
                 TaskUpdateRequestDto.of(
                         "팀장 수정 제목",
                         "팀장 수정 내용",
-                        LocalDate.of(2026, 4, 20),
+                        TestClocks.today().plusDays(14),
                         Priority.MEDIUM
                 ),
                 leaderId,
@@ -293,7 +294,7 @@ class TaskServiceTest {
 
         assertThat(task.getTaskTitle()).isEqualTo("팀장 수정 제목");
         assertThat(task.getTaskContent()).isEqualTo("팀장 수정 내용");
-        assertThat(task.getEndDate()).isEqualTo(LocalDate.of(2026, 4, 20));
+        assertThat(task.getEndDate()).isEqualTo(TestClocks.today().plusDays(14));
         assertThat(response.getTaskTitle()).isEqualTo("팀장 수정 제목");
     }
 
@@ -305,7 +306,7 @@ class TaskServiceTest {
                 TaskUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 5, 10),
+                        TestClocks.today().plusDays(34),
                         Priority.HIGH
                 ),
                 10L,
@@ -331,7 +332,7 @@ class TaskServiceTest {
                 TaskUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 5, 10),
+                        TestClocks.today().plusDays(34),
                         Priority.HIGH
                 ),
                 leaderId,
@@ -353,7 +354,7 @@ class TaskServiceTest {
                 TaskUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 5, 10),
+                        TestClocks.today().plusDays(34),
                         Priority.HIGH
                 ),
                 1L,
@@ -376,7 +377,7 @@ class TaskServiceTest {
                 TaskUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 5, 10),
+                        TestClocks.today().plusDays(34),
                         Priority.HIGH
                 ),
                 1L,
@@ -532,7 +533,7 @@ class TaskServiceTest {
                 projectId,
                 "팀장 업무 생성",
                 "팀장 권한 검증",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 TaskStatus.TODO,
                 Priority.MEDIUM,
                 List.of(10L)
@@ -562,7 +563,7 @@ class TaskServiceTest {
                 projectId,
                 "팀장 업무 생성",
                 "팀장 권한 검증",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 TaskStatus.TODO,
                 Priority.MEDIUM,
                 List.of(10L)
@@ -601,7 +602,7 @@ class TaskServiceTest {
         Task task = Task.create(
                 "업무 제목",
                 "업무 내용",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 TaskStatus.TODO,
                 Priority.MEDIUM,
                 project
@@ -635,8 +636,8 @@ class TaskServiceTest {
         Project project = Project.create(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM
         );
         ReflectionTestUtils.setField(project, "id", id);
@@ -647,7 +648,7 @@ class TaskServiceTest {
         Task task = Task.create(
                 "업무 제목",
                 "업무 내용",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 taskStatus,
                 Priority.MEDIUM,
                 createProject(projectId)

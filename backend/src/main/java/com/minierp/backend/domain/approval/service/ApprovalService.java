@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.util.Arrays;
@@ -63,6 +64,7 @@ public class ApprovalService {
     private final LeaveRequestRepository leaveRequestRepository;
     private final UserRepository userRepository;
     private final AccessPolicy accessPolicy;
+    private final Clock clock;
 
     /**
      * 연차 신청 생성
@@ -79,7 +81,7 @@ public class ApprovalService {
         }
 
         // 과거 날짜 신청 방지: 시작일이 오늘 이전이면 신청 불가
-        if (startDate.isBefore(LocalDate.now())) {
+        if (startDate.isBefore(LocalDate.now(clock))) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "오늘 이전 날짜로는 연차를 신청할 수 없습니다.");
         }
 
