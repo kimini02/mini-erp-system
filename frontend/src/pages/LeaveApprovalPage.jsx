@@ -1,358 +1,351 @@
 import { useState, useEffect } from 'react';
-import api from '../api/axios'; 
-import { X } from 'lucide-react';
-import { useAuthStore } from '../store/authStore'; // [수정] Zustand 스토어 연결 (일관성 유지)
+import { Hourglass, CheckCircle2, XCircle } from 'lucide-react';
+import api from '../api/axios';
+import { useAuthStore } from '../store/authStore';
+import { useApprovalStore } from '../store/approvalStore';
+import { DEPARTMENT_LABELS, LEAVE_TYPE_LABELS, ROLE_LABELS } from '@/lib/labels';
+import { confirm } from '@/lib/confirm';
+import { toast } from '@/lib/toast';
+import { cn } from '@/lib/cn';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Field,
+  Modal,
+  PageHeader,
+  StatCard,
+  StatusBadge,
+  Table,
+  TableEmpty,
+  Td,
+  Th,
+  Tr,
+  Textarea,
+} from '@/components/ui';
+
+/** 신청자 셀: 아바타 + 이름 + 직급/부서 */
+const RequesterCell = ({ name, role, departmentCode }) => (
+  <div className="flex items-center gap-2.5">
+    <Avatar name={name} size="sm" />
+    <div className="min-w-0">
+      <p className="font-medium text-gray-900">{name}</p>
+      <p className="text-xs text-gray-500">
+        {ROLE_LABELS[role] || '사원'} · {DEPARTMENT_LABELS[departmentCode] || '소속 없음'}
+      </p>
+    </div>
+  </div>
+);
+
+const ActionButtons = ({ onApprove, onReject }) => (
+  <div className="flex justify-end gap-1.5">
+    <Button size="sm" onClick={onApprove}>승인</Button>
+    <Button size="sm" variant="danger-outline" onClick={onReject}>반려</Button>
+  </div>
+);
 
 const LeaveApprovalPage = () => {
   const [requests, setRequests] = useState([]); // 연차 데이터
   const [overtimes, setOvertimes] = useState([]); // 특근 데이터
+  const [tab, setTab] = useState('leave');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
 
-  // 1. [수정] Zustand 스토어에서 유저 정보 가져오기 (localStorage 직접 접근보다 안전)
   const { user } = useAuthStore();
+  const refreshInbox = useApprovalStore((s) => s.fetchPending);
 
-  // 2. [추가] Sidebar와 동일한 권한 체크 로직 (관리소장/팀장 구분)
+  // 관리소장/팀장 구분
   const userRole = user?.role || '';
   const userPosition = user?.position || '';
   const isChief = userRole === 'ADMIN' || userPosition === '관리소장';
 
-  // 3. 데이터 로드 및 권한별 데이터 필터링
+  // 데이터 로드 및 권한별 데이터 필터링
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        // [체크] 현재 접속 권한 로그 확인
-        console.log("현재 접속 유저:", user?.userName, "권한:", userRole);
+        const response = await api.get('/leave/all');
 
-        // [수정] 관리소장(isChief) 여부에 따른 엔드포인트 설정
-        const endpoint = isChief 
-          ? '/leave/all' 
-          : '/leave/all';
-
-        const response = await api.get(endpoint); 
-        
         if (response.data && response.data.success) {
-          let rawData = response.data.data || [];
-          let filteredData = [];
-          
-          if (isChief) {
-            // [관리소장] 팀장(TEAM_LEADER)의 신청 내역만 필터링
-            filteredData = rawData.filter(item => item.userRole === 'TEAM_LEADER');
-            console.log("관리소장 모드: 팀장 신청 건만 표시", filteredData);
-          } else {
-            // [팀장] 일반사원(USER)의 신청 내역만 필터링, 팀장과 같은 팀인 사원것만 필터링 
-            filteredData = rawData.filter(item => item.userRole === 'USER'
-              && String(item.departmentCode) === String(user?.departmentCode)
-            );
-            console.log("팀장 모드: 사원 신청 건만 표시", filteredData);
-          }
-          
+          const rawData = response.data.data || [];
+          const filteredData = isChief
+            // [관리소장] 팀장(TEAM_LEADER)의 신청 내역만
+            ? rawData.filter(item => item.userRole === 'TEAM_LEADER')
+            // [팀장] 같은 팀 사원(USER)의 신청 내역만
+            : rawData.filter(item => item.userRole === 'USER'
+                && String(item.departmentCode) === String(user?.departmentCode));
           setRequests(filteredData);
         }
 
-        // 특근 
+        // 특근
         const overtimeResponse = await api.get('/overtime/all');
 
         if (overtimeResponse.data && overtimeResponse.data.success) {
-        let rawOvData = overtimeResponse.data.data || [];
-        let filteredOvData = [];
-
-        if (isChief) {
-          // 관리소장은 팀장의 특근만
-          filteredOvData = rawOvData.filter(item => item.userRole === 'TEAM_LEADER');
-        } else {
-          // 팀장은 자기 팀 사원의 특근만
-          filteredOvData = rawOvData.filter(item => item.userRole === 'USER'
-            && String(item.departmentCode) === String(user?.departmentCode)
-          );
+          const rawOvData = overtimeResponse.data.data || [];
+          const filteredOvData = isChief
+            ? rawOvData.filter(item => item.userRole === 'TEAM_LEADER')
+            : rawOvData.filter(item => item.userRole === 'USER'
+                && String(item.departmentCode) === String(user?.departmentCode));
+          setOvertimes(filteredOvData);
         }
-        setOvertimes(filteredOvData);
-      }
       } catch (error) {
-        console.error("데이터 로드 중 오류:", error);
+        console.error('데이터 로드 중 오류:', error);
         setRequests([]);
         setOvertimes([]);
       }
     };
-    
+
     // 유저 정보가 있을 때만 호출
     if (userRole) {
       fetchRequests();
     }
-  }, [userRole, isChief]); // 의존성 배열에 권한 상태 추가
+  }, [userRole, isChief, user?.departmentCode]);
 
   // 상단 통계 카운트
-  const pendingCount = requests.filter(r => r.appStatus === 'PENDING').length +
-    overtimes.filter(r => r.status === 'PENDING').length;
-  const approvedCount = requests.filter(r => r.appStatus === 'APPROVED').length +
-    overtimes.filter(r => r.status === 'APPROVED').length;
-  const rejectedCount = requests.filter(r => r.appStatus === 'REJECTED').length +
-    overtimes.filter(r => r.status === 'REJECTED').length;
-
-  const leaveTypeLabels = {
-    'ANNUAL': '연차',
-    'HALF_MORNING': '오전 반차',
-    'HALF_AFTERNOON': '오후 반차'
-  };
-
-  const statusLabels = {
-    'PENDING': '대기중',
-    'APPROVED': '승인완료',
-    'REJECTED': '반려'
-  };
-
-  const departmentLabels = {
-    '01': '개발팀',
-    '02': '유지보수팀',
-    '03': '모바일개발팀'
-  };
+  const countBy = (status) =>
+    requests.filter(r => r.appStatus === status).length + overtimes.filter(r => r.status === status).length;
 
   // 연차 승인 처리
-  const handleApprove = async (appId) => {
-    if (!window.confirm('승인하시겠습니까?')) return;
+  const handleApprove = async (req) => {
+    const ok = await confirm({
+      title: '연차를 승인하시겠습니까?',
+      description: `${req.requesterName} · ${LEAVE_TYPE_LABELS[req.appType] || req.appType} · ${req.startDate} ~ ${req.endDate}`,
+      confirmText: '승인',
+    });
+    if (!ok) return;
     try {
-      const response = await api.patch(`/leave/${appId}/approve`);
+      const response = await api.patch(`/leave/${req.appId}/approve`);
       if (response.data.success) {
-        setRequests(prev => prev.map(req => 
-          req.appId === appId ? { ...req, appStatus: 'APPROVED' } : req
-        ));
-        alert('승인되었습니다.');
+        setRequests(prev => prev.map(r => (r.appId === req.appId ? { ...r, appStatus: 'APPROVED' } : r)));
+        toast.success('승인되었습니다.');
+        refreshInbox(user);
       }
-    } catch (err) {
-      alert('처리 중 오류가 발생했습니다.');
+    } catch {
+      toast.error('처리 중 오류가 발생했습니다.');
     }
   };
 
   // 연차 반려 처리
   const handleRejectSubmit = async () => {
-    if (!rejectReason.trim()) return alert('반려 사유를 입력하세요.');
+    if (!rejectReason.trim()) {
+      toast.error('반려 사유를 입력하세요.');
+      return;
+    }
     try {
       const appId = selectedRequest.appId;
-      const response = await api.patch(`/leave/${appId}/reject`, { rejectReason: rejectReason });
+      const response = await api.patch(`/leave/${appId}/reject`, { rejectReason });
       if (response.data.success) {
-        setRequests(prev => prev.map(req => 
+        setRequests(prev => prev.map(req =>
           req.appId === appId ? { ...req, appStatus: 'REJECTED', rejectReason } : req
         ));
-        setIsModalOpen(false);
-        setRejectReason('');
-        alert('반려되었습니다.');
+        closeRejectModal();
+        toast.success('반려되었습니다.');
+        refreshInbox(user);
       }
-    } catch (error) {
-      alert('서버 통신 실패');
+    } catch {
+      toast.error('서버 통신에 실패했습니다.');
     }
   };
 
-  // 특근 승인 처리 
-  const handleOvertimeApprove = async (id) => {
-    if (!window.confirm('특근을 승인하시겠습니까?')) return;
-    try {
-      const res = await api.patch(`/overtime/${id}/approve`);
-      if (res.data.success) {
-        setOvertimes(prev => prev.map(ov => ov.id === id ? { ...ov, status: 'APPROVED' } : ov));
-        alert('특근이 승인되었습니다.');
-      }
-    } catch (err) { alert('처리 중 오류 발생'); }
+  const closeRejectModal = () => {
+    setIsModalOpen(false);
+    setRejectReason('');
   };
 
-  // 특근 반려 처리 
-  const handleOvertimeReject = async (id) => {
-    if (!window.confirm('특근을 반려하시겠습니까?')) return;
+  // 특근 승인 처리
+  const handleOvertimeApprove = async (ov) => {
+    const ok = await confirm({
+      title: '특근을 승인하시겠습니까?',
+      description: `${ov.requesterName} · ${ov.overtimeDate} ${ov.startTime?.slice(0, 5)}~${ov.endTime?.slice(0, 5)}`,
+      confirmText: '승인',
+    });
+    if (!ok) return;
     try {
-      const res = await api.patch(`/overtime/${id}/reject`);
+      const res = await api.patch(`/overtime/${ov.id}/approve`);
       if (res.data.success) {
-        setOvertimes(prev => prev.map(ov => ov.id === id ? { ...ov, status: 'REJECTED' } : ov));
-        alert('특근이 반려되었습니다.');
+        setOvertimes(prev => prev.map(o => (o.id === ov.id ? { ...o, status: 'APPROVED' } : o)));
+        toast.success('특근이 승인되었습니다.');
+        refreshInbox(user);
       }
-    } catch (err) { alert('처리 중 오류 발생'); }
+    } catch {
+      toast.error('처리 중 오류가 발생했습니다.');
+    }
   };
+
+  // 특근 반려 처리
+  const handleOvertimeReject = async (ov) => {
+    const ok = await confirm({
+      title: '특근을 반려하시겠습니까?',
+      description: `${ov.requesterName} · ${ov.overtimeDate}`,
+      confirmText: '반려',
+      tone: 'danger',
+    });
+    if (!ok) return;
+    try {
+      const res = await api.patch(`/overtime/${ov.id}/reject`);
+      if (res.data.success) {
+        setOvertimes(prev => prev.map(o => (o.id === ov.id ? { ...o, status: 'REJECTED' } : o)));
+        toast.success('특근이 반려되었습니다.');
+        refreshInbox(user);
+      }
+    } catch {
+      toast.error('처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  const tabs = [
+    { key: 'leave', label: '연차', pending: requests.filter(r => r.appStatus === 'PENDING').length },
+    { key: 'overtime', label: '특근', pending: overtimes.filter(r => r.status === 'PENDING').length },
+  ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <header className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">
-          {/* [수정] 관리소장/팀장 문구 동적 변경 */}
-          {isChief ? '팀장 연차 결재 관리 (관리소장)' : '사원 연차 결재 관리 (팀장)'}
-        </h2>
-        <p className="text-sm text-gray-500 mt-1">
-          {isChief 
-            ? '각 팀의 팀장들이 신청한 연차를 최종 승인하거나 반려합니다.' 
-            : '소속 팀원들이 신청한 연차를 1차 승인하거나 반려합니다.'}
-        </p>
-      </header>
+    <>
+      <PageHeader
+        title="결재함"
+        description={isChief
+          ? '각 팀 팀장이 신청한 연차·특근을 최종 승인하거나 반려합니다.'
+          : '소속 팀원이 신청한 연차·특근을 승인하거나 반려합니다.'}
+      />
 
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-3 gap-6 mb-10">
-        <div className="bg-white p-6 rounded-xl border flex items-center gap-4 shadow-sm">
-          <div className="text-2xl font-bold">⏳</div>
-          <div><p className="text-2xl font-bold">{pendingCount}</p><p className="text-xs text-gray-400 font-medium">승인 대기</p></div>
-        </div>
-        <div className="bg-white p-6 rounded-xl border flex items-center gap-4 shadow-sm">
-          <div className="text-2xl text-emerald-500 font-bold">✅</div>
-          <div><p className="text-2xl font-bold">{approvedCount}</p><p className="text-xs text-gray-400 font-medium">최종 승인</p></div>
-        </div>
-        <div className="bg-white p-6 rounded-xl border flex items-center gap-4 shadow-sm">
-          <div className="text-2xl text-red-500 font-bold">❌</div>
-          <div><p className="text-2xl font-bold">{rejectedCount}</p><p className="text-xs text-gray-400 font-medium">반려 내역</p></div>
-        </div>
+      {/* 통계 */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="승인 대기" value={countBy('PENDING')} unit="건" icon={Hourglass} tone="amber" />
+        <StatCard label="승인 완료" value={countBy('APPROVED')} unit="건" icon={CheckCircle2} tone="green" />
+        <StatCard label="반려" value={countBy('REJECTED')} unit="건" icon={XCircle} tone="red" />
       </div>
 
-      {/* 리스트 테이블 */}
-      <h3 className="text-lg font-bold mb-4 text-gray-700">연차 신청 목록</h3>
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b">
-            <tr className="text-xs text-gray-400 font-bold uppercase">
-              <th className="px-6 py-4">신청자</th>
-              <th className="px-6 py-4">부서</th>
-              <th className="px-6 py-4">유형</th>
-              <th className="px-6 py-4">신청 기간</th>
-              <th className="px-6 py-4">사유</th>
-              <th className="px-6 py-4 text-center">신청일</th>
-              <th className="px-6 py-4 text-center">상태</th>
-              <th className="px-6 py-4 text-center">결재</th>
-            </tr>
-          </thead>
-          <tbody className="text-sm divide-y">
-            {requests.length > 0 ? (
-              requests.map((req) => (
-                <tr key={req.appId} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-gray-700">{req.requesterName}</div>
-                    <div className={`text-[10px] px-1.5 py-0.5 rounded inline-block font-medium ${
-                      req.userRole === 'TEAM_LEADER' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'
-                    }`}>
-                      {req.userRole === 'TEAM_LEADER' ? '팀장' : '사원'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">{departmentLabels[req.departmentCode] || '소속없음'}</td>
-                  <td className="px-6 py-4 text-gray-500">{leaveTypeLabels[req.appType] || req.appType}</td>
-                  <td className="px-6 py-4 text-gray-500 font-medium">
-                    {req.startDate} ~ {req.endDate} <span className="text-xs text-gray-400">({req.usedDays}일)</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500 italic">"{req.requestReason}"</td>
-                  <td className="px-6 py-4 text-center text-gray-400">{req.createdAt?.split('T')[0]}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                      req.appStatus === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' : 
-                      req.appStatus === 'REJECTED' ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600'
-                    }`}>
-                      {statusLabels[req.appStatus] || req.appStatus}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {req.appStatus === 'PENDING' ? (
-                      <div className="flex justify-center gap-2">
-                        <button onClick={() => handleApprove(req.appId)} className="px-2 py-1 bg-emerald-500 text-white rounded text-xs hover:bg-emerald-600 transition-colors">승인</button>
-                        <button onClick={() => { setSelectedRequest(req); setIsModalOpen(true); }} className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors">반려</button>
-                      </div>
-                    ) : (
-                      <div className="text-gray-400 text-xs">
-                        {req.appStatus === 'REJECTED' ? `사유: ${req.rejectReason || '없음'}` : '처리 완료'}
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
+      <Card className="mt-4 overflow-hidden">
+        {/* 탭 */}
+        <div className="flex gap-6 border-b border-gray-200 px-5">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setTab(t.key)}
+              className={cn(
+                '-mb-px flex h-12 items-center gap-2 border-b-2 text-sm transition-colors',
+                tab === t.key ? 'border-blue-600 font-semibold text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-800'
+              )}
+            >
+              {t.label} 신청
+              {t.pending > 0 && (
+                <span className="rounded-full bg-amber-100 px-1.5 text-xs font-medium tabular-nums text-amber-800">{t.pending}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'leave' ? (
+          <Table>
+            <thead>
               <tr>
-                <td colSpan="7" className="py-24 text-center">
-                  <div className="text-gray-300 text-4xl mb-2">📋</div>
-                  <div className="text-gray-400">결재 대기 중인 내역이 없습니다.</div>
-                </td>
+                <Th>신청자</Th>
+                <Th>유형</Th>
+                <Th>기간</Th>
+                <Th>사유</Th>
+                <Th>신청일</Th>
+                <Th align="center">상태</Th>
+                <Th align="right">결재</Th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 특근 테이블 추가 */}
-      <div className="mt-12">
-      <h3 className="text-lg font-bold mb-4 text-gray-700">특근 신청 목록</h3>
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b">
-            <tr className="text-xs text-gray-400 font-bold uppercase">
-              <th className="px-6 py-4">신청자</th>
-              <th className="px-6 py-4">부서</th>
-              <th className="px-6 py-4">특근 일자</th>
-              <th className="px-6 py-4">시간</th>
-              <th className="px-6 py-4">사유</th>
-              <th className="px-6 py-4">신청일</th>
-              <th className="px-6 py-4 text-center">상태</th>
-              <th className="px-6 py-4 text-center">결재</th>
-            </tr>
-          </thead>
-          <tbody className="text-sm divide-y">
-            {overtimes.length > 0 ? (
-              overtimes.map((ov) => (
-                <tr key={ov.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-gray-700">{ov.requesterName}</div>
-                    <div className={`text-[10px] px-1.5 py-0.5 rounded inline-block font-medium ${
-                      ov.userRole === 'TEAM_LEADER' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'
-                    }`}>
-                      {ov.userRole === 'TEAM_LEADER' ? '팀장' : '사원'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">{departmentLabels[ov.departmentCode] || '소속없음'}</td>
-                  <td className="px-6 py-4 text-gray-500">{ov.overtimeDate}</td>
-                  <td className="px-6 py-4 text-gray-500">{ov.startTime.slice(0,5)} ~ {ov.endTime.slice(0,5)}</td>
-                  <td className="px-6 py-4 text-gray-500 italic">"{ov.reason}"</td>
-                  <td className="px-6 py-4 text-gray-400">{ov.createdAt?.split('T')[0]}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                      ov.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' : 
-                      ov.status === 'REJECTED' ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600'
-                    }`}>
-                      {statusLabels[ov.status] || ov.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {ov.status === 'PENDING' ? (
-                      <div className="flex justify-center gap-2">
-                        <button onClick={() => handleOvertimeApprove(ov.id)} className="px-2 py-1 bg-emerald-500 text-white rounded text-xs hover:bg-emerald-600 transition-colors">승인</button>
-                        <button onClick={() => handleOvertimeReject(ov.id)} className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors">반려</button>
-                      </div>
-                    ) : <div className="text-gray-400 text-xs">처리 완료</div>}
-                  </td>
-                </tr>
-              ))
-            ) : (
+            </thead>
+            <tbody>
+              {requests.length > 0 ? (
+                requests.map((req) => (
+                  <Tr key={req.appId}>
+                    <Td><RequesterCell name={req.requesterName} role={req.userRole} departmentCode={req.departmentCode} /></Td>
+                    <Td><Badge tone="blue">{LEAVE_TYPE_LABELS[req.appType] || req.appType}</Badge></Td>
+                    <Td className="whitespace-nowrap tabular-nums">
+                      {req.startDate === req.endDate ? req.startDate : `${req.startDate} ~ ${req.endDate}`}
+                      <span className="ml-1.5 text-xs text-gray-500">{req.usedDays}일</span>
+                    </Td>
+                    <Td className="max-w-[220px] truncate text-gray-500">{req.requestReason}</Td>
+                    <Td className="tabular-nums text-gray-500">{req.createdAt?.split('T')[0]}</Td>
+                    <Td align="center"><StatusBadge status={req.appStatus} /></Td>
+                    <Td align="right">
+                      {req.appStatus === 'PENDING' ? (
+                        <ActionButtons
+                          onApprove={() => handleApprove(req)}
+                          onReject={() => { setSelectedRequest(req); setIsModalOpen(true); }}
+                        />
+                      ) : (
+                        <span className="ml-auto block max-w-[180px] truncate text-xs text-gray-500">
+                          {req.appStatus === 'REJECTED' ? `사유: ${req.rejectReason || '없음'}` : '처리 완료'}
+                        </span>
+                      )}
+                    </Td>
+                  </Tr>
+                ))
+              ) : (
+                <TableEmpty colSpan={7}>결재할 연차 신청이 없습니다.</TableEmpty>
+              )}
+            </tbody>
+          </Table>
+        ) : (
+          <Table>
+            <thead>
               <tr>
-                <td colSpan="7" className="py-24 text-center">
-                  <div className="text-gray-300 text-4xl mb-2">📋</div>
-                  <div className="text-gray-400">결재 대기 중인 내역이 없습니다.</div>
-                </td>
+                <Th>신청자</Th>
+                <Th>특근일</Th>
+                <Th>시간</Th>
+                <Th>사유</Th>
+                <Th>신청일</Th>
+                <Th align="center">상태</Th>
+                <Th align="right">결재</Th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      </div>
+            </thead>
+            <tbody>
+              {overtimes.length > 0 ? (
+                overtimes.map((ov) => (
+                  <Tr key={ov.id}>
+                    <Td><RequesterCell name={ov.requesterName} role={ov.userRole} departmentCode={ov.departmentCode} /></Td>
+                    <Td className="tabular-nums">{ov.overtimeDate}</Td>
+                    <Td className="whitespace-nowrap tabular-nums">{ov.startTime?.slice(0, 5)} ~ {ov.endTime?.slice(0, 5)}</Td>
+                    <Td className="max-w-[220px] truncate text-gray-500">{ov.reason}</Td>
+                    <Td className="tabular-nums text-gray-500">{ov.createdAt?.split('T')[0]}</Td>
+                    <Td align="center"><StatusBadge status={ov.status} /></Td>
+                    <Td align="right">
+                      {ov.status === 'PENDING' ? (
+                        <ActionButtons onApprove={() => handleOvertimeApprove(ov)} onReject={() => handleOvertimeReject(ov)} />
+                      ) : (
+                        <span className="text-xs text-gray-500">처리 완료</span>
+                      )}
+                    </Td>
+                  </Tr>
+                ))
+              ) : (
+                <TableEmpty colSpan={7}>결재할 특근 신청이 없습니다.</TableEmpty>
+              )}
+            </tbody>
+          </Table>
+        )}
+      </Card>
 
       {/* 반려 사유 입력 모달 */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg text-gray-800">반려 사유 입력</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={20}/></button>
-            </div>
-            <textarea 
-              className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all resize-none"
-              placeholder="반려 사유를 입력하세요 (사원에게 전달됩니다)..."
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-            />
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setIsModalOpen(false)} className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">취소</button>
-              <button onClick={handleRejectSubmit} className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors">반려 확정</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <Modal
+        open={isModalOpen}
+        onClose={closeRejectModal}
+        title="연차 반려"
+        description={selectedRequest && `${selectedRequest.requesterName} · ${selectedRequest.startDate} ~ ${selectedRequest.endDate}`}
+        footer={
+          <>
+            <Button variant="secondary" onClick={closeRejectModal}>취소</Button>
+            <Button variant="danger" onClick={handleRejectSubmit}>반려</Button>
+          </>
+        }
+      >
+        <Field label="반려 사유" htmlFor="reject-reason" required hint="신청자에게 그대로 전달됩니다.">
+          <Textarea
+            id="reject-reason"
+            rows={4}
+            placeholder="반려 사유를 입력하세요"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            autoFocus
+          />
+        </Field>
+      </Modal>
+    </>
   );
 };
 

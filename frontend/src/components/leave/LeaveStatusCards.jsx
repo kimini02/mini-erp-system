@@ -1,65 +1,20 @@
-// src/components/leave/LeaveStatusCards.jsx
-import React, { useEffect, useState } from 'react';
-// 04.03 -2 수정 
+import React from 'react';
+import { FileText, CheckCircle2, Hourglass, XCircle } from 'lucide-react';
+import { StatCard } from '@/components/ui';
 
 const LeaveStatusCards = ({ leaveData = [], overtimeData = [] }) => {
+  const count = (status) =>
+    leaveData.filter(item => item.appStatus === status).length +
+    overtimeData.filter(item => item.status === status).length;
 
-    const stats = {
-        total: leaveData.length + overtimeData.length,
-        approved: leaveData.filter(item => item.appStatus === 'APPROVED').length + 
-                    overtimeData.filter(item => item.status === 'APPROVED').length,
-        pending: leaveData.filter(item => item.appStatus === 'PENDING').length +
-                    overtimeData.filter(item => item.status === 'PENDING').length,
-        rejected: leaveData.filter(item => item.appStatus === 'REJECTED').length +
-                    overtimeData.filter(item => item.status === 'REJECTED').length
-    };
-
-    const cardData = [
-        { label: '전체 신청', count: stats.total, icon: '📋', color: '#333' },
-        { label: '승인', count: stats.approved, icon: '✅', color: '#2ecc71' },
-        { label: '대기중', count: stats.pending, icon: '⏳', color: '#f1c40f' },
-        { label: '반려', count: stats.rejected, icon: '❌', color: '#e74c3c' },
-    ];
-
-    return (
-        <div style={{ display: 'flex', gap: '20px', width: '100%' }}>
-            {cardData.map((data, index) => (
-                <div key={index} style={styles.card}>
-                    <div style={styles.icon}>{data.icon}</div>
-                    <div style={styles.info}>
-                        <div style={{ ...styles.count, color: data.color }}>{data.count}</div>
-                        <div style={styles.label}>{data.label}</div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-};
-
-const styles = {
-    card: {
-        flex: 1,
-        backgroundColor: 'white',
-        padding: '20px 25px',
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '20px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-    },
-    icon: {
-        fontSize: '28px',
-        width: '50px',
-        height: '50px',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '10px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    info: { display: 'flex', flexDirection: 'column' },
-    count: { fontSize: '26px', fontWeight: '800' },
-    label: { fontSize: '13px', color: '#888', marginTop: '4px' }
+  return (
+    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <StatCard label="전체 신청" value={leaveData.length + overtimeData.length} unit="건" icon={FileText} />
+      <StatCard label="승인" value={count('APPROVED')} unit="건" icon={CheckCircle2} tone="green" />
+      <StatCard label="대기" value={count('PENDING')} unit="건" icon={Hourglass} tone="amber" />
+      <StatCard label="반려" value={count('REJECTED')} unit="건" icon={XCircle} tone="red" />
+    </div>
+  );
 };
 
 export default LeaveStatusCards;

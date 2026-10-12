@@ -1,97 +1,69 @@
 import React, { useState, useEffect } from 'react';
+import { Info } from 'lucide-react';
 import api from '../../api/axios';
-// 04.03 수정 
+import { Badge, Card, CardHeader, CardBody, Table, Th, Tr, Td } from '@/components/ui';
 
-const LeavePolicyTable = ({ position = "" }) => { 
-    const [policies, setPolicies] = useState([]);
+const NOTICES = [
+  '연차는 입사일 기준으로 부여됩니다.',
+  '반차는 오전(09:00~13:00), 오후(13:00~18:00)로 구분됩니다.',
+  '당일/익일 신청은 관리자 승인이 필요합니다.',
+  '미사용 연차는 다음 해로 이월되지 않습니다.',
+];
 
-    useEffect(() => {
-        const fetchPolicy = async () => {
-            try {
-                // 백엔드: GET /api/v1/leave/policy
-                const response = await api.get('/leave/policy');
-                if (response.data.success) {
-                    // 백엔드 DTO: { position: "사원", annualLeaveDays: 15 }
-                    setPolicies(response.data.data);
-                }
-            } catch (error) {
-                console.error("연차 정책 로드 실패:", error);
-            }
-        };
-        fetchPolicy();
-    }, []);
+const LeavePolicyTable = ({ position = '' }) => {
+  const [policies, setPolicies] = useState([]);
 
-    return (
-        <div style={styles.container}>
-            <h3 style={styles.title}>📊 직급별 연차 기준</h3>
-            <table style={styles.table}>
-                <thead>
-                    <tr style={styles.theadRow}>
-                        <th style={styles.th}>직급</th>
-                        <th style={styles.th}>연간 연차</th>
-                        <th style={styles.th}>비고</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {[...policies]
-                        .sort((a, b) => b.annualLeaveDays - a.annualLeaveDays)
-                        .map((policy, index) => {
-                        const isMyRank = policy.position === position;
-                        return (
-                            <tr key={index} style={isMyRank ? styles.activeRow : styles.tr}>
-                                <td style={styles.td}>{policy.position}</td>
-                                <td style={{...styles.td, fontWeight: 'bold'}}>{policy.annualLeaveDays}일</td>
-                                <td style={styles.td}>
-                                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center', justifyContent: 'center' }}>
-                                        {isMyRank && <span style={styles.currentBadge}>현재</span>}
-                                    </div>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+  useEffect(() => {
+    const fetchPolicy = async () => {
+      try {
+        // 백엔드: GET /api/v1/leave/policy → { position: "사원", annualLeaveDays: 15 }
+        const response = await api.get('/leave/policy');
+        if (response.data.success) {
+          setPolicies(response.data.data);
+        }
+      } catch (error) {
+        console.error('연차 정책 로드 실패:', error);
+      }
+    };
+    fetchPolicy();
+  }, []);
 
-            {/* 하단 유의사항 (사진 하단 노란 박스 부분) */}
-            <div style={styles.noticeBox}>
-                <p style={{fontWeight: 'bold', fontSize: '13px', marginBottom: '5px'}}>⚠️ 유의사항</p>
-                <ul style={styles.noticeList}>
-                    <li>연차는 입사일 기준으로 부여됩니다.</li>
-                    <li>반차는 오전(09:00~13:00), 오후(13:00~18:00)</li>
-                    <li>당일/익일 신청은 관리자 승인이 필요합니다.</li>
-                    <li>미사용 연차는 다음 해로 이월되지 않습니다.</li>
-                </ul>
-            </div>
-        </div>
-    );
-};
-
-const styles = {
-    container: {
-        backgroundColor: 'white', padding: '15px 25px 25px 25px', borderRadius: '12px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.05)', boxSizing: 'border-box'
-    },
-    title: { fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' },
-    table: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' },
-    th: { textAlign: 'center', padding: '12px 8px', color: '#888', borderBottom: '1px solid #eee', fontWeight: '500', backgroundColor: '#f5f5f5' },
-    td: { textAlign: 'center', padding: '15px 8px', borderBottom: '1px solid #f5f5f5' },
-    tr: { transition: '0.2s' },
-    // 현재 직급 강조 스타일
-    activeRow: { backgroundColor: '#f0f4ff', color: '#254EDB' },
-    
-    // [현재] 파란색 배지
-    currentBadge: {
-        padding: '2px 8px', backgroundColor: '#254EDB', color: 'white',
-        borderRadius: '10px', fontSize: '11px', fontWeight: 'bold'
-    },
-    // 하단 노란색 유의사항 박스
-    noticeBox: {
-        marginTop: '10px', padding: '4px 12px 10px 12px', backgroundColor: '#fffdf0',
-        borderRadius: '8px', border: '1px solid #ffecb3', color: '#856404'
-    },
-    noticeList: {
-        margin: 0, paddingLeft: '18px', fontSize: '12px', lineHeight: '1.8'
-    }
+  return (
+    <Card>
+      <CardHeader title="직급별 연차 기준" />
+      <Table>
+        <thead>
+          <tr>
+            <Th>직급</Th>
+            <Th align="right">연간 연차</Th>
+            <Th align="center">비고</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...policies]
+            .sort((a, b) => b.annualLeaveDays - a.annualLeaveDays)
+            .map((policy) => {
+              const isMyRank = policy.position === position;
+              return (
+                <Tr key={policy.position} className={isMyRank ? 'bg-blue-50/60' : undefined}>
+                  <Td className="font-medium text-gray-900">{policy.position}</Td>
+                  <Td align="right" className="tabular-nums">{policy.annualLeaveDays}일</Td>
+                  <Td align="center">{isMyRank && <Badge tone="blue">내 직급</Badge>}</Td>
+                </Tr>
+              );
+            })}
+        </tbody>
+      </Table>
+      <CardBody className="border-t border-gray-100">
+        <p className="mb-2 flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
+          <Info size={14} className="text-gray-400" /> 유의사항
+        </p>
+        <ul className="list-disc space-y-1 pl-5 text-[13px] text-gray-500">
+          {NOTICES.map((n) => <li key={n}>{n}</li>)}
+        </ul>
+      </CardBody>
+    </Card>
+  );
 };
 
 export default LeavePolicyTable;

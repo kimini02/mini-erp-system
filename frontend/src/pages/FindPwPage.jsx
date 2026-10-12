@@ -1,27 +1,41 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, User, Mail, ShieldCheck, Lock, CheckCircle2, Eye, EyeOff, LogIn } from 'lucide-react';
-import axios from '@/api/axios'; // axios 설정 파일 임포트
+import { Check, CheckCircle2, Eye, EyeOff, Info } from 'lucide-react';
+import axios from '@/api/axios';
+import AuthLayout, { AuthLinks } from '@/components/layout/AuthLayout';
+import { Button, Field, Input } from '@/components/ui';
+import { toast } from '@/lib/toast';
+import { cn } from '@/lib/cn';
+
+const STEPS = ['본인 확인', '인증번호 입력', '새 비밀번호'];
 
 /**
- * [컴포넌트] Stepper
- * 현재 진행 단계를 시각적으로 표시합니다.
+ * 진행 단계 표시
  */
 const Stepper = ({ currentStep }) => (
-  <div className="flex items-center justify-between w-full max-w-[320px] mx-auto mb-10">
-    {[1, 2, 3].map((num) => (
-      <div key={num} className="flex items-center flex-1 last:flex-none">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-          currentStep >= num ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'
-        } ${currentStep === num ? 'ring-4 ring-blue-50 shadow-sm' : ''}`}>
-          {currentStep > num ? <CheckCircle2 className="w-4 h-4" /> : num}
-        </div>
-        {num < 3 && (
-          <div className={`h-[0.5px] flex-1 mx-2 ${currentStep > num ? 'bg-blue-600' : 'bg-gray-100'}`} />
-        )}
-      </div>
-    ))}
-  </div>
+  <ol className="mb-8 flex items-center gap-2">
+    {STEPS.map((label, i) => {
+      const num = i + 1;
+      const done = currentStep > num;
+      const active = currentStep === num;
+      return (
+        <li key={label} className="flex flex-1 items-center gap-2">
+          <span
+            className={cn(
+              'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+              done || active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'
+            )}
+          >
+            {done ? <Check size={13} strokeWidth={3} /> : num}
+          </span>
+          <span className={cn('whitespace-nowrap text-[13px]', active ? 'font-medium text-gray-900' : 'text-gray-400')}>
+            {label}
+          </span>
+          {num < STEPS.length && <span className={cn('h-px flex-1', done ? 'bg-blue-600' : 'bg-gray-200')} />}
+        </li>
+      );
+    })}
+  </ol>
 );
 
 export default function FindPwPage() {
@@ -29,7 +43,7 @@ export default function FindPwPage() {
   const [step, setStep] = useState(1); // 1:본인확인, 2:인증번호, 3:재설정, 4:완료
   const [showPw, setShowPw] = useState(false); // 비밀번호 보이기/숨기기
   const [targetUser, setTargetUser] = useState(null); // 찾은 유저의 정보를 임시 저장 (id 포함)
-  
+
   // 입력 폼 상태 관리
   const [formData, setFormData] = useState({
     userId: '',
@@ -46,235 +60,201 @@ export default function FindPwPage() {
   };
 
   /**
-   * [기능] STEP 1: 사용자 확인 및 인증번호 발송
+   * STEP 1: 사용자 확인 및 인증번호 발송
    */
-  const handleVerifyUser = async () => {
+  const handleVerifyUser = async (e) => {
+    e.preventDefault();
     try {
       // 아이디와 이메일이 동시에 일치하는 유저 조회
       const response = await axios.get(`/users?userId=${formData.userId}&email=${formData.email}`);
-      
+
       if (response.data && response.data.length > 0) {
         setTargetUser(response.data[0]); // 유저 객체 저장 (patch 통신 시 id 필요)
         setStep(2);
-        console.log("사용자 확인 성공:", response.data[0].userId);
       } else {
-        alert("일치하는 사용자 정보가 없습니다. 다시 확인해주세요.");
+        toast.error('일치하는 사용자 정보가 없습니다. 다시 확인해주세요.');
       }
     } catch (error) {
-      console.error("사용자 확인 중 에러 발생:", error);
-      alert("서버 연결에 실패했습니다. (json-server 실행 여부를 확인하세요)");
+      console.error('사용자 확인 중 에러 발생:', error);
+      toast.error('서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
   };
 
   /**
-   * [기능] STEP 2: 인증번호 확인
+   * STEP 2: 인증번호 확인
    */
-  const handleVerifyCode = () => {
+  const handleVerifyCode = (e) => {
+    e.preventDefault();
     // 가짜 서버이므로 데모 번호 123456으로 고정
     if (formData.authCode === '123456') {
       setStep(3);
     } else {
-      alert("인증번호가 일치하지 않습니다. (데모: 123456)");
+      toast.error('인증번호가 일치하지 않습니다.');
     }
   };
 
   /**
-   * [기능] STEP 2-1: 인증번호 재발송
+   * STEP 2-1: 인증번호 재발송
    */
   const handleResendCode = () => {
     setFormData(prev => ({ ...prev, authCode: '' })); // 입력창 초기화
-    alert("인증번호가 재발송되었습니다. (데모: 123456)");
+    toast.info('인증번호를 다시 발송했습니다.');
   };
 
   /**
-   * [기능] STEP 3: 실제 비밀번호 재설정 (PATCH)
+   * STEP 3: 실제 비밀번호 재설정 (PATCH)
    */
-  const handleResetPassword = async () => {
-    // 유효성 검사
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
     if (formData.newPassword !== formData.confirmPassword) {
-      alert("비밀번호가 서로 일치하지 않습니다.");
+      toast.error('비밀번호가 서로 일치하지 않습니다.');
       return;
     }
     if (formData.newPassword.length < 4) {
-      alert("비밀번호는 최소 4자 이상이어야 합니다.");
+      toast.error('비밀번호는 최소 4자 이상이어야 합니다.');
       return;
     }
 
     try {
-      // json-server의 해당 유저 데이터만 부분 수정(PATCH)
+      // 해당 유저 데이터만 부분 수정(PATCH)
       await axios.patch(`/users/${targetUser.id}`, {
         password: formData.newPassword
       });
 
       setStep(4); // 완료 화면으로 이동
     } catch (error) {
-      console.error("비밀번호 변경 중 에러 발생:", error);
-      alert("비밀번호 변경에 실패했습니다. 다시 시도해주세요.");
+      console.error('비밀번호 변경 중 에러 발생:', error);
+      toast.error('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6 py-12 text-gray-900">
-      <div className="bg-white p-10 rounded-3xl shadow-lg w-full max-w-[520px]">
-        
-        {/* 공통 헤더 */}
-        <div className="flex flex-col items-center mb-8 text-center">
-          <div className="bg-blue-600 p-3 rounded-2xl mb-4 shadow-lg shadow-blue-100">
-            <Key className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-950 mb-1">WorkFlow</h1>
-          <p className="text-sm text-gray-500 font-medium">비밀번호를 재설정할 수 있어요</p>
+  const links = (
+    <AuthLinks
+      links={[
+        { label: '로그인', onClick: () => navigate('/login') },
+        { label: '아이디 찾기', onClick: () => navigate('/find-id') },
+        { label: '회원가입', onClick: () => navigate('/signup') },
+      ]}
+    />
+  );
+
+  if (step === 4) {
+    return (
+      <AuthLayout>
+        <div className="text-center">
+          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
+            <CheckCircle2 size={24} className="text-emerald-600" />
+          </span>
+          <h1 className="text-xl font-semibold text-gray-900">비밀번호가 재설정되었습니다</h1>
+          <p className="mt-2 text-sm text-gray-500">새 비밀번호로 로그인하세요.</p>
         </div>
+        <Button size="lg" block className="mt-8" onClick={() => navigate('/login')}>
+          로그인하러 가기
+        </Button>
+      </AuthLayout>
+    );
+  }
 
-        {/* 스테퍼 표시 (완료 단계 제외) */}
-        {step < 4 && <Stepper currentStep={step} />}
+  return (
+    <AuthLayout title="비밀번호 찾기" description="본인 확인 후 비밀번호를 재설정할 수 있습니다." footer={links}>
+      <Stepper currentStep={step} />
 
-        {/* STEP 1: 본인확인 */}
-        {step === 1 && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div>
-              <h2 className="text-xl font-bold text-gray-950 mb-1">본인 확인</h2>
-              <p className="text-sm text-gray-500">정보를 입력하고 인증번호를 받으세요</p>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-gray-700 tracking-tight">아이디</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    id="userId" type="text" onChange={handleChange} placeholder="아이디" 
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400 transition-all" 
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-gray-700 tracking-tight">이메일</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    id="email" type="email" onChange={handleChange} placeholder="가입 시 입력한 이메일" 
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400 transition-all" 
-                  />
-                </div>
-              </div>
-            </div>
-            <button 
-              onClick={handleVerifyUser} 
-              className="w-full py-3.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all"
-            >
-              인증번호 발송
-            </button>
-          </div>
-        )}
+      {/* STEP 1: 본인확인 */}
+      {step === 1 && (
+        <form onSubmit={handleVerifyUser} className="space-y-4">
+          <Field label="아이디" htmlFor="userId">
+            <Input id="userId" value={formData.userId} onChange={handleChange} placeholder="아이디" required className="h-11" />
+          </Field>
+          <Field label="이메일" htmlFor="email">
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="가입 시 입력한 이메일"
+              required
+              className="h-11"
+            />
+          </Field>
+          <Button type="submit" size="lg" block className="!mt-6">
+            인증번호 발송
+          </Button>
+        </form>
+      )}
 
-        {/* STEP 2: 인증번호 입력 */}
-        {step === 2 && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div>
-              <h2 className="text-xl font-bold text-gray-950 mb-1">인증번호 입력</h2>
-              <p className="text-sm text-gray-500">{formData.email}로 발송된 번호를 입력하세요</p>
-            </div>
-            <div className="bg-blue-50 p-4 rounded-xl flex items-center gap-3 border border-blue-100">
-              <ShieldCheck className="w-5 h-5 text-blue-600" />
-              <p className="text-xs text-blue-600 font-medium">인증번호가 발송되었습니다. (데모: 123456)</p>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-bold text-gray-700 tracking-tight">인증번호</label>
-              <div className="flex gap-2">
-                <input 
-                  id="authCode" type="text" maxLength={6} value={formData.authCode} onChange={handleChange} 
-                  placeholder="123456" 
-                  className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-center tracking-[0.5em] font-bold outline-none focus:border-blue-400" 
+      {/* STEP 2: 인증번호 입력 */}
+      {step === 2 && (
+        <form onSubmit={handleVerifyCode} className="space-y-4">
+          <p className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-[13px] text-blue-800">
+            <Info size={16} className="mt-px shrink-0 text-blue-600" />
+            <span>
+              <b className="font-medium">{formData.email}</b>(으)로 인증번호를 보냈습니다. (데모: 123456)
+            </span>
+          </p>
+          <Field label="인증번호" htmlFor="authCode">
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Input
+                  id="authCode"
+                  maxLength={6}
+                  value={formData.authCode}
+                  onChange={handleChange}
+                  placeholder="6자리 숫자"
+                  inputMode="numeric"
+                  className="h-11 tracking-[0.2em]"
                 />
-                <button 
-                  onClick={handleResendCode}
-                  className="px-4 py-3 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 hover:text-blue-600 transition-all"
+              </div>
+              <Button variant="secondary" size="lg" onClick={handleResendCode}>
+                재발송
+              </Button>
+            </div>
+          </Field>
+          <Button type="submit" size="lg" block className="!mt-6">
+            인증 확인
+          </Button>
+        </form>
+      )}
+
+      {/* STEP 3: 새 비밀번호 설정 */}
+      {step === 3 && (
+        <form onSubmit={handleResetPassword} className="space-y-4">
+          <Field label="새 비밀번호" htmlFor="newPassword">
+            <Input
+              id="newPassword"
+              type={showPw ? 'text' : 'password'}
+              value={formData.newPassword}
+              onChange={handleChange}
+              placeholder="8자 이상 권장"
+              autoComplete="new-password"
+              className="h-11"
+              trailing={
+                <button
+                  type="button"
+                  onClick={() => setShowPw(!showPw)}
+                  className="rounded p-1 text-gray-400 hover:text-gray-600"
+                  aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'}
                 >
-                  재발송
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
-              </div>
-            </div>
-            <button 
-              onClick={handleVerifyCode} 
-              className="w-full py-3.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all"
-            >
-              인증 확인
-            </button>
-          </div>
-        )}
-
-        {/* STEP 3: 새 비밀번호 설정 */}
-        {step === 3 && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div>
-              <h2 className="text-xl font-bold text-gray-950 mb-1">새 비밀번호 설정</h2>
-              <p className="text-sm text-gray-500">로그인에 사용할 새 비밀번호를 입력하세요</p>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-gray-700 tracking-tight">새 비밀번호</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    id="newPassword" type={showPw ? "text" : "password"} onChange={handleChange} 
-                    placeholder="8자 이상 권장" 
-                    className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400 transition-all" 
-                  />
-                  <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-gray-700 tracking-tight">새 비밀번호 확인</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    id="confirmPassword" type={showPw ? "text" : "password"} onChange={handleChange} 
-                    placeholder="비밀번호 재입력" 
-                    className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-400 transition-all" 
-                  />
-                </div>
-              </div>
-            </div>
-            <button 
-              onClick={handleResetPassword} 
-              className="w-full py-3.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all"
-            >
-              비밀번호 재설정
-            </button>
-          </div>
-        )}
-
-        {/* STEP 4: 완료 */}
-        {step === 4 && (
-          <div className="flex flex-col items-center py-6 animate-in zoom-in duration-500">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 relative">
-              <CheckCircle2 className="w-10 h-10 text-green-500" />
-              <div className="absolute -top-1 -right-1 text-2xl">🎉</div>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-950 mb-2">재설정 완료!</h2>
-            <p className="text-sm text-gray-500 mb-10">새 비밀번호로 안전하게 로그인하세요.</p>
-            <button 
-              onClick={() => navigate('/login')} 
-              className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 shadow-lg flex items-center justify-center gap-2"
-            >
-              <LogIn className="w-4 h-4" /> 로그인하러 가기
-            </button>
-          </div>
-        )}
-
-        {/* 하단 링크 */}
-        {step < 4 && (
-          <div className="mt-10 flex justify-center gap-4 text-[11px] text-gray-400 border-t pt-6">
-            <button onClick={() => navigate('/login')} className="hover:text-blue-600">로그인</button>
-            <span className="text-gray-200">|</span>
-            <button onClick={() => navigate('/find-id')} className="hover:text-blue-600">아이디 찾기</button>
-            <span className="text-gray-200">|</span>
-            <button onClick={() => navigate('/signup')} className="hover:text-blue-600 font-bold">회원가입</button>
-          </div>
-        )}
-      </div>
-    </div>
+              }
+            />
+          </Field>
+          <Field label="새 비밀번호 확인" htmlFor="confirmPassword">
+            <Input
+              id="confirmPassword"
+              type={showPw ? 'text' : 'password'}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="한 번 더 입력"
+              autoComplete="new-password"
+              className="h-11"
+            />
+          </Field>
+          <Button type="submit" size="lg" block className="!mt-6">
+            비밀번호 재설정
+          </Button>
+        </form>
+      )}
+    </AuthLayout>
   );
 }

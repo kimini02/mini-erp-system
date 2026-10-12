@@ -2,88 +2,162 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tailwind v4에서는 여기서 직접 설정을 확장합니다. */
-@theme {
-  --color-primary: #2563eb;
-  --font-sans: "Pretendard", "Inter", system-ui, sans-serif;
-}
-
-/* 아래는 브라우저 기본 스타일 초기화 (시안처럼 깔끔하게 나오게 함) */
 @layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-50 text-gray-900 text-sm;
+    word-break: keep-all;
   }
 }
-/* FullCalendar 커스텀 스타일링 */
-.custom-calendar .fc {
-  --fc-border-color: #f8fafc;
-  --fc-today-bg-color: #eff6ff;
+
+/* ------------------------------------------------------------
+   FullCalendar 테마 (CalendarPage)
+------------------------------------------------------------ */
+.wf-calendar .fc {
+  --fc-border-color: theme('colors.gray.200');
+  --fc-today-bg-color: theme('colors.blue.50');
+  --fc-page-bg-color: #fff;
+  --fc-neutral-bg-color: theme('colors.gray.50');
+  font-size: 13px;
 }
 
-.custom-calendar .fc-col-header-cell {
-  padding: 12px 0 !important;
-  background-color: #fcfcfc;
-  color: #64748b;
+.wf-calendar .fc .fc-toolbar.fc-header-toolbar {
+  margin-bottom: 16px;
+}
+
+.wf-calendar .fc .fc-toolbar-title {
+  font-size: 16px;
   font-weight: 600;
+  color: theme('colors.gray.900');
 }
 
-.custom-calendar .fc-daygrid-day-number {
-  font-size: 0.85rem;
-  padding: 8px !important;
-  color: #94a3b8;
+.wf-calendar .fc .fc-button {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  color: theme('colors.gray.700');
+  background: #fff;
+  border: 1px solid theme('colors.gray.300');
+  border-radius: 8px;
+  box-shadow: none;
 }
 
-.custom-calendar .fc-event {
-  border-radius: 4px !important;
-  padding: 2px 4px !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
+.wf-calendar .fc .fc-button:hover {
+  background: theme('colors.gray.50');
+  color: theme('colors.gray.900');
 }
 
-/* 페이드 인 애니메이션 */
-.animation-fade-in {
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-/* CalendarPage.css 또는 index.css에 추가 */
-
-/* 1. 요일 헤더 스타일 (이미지처럼 배경 제거 및 폰트 설정) */
-.fc-col-header-cell {
-  background-color: transparent !important;
-  border: none !important;
-  padding: 10px 0 !important;
-}
-
-.fc-col-header-cell-cushion {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #64748b;
-}
-
-/* 2. 일요일(Red) & 토요일(Blue) 날짜 색상 */
-.fc-day-sun .fc-daygrid-day-number { color: #ef4444 !important; } /* 일요일 */
-.fc-day-sat .fc-daygrid-day-number { color: #3b82f6 !important; } /* 토요일 */
-
-/* 3. 이벤트 태그 스타일 (이미지의 둥근 모서리와 폰트 재현) */
-.fc-event {
-  border-radius: 6px !important;
-  padding: 3px 6px !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  margin-top: 2px !important;
+.wf-calendar .fc .fc-button:focus,
+.wf-calendar .fc .fc-button:active {
   box-shadow: none !important;
 }
 
-/* 4. 캘린더 내부 그리드 선 투명도 조절 */
-.fc-theme-standard td, .fc-theme-standard th {
-  border-color: #f1f5f9 !important;
+.wf-calendar .fc .fc-button-primary:disabled {
+  opacity: 0.5;
+  background: #fff;
+  color: theme('colors.gray.500');
+  border-color: theme('colors.gray.200');
 }
 
-/* 5. 오늘 날짜 하이라이트 제거 또는 커스텀 */
-.fc-day-today {
-  background-color: #f8fafc !important;
+.wf-calendar .fc .fc-button-group > .fc-button {
+  border-radius: 0;
 }
+.wf-calendar .fc .fc-button-group > .fc-button:first-child {
+  border-radius: 8px 0 0 8px;
+}
+.wf-calendar .fc .fc-button-group > .fc-button:last-child {
+  border-radius: 0 8px 8px 0;
+  margin-left: -1px;
+}
+
+.wf-calendar .fc .fc-toolbar-chunk > .fc-button {
+  margin-left: 6px;
+}
+
+.wf-calendar .fc .fc-scrollgrid {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.wf-calendar .fc .fc-col-header-cell {
+  background: theme('colors.gray.50');
+  padding: 8px 0;
+}
+
+.wf-calendar .fc .fc-col-header-cell-cushion {
+  font-size: 12px;
+  font-weight: 500;
+  color: theme('colors.gray.500');
+}
+
+.wf-calendar .fc .fc-daygrid-day-number {
+  padding: 6px 8px;
+  font-size: 12px;
+  color: theme('colors.gray.700');
+}
+
+.wf-calendar .fc .fc-day-sun .fc-daygrid-day-number,
+.wf-calendar .fc .fc-day-sun .fc-col-header-cell-cushion {
+  color: theme('colors.red.500');
+}
+
+.wf-calendar .fc .fc-day-sat .fc-daygrid-day-number,
+.wf-calendar .fc .fc-day-sat .fc-col-header-cell-cushion {
+  color: theme('colors.blue.600');
+}
+
+.wf-calendar .fc .fc-day-other .fc-daygrid-day-number {
+  opacity: 0.4;
+}
+
+.wf-calendar .fc .fc-day-today .fc-daygrid-day-number {
+  color: #fff;
+  background: theme('colors.blue.600');
+  border-radius: 9999px;
+  min-width: 22px;
+  height: 22px;
+  margin: 4px 4px 0 0;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wf-calendar .fc .fc-daygrid-day {
+  cursor: pointer;
+}
+
+.wf-calendar .fc .fc-daygrid-day:hover {
+  background: theme('colors.gray.50');
+}
+
+/* 일정 칩 */
+.wf-calendar .fc .fc-daygrid-event {
+  margin: 1px 4px 0;
+  padding: 1px 6px;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.wf-calendar .fc .fc-daygrid-event .fc-event-main {
+  color: inherit;
+}
+
+.wf-calendar .fc .fc-daygrid-dot-event .fc-event-title {
+  font-weight: 500;
+}
+
+.wf-calendar .fc .evt-project  { background: theme('colors.blue.50');    border-left-color: theme('colors.blue.500');    color: theme('colors.blue.800'); }
+.wf-calendar .fc .evt-leave    { background: theme('colors.emerald.50'); border-left-color: theme('colors.emerald.500'); color: theme('colors.emerald.800'); }
+.wf-calendar .fc .evt-overtime { background: theme('colors.amber.50');   border-left-color: theme('colors.amber.500');   color: theme('colors.amber.800'); }
+.wf-calendar .fc .evt-holiday  { background: theme('colors.red.50');     border-left-color: theme('colors.red.500');     color: theme('colors.red.700'); }
+.wf-calendar .fc .evt-etc      { background: theme('colors.gray.100');   border-left-color: theme('colors.gray.400');    color: theme('colors.gray.700'); }
