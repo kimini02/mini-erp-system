@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.dashboard.service;
 
+import com.minierp.backend.support.TestClocks;
+
 import com.minierp.backend.domain.approval.entity.LeaveStatus;
 import com.minierp.backend.domain.approval.repository.LeaveRequestRepository;
 import com.minierp.backend.domain.dashboard.dto.AdminDashboardResponseDto;
@@ -164,12 +166,12 @@ class DashboardServiceTest {
     @Test
     @DisplayName("ADMIN은 프로젝트 현황을 진행 중 우선으로 최대 5개 조회한다")
     void getDashboardProjects_asAdmin_success() {
-        Project p1 = createProject(1L, ProjectStatus.READY, LocalDate.of(2026, 4, 30), "A");
-        Project p2 = createProject(2L, ProjectStatus.PROGRESS, LocalDate.of(2026, 4, 20), "B");
-        Project p3 = createProject(3L, ProjectStatus.PROGRESS, LocalDate.of(2026, 4, 25), "C");
-        Project p4 = createProject(4L, ProjectStatus.READY, LocalDate.of(2026, 5, 1), "D");
-        Project p5 = createProject(5L, ProjectStatus.PROGRESS, LocalDate.of(2026, 4, 10), "E");
-        Project p6 = createProject(6L, ProjectStatus.READY, LocalDate.of(2026, 4, 15), "F");
+        Project p1 = createProject(1L, ProjectStatus.READY, TestClocks.today().plusDays(24), "A");
+        Project p2 = createProject(2L, ProjectStatus.PROGRESS, TestClocks.today().plusDays(14), "B");
+        Project p3 = createProject(3L, ProjectStatus.PROGRESS, TestClocks.today().plusDays(19), "C");
+        Project p4 = createProject(4L, ProjectStatus.READY, TestClocks.today().plusDays(25), "D");
+        Project p5 = createProject(5L, ProjectStatus.PROGRESS, TestClocks.today().plusDays(4), "E");
+        Project p6 = createProject(6L, ProjectStatus.READY, TestClocks.today().plusDays(9), "F");
         given(projectRepository.findAll()).willReturn(List.of(p1, p2, p3, p4, p5, p6));
         given(taskRepository.countByProjectId(1L)).willReturn(2L);
         given(taskRepository.countByProjectIdAndTaskStatus(1L, TaskStatus.DONE)).willReturn(1L);
@@ -215,7 +217,7 @@ class DashboardServiceTest {
         Task task = Task.create(
                 "업무 제목",
                 "업무 내용",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 taskStatus,
                 Priority.MEDIUM,
                 project
@@ -225,7 +227,7 @@ class DashboardServiceTest {
     }
 
     private Project createProject(Long id, ProjectStatus status) {
-        return createProject(id, status, LocalDate.of(2026, 4, 30), "ERP 재구축");
+        return createProject(id, status, TestClocks.today().plusDays(24), "ERP 재구축");
     }
 
     private Project createProject(Long id, ProjectStatus status, LocalDate endDate, String title) {
@@ -241,7 +243,7 @@ class DashboardServiceTest {
         ReflectionTestUtils.setField(project, "title", title);
         ReflectionTestUtils.setField(project, "content", "설명");
         ReflectionTestUtils.setField(project, "status", status);
-        ReflectionTestUtils.setField(project, "startDate", LocalDate.of(2026, 3, 31));
+        ReflectionTestUtils.setField(project, "startDate", TestClocks.today().minusDays(6));
         ReflectionTestUtils.setField(project, "endDate", endDate);
         return project;
     }

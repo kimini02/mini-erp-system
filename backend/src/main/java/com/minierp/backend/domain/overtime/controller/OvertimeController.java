@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.overtime.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.overtime.dto.OvertimeRequestDto;
 import com.minierp.backend.domain.overtime.dto.OvertimeResponseDto;
 import com.minierp.backend.domain.overtime.service.OvertimeService;
@@ -18,6 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OvertimeController {
 
+    private final Clock clock;
+
     private final OvertimeService overtimeService;
     private final CurrentUserResolver currentUserResolver;
 
@@ -32,7 +36,7 @@ public class OvertimeController {
 
         OvertimeResponseDto response = overtimeService.requestOvertime(dto, currentUserResolver.resolveUserId(authentication));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "특근 신청이 완료되었습니다."));
+                .body(ApiResponse.success(clock, response, "특근 신청이 완료되었습니다."));
     }
 
     /**
@@ -45,7 +49,7 @@ public class OvertimeController {
             Authentication authentication) {
 
         overtimeService.cancelOvertime(id, currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.successMessage("특근 신청이 취소되었습니다."));
+        return ResponseEntity.ok(ApiResponse.successMessage(clock, "특근 신청이 취소되었습니다."));
     }
 
     /**
@@ -58,7 +62,7 @@ public class OvertimeController {
             Authentication authentication) {
 
         OvertimeResponseDto response = overtimeService.approveOvertime(id, currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "특근이 승인되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "특근이 승인되었습니다."));
     }
 
     /**
@@ -71,7 +75,7 @@ public class OvertimeController {
             Authentication authentication) {
 
         OvertimeResponseDto response = overtimeService.rejectOvertime(id, currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "특근이 반려되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "특근이 반려되었습니다."));
     }
 
     /**
@@ -84,7 +88,7 @@ public class OvertimeController {
             Authentication authentication) {
 
         OvertimeResponseDto response = overtimeService.cancelOvertime(id, currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "특근 신청이 취소되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "특근 신청이 취소되었습니다."));
     }
 
     /**
@@ -96,7 +100,7 @@ public class OvertimeController {
             Authentication authentication) {
 
         OvertimeResponseDto response = overtimeService.getOvertimeRequest(id, currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "특근 단건 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "특근 단건 조회가 완료되었습니다."));
     }
 
     /**
@@ -111,7 +115,7 @@ public class OvertimeController {
                 currentUserResolver.resolveUserId(authentication),
                 includeCancelled
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "특근 내역 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "특근 내역 조회가 완료되었습니다."));
     }
 
     /**
@@ -127,7 +131,7 @@ public class OvertimeController {
 
         Long userId = currentUserResolver.resolveUserId(authentication);
         List<OvertimeResponseDto> response = overtimeService.getAllOvertimeRequestList(userId, includeCancelled);
-        return ResponseEntity.ok(ApiResponse.success(response, "전체 특근 내역 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "전체 특근 내역 조회가 완료되었습니다."));
     }
 
     @Deprecated
@@ -139,6 +143,6 @@ public class OvertimeController {
                 currentUserResolver.resolveUserId(authentication),
                 includeCancelled
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "내 특근 신청 내역 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "내 특근 신청 내역 조회가 완료되었습니다."));
     }
 }

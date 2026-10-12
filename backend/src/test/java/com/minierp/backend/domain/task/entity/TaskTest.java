@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.task.entity;
 
+import com.minierp.backend.support.TestClocks;
+
 import com.minierp.backend.domain.project.entity.Project;
 import com.minierp.backend.global.entity.Priority;
 import com.minierp.backend.global.exception.BusinessException;
@@ -7,7 +9,6 @@ import com.minierp.backend.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -22,7 +23,7 @@ class TaskTest {
         Task task = Task.create(
                 "내 업무 화면 구현",
                 "React 페이지 및 API 연동",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 null,
                 Priority.HIGH,
                 project
@@ -30,7 +31,7 @@ class TaskTest {
 
         assertThat(task.getTaskTitle()).isEqualTo("내 업무 화면 구현");
         assertThat(task.getTaskContent()).isEqualTo("React 페이지 및 API 연동");
-        assertThat(task.getEndDate()).isEqualTo(LocalDate.of(2026, 4, 2));
+        assertThat(task.getEndDate()).isEqualTo(TestClocks.today().minusDays(4));
         assertThat(task.getTaskStatus()).isEqualTo(TaskStatus.TODO);
         assertThat(task.getPriority()).isEqualTo(Priority.HIGH);
         assertThat(task.getProject()).isSameAs(project);
@@ -42,7 +43,7 @@ class TaskTest {
         Task task = Task.create(
                 "내 업무 화면 구현",
                 "React 페이지 및 API 연동",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 TaskStatus.TODO,
                 Priority.MEDIUM,
                 createProject()
@@ -59,7 +60,7 @@ class TaskTest {
         Task task = Task.create(
                 "기존 제목",
                 "기존 내용",
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().plusDays(24),
                 TaskStatus.TODO,
                 Priority.LOW,
                 createProject()
@@ -68,13 +69,13 @@ class TaskTest {
         task.update(
                 "수정된 제목",
                 "수정된 내용",
-                LocalDate.of(2026, 4, 15),
+                TestClocks.today().plusDays(9),
                 Priority.HIGH
         );
 
         assertThat(task.getTaskTitle()).isEqualTo("수정된 제목");
         assertThat(task.getTaskContent()).isEqualTo("수정된 내용");
-        assertThat(task.getEndDate()).isEqualTo(LocalDate.of(2026, 4, 15));
+        assertThat(task.getEndDate()).isEqualTo(TestClocks.today().plusDays(9));
         assertThat(task.getPriority()).isEqualTo(Priority.HIGH);
     }
 
@@ -84,7 +85,7 @@ class TaskTest {
         assertThatThrownBy(() -> Task.create(
                 "내 업무 화면 구현",
                 "React 페이지 및 API 연동",
-                LocalDate.of(2026, 5, 1),
+                TestClocks.today().plusDays(25),
                 null,
                 Priority.HIGH,
                 createProject()
@@ -100,7 +101,7 @@ class TaskTest {
         Task task = Task.create(
                 "기존 제목",
                 "기존 내용",
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().plusDays(24),
                 TaskStatus.TODO,
                 Priority.LOW,
                 createProject()
@@ -109,7 +110,7 @@ class TaskTest {
         assertThatThrownBy(() -> task.update(
                 "수정된 제목",
                 "수정된 내용",
-                LocalDate.of(2026, 5, 15),
+                TestClocks.today().plusDays(39),
                 Priority.HIGH
         ))
                 .isInstanceOf(BusinessException.class)
@@ -123,21 +124,22 @@ class TaskTest {
         Task task = Task.create(
                 "내 업무 화면 구현",
                 "React 페이지 및 API 연동",
-                LocalDate.now().minusDays(1),
+                TestClocks.today().minusDays(1),
                 TaskStatus.DOING,
                 Priority.LOW,
-                createProject()
+                Project.create("지연 검증", "", TestClocks.today().minusDays(7),
+                        TestClocks.today().plusDays(7), Priority.MEDIUM)
         );
 
-        assertThat(task.isOverdue()).isTrue();
+        assertThat(task.isOverdue(TestClocks.today())).isTrue();
     }
 
     private Project createProject() {
         return Project.create(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM
         );
     }

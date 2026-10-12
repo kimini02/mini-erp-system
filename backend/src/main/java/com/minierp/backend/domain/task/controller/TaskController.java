@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.task.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.task.dto.TaskAssignmentRequestDto;
 import com.minierp.backend.domain.task.dto.TaskAssignmentResponseDto;
 import com.minierp.backend.domain.task.dto.TaskCreateRequestDto;
@@ -40,6 +42,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskController {
 
+    private final Clock clock;
+
     private final TaskService taskService;
     private final CurrentUserResolver currentUserResolver;
 
@@ -54,7 +58,7 @@ public class TaskController {
                 currentUserResolver.resolveUserRole(authentication)
         );
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "Task가 생성되었습니다."));
+                .body(ApiResponse.success(clock, response, "Task가 생성되었습니다."));
     }
 
     @GetMapping
@@ -63,7 +67,7 @@ public class TaskController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "업무 목록 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "업무 목록 조회가 완료되었습니다."));
     }
 
     @GetMapping("/{taskId}")
@@ -76,7 +80,7 @@ public class TaskController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "업무 상세 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "업무 상세 조회가 완료되었습니다."));
     }
 
     @PutMapping("/{taskId}")
@@ -91,7 +95,7 @@ public class TaskController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "업무가 수정되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "업무가 수정되었습니다."));
     }
 
     @PatchMapping("/{taskId}/status")
@@ -106,7 +110,7 @@ public class TaskController {
                 currentUserResolver.resolveUserRole(authentication),
                 request
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "Task 상태가 변경되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "Task 상태가 변경되었습니다."));
     }
 
     @PostMapping("/{taskId}/assignments")
@@ -122,7 +126,7 @@ public class TaskController {
                 currentUserResolver.resolveUserRole(authentication)
         );
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "업무 담당자가 배정되었습니다."));
+                .body(ApiResponse.success(clock, response, "업무 담당자가 배정되었습니다."));
     }
 
     @GetMapping("/{taskId}/assignments")
@@ -135,7 +139,7 @@ public class TaskController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "업무 담당자 목록 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "업무 담당자 목록 조회가 완료되었습니다."));
     }
 
     @DeleteMapping("/{taskId}/assignments/{userId}")
@@ -150,7 +154,7 @@ public class TaskController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.successMessage("업무 담당자 배정이 해제되었습니다."));
+        return ResponseEntity.ok(ApiResponse.successMessage(clock, "업무 담당자 배정이 해제되었습니다."));
     }
 
     @GetMapping("/recent-assignments")
@@ -159,6 +163,6 @@ public class TaskController {
                 currentUserResolver.resolveUserId(authentication),
                 currentUserResolver.resolveUserRole(authentication)
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "최근 업무 배정 이력 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "최근 업무 배정 이력 조회가 완료되었습니다."));
     }
 }

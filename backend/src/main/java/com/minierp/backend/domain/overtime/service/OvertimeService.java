@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ public class OvertimeService {
     private final OvertimeRequestRepository overtimeRequestRepository;
     private final UserRepository userRepository;
     private final AccessPolicy accessPolicy;
+    private final Clock clock;
 
     /**
      * 특근 신청
@@ -41,7 +43,7 @@ public class OvertimeService {
             throw new BusinessException(ErrorCode.INVALID_OVERTIME_TIME);
         }
 
-        if (dto.getStartDate().isBefore(LocalDate.now())) {
+        if (dto.getStartDate().isBefore(LocalDate.now(clock))) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "오늘 이전 날짜로는 특근을 신청할 수 없습니다.");
         }
 

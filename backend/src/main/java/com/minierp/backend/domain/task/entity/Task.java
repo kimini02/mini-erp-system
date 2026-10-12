@@ -82,8 +82,8 @@ public class Task extends BaseEntity {
         this.validatePeriod();
     }
 
-    public boolean isOverdue() {
-        return taskStatus != TaskStatus.DONE && endDate != null && endDate.isBefore(LocalDate.now());
+    public boolean isOverdue(LocalDate today) {
+        return taskStatus != TaskStatus.DONE && endDate != null && endDate.isBefore(today);
     }
 
     // 양방향 연관관계 편의 메서드 — TaskAssignment.create()에서 호출

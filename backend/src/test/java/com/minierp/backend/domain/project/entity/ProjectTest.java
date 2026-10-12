@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.project.entity;
 
+import com.minierp.backend.support.TestClocks;
+
 import com.minierp.backend.domain.user.entity.User;
 import com.minierp.backend.domain.user.entity.UserRole;
 import com.minierp.backend.global.entity.Priority;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Constructor;
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,15 +24,15 @@ class ProjectTest {
         Project project = Project.create(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM
         );
 
         assertThat(project.getTitle()).isEqualTo("ERP 재구축");
         assertThat(project.getContent()).isEqualTo("사내 업무 시스템 고도화");
-        assertThat(project.getStartDate()).isEqualTo(LocalDate.of(2026, 3, 31));
-        assertThat(project.getEndDate()).isEqualTo(LocalDate.of(2026, 4, 30));
+        assertThat(project.getStartDate()).isEqualTo(TestClocks.today().minusDays(6));
+        assertThat(project.getEndDate()).isEqualTo(TestClocks.today().plusDays(24));
         assertThat(project.getStatus()).isEqualTo(ProjectStatus.READY);
         assertThat(project.getPriority()).isEqualTo(Priority.MEDIUM);
     }
@@ -42,8 +43,8 @@ class ProjectTest {
         assertThatThrownBy(() -> Project.create(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 4, 30),
-                LocalDate.of(2026, 3, 31),
+                TestClocks.today().plusDays(24),
+                TestClocks.today().minusDays(6),
                 Priority.HIGH
         ))
                 .isInstanceOf(BusinessException.class)
@@ -57,8 +58,8 @@ class ProjectTest {
         Project project = Project.create(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.LOW
         );
 
@@ -73,23 +74,23 @@ class ProjectTest {
         Project project = Project.create(
                 "기존 제목",
                 "기존 내용",
-                LocalDate.of(2026, 4, 1),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(5),
+                TestClocks.today().plusDays(24),
                 Priority.LOW
         );
 
         project.update(
                 "수정된 제목",
                 "수정된 내용",
-                LocalDate.of(2026, 5, 1),
-                LocalDate.of(2026, 6, 30),
+                TestClocks.today().plusDays(25),
+                TestClocks.today().plusDays(85),
                 Priority.HIGH
         );
 
         assertThat(project.getTitle()).isEqualTo("수정된 제목");
         assertThat(project.getContent()).isEqualTo("수정된 내용");
-        assertThat(project.getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(project.getEndDate()).isEqualTo(LocalDate.of(2026, 6, 30));
+        assertThat(project.getStartDate()).isEqualTo(TestClocks.today().plusDays(25));
+        assertThat(project.getEndDate()).isEqualTo(TestClocks.today().plusDays(85));
         assertThat(project.getPriority()).isEqualTo(Priority.HIGH);
     }
 
@@ -99,16 +100,16 @@ class ProjectTest {
         Project project = Project.create(
                 "제목",
                 "내용",
-                LocalDate.of(2026, 4, 1),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(5),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM
         );
 
         assertThatThrownBy(() -> project.update(
                 "제목",
                 "내용",
-                LocalDate.of(2026, 5, 1),
-                LocalDate.of(2026, 4, 1),
+                TestClocks.today().plusDays(25),
+                TestClocks.today().minusDays(5),
                 Priority.MEDIUM
         ))
                 .isInstanceOf(BusinessException.class)
@@ -122,8 +123,8 @@ class ProjectTest {
         Project project = Project.create(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM
         );
         User leader = createUser(20L, UserRole.TEAM_LEADER);

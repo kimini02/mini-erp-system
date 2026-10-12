@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+    boolean existsByUserRole(UserRole userRole);
+
     boolean existsByLoginId(String loginId);
 
     boolean existsByUserEmail(String userEmail);

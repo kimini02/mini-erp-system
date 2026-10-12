@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.attendance.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.attendance.dto.AttendanceSummaryDto;
 import com.minierp.backend.domain.attendance.dto.AttendanceUpdateRequestDto;
 import com.minierp.backend.domain.attendance.dto.AttendanceUpdateResponseDto;
@@ -30,6 +32,8 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class AttendanceController {
 
+    private final Clock clock;
+
     private final AttendanceService attendanceService;
     private final CurrentUserResolver currentUserResolver;
 
@@ -39,7 +43,7 @@ public class AttendanceController {
             Authentication authentication
     ) {
         CheckInResponseDto response = attendanceService.checkIn(currentUserResolver.resolveUserId(authentication), requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response, "출근이 기록되었습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "출근이 기록되었습니다"));
     }
 
     @PatchMapping("/check-out")
@@ -49,7 +53,7 @@ public class AttendanceController {
             Authentication authentication
     ) {
         CheckOutResponseDto response = attendanceService.checkOut(currentUserResolver.resolveUserId(authentication), workDate, requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response, "퇴근이 기록되었습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "퇴근이 기록되었습니다"));
     }
 
     @PutMapping
@@ -59,7 +63,7 @@ public class AttendanceController {
             Authentication authentication
     ) {
         AttendanceUpdateResponseDto response = attendanceService.updateFullAttendance(currentUserResolver.resolveUserId(authentication), workDate, requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response, "근태 기록이 수정되었습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "근태 기록이 수정되었습니다"));
     }
 
     @GetMapping("/summary")
@@ -68,6 +72,6 @@ public class AttendanceController {
             Authentication authentication
     ) {
         AttendanceSummaryDto response = attendanceService.getMonthlySummary(currentUserResolver.resolveUserId(authentication), month);
-        return ResponseEntity.ok(ApiResponse.success(response, "근태 요약 조회가 완료되었습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "근태 요약 조회가 완료되었습니다"));
     }
 }

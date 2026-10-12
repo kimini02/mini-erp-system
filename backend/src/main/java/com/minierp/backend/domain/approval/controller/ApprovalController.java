@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.approval.controller;
 
+import java.time.Clock;
+
 import com.minierp.backend.domain.approval.dto.LeaveBalanceResponseDto;
 import com.minierp.backend.domain.approval.dto.LeavePolicyResponseDto;
 import com.minierp.backend.domain.approval.dto.LeaveRequestCreateDto;
@@ -21,6 +23,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApprovalController {
 
+    private final Clock clock;
+
     private final ApprovalService approvalService;
     private final CurrentUserResolver currentUserResolver;
 
@@ -35,7 +39,7 @@ public class ApprovalController {
 
         LeaveRequestResponseDto response = approvalService.createLeaveRequest(dto, currentUserResolver.resolveUserId(authentication));
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "연차 신청이 완료되었습니다."));
+                .body(ApiResponse.success(clock, response, "연차 신청이 완료되었습니다."));
     }
 
     /**
@@ -48,7 +52,7 @@ public class ApprovalController {
             Authentication authentication) {
 
         LeaveRequestResponseDto response = approvalService.approveLeaveRequest(requestId, currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "연차가 승인되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "연차가 승인되었습니다."));
     }
 
     /**
@@ -62,7 +66,7 @@ public class ApprovalController {
             Authentication authentication) {
 
         LeaveRequestResponseDto response = approvalService.rejectLeaveRequest(requestId, currentUserResolver.resolveUserId(authentication), rejectDto);
-        return ResponseEntity.ok(ApiResponse.success(response, "연차가 반려되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "연차가 반려되었습니다."));
     }
 
     /**
@@ -75,7 +79,7 @@ public class ApprovalController {
             Authentication authentication) {
 
         LeaveRequestResponseDto response = approvalService.cancelLeaveRequest(requestId, currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "연차가 취소되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "연차가 취소되었습니다."));
     }
 
     /**
@@ -91,7 +95,7 @@ public class ApprovalController {
                 currentUserResolver.resolveUserId(authentication),
                 includeCancelled
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "내 연차 신청 내역 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "내 연차 신청 내역 조회가 완료되었습니다."));
     }
 
     /**
@@ -106,7 +110,7 @@ public class ApprovalController {
                 currentUserResolver.resolveUserId(authentication),
                 includeCancelled
         );
-        return ResponseEntity.ok(ApiResponse.success(response, "연차 신청 전체 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "연차 신청 전체 조회가 완료되었습니다."));
     }
 
     /**
@@ -118,7 +122,7 @@ public class ApprovalController {
             Authentication authentication) {
 
         LeaveBalanceResponseDto response = approvalService.getLeaveBalance(currentUserResolver.resolveUserId(authentication));
-        return ResponseEntity.ok(ApiResponse.success(response, "연차 잔여 현황 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "연차 잔여 현황 조회가 완료되었습니다."));
     }
 
     /**
@@ -128,6 +132,6 @@ public class ApprovalController {
     @GetMapping("/policy")
     public ResponseEntity<ApiResponse<List<LeavePolicyResponseDto>>> getLeavePolicy() {
         List<LeavePolicyResponseDto> response = approvalService.getLeavePolicy();
-        return ResponseEntity.ok(ApiResponse.success(response, "연차 정책 조회가 완료되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, response, "연차 정책 조회가 완료되었습니다."));
     }
 }

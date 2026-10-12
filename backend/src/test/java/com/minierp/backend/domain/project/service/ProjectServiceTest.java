@@ -1,5 +1,7 @@
 package com.minierp.backend.domain.project.service;
 
+import com.minierp.backend.support.TestClocks;
+
 import com.minierp.backend.domain.project.dto.ProjectCreateRequestDto;
 import com.minierp.backend.domain.project.dto.ProjectPermissionDto;
 import com.minierp.backend.domain.project.dto.ProjectPermissionUpdateRequestDto;
@@ -40,7 +42,6 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import java.lang.reflect.Constructor;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -85,8 +86,8 @@ class ProjectServiceTest {
         ProjectCreateRequestDto request = ProjectCreateRequestDto.of(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM,
                 leaderId
         );
@@ -111,8 +112,8 @@ class ProjectServiceTest {
         ProjectCreateRequestDto request = ProjectCreateRequestDto.of(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM,
                 null
         );
@@ -130,8 +131,8 @@ class ProjectServiceTest {
         ProjectCreateRequestDto request = ProjectCreateRequestDto.of(
                 "ERP 재구축",
                 "사내 업무 시스템 고도화",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.HIGH,
                 leaderId
         );
@@ -204,8 +205,8 @@ class ProjectServiceTest {
                 ProjectUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 5, 1),
-                        LocalDate.of(2026, 6, 30),
+                        TestClocks.today().plusDays(25),
+                        TestClocks.today().plusDays(85),
                         Priority.HIGH
                 ),
                 UserRole.ADMIN
@@ -213,8 +214,8 @@ class ProjectServiceTest {
 
         assertThat(project.getTitle()).isEqualTo("수정된 제목");
         assertThat(project.getContent()).isEqualTo("수정된 내용");
-        assertThat(project.getStartDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(project.getEndDate()).isEqualTo(LocalDate.of(2026, 6, 30));
+        assertThat(project.getStartDate()).isEqualTo(TestClocks.today().plusDays(25));
+        assertThat(project.getEndDate()).isEqualTo(TestClocks.today().plusDays(85));
         assertThat(project.getPriority()).isEqualTo(Priority.HIGH);
         assertThat(response.getTitle()).isEqualTo("수정된 제목");
         assertThat(response.getMemberCount()).isEqualTo(2L);
@@ -230,8 +231,8 @@ class ProjectServiceTest {
                 ProjectUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 5, 1),
-                        LocalDate.of(2026, 6, 30),
+                        TestClocks.today().plusDays(25),
+                        TestClocks.today().plusDays(85),
                         Priority.HIGH
                 ),
                 UserRole.TEAM_LEADER
@@ -249,8 +250,8 @@ class ProjectServiceTest {
                 ProjectUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 5, 1),
-                        LocalDate.of(2026, 6, 30),
+                        TestClocks.today().plusDays(25),
+                        TestClocks.today().plusDays(85),
                         Priority.HIGH
                 ),
                 UserRole.USER
@@ -271,8 +272,8 @@ class ProjectServiceTest {
                 ProjectUpdateRequestDto.of(
                         "수정된 제목",
                         "수정된 내용",
-                        LocalDate.of(2026, 5, 1),
-                        LocalDate.of(2026, 6, 30),
+                        TestClocks.today().plusDays(25),
+                        TestClocks.today().plusDays(85),
                         Priority.HIGH
                 ),
                 UserRole.ADMIN
@@ -660,8 +661,8 @@ class ProjectServiceTest {
         Project project = Project.create(
                 title,
                 "설명",
-                LocalDate.of(2026, 3, 31),
-                LocalDate.of(2026, 4, 30),
+                TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24),
                 Priority.MEDIUM
         );
         ReflectionTestUtils.setField(project, "id", id);
@@ -698,7 +699,7 @@ class ProjectServiceTest {
         Task task = Task.create(
                 "업무 제목",
                 "업무 내용",
-                LocalDate.of(2026, 4, 2),
+                TestClocks.today().minusDays(4),
                 taskStatus,
                 Priority.MEDIUM,
                 project
