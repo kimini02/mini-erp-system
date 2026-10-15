@@ -376,4 +376,53 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
         mvc.perform(get("/api/v1/users").param("departmentId","3").header("Authorization",auth(leaderToken))).andExpect(status().isOk());
         mvc.perform(delete("/api/v1/roles/"+roleId).header("Authorization",auth(chiefToken))).andExpect(status().isConflict());
     }
+
+    @Test void privilegedResendRequiresRolePermissionBeforeAcceptedStateCheck() throws Exception {
+        employeeOperator(true,false,false);clearInvocations(tokens,mail);
+        mvc.perform(post("/api/v1/users/"+leader.getId()+"/invitation").header("Authorization",auth(employeeToken)))
+            .andExpect(status().isForbidden()).andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+        verifyNoInteractions(tokens,mail);
+    }
+
+    private long employeeOperator(boolean create,boolean update,boolean roleUpdate) {
+        long role=db.insert("INSERT INTO roles(code,name,is_system) VALUES('REVIEW_OPERATOR','리뷰 담당',0)",Map.of());
+        db.update("DELETE FROM user_roles WHERE user_id=:id",map("id",employee.getId()));
+        db.update("INSERT INTO user_roles VALUES(:user,:role)",map("user",employee.getId(),"role",role));
+        db.update("INSERT INTO role_permissions VALUES(:role,8,0,:c,:u,0,'ALL')",map("role",role,"c",create,"u",update));
+        if(roleUpdate) db.update("INSERT INTO role_permissions VALUES(:role,9,0,0,1,0,NULL)",map("role",role));
+        return role;
+    }
+    @Test void employeeUpdateCannotChangeChiefEmail() throws Exception {
+        employeeOperator(false,true,false);
+        var before=new HashMap<>(links);clearInvocations(tokens,mail);
+        mvc.perform(patch("/api/v1/users/"+chief.getId()).header("Authorization",auth(employeeToken))
+            .contentType(MediaType.APPLICATION_JSON).content(json(map("email","chief-change@example.test"))))
+            .andExpect(status().isForbidden()).andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+        assertThat(users.findById(chief.getId()).orElseThrow().getUserEmail()).isEqualTo(chief.getUserEmail());
+        assertThat(links).isEqualTo(before);verifyNoInteractions(tokens,mail);
+    }
+    @Test void employeeUpdateCanChangeEmployeeOnlyEmail() throws Exception {
+        employeeOperator(false,true,false);
+        mvc.perform(patch("/api/v1/users/"+outsider.getId()).header("Authorization",auth(employeeToken))
+            .contentType(MediaType.APPLICATION_JSON).content(json(map("email","employee-change@example.test"))))
+            .andExpect(status().isOk());
+        assertThat(users.findById(outsider.getId()).orElseThrow().getUserEmail()).isEqualTo("employee-change@example.test");
+    }
+    @Test void roleUpdateAllowsChiefEmailChange() throws Exception {
+        employeeOperator(false,true,true);
+        mvc.perform(patch("/api/v1/users/"+chief.getId()).header("Authorization",auth(employeeToken))
+            .contentType(MediaType.APPLICATION_JSON).content(json(map("email","allowed-chief@example.test"))))
+            .andExpect(status().isOk());
+        assertThat(users.findById(chief.getId()).orElseThrow().getUserEmail()).isEqualTo("allowed-chief@example.test");
+    }
+    @Test void employeeCreateCannotResendPendingLeaderInvitation() throws Exception {
+        employeeOperator(true,false,false);
+        var pending=employees.register(create("초대대기팀장"));
+        db.update("INSERT INTO user_roles VALUES(:id,2)",map("id",pending.getId()));
+        var before=new HashMap<>(links);var row=employees.raw(pending.getId());clearInvocations(tokens,mail);
+        mvc.perform(post("/api/v1/users/"+pending.getId()+"/invitation").header("Authorization",auth(employeeToken)))
+            .andExpect(status().isForbidden()).andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+        assertThat(employees.raw(pending.getId())).isEqualTo(row);
+        assertThat(links).isEqualTo(before);verifyNoInteractions(tokens,mail);
+    }
 }

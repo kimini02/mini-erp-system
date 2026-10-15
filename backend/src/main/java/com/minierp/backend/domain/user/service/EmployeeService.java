@@ -27,6 +27,10 @@ public class EmployeeService {
         if(chiefs.size()<=1 && chiefs.stream().anyMatch(r->number(r,"id")==id)) throw new BusinessException(ErrorCode.LAST_CHIEF);
     }
     private void notHead(long id) { if(!db.rows("SELECT id FROM departments WHERE head_user_id=:id FOR UPDATE",map("id",id)).isEmpty()) throw new BusinessException(ErrorCode.HEAD_MUST_BE_REASSIGNED); }
+    private void requireRoleUpdateForPrivilegedTarget(long id) {
+        if(db.count("SELECT COUNT(*) FROM user_roles ur JOIN roles r ON r.id=ur.role_id WHERE ur.user_id=:id AND r.code<>'EMPLOYEE'",map("id",id))>0)
+            access.require("ROLE",Action.UPDATE);
+    }
     public List<Map<String,Object>> views(List<Long> ids) {
         if(ids.isEmpty()) return List.of();
         var rows=db.rows("""
@@ -112,6 +116,7 @@ public class EmployeeService {
         if(r.departmentId()!=null) treeLock.lock();
         access.assertUserInScope("EMPLOYEE",id);
         var old=r.email()==null && r.departmentId()==null?raw(id):db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);
+        if(r.email()!=null && !r.email().equals(old.get("user_email"))) requireRoleUpdateForPrivilegedTarget(id);
         if(r.departmentId()!=null) { if(number(old,"department_id")!=r.departmentId()) notHead(id); db.one("SELECT id FROM departments WHERE id=:id",map("id",r.departmentId()),ErrorCode.DEPARTMENT_NOT_FOUND); }
         if(r.positionId()!=null) db.one("SELECT id FROM positions WHERE id=:id",map("id",r.positionId()),ErrorCode.POSITION_NOT_FOUND);
         if(r.name()!=null && r.name().isBlank() || r.email()!=null && r.email().isBlank()) throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
@@ -137,7 +142,9 @@ public class EmployeeService {
         for(long role:ids) db.update("INSERT INTO user_roles(user_id,role_id) VALUES(:id,:role)",map("id",id,"role",role));
     }
     @Transactional public RegistrationResult invitation(long id) {
-        var user=db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND); if(user.get("user_pw")!=null) throw new BusinessException(ErrorCode.INVITATION_ALREADY_ACCEPTED);
+        var user=db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);
+        requireRoleUpdateForPrivilegedTarget(id);
+        if(user.get("user_pw")!=null) throw new BusinessException(ErrorCode.INVITATION_ALREADY_ACCEPTED);
         invitationTokens.revoke(id);
         var result=new RegistrationResult(id,(String)user.get("login_id"));events.publishEvent(new InvitationRequested(id,(String)user.get("user_email"),result));return result;
     }
