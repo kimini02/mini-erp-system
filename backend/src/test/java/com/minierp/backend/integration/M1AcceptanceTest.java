@@ -426,4 +426,18 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
         assertThat(employees.raw(pending.getId())).isEqualTo(row);
         assertThat(links).isEqualTo(before);verifyNoInteractions(tokens,mail);
     }
+
+    @Test void loginIgnoresRevokedBearerToken() throws Exception {
+        db.update("UPDATE users SET token_version=token_version+1 WHERE id=:id",map("id",employee.getId()));
+        mvc.perform(post("/api/v1/auth/login").header("Authorization",auth(employeeToken))
+            .contentType(MediaType.APPLICATION_JSON).content(json(map("id",employee.getLoginId(),"password",password))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.accessToken").isNotEmpty());
+    }
+    @Test void passwordSetupIgnoresMalformedBearerToken() throws Exception {
+        var created=employees.register(create("인증헤더무시"));String token=links.keySet().iterator().next();
+        mvc.perform(post("/api/v1/auth/password/setup").header("Authorization","Bearer not-a-jwt")
+            .contentType(MediaType.APPLICATION_JSON).content(json(map("setupToken",token,"newPassword",password))))
+            .andExpect(status().isOk());
+        assertThat(encoder.matches(password,users.findById(created.getId()).orElseThrow().getUserPw())).isTrue();
+    }
 }

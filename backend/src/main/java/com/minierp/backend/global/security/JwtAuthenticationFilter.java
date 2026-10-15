@@ -18,6 +18,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserRepository users;
     private final ObjectMapper mapper;
     private final Clock clock;
+    @Override protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path=request.getRequestURI().substring(request.getContextPath().length());
+        return path.equals("/api/v1/auth") || path.startsWith("/api/v1/auth/");
+    }
     @Override protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,FilterChain chain) throws ServletException,IOException {
         String header=request.getHeader("Authorization");
         if(header!=null && header.startsWith("Bearer ")) {
