@@ -64,10 +64,11 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
         chief=user("chief","01",UserRole.ADMIN); leader=user("leader","01",UserRole.TEAM_LEADER);
         employee=user("employee","01",UserRole.USER); outsider=user("outside","02",UserRole.USER);
         links.clear();reset(tokens,mail);
-        doAnswer(inv->{Long id=inv.getArgument(1);links.values().removeIf(id::equals);links.put(inv.getArgument(0),id);return null;}).when(tokens).save(anyString(),anyLong());
+        doAnswer(inv->{Long id=inv.getArgument(1);links.values().removeIf(id::equals);links.put(inv.getArgument(0),id);return null;}).when(tokens).save(anyString(),anyLong(),anyString());
         doAnswer(inv->{Long id=inv.getArgument(0);links.values().removeIf(id::equals);return null;}).when(tokens).revoke(anyLong());
+        doAnswer(inv->{Long id=inv.getArgument(0);links.values().removeIf(id::equals);return null;}).when(tokens).revokeForEmail(anyLong(),anyString());
         when(tokens.owner(anyString())).thenAnswer(inv->links.get(inv.getArgument(0)));
-        when(tokens.consume(anyString())).thenAnswer(inv->links.remove(inv.getArgument(0)));
+        when(tokens.consume(anyString(),anyString())).thenAnswer(inv->links.remove(inv.getArgument(0)));
         chiefToken=login(chief.getLoginId());leaderToken=login(leader.getLoginId());employeeToken=login(employee.getLoginId());
     }
     private User user(String prefix,String department,UserRole role) {

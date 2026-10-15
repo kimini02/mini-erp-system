@@ -19,6 +19,7 @@ public class EmployeeService {
     private final SqlStore db; private final EmployeeRepository repository; private final PermissionAccess access;
     private final ApplicationEventPublisher events; private final Clock clock;
     private final com.minierp.backend.global.service.InvitationTokenStore invitationTokens;
+    public record InvitationEmailChanged(long userId,String oldEmail) {}
     public record InvitationRequested(long userId,String email,RegistrationResult result) {}
     public Map<String,Object> raw(long id) { return db.one("SELECT * FROM users WHERE id=:id",map("id",id),ErrorCode.USER_NOT_FOUND); }
     public void lockChief() { db.rows("SELECT id FROM roles WHERE code='CHIEF' FOR UPDATE",Map.of()); }
@@ -123,7 +124,7 @@ public class EmployeeService {
         try { db.update("UPDATE users SET user_name=COALESCE(:name,user_name),user_email=COALESCE(:email,user_email),department_id=COALESCE(:dept,department_id),position_id=COALESCE(:position,position_id),hire_date=COALESCE(:hire,hire_date),updated_at=:now WHERE id=:id",
             map("id",id,"name",r.name(),"email",r.email(),"dept",r.departmentId(),"position",r.positionId(),"hire",r.hireDate(),"now",LocalDateTime.now(clock))); }
         catch(org.springframework.dao.DuplicateKeyException ex) { throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS); }
-        if(r.email()!=null && !r.email().equals(old.get("user_email"))) invitationTokens.revoke(id);
+        if(r.email()!=null && !r.email().equals(old.get("user_email"))) events.publishEvent(new InvitationEmailChanged(id,(String)old.get("user_email")));
         return views(List.of(id)).get(0);
     }
     @Transactional public Map<String,Object> status(long id,com.minierp.backend.domain.user.entity.UserStatus status) {

@@ -125,4 +125,42 @@ class InvitationLifecycleTest extends MariaDbIntegrationTest {
             assertThat(usable).isEqualTo(1);
         } finally {pool.shutdownNow();}
     }
+
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
+    @Test void emailChangeRevokesOnlyAfterCommit() throws Exception {
+        var employee=register();String a=linkToken(0);
+        new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(tx -> {
+            try {changeEmail(employee.getId(),UUID.randomUUID()+"@example.test");}
+            catch(Exception ex) {throw new IllegalStateException(ex);}
+            assertThat(tokens.owner(a)).isEqualTo(employee.getId());
+        });
+        invalid(a);
+    }
+    @Test void rolledBackEmailChangePreservesOriginalInvitation() throws Exception {
+        var employee=register();String a=linkToken(0);String oldEmail=sent.get(0).getTo()[0];
+        new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(tx -> {
+            try {changeEmail(employee.getId(),UUID.randomUUID()+"@example.test");}
+            catch(Exception ex) {throw new IllegalStateException(ex);}
+            tx.setRollbackOnly();
+        });
+        assertThat(users.findById(employee.getId()).orElseThrow().getUserEmail()).isEqualTo(oldEmail);
+        setup(a).andExpect(status().isOk());
+    }
+
+    @Test void delayedDeletionPreservesNewEmailToken() throws Exception {
+        var employee=register();String oldEmail=sent.get(0).getTo()[0];
+        changeEmail(employee.getId(),UUID.randomUUID()+"@example.test");
+        employees.invitation(employee.getId());String b=linkToken(1);
+        tokens.revokeForEmail(employee.getId(),oldEmail);
+        setup(b).andExpect(status().isOk());
+    }
+    @Test void tokenBoundToOldEmailCannotSetPasswordEvenBeforeDeletion() throws Exception {
+        var employee=register();String oldEmail=sent.get(0).getTo()[0];
+        changeEmail(employee.getId(),UUID.randomUUID()+"@example.test");
+        String stale=UUID.randomUUID().toString();
+        // Simulate a token left behind while an after-commit Redis deletion is delayed.
+        tokens.save(stale,employee.getId(),oldEmail);
+        invalid(stale);
+        assertThat(users.findById(employee.getId()).orElseThrow().getUserPw()).isNull();
+    }
 }

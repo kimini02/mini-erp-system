@@ -26,7 +26,7 @@ public class InvitationService {
             // Serialize issuance with email changes and setup; ignore stale after-commit events.
             var user=users.findByIdForUpdate(event.userId()).orElse(null);
             if(user==null || user.getUserPw()!=null || !user.getUserEmail().equals(event.email())) return;
-            String token=UUID.randomUUID().toString(); tokens.save(token,event.userId());
+            String token=UUID.randomUUID().toString(); tokens.save(token,event.userId(),user.getUserEmail());
             String link=UriComponentsBuilder.fromUriString(setupUrl).queryParam("setupToken",token).build().encode().toUriString();
             mail.sendInvitationMail(event.email(),link); event.result().invitationDelivered();
         } catch(RuntimeException ex) {
@@ -34,13 +34,17 @@ public class InvitationService {
             log.warn("초대 메일 발송 실패: 사원 등록은 유지됩니다. 재발송을 이용하세요.");
         }
     }
+    @TransactionalEventListener(phase=TransactionPhase.AFTER_COMMIT)
+    public void revokeChangedEmail(EmployeeService.InvitationEmailChanged event) {
+        tokens.revokeForEmail(event.userId(),event.oldEmail());
+    }
     @Transactional
     public void setup(String token,String password) {
         PasswordPolicy.validate(password);
         Long userId=tokens.owner(token);
         if(userId==null) throw new BusinessException(ErrorCode.SETUP_TOKEN_INVALID);
         var user=users.findByIdForUpdate(userId).orElseThrow(()->new BusinessException(ErrorCode.SETUP_TOKEN_INVALID));
-        if(user.getUserPw()!=null || !userId.equals(tokens.consume(token))) throw new BusinessException(ErrorCode.SETUP_TOKEN_INVALID);
+        if(user.getUserPw()!=null || !userId.equals(tokens.consume(token,user.getUserEmail()))) throw new BusinessException(ErrorCode.SETUP_TOKEN_INVALID);
         user.updatePassword(encoder.encode(password));
     }
 }
