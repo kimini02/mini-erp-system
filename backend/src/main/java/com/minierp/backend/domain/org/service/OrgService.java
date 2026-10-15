@@ -14,10 +14,11 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @Service @RequiredArgsConstructor @Transactional(readOnly=true)
 public class OrgService {
     private final SqlStore db;
+    private final com.minierp.backend.domain.org.repository.DepartmentTreeLock treeLock;
     private final JdbcTemplate jdbc;
     private final PermissionAccess permissions;
     private Map<String,Object> department(long id) { return db.one("SELECT * FROM departments WHERE id=:id",map("id",id),ErrorCode.DEPARTMENT_NOT_FOUND); }
-    private void lockTree() { db.rows("SELECT id FROM departments WHERE parent_id IS NULL FOR UPDATE",Map.of()); }
+    private void lockTree() { treeLock.lock(); }
     public Map<String,Object> tree() {
         // Exactly two queries regardless of department count, including heads/positions.
         var departments=jdbc.queryForList("""

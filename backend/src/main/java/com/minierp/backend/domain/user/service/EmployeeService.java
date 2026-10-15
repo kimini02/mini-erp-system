@@ -15,6 +15,7 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 
 @Service @RequiredArgsConstructor @Transactional(readOnly=true)
 public class EmployeeService {
+    private final com.minierp.backend.domain.org.repository.DepartmentTreeLock treeLock;
     private final SqlStore db; private final EmployeeRepository repository; private final PermissionAccess access;
     private final ApplicationEventPublisher events; private final Clock clock;
     private final com.minierp.backend.global.service.InvitationTokenStore invitationTokens;
@@ -25,7 +26,7 @@ public class EmployeeService {
         var chiefs=db.rows("SELECT u.id FROM users u JOIN user_roles ur ON ur.user_id=u.id JOIN roles r ON r.id=ur.role_id WHERE u.status='ACTIVE' AND r.code='CHIEF' FOR UPDATE",Map.of());
         if(chiefs.size()<=1 && chiefs.stream().anyMatch(r->number(r,"id")==id)) throw new BusinessException(ErrorCode.LAST_CHIEF);
     }
-    private void notHead(long id) { if(db.count("SELECT COUNT(*) FROM departments WHERE head_user_id=:id",map("id",id))>0) throw new BusinessException(ErrorCode.HEAD_MUST_BE_REASSIGNED); }
+    private void notHead(long id) { if(!db.rows("SELECT id FROM departments WHERE head_user_id=:id FOR UPDATE",map("id",id)).isEmpty()) throw new BusinessException(ErrorCode.HEAD_MUST_BE_REASSIGNED); }
     public List<Map<String,Object>> views(List<Long> ids) {
         if(ids.isEmpty()) return List.of();
         var rows=db.rows("""
@@ -107,8 +108,10 @@ public class EmployeeService {
         var result=new RegistrationResult(id,loginId);events.publishEvent(new InvitationRequested(id,r.email(),result));return result;
     }
     @Transactional public Map<String,Object> patch(long id,Patch r) {
+        // Same order as OrgService.setHead: tree first, then user/current head reads.
+        if(r.departmentId()!=null) treeLock.lock();
         access.assertUserInScope("EMPLOYEE",id);
-        var old=r.email()==null?raw(id):db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);
+        var old=r.email()==null && r.departmentId()==null?raw(id):db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);
         if(r.departmentId()!=null) { if(number(old,"department_id")!=r.departmentId()) notHead(id); db.one("SELECT id FROM departments WHERE id=:id",map("id",r.departmentId()),ErrorCode.DEPARTMENT_NOT_FOUND); }
         if(r.positionId()!=null) db.one("SELECT id FROM positions WHERE id=:id",map("id",r.positionId()),ErrorCode.POSITION_NOT_FOUND);
         if(r.name()!=null && r.name().isBlank() || r.email()!=null && r.email().isBlank()) throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
@@ -119,7 +122,9 @@ public class EmployeeService {
         return views(List.of(id)).get(0);
     }
     @Transactional public Map<String,Object> status(long id,com.minierp.backend.domain.user.entity.UserStatus status) {
-        access.assertUserInScope("EMPLOYEE",id);lockChief(); var user=raw(id);
+        if(status!=com.minierp.backend.domain.user.entity.UserStatus.ACTIVE) treeLock.lock();
+        access.assertUserInScope("EMPLOYEE",id);lockChief();
+        var user=db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);
         if(!status.name().equals(user.get("status"))) {
             if(status!=com.minierp.backend.domain.user.entity.UserStatus.ACTIVE) { notHead(id);protectLastChief(id); }
             db.update("UPDATE users SET status=:status,token_version=token_version+:increment,updated_at=:now WHERE id=:id",map("id",id,"status",status.name(),"increment",status==com.minierp.backend.domain.user.entity.UserStatus.ACTIVE?0:1,"now",LocalDateTime.now(clock)));
