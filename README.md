@@ -132,17 +132,15 @@ cd backend
 
 ## M1: 조직·권한 이관 및 실행
 
-**현재 작업 상태:** 비활성 기존 계정(`is_active=false`)을 휴직/퇴사 중 어디로 이관할지 결정 대기 중입니다. 운영 V2 파일은 아직 확정하지 않았습니다. 현재 브랜치를 배포하거나 아래 최종 실행 절차를 적용하지 마세요. 활성 계정만 넣은 임시 V2로 기능 검증을 진행했습니다. `docs/troubleshooting/M1-1-schema-migration.md`를 참고하세요.
+V2는 비활성 기존 계정(`is_active=false`)을 `RETIRED`로 이관하며, 기존 입사일은 `NULL`로 보존합니다. 선택 이유와 검증은 `docs/troubleshooting/M1-1-schema-migration.md`에 있습니다. 이관 SQL은 Flyway INFO 로그에 `M1: migrated_inactive_to_retired=N`을 남기므로 기동 로그를 보관하세요.
 
-이관 결정을 반영하고 최종 V2 검증을 마친 후의 순서:
-
-1. **기존 M0 DB:** 앱을 정지하고 DB를 백업합니다. `flyway_schema_history`의 V1 성공 및 체크섬을 확인합니다. 기존 부서 코드가 01/02/03이고 비활성 계정 처리에 합의했는지 확인한 뒤 복제 DB에서 먼저 V2 이관을 검증합니다. 기존 DB와 V1 이력은 지우지 않습니다.
+1. **기존 M0 DB:** 앱을 정지하고 DB를 백업합니다. `flyway_schema_history`의 V1 성공 및 체크섬을 확인합니다. 기존 부서 코드가 01/02/03인지, 이관 후 사용할 ACTIVE 관리소장 접근 경로가 있는지 확인한 뒤 복제 DB에서 먼저 V2 이관을 검증합니다. 기존 DB와 V1 이력은 지우지 않습니다.
 2. **새 DB:** MariaDB 10.11에 빈 DB와 앱 전용 계정을 준비합니다. Java 17을 사용하고 DB/JWT 환경값을 주입합니다. 새 DB는 Flyway V1 → V2 순서로 적용됩니다.
 3. 공통으로 Hibernate는 `validate`, Flyway는 `baseline-on-migrate=false`를 유지합니다. `backend/`에서 `./mvnw spring-boot:run`을 실행해 V2와 validate 완료를 확인합니다. 과거 토큰에는 ver가 없으므로 다시 로그인해야 합니다.
 4. 최초 관리자 환경변수 네 개는 위 절과 같습니다. 첫 로그인 후 비밀번호를 변경하고 새 토큰을 사용합니다. 이미 CHIEF가 있으면 추가 생성하지 않습니다.
 5. 초대를 쓰려면 Redis와 메일 설정을 준비하고 `APP_MAIL_ENABLED=true`, `APP_INVITATION_SETUP_URL`을 프론트의 비밀번호 설정 페이지 주소로 설정합니다. 링크의 쿼리 키는 `setupToken`입니다. 화면은 별도 작업이므로 연결 전에는 메일을 꺼 둘 수 있습니다. 메일이 꺼져 있거나 발송 실패 시 사원은 등록되고 `invitationSent=false`를 받습니다.
 
-최종 V2 확정 후 테스트 명령:
+테스트 명령:
 
 ```bash
 cd backend
@@ -152,3 +150,5 @@ cd backend
 ```
 
 Docker가 켜져 있어야 MariaDB 테스트가 실행됩니다. 테스트 메일·초대 토큰 저장소는 가짜를 사용하므로 외부 메일을 보내지 않습니다. API 명세 9장의 일곱 검증은 `M1AcceptanceTest`에 있으며, 조직도는 실제 MariaDB의 `Com_select` 증가량이 부서 수와 상관없이 2인지 확인합니다.
+
+신규 사원 등록의 `hireDate`는 필수입니다. 이관 사원의 입사일은 `PATCH /api/v1/users/{id}`에 `{"hireDate":"2020-03-02"}`처럼 보정할 수 있습니다(EMPLOYEE U와 기존 데이터 범위 적용). 아이디와 발급 시퀀스는 바뀌지 않으며, 필드를 생략하거나 null을 보내면 기존 날짜를 유지합니다. EMPLOYEE 이외 역할을 붙여 새 사원을 등록하려면 EMPLOYEE C 외에 ROLE U도 필요합니다.
