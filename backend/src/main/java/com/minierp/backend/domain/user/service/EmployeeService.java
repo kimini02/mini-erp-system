@@ -110,8 +110,8 @@ public class EmployeeService {
         if(r.departmentId()!=null) { if(number(old,"department_id")!=r.departmentId()) notHead(id); db.one("SELECT id FROM departments WHERE id=:id",map("id",r.departmentId()),ErrorCode.DEPARTMENT_NOT_FOUND); }
         if(r.positionId()!=null) db.one("SELECT id FROM positions WHERE id=:id",map("id",r.positionId()),ErrorCode.POSITION_NOT_FOUND);
         if(r.name()!=null && r.name().isBlank() || r.email()!=null && r.email().isBlank()) throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
-        try { db.update("UPDATE users SET user_name=COALESCE(:name,user_name),user_email=COALESCE(:email,user_email),department_id=COALESCE(:dept,department_id),position_id=COALESCE(:position,position_id),updated_at=:now WHERE id=:id",
-            map("id",id,"name",r.name(),"email",r.email(),"dept",r.departmentId(),"position",r.positionId(),"now",LocalDateTime.now(clock))); }
+        try { db.update("UPDATE users SET user_name=COALESCE(:name,user_name),user_email=COALESCE(:email,user_email),department_id=COALESCE(:dept,department_id),position_id=COALESCE(:position,position_id),hire_date=COALESCE(:hire,hire_date),updated_at=:now WHERE id=:id",
+            map("id",id,"name",r.name(),"email",r.email(),"dept",r.departmentId(),"position",r.positionId(),"hire",r.hireDate(),"now",LocalDateTime.now(clock))); }
         catch(org.springframework.dao.DuplicateKeyException ex) { throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS); }
         return views(List.of(id)).get(0);
     }

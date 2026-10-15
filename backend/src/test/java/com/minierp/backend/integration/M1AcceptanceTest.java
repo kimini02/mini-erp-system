@@ -87,6 +87,49 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
         return new EmployeeRequests.Create(prefix,prefix+UUID.randomUUID()+"@example.test",LocalDate.now(clock),2L,1L,List.of("EMPLOYEE"));
     }
 
+    @Test void chiefCanFillLegacyHireDateWithoutChangingLoginId() throws Exception {
+        String loginId = employee.getLoginId();
+        LocalDate hireDate = LocalDate.now(clock).minusYears(3);
+        assertThat(users.findById(employee.getId()).orElseThrow().getHireDate()).isNull();
+        mvc.perform(patch("/api/v1/users/"+employee.getId()).header("Authorization",auth(chiefToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(map("hireDate",hireDate.toString()))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.hireDate").value(hireDate.toString()))
+                .andExpect(jsonPath("$.data.loginId").value(loginId));
+        var updated = users.findById(employee.getId()).orElseThrow();
+        assertThat(updated.getHireDate()).isEqualTo(hireDate);
+        assertThat(updated.getLoginId()).isEqualTo(loginId);
+        assertThat(db.count("SELECT COUNT(*) FROM login_id_sequences",Map.of())).isZero();
+        mvc.perform(patch("/api/v1/users/"+employee.getId()).header("Authorization",auth(chiefToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(map("name","입사일유지"))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.hireDate").value(hireDate.toString()));
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings={"2024/02/01","2024-2-01","2024-02-30"})
+    void hireDatePatchRejectsMalformedOrImpossibleDates(String date) throws Exception {
+        mvc.perform(patch("/api/v1/users/"+employee.getId()).header("Authorization",auth(chiefToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(map("hireDate",date))))
+                .andExpect(status().isBadRequest());
+        assertThat(users.findById(employee.getId()).orElseThrow().getHireDate()).isNull();
+    }
+
+    @Test void employeeCannotEditTheirHireDate() throws Exception {
+        mvc.perform(patch("/api/v1/users/"+employee.getId()).header("Authorization",auth(employeeToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(map("hireDate",LocalDate.now(clock).toString()))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test void employeeRegistrationRequiresHireDate() throws Exception {
+        var request = create("입사일필수");
+        var body = map("name",request.name(),"email",request.email(),"departmentId",2,"positionId",1,"roleCodes",List.of("EMPLOYEE"));
+        mvc.perform(post("/api/v1/users").header("Authorization",auth(chiefToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isBadRequest());
+        body.put("hireDate",null);
+        mvc.perform(post("/api/v1/users").header("Authorization",auth(chiefToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isBadRequest());
+        assertThat(users.existsByUserEmail(request.email())).isFalse();
+    }
+
     private long grantEmployeeCreateOnly() {
         long role = db.insert("INSERT INTO roles(code,name,is_system) VALUES('HR_RECRUITER','사원 등록 담당',0)", Map.of());
         db.update("INSERT INTO role_permissions VALUES(:role,8,0,1,0,0,'ALL')", map("role",role));
