@@ -17,6 +17,7 @@ public class UserResponseDto {
     private final Long id;
     private final String name;
     private final String email;
+    // M1 프론트 작업 후 제거: departmentCode, departmentName, position, role
     private final String departmentCode;
     private final String departmentName;
     private final String position;
@@ -25,18 +26,28 @@ public class UserResponseDto {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
+    private final String loginId;
+    private final Department department;
+    private final java.util.List<String> roles;
+    private final java.time.LocalDate hireDate;
+    private final String status;
+    private final boolean invitationPending;
+    public record Department(Long id, String name) {}
+
     public static UserResponseDto summary(User user) {
         return new UserResponseDto(
                 user.getId(),
                 user.getUserName(),
                 user.getUserEmail(),
                 user.getDepartmentCode(),
-                getDepartmentName(user.getDepartmentCode()),
+                user.getDepartmentName(),
                 user.getPositionName(),
                 user.getUserRole().name(),
                 null,
                 null,
-                null
+                null,
+                user.getLoginId(), new Department(user.getDepartmentId(), user.getDepartmentName()),
+                user.roleCodeList(), user.getHireDate(), user.getStatus().name(), user.getUserPw() == null
         );
     }
 
@@ -46,12 +57,14 @@ public class UserResponseDto {
                 user.getUserName(),
                 user.getUserEmail(),
                 user.getDepartmentCode(),
-                getDepartmentName(user.getDepartmentCode()),
+                user.getDepartmentName(),
                 user.getPositionName(),
                 user.getUserRole().name(),
                 user.getRemainingAnnualLeave(),
                 user.getCreatedAt(),
-                user.getUpdatedAt()
+                user.getUpdatedAt(),
+                user.getLoginId(), new Department(user.getDepartmentId(), user.getDepartmentName()),
+                user.roleCodeList(), user.getHireDate(), user.getStatus().name(), user.getUserPw() == null
         );
     }
 

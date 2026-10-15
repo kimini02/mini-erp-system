@@ -29,6 +29,7 @@ public class OvertimeService {
     private final UserRepository userRepository;
     private final AccessPolicy accessPolicy;
     private final Clock clock;
+    private final com.minierp.backend.global.permission.LegacyRequestScopeRepository scopedRequests;
 
     /**
      * 특근 신청
@@ -146,13 +147,13 @@ public class OvertimeService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED, "관리자 권한이 필요합니다.");
         }
 
-        return overtimeRequestRepository.findAll().stream()
-                .filter(req -> includeCancelled || req.getStatus() != OvertimeStatus.CANCELLED)
+        return overtimeRequestRepository.findAllById(scopedRequests.overtime(userId, includeCancelled)).stream()
                 .map(OvertimeResponseDto::from)
                 .collect(Collectors.toList());
     }
 
     private void validateApprovalHierarchy(User requester, User approver) {
+        accessPolicy.validateDepartmentScope(requester.getId(), approver.getId());
         accessPolicy.validateApprovalHierarchy(
                 requester.getUserRole(),
                 requester.getId(),

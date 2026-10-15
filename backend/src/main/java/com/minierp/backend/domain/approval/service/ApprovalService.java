@@ -65,6 +65,7 @@ public class ApprovalService {
     private final UserRepository userRepository;
     private final AccessPolicy accessPolicy;
     private final Clock clock;
+    private final com.minierp.backend.global.permission.LegacyRequestScopeRepository scopedRequests;
 
     /**
      * 연차 신청 생성
@@ -195,8 +196,7 @@ public class ApprovalService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED, "전체 연차 내역은 팀장/관리자만 조회할 수 있습니다.");
         }
 
-        return leaveRequestRepository.findAll().stream()
-                .filter(req -> includeCancelled || req.getAppStatus() != LeaveStatus.CANCELLED)
+        return leaveRequestRepository.findAllById(scopedRequests.leaves(requesterUserId, includeCancelled)).stream()
                 .map(LeaveRequestResponseDto::from)
                 .collect(Collectors.toList());
     }
@@ -302,6 +302,7 @@ public class ApprovalService {
         }
 
         User requester = leaveRequest.getRequester();
+        accessPolicy.validateDepartmentScope(requester.getId(), approver.getId());
         accessPolicy.validateApprovalHierarchy(
                 requester.getUserRole(),
                 requester.getId(),

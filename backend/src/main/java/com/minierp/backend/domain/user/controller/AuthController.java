@@ -33,13 +33,14 @@ public class AuthController {
     private final Clock clock;
 
     private final AuthService authService;
+    private final com.minierp.backend.domain.user.service.InvitationService invitations;
 
-    @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<UserResponseDto>> signup(@Valid @RequestBody SignupRequestDto requestDto) {
-        UserResponseDto response = authService.signup(requestDto);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(clock, response, "회원가입이 완료되었습니다"));
+    public record SetupRequest(@jakarta.validation.constraints.NotBlank String setupToken,
+                               @jakarta.validation.constraints.NotBlank String newPassword) {}
+    @PostMapping("/password/setup")
+    public ResponseEntity<ApiResponse<Void>> setup(@Valid @RequestBody SetupRequest r) {
+        invitations.setup(r.setupToken(), r.newPassword());
+        return ResponseEntity.ok(ApiResponse.successMessage(clock,"비밀번호 설정이 완료되었습니다."));
     }
 
     @PostMapping("/login")

@@ -36,13 +36,23 @@ class InitialAdminInitializerTest {
     void setUp() {
         repository = mock(UserRepository.class);
         encoder = new BCryptPasswordEncoder();
-        password = UUID.randomUUID().toString();
+        password = "Aa1!" + UUID.randomUUID().toString().substring(0,12);
         environment = new MockEnvironment()
                 .withProperty("INITIAL_ADMIN_LOGIN_ID", "initial-admin")
                 .withProperty("INITIAL_ADMIN_NAME", "초기 관리소장")
                 .withProperty("INITIAL_ADMIN_EMAIL", "initial-admin@example.test")
                 .withProperty("INITIAL_ADMIN_PASSWORD", password);
         initializer = new InitialAdminInitializer(repository, encoder, environment);
+    }
+
+    @Test
+    void invalidPasswordOnlyWarns(CapturedOutput output) {
+        String invalid = UUID.randomUUID().toString();
+        environment.setProperty("INITIAL_ADMIN_PASSWORD", invalid);
+        initializer.run(new DefaultApplicationArguments());
+        verify(repository, never()).saveAndFlush(any());
+        assertThat(output.getAll()).contains("최초 관리자 생성 생략");
+        assertThat(output.getAll().contains(invalid)).isFalse();
     }
 
     @Test
@@ -84,7 +94,10 @@ class InitialAdminInitializerTest {
         assertThat(admin.getUserName()).isEqualTo("초기 관리소장");
         assertThat(admin.getUserEmail()).isEqualTo("initial-admin@example.test");
         assertThat(admin.getUserRole()).isEqualTo(UserRole.ADMIN);
-        assertThat(admin.getDepartmentCode()).isEqualTo(DepartmentCode.values()[0].getCode());
+        assertThat(admin.isMustChangePassword()).isTrue();
+        assertThat(admin.roleCodeList()).containsExactly("CHIEF");
+        assertThat(admin.getDepartmentId()).isEqualTo(1L);
+        assertThat(admin.getDepartmentCode()).isEqualTo("D-0001");
         assertThat(admin.getPositionName()).isEqualTo("관리소장");
         assertThat(admin.isActive()).isTrue();
         assertThat(admin.getTotalAnnualLeave()).isZero();

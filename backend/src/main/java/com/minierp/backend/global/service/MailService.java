@@ -28,7 +28,7 @@ public class MailService {
 
     public void sendVerificationCodeMail(String toEmail, String verificationCode) {
         if (!mailEnabled) {
-            log.info("메일 발송 비활성화 상태입니다. code={}, to={}", verificationCode, toEmail);
+            log.info("메일 발송 비활성화 상태입니다.");
             return;
         }
 
@@ -48,6 +48,15 @@ public class MailService {
         } catch (MailException e) {
             throw new BusinessException(ErrorCode.INVALID_RESET_REQUEST, "인증 메일 발송에 실패했습니다.");
         }
+    }
+
+    public void sendInvitationMail(String toEmail,String link) {
+        String from=resolveFromAddress();
+        if(from==null || from.isBlank()) throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE,"메일 발신 주소 설정이 필요합니다.");
+        SimpleMailMessage message=new SimpleMailMessage();
+        message.setTo(toEmail);message.setFrom(from);message.setSubject("[WorkFlow] 첫 비밀번호 설정");
+        message.setText("아래 링크에서 첫 비밀번호를 설정해 주세요. 유효시간은 24시간입니다.\n\n"+link);
+        mailSender.send(message);
     }
 
     private String resolveFromAddress() {

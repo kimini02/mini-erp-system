@@ -4,7 +4,7 @@ React 기반 프론트엔드와 Spring Boot 기반 백엔드를 하나의 저장
 
 ## 주요 기능
 
-- 회원가입·로그인 및 역할 기반 접근 제어
+- 관리자 사원 등록·초대·로그인 및 역할 기반 접근 제어
 - 사용자·권한 관리
 - 출퇴근 및 근태 현황 관리
 - 연차·특근 신청과 승인
@@ -59,6 +59,8 @@ MariaDB와 Redis가 로컬에서 실행 중이어야 하며, DB·메일 관련 �
 
 ## M0: 빈 MariaDB에서 처음 실행하기
 
+> 이 절의 삭제·재생성은 M0 이전 DB 전용입니다. 이미 M0 V1을 적용한 DB의 M1 이관에는 실행하지 마세요. 아래 M1 절을 참고하세요.
+
 MariaDB **10.11**, Java **17**을 사용합니다. 스키마는 Flyway `V1__init.sql`이 만들고 Hibernate는 `validate`만 수행합니다.
 
 **기존 로컬 DB는 지우고 다시 만들기:** 과거 V1~V5를 V1 하나로 통합했으므로 기존 스키마와 Flyway 이력을 그대로 사용할 수 없습니다. 필요한 데이터는 먼저 백업하고, 삭제 대상이 개발용 로컬 DB인지 확인하세요. 운영 DB에 이 초기화 절차를 적용하지 마세요.
@@ -102,7 +104,7 @@ M0-4에서 날짜에 의존하던 실패를 해결했습니다. 알려진 특근
 | `INITIAL_ADMIN_EMAIL` | `user_email` |
 | `INITIAL_ADMIN_PASSWORD` | 기존 BCrypt로 암호화한 `user_pw` |
 
-앱 시작 시 `user_role=ADMIN`이 없을 때만 생성합니다. 직급은 관리소장, 부서는 현재 `DepartmentCode` 첫 값, 연차 세 수치는 모두 0입니다. 하나라도 누락·빈 값이면 경고만 남기고 계정은 만들지 않습니다. 이미 관리자가 있으면 환경값을 읽거나 계정·비밀번호를 변경하지 않습니다.
+M1에서는 앱 시작 시 `CHIEF` 역할 사용자가 없을 때만 생성합니다. 초기 비밀번호는 기존 정책(8~20자, 대문자·소문자·숫자·특수문자)을 만족해야 하며, 미충족이면 경고만 남깁니다. 생성된 계정은 `must_change_pw=true`이므로 첫 로그인 뒤 `GET /api/v1/me`와 `PATCH /api/v1/me/password`만 사용할 수 있습니다. 직급은 관리소장, 부서는 현재 `DepartmentCode` 첫 값, 연차 세 수치는 모두 0입니다. 하나라도 누락·빈 값이면 경고만 남기고 계정은 만들지 않습니다. 이미 관리자가 있으면 환경값을 읽거나 계정·비밀번호를 변경하지 않습니다.
 
 관리자가 없는데 입력한 아이디·이메일이 일반 계정과 중복되면 기존 BusinessException 오류로 기동을 중단합니다. 기존 계정을 승격하거나 덮어쓰지 않으므로 사용하지 않는 값을 지정하세요. 최초 설치는 한 앱 인스턴스로 실행하세요. 여러 인스턴스의 동시 최초 생성은 이번 단계에서 보장하지 않습니다. 초기 생성 후에는 주입한 초기 비밀번호 환경변수를 제거할 수 있습니다.
 
@@ -126,4 +128,27 @@ cd backend
 ./mvnw -Dtest.clock.instant=2026-12-31T15:00:00Z -Duser.timezone=UTC test
 ```
 
-`test.clock.instant`는 테스트 전용 속성이며 운영 시계를 고정하지 않습니다. 공휴일 정책을 검증하는 테스트는 의도한 근무일·공휴일에 맞는 데이터를 선택해야 합니다. JWT 유효기간과 JPA 자동 생성·수정 시각은 기존 동작을 유지하며 이 업무용 Clock의 제어 대상에 포함하지 않았습니다.
+`test.clock.instant`는 테스트 전용 속성이며 운영 시계를 고정하지 않습니다. 공휴일 정책을 검증하는 테스트는 의도한 근무일·공휴일에 맞는 데이터를 선택해야 합니다. JWT 유효기간은 기존 동작을 유지합니다. M1부터 JPA 자동 생성·수정 시각도 같은 Clock의 DateTimeProvider로 제어하며, JVM 기본 시간대가 UTC인 MariaDB 테스트로 검증합니다.
+
+## M1: 조직·권한 이관 및 실행
+
+V2는 비활성 기존 계정(`is_active=false`)을 `RETIRED`로 이관하며, 기존 입사일은 `NULL`로 보존합니다. 선택 이유와 검증은 `docs/troubleshooting/M1-1-schema-migration.md`에 있습니다. 이관 SQL은 Flyway INFO 로그에 `M1: migrated_inactive_to_retired=N`을 남기므로 기동 로그를 보관하세요.
+
+1. **기존 M0 DB:** 앱을 정지하고 DB를 백업합니다. `flyway_schema_history`의 V1 성공 및 체크섬을 확인합니다. 기존 부서 코드가 01/02/03인지, 이관 후 사용할 ACTIVE 관리소장 접근 경로가 있는지 확인한 뒤 복제 DB에서 먼저 V2 이관을 검증합니다. 기존 DB와 V1 이력은 지우지 않습니다.
+2. **새 DB:** MariaDB 10.11에 빈 DB와 앱 전용 계정을 준비합니다. Java 17을 사용하고 DB/JWT 환경값을 주입합니다. 새 DB는 Flyway V1 → V2 순서로 적용됩니다.
+3. 공통으로 Hibernate는 `validate`, Flyway는 `baseline-on-migrate=false`를 유지합니다. `backend/`에서 `./mvnw spring-boot:run`을 실행해 V2와 validate 완료를 확인합니다. 과거 토큰에는 ver가 없으므로 다시 로그인해야 합니다.
+4. 최초 관리자 환경변수 네 개는 위 절과 같습니다. 첫 로그인 후 비밀번호를 변경하고 새 토큰을 사용합니다. 이미 CHIEF가 있으면 추가 생성하지 않습니다.
+5. 초대를 쓰려면 Redis와 메일 설정을 준비하고 `APP_MAIL_ENABLED=true`, `APP_INVITATION_SETUP_URL`을 프론트의 비밀번호 설정 페이지 주소로 설정합니다. 링크의 쿼리 키는 `setupToken`입니다. 화면은 별도 작업이므로 연결 전에는 메일을 꺼 둘 수 있습니다. 메일이 꺼져 있거나 발송 실패 시 사원은 등록되고 `invitationSent=false`를 받습니다.
+
+테스트 명령:
+
+```bash
+cd backend
+./mvnw test
+./mvnw -Dtest=M1DataMigrationTest,MariaDbMigrationTest test
+./mvnw -Dtest=M1AcceptanceTest,M1RegressionTest,AuditClockMariaDbTest test
+```
+
+Docker가 켜져 있어야 MariaDB 테스트가 실행됩니다. 테스트 메일·초대 토큰 저장소는 가짜를 사용하므로 외부 메일을 보내지 않습니다. API 명세 9장의 일곱 검증은 `M1AcceptanceTest`에 있으며, 조직도는 실제 MariaDB의 `Com_select` 증가량이 부서 수와 상관없이 2인지 확인합니다.
+
+신규 사원 등록의 `hireDate`는 필수입니다. 이관 사원의 입사일은 `PATCH /api/v1/users/{id}`에 `{"hireDate":"2020-03-02"}`처럼 보정할 수 있습니다(EMPLOYEE U와 기존 데이터 범위 적용). 아이디와 발급 시퀀스는 바뀌지 않으며, 필드를 생략하거나 null을 보내면 기존 날짜를 유지합니다. EMPLOYEE 이외 역할을 붙여 새 사원을 등록하려면 EMPLOYEE C 외에 ROLE U도 필요합니다.

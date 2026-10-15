@@ -18,7 +18,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private static final String ROLE_CLAIM_KEY = "role";
+    private static final String VERSION_CLAIM_KEY = "ver";
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -34,22 +34,21 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(String subject, String role) {
+    public String generateAccessToken(String subject, int tokenVersion) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpirationMs);
 
         return Jwts.builder()
                 .subject(subject)
-                .claim(ROLE_CLAIM_KEY, role)
+                .claim(VERSION_CLAIM_KEY, tokenVersion)
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(key)
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) {
+    public Authentication getAuthentication(String token, String role) {
         Claims claims = getClaims(token);
-        String role = claims.get(ROLE_CLAIM_KEY, String.class);
 
         String normalizedRole = role == null ? "USER" : role;
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + normalizedRole);
@@ -63,6 +62,8 @@ public class JwtTokenProvider {
     public long getAccessTokenExpirationSeconds() {
         return accessTokenExpirationMs / 1000;
     }
+
+    public Integer getTokenVersion(String token) { return getClaims(token).get(VERSION_CLAIM_KEY, Integer.class); }
 
     public String getSubject(String token) {
         return getClaims(token).getSubject();

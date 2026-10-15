@@ -9,6 +9,27 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
+    TOKEN_REVOKED(HttpStatus.UNAUTHORIZED, "로그인이 만료되었습니다. 다시 로그인해 주세요."),
+    SETUP_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "비밀번호 설정 링크가 만료되었거나 이미 사용되었습니다."),
+    ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "재직 중인 계정이 아닙니다."),
+    PASSWORD_CHANGE_REQUIRED(HttpStatus.FORBIDDEN, "비밀번호를 먼저 변경해 주세요."),
+    SYSTEM_ROLE_LOCKED(HttpStatus.FORBIDDEN, "기본 역할은 바꾸거나 지울 수 없습니다."),
+    DEPARTMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "부서를 찾을 수 없습니다."),
+    POSITION_NOT_FOUND(HttpStatus.NOT_FOUND, "직급을 찾을 수 없습니다."),
+    ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "역할을 찾을 수 없습니다."),
+    DEPARTMENT_NOT_EMPTY(HttpStatus.CONFLICT, "소속 사원이나 하위 부서가 있어 삭제할 수 없습니다."),
+    POSITION_IN_USE(HttpStatus.CONFLICT, "이 직급을 쓰는 사원이 있습니다."),
+    ROLE_IN_USE(HttpStatus.CONFLICT, "이 역할을 쓰는 사원이나 결재 규칙이 있습니다."),
+    LAST_CHIEF(HttpStatus.CONFLICT, "관리소장이 한 명 이상 있어야 합니다."),
+    INVITATION_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "이미 비밀번호를 설정한 사원입니다."),
+    HOLIDAY_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 날짜입니다."),
+    INVALID_PERMISSION(HttpStatus.BAD_REQUEST, "이 메뉴에서 쓸 수 없는 권한입니다."),
+    INVALID_WORK_SCHEDULE(HttpStatus.BAD_REQUEST, "퇴근 시각은 출근 시각보다 늦어야 합니다."),
+    INVALID_DEPARTMENT_MOVE(HttpStatus.UNPROCESSABLE_ENTITY, "자기 자신이나 하위 부서 아래로 옮길 수 없습니다."),
+    HEAD_NOT_IN_DEPARTMENT(HttpStatus.UNPROCESSABLE_ENTITY, "그 부서 소속 사원만 부서장이 될 수 있습니다."),
+    HEAD_MUST_BE_REASSIGNED(HttpStatus.UNPROCESSABLE_ENTITY, "부서장을 먼저 다른 사람으로 바꿔 주세요."),
+    ROLE_REQUIRED(HttpStatus.UNPROCESSABLE_ENTITY, "역할이 하나 이상 있어야 합니다."),
+
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "잘못된 요청 값입니다."),
     LOGIN_ID_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),

@@ -53,8 +53,8 @@ class ClockBehaviorTest {
         var overtimes = mock(OvertimeRequestRepository.class);
         // The entity is only an authenticated requester fixture; no password is needed here.
         when(users.findById(1L)).thenReturn(Optional.of(mock(User.class)));
-        var approvalService = new ApprovalService(leaves, users, new AccessPolicy(), clock);
-        var overtimeService = new OvertimeService(overtimes, users, new AccessPolicy(), clock);
+        var approvalService = new ApprovalService(leaves, users, new AccessPolicy(mock(com.minierp.backend.global.permission.PermissionAccess.class)), clock, mock(com.minierp.backend.global.permission.LegacyRequestScopeRepository.class));
+        var overtimeService = new OvertimeService(overtimes, users, new AccessPolicy(mock(com.minierp.backend.global.permission.PermissionAccess.class)), clock, mock(com.minierp.backend.global.permission.LegacyRequestScopeRepository.class));
 
         var leave = new LeaveRequestCreateDto();
         leave.setAppType(LeaveType.ANNUAL);

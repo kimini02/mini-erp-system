@@ -8,8 +8,15 @@ import org.springframework.stereotype.Component;
 /**
  * 접근 권한 정책 — 역할 기반 접근 제어(RBAC)를 공통 컴포넌트로 추출
  */
+@lombok.RequiredArgsConstructor
 @Component
 public class AccessPolicy {
+    private final com.minierp.backend.global.permission.PermissionAccess permissions;
+    public void validateDepartmentScope(Long requesterId,Long approverId) {
+        permissions.require(approverId,"LEAVE_ADMIN",com.minierp.backend.global.permission.Action.VIEW);
+        permissions.assertUserInScope("LEAVE_ADMIN",approverId,requesterId);
+    }
+
 
     public void requireAdmin(UserRole role) {
         if (role == null || !role.isTopManager()) {
