@@ -173,6 +173,7 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
     email: user.email,
     departmentId: String(user.department?.id ?? ''),
     positionId: String(positions.find((p) => p.name === user.position)?.id ?? ''),
+    hireDate: user.hireDate || '',
     status: user.status,
     roleCodes: user.roles.map((r) => r.code),
   }, [user, positions]);
@@ -191,7 +192,8 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
   const profileChanged = form.name !== initial.name || form.email !== initial.email
-    || form.departmentId !== initial.departmentId || form.positionId !== initial.positionId;
+    || form.departmentId !== initial.departmentId || form.positionId !== initial.positionId
+    || form.hireDate !== initial.hireDate;
   const statusChanged = form.status !== initial.status;
   const rolesChanged = [...form.roleCodes].sort().join() !== [...initial.roleCodes].sort().join();
   const leaving = statusChanged && form.status !== 'ACTIVE';
@@ -206,6 +208,7 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
         if (form.email !== initial.email) body.email = form.email.trim();
         if (form.departmentId !== initial.departmentId) body.departmentId = Number(form.departmentId);
         if (form.positionId !== initial.positionId) body.positionId = Number(form.positionId);
+        if (form.hireDate !== initial.hireDate) body.hireDate = form.hireDate;
         await userApi.update(user.id, body);
       }
       if (rolesChanged) await userApi.setRoles(user.id, form.roleCodes);
@@ -238,7 +241,7 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
       open
       onClose={onClose}
       title={`${user.name} · ${user.loginId}`}
-      description={`${user.hireDate} 입사`}
+      description={user.hireDate ? `${user.hireDate} 입사` : '입사일 미입력 (v1에서 옮겨 온 사원)'}
       size="xl"
       footer={<><Button variant="secondary" onClick={onClose}>닫기</Button><Button onClick={save} loading={saving} disabled={!(profileChanged || statusChanged || rolesChanged) || !form.name.trim()}>저장</Button></>}
     >
@@ -267,6 +270,9 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
             <Select id="eu-pos" value={form.positionId} onChange={set('positionId')}>
               {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </Select>
+          </Field>
+          <Field label="입사일" htmlFor="eu-hire" hint={user.hireDate ? undefined : '연차 자동 부여에 필요합니다. 채워 주세요.'}>
+            <Input id="eu-hire" type="date" value={form.hireDate} onChange={set('hireDate')} invalid={!form.hireDate} />
           </Field>
           <Field
             label="재직 상태"
@@ -458,7 +464,7 @@ export default function EmployeesPage() {
                         {u.roles.map((r) => <Badge key={r.code} tone={roleTone(r.code)}>{r.name}</Badge>)}
                       </span>
                     </Td>
-                    <Td className="tabular-nums text-gray-500">{u.hireDate}</Td>
+                    <Td className="tabular-nums text-gray-500">{u.hireDate || <span className="text-amber-700">미입력</span>}</Td>
                     <Td>
                       <span className="flex flex-wrap gap-1">
                         <Badge tone={USER_STATUS_META[u.status].tone} dot>{USER_STATUS_META[u.status].label}</Badge>

@@ -59,6 +59,8 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 - `user_role` → `user_roles` (USER → EMPLOYEE, TEAM_LEADER → LEADER, ADMIN → CHIEF)
 - `position_name` → `positions` (같은 이름은 한 행), `is_active` → `status`
 - 기존 `login_id`(예: user01)는 그대로 둡니다. 새 규칙(입사연도+순번)은 새로 등록하는 사원부터 적용합니다.
+- `is_active = false` → `RETIRED`. v1에는 비활성으로 바꾸는 기능이 없어 DB를 직접 고친 경우뿐이므로, 이유를 모르는 계정은 가장 닫힌 상태로 두고 필요하면 관리자가 되돌립니다. 이관 건수를 마이그레이션 로그에 남깁니다.
+- 입사일은 v1에 없으므로 `hire_date = NULL`로 둡니다(계정 생성일로 추정해 채우지 않음). 새로 등록하는 사원은 필수입니다. 관리자가 사원 수정 화면에서 채웁니다. M3 연차 자동 부여는 입사일이 없는 사원을 건너뛰고 목록으로 남깁니다.
 - `menus`, 기본 역할 3개와 `role_permissions`, 회사 기본 `work_schedules`(09:00~18:00, 유예 10분)를 초기 데이터로 넣습니다.
 
 ---
@@ -231,7 +233,7 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 | `GET /api/v1/users/{id}` | 상세 | EMPLOYEE V (본인은 로그인만) | O |
 | `GET /api/v1/users/login-id-preview` | 등록 화면의 아이디 미리보기 | EMPLOYEE C | - |
 | `POST /api/v1/users` | 등록 + 초대 메일 | EMPLOYEE C (사원 외 역할을 함께 주면 ROLE U도) | - |
-| `PATCH /api/v1/users/{id}` | 이름·이메일·부서·직급 수정 | EMPLOYEE U | O |
+| `PATCH /api/v1/users/{id}` | 이름·이메일·부서·직급·입사일 수정 | EMPLOYEE U | O |
 | `PATCH /api/v1/users/{id}/status` | 재직·휴직·퇴사 | EMPLOYEE U | O |
 | `PUT /api/v1/users/{id}/roles` | 역할 지정 (전체 교체) | ROLE U | - |
 | `POST /api/v1/users/{id}/invitation` | 초대 메일 다시 보내기 | EMPLOYEE C | - |
@@ -284,7 +286,8 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 - 에러: `409 EMAIL_ALREADY_EXISTS`, `404 DEPARTMENT_NOT_FOUND`, `404 POSITION_NOT_FOUND`, `404 ROLE_NOT_FOUND`, `422 ROLE_REQUIRED`(역할 0개), `403 ACCESS_DENIED`(위 권한 상승)
 
 ### 5.4 수정 · 상태 · 역할
-- `PATCH /api/v1/users/{id}` `{ "departmentId": 8, "positionId": 3 }`
+- `PATCH /api/v1/users/{id}` `{ "departmentId": 8, "positionId": 3, "hireDate": "2021-06-07" }`
+  - `hireDate`는 v1에서 이관한 사원처럼 입사일이 없는(NULL) 사람에게 나중에 채워 넣는 용도입니다. 아이디는 바뀌지 않습니다. (2026-10-15 추가)
   - 부서장인 사람을 다른 부서로 옮기면 `422 HEAD_MUST_BE_REASSIGNED` (먼저 부서장을 바꾸기)
 - `PATCH /api/v1/users/{id}/status` `{ "status": "RETIRED" }`
   - `ON_LEAVE`·`RETIRED`로 바꾸면 `token_version + 1` → 그 사람의 기존 토큰은 바로 `401 TOKEN_REVOKED`

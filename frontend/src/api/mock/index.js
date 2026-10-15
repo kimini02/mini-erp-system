@@ -435,6 +435,10 @@ route('PATCH', '/users/:id', (ctx) => {
     if (!positionById(positionId)) fail(404, 'POSITION_NOT_FOUND', '직급을 찾을 수 없습니다.');
     target.positionId = Number(positionId);
   }
+  if (ctx.body.hireDate !== undefined) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ctx.body.hireDate)) fail(400, 'INVALID_INPUT_VALUE', '입사일을 확인해 주세요.');
+    target.hireDate = ctx.body.hireDate;
+  }
   if (name !== undefined) target.name = name.trim();
   if (email !== undefined) target.email = email;
   return userListView(target);
