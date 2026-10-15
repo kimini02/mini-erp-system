@@ -81,6 +81,10 @@ public class EmployeeService {
         return rows.stream().map(r->number(r,"id")).toList();
     }
     @Transactional public RegistrationResult register(Create r) {
+        // Creating an account must not bypass the separate permission to assign roles.
+        if (r.roleCodes() != null && r.roleCodes().stream().anyMatch(code -> !"EMPLOYEE".equals(code))) {
+            access.require("ROLE", Action.UPDATE);
+        }
         var roles=roleIds(r.roleCodes());
         db.one("SELECT id FROM departments WHERE id=:id",map("id",r.departmentId()),ErrorCode.DEPARTMENT_NOT_FOUND);
         var position=db.one("SELECT name FROM positions WHERE id=:id",map("id",r.positionId()),ErrorCode.POSITION_NOT_FOUND);

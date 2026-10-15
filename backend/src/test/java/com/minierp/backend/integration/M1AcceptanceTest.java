@@ -87,6 +87,63 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
         return new EmployeeRequests.Create(prefix,prefix+UUID.randomUUID()+"@example.test",LocalDate.now(clock),2L,1L,List.of("EMPLOYEE"));
     }
 
+    private long grantEmployeeCreateOnly() {
+        long role = db.insert("INSERT INTO roles(code,name,is_system) VALUES('HR_RECRUITER','사원 등록 담당',0)", Map.of());
+        db.update("INSERT INTO role_permissions VALUES(:role,8,0,1,0,0,'ALL')", map("role",role));
+        db.update("DELETE FROM user_roles WHERE user_id=:user", map("user",employee.getId()));
+        db.update("INSERT INTO user_roles VALUES(:user,:role)", map("user",employee.getId(),"role",role));
+        return role;
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings={"CHIEF","LEADER","HR_RECRUITER"})
+    void employeeCreatorCannotAssignOtherRoles(String role) throws Exception {
+        grantEmployeeCreateOnly();
+        long before = users.count();
+        var request = create("권한검증");
+        var restricted = new EmployeeRequests.Create(request.name(),request.email(),request.hireDate(),
+                request.departmentId(),request.positionId(),List.of(role));
+        mvc.perform(post("/api/v1/users").header("Authorization",auth(employeeToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(restricted)))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+        assertThat(users.count()).isEqualTo(before);
+        assertThat(db.count("SELECT COUNT(*) FROM login_id_sequences",Map.of())).isZero();
+        verifyNoInteractions(tokens,mail);
+    }
+
+    @Test void employeeCreatorCannotHidePrivilegedRoleAlongsideEmployee() throws Exception {
+        grantEmployeeCreateOnly();
+        var request = create("복수역할검증");
+        var restricted = new EmployeeRequests.Create(request.name(),request.email(),request.hireDate(),
+                request.departmentId(),request.positionId(),List.of("EMPLOYEE","CHIEF"));
+        mvc.perform(post("/api/v1/users").header("Authorization",auth(employeeToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(restricted)))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+        assertThat(users.existsByUserEmail(request.email())).isFalse();
+        verifyNoInteractions(tokens,mail);
+    }
+
+    @Test void employeeCreatorCanRegisterEmployeeWithoutRoleUpdate() throws Exception {
+        grantEmployeeCreateOnly();
+        var request = create("일반사원등록");
+        mvc.perform(post("/api/v1/users").header("Authorization",auth(employeeToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(request)))
+                .andExpect(status().isCreated());
+        assertThat(users.findByUserEmail(request.email()).orElseThrow().roleCodeList()).containsExactly("EMPLOYEE");
+    }
+
+    @Test void employeeCreatorWithRoleUpdateCanAssignChief() throws Exception {
+        long role = grantEmployeeCreateOnly();
+        db.update("INSERT INTO role_permissions VALUES(:role,9,0,0,1,0,NULL)",map("role",role));
+        var request = create("승인된역할등록");
+        var permitted = new EmployeeRequests.Create(request.name(),request.email(),request.hireDate(),
+                request.departmentId(),request.positionId(),List.of("CHIEF"));
+        mvc.perform(post("/api/v1/users").header("Authorization",auth(employeeToken))
+                .contentType(MediaType.APPLICATION_JSON).content(json(permitted)))
+                .andExpect(status().isCreated());
+        assertThat(users.findByUserEmail(request.email()).orElseThrow().roleCodeList()).containsExactly("CHIEF");
+    }
+
     @Test void concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides() throws Exception {
         int year=LocalDate.now(clock).getYear();var pool=Executors.newFixedThreadPool(8);
         try {
