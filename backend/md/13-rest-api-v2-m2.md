@@ -50,6 +50,7 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 
 예외 처리 (양식 옵션):
 - `fallback_to_upper` — 부서장이 비어 있으면 더 위 부서장. 끝까지 없으면 `422 APPROVER_NOT_FOUND`
+  - v1에서 이관한 부서는 부서장이 모두 비어 있습니다(M1 1.5). 관리자가 지정하기 전까지는 상신이 이 오류로 막히고, 결재선 미리보기는 그 단계를 `ERROR`로 보여 줍니다. 화면은 "부서장이 지정되지 않아 결재선을 만들 수 없습니다. 관리자에게 문의하세요."로 안내합니다. 비어 있다고 자동 승인하지 않습니다. (2026-10-15 추가)
 - `skip_self` — 결재자가 기안자 본인이면 `SKIPPED(SELF)`
 - `dedupe_approver` — 앞 단계와 같은 사람이면 `SKIPPED(DUPLICATE)`
 - 결재자가 **한 명도 남지 않으면** 상신하는 순간 바로 `APPROVED` (처리기의 `onApproved`까지 같은 트랜잭션)
