@@ -371,7 +371,7 @@ const CalendarPage = () => {
         <CardHeader
           title="연차 신청 내역"
           action={
-            <Button size="sm" icon={FilePlus2} onClick={() => navigate('/user/leaves/new')}>
+            <Button size="sm" icon={FilePlus2} onClick={() => navigate('/leaves/new')}>
               연차 신청
             </Button>
           }

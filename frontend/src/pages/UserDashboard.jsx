@@ -65,7 +65,7 @@ const UserDashboard = () => {
         title={`안녕하세요, ${getDisplayName(user)}님`}
         description="오늘의 업무와 이번 주 일정을 확인하세요."
         actions={
-          <Button icon={FilePlus2} onClick={() => navigate('/user/leaves/new')}>
+          <Button icon={FilePlus2} onClick={() => navigate('/leaves/new')}>
             연차/특근 신청
           </Button>
         }
@@ -85,7 +85,7 @@ const UserDashboard = () => {
           title="이번 주 일정"
           description={`${md(week[0])} ~ ${md(week[4])}`}
           action={
-            <Button variant="ghost" size="sm" onClick={() => navigate('/user/calendar')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/calendar')}>
               캘린더 <ChevronRight size={14} />
             </Button>
           }
@@ -116,7 +116,7 @@ const UserDashboard = () => {
           <CardHeader
             title="내 할 일"
             action={
-              <Button variant="ghost" size="sm" onClick={() => navigate('/user/projects')}>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/my-tasks')}>
                 내 업무 <ChevronRight size={14} />
               </Button>
             }

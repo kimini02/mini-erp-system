@@ -53,13 +53,20 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 - 클레임: `sub` = 사용자 id, `ver` = `users.token_version`. 역할·권한은 토큰에 넣지 않고 **요청마다 DB에서 조회**합니다. 그래서 권한을 바꾸면 다음 요청부터 바로 반영됩니다.
 - `token_version`을 올리는 때: **퇴사·휴직 처리, 비밀번호 변경**. 이전 토큰은 `401 TOKEN_REVOKED`.
 - `users.status`가 `ACTIVE`인 사람만 로그인할 수 있습니다.
+- 공개 API(`/api/v1/auth/**`: 로그인, 초대 링크 설정, 아이디·비밀번호 찾기)는 `Authorization` 헤더를 보지 않습니다. 만료되거나 무효가 된 토큰이 붙어 와도 401로 막지 않고 그대로 처리합니다. 화면도 이 요청에는 토큰을 붙이지 않습니다. (2026-10-15 추가)
 
 ### 1.5 기존 데이터 이관 (M1 Flyway)
 - `department_code` '01'/'02'/'03' → 최상위 부서 "회사" 아래 부서 3개
 - `user_role` → `user_roles` (USER → EMPLOYEE, TEAM_LEADER → LEADER, ADMIN → CHIEF)
 - `position_name` → `positions` (같은 이름은 한 행), `is_active` → `status`
 - 기존 `login_id`(예: user01)는 그대로 둡니다. 새 규칙(입사연도+순번)은 새로 등록하는 사원부터 적용합니다.
+- `is_active = false` → `RETIRED`. v1에는 비활성으로 바꾸는 기능이 없어 DB를 직접 고친 경우뿐이므로, 이유를 모르는 계정은 가장 닫힌 상태로 두고 필요하면 관리자가 되돌립니다. 이관 건수를 마이그레이션 로그에 남깁니다.
+- 입사일은 v1에 없으므로 `hire_date = NULL`로 둡니다(계정 생성일로 추정해 채우지 않음). 새로 등록하는 사원은 필수입니다. 관리자가 사원 수정 화면에서 채웁니다. M3 연차 자동 부여는 입사일이 없는 사원을 건너뛰고 목록으로 남깁니다.
 - `menus`, 기본 역할 3개와 `role_permissions`, 회사 기본 `work_schedules`(09:00~18:00, 유예 10분)를 초기 데이터로 넣습니다.
+- (2026-10-15 추가) `department_code`가 '01'/'02'/'03'이 아닌 행은 최상위 부서 "회사"로 넣고 건수를 로그에 남깁니다(이관이 중간에 실패하지 않게).
+- (2026-10-15 추가) **부서장은 이관하지 않습니다.** v1에는 부서장 개념이 없고 팀장이 여러 명일 수 있어서 추정하지 않습니다. 관리자가 부서 관리 화면에서 지정하기 전까지 M2 결재 상신은 `422 APPROVER_NOT_FOUND`이므로, 운영 전에 부서장 지정이 필요합니다.
+- (2026-10-15 추가) MariaDB는 DDL을 되돌리지 못하므로, 이관 도중 실패하면 앞 단계 변경이 남습니다. 실행 전에 DB를 백업합니다.
+- 환경변수로 만드는 최초 관리자는 최상위 부서 소속, 관리소장(CHIEF) 역할입니다.
 
 ---
 
@@ -100,6 +107,7 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 { "setupToken": "…메일 링크에 담긴 값…", "newPassword": "********" }
 ```
 - 토큰은 기존 비밀번호 재설정과 같은 저장소(Redis, 만료 24시간)를 씁니다. 한 번 쓰면 지워집니다.
+- **사원마다 유효한 링크는 하나입니다** (2026-10-15 추가). 초대 메일을 다시 보내거나 그 사원의 이메일이 바뀌면 이전 링크는 바로 무효(`401 SETUP_TOKEN_INVALID`)입니다. 잘못된 주소로 간 링크로 다른 사람이 비밀번호를 정하는 것을 막습니다.
 - 에러: `401 SETUP_TOKEN_INVALID`, `400 PASSWORD_POLICY_VIOLATION`
 
 ### 2.3 내 비밀번호 변경 (신규)
@@ -198,6 +206,7 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
   - 그 부서 소속이 아니면 `422 HEAD_NOT_IN_DEPARTMENT`, 재직 중이 아니면 `422 ACCOUNT_INACTIVE`
 - `DELETE /api/v1/departments/{id}/head` → 공석
 - 진행 중인 결재 문서의 결재자는 바뀌지 않습니다(상신 때 스냅샷). 새로 상신하는 문서부터 적용됩니다.
+- **잠금 순서** (2026-10-15 추가): 부서장 지정, 사원의 부서 이동, 사원을 휴직·퇴사로 바꾸기는 모두 같은 순서(부서 트리 → 그 사원 행)로 잠그고, 부서장 여부는 잠금 읽기로 확인합니다. 동시에 실행돼도 "부서장은 그 부서 소속의 재직자" 조건이 깨지지 않습니다.
 
 ### 3.5 근무시간
 - `PUT /api/v1/departments/{id}/work-schedule`
@@ -230,11 +239,11 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 | `GET /api/v1/users` | 목록·검색 | EMPLOYEE V | O |
 | `GET /api/v1/users/{id}` | 상세 | EMPLOYEE V (본인은 로그인만) | O |
 | `GET /api/v1/users/login-id-preview` | 등록 화면의 아이디 미리보기 | EMPLOYEE C | - |
-| `POST /api/v1/users` | 등록 + 초대 메일 | EMPLOYEE C | - |
-| `PATCH /api/v1/users/{id}` | 이름·이메일·부서·직급 수정 | EMPLOYEE U | O |
+| `POST /api/v1/users` | 등록 + 초대 메일 | EMPLOYEE C (사원 외 역할을 함께 주면 ROLE U도) | - |
+| `PATCH /api/v1/users/{id}` | 이름·이메일·부서·직급·입사일 수정 | EMPLOYEE U (사원 외 역할을 가진 사람의 이메일을 바꾸면 ROLE U도) | O |
 | `PATCH /api/v1/users/{id}/status` | 재직·휴직·퇴사 | EMPLOYEE U | O |
 | `PUT /api/v1/users/{id}/roles` | 역할 지정 (전체 교체) | ROLE U | - |
-| `POST /api/v1/users/{id}/invitation` | 초대 메일 다시 보내기 | EMPLOYEE C | - |
+| `POST /api/v1/users/{id}/invitation` | 초대 메일 다시 보내기 | EMPLOYEE C (사원 외 역할을 가진 사람이면 ROLE U도) | - |
 
 ### 5.1 목록
 `GET /api/v1/users?q=김&departmentId=6&includeSubDepartments=true&status=ACTIVE&page=0&size=20&sort=userName,asc`
@@ -280,17 +289,22 @@ API마다 **필요 권한 = 메뉴 코드 + 동작(V 보기 / C 등록 / U 수�
 - 처리 순서(한 트랜잭션): `login_id_sequences`의 입사연도 행을 `SELECT … FOR UPDATE` → 번호 +1 → 사용자 저장(비밀번호는 비워 둠) → 역할 저장. 행이 없으면 새로 만듭니다.
 - 초대 메일은 **커밋 뒤**에 보냅니다. 메일이 꺼져 있거나 실패하면 `invitationSent: false`, 사원은 그대로 등록됩니다(나중에 다시 보내기).
 - `users.user_pw`는 NULL을 허용하도록 바꿉니다(초대 전 계정).
-- 에러: `409 EMAIL_ALREADY_EXISTS`, `404 DEPARTMENT_NOT_FOUND`, `404 POSITION_NOT_FOUND`, `404 ROLE_NOT_FOUND`, `422 ROLE_REQUIRED`(역할 0개)
+- **권한 상승 방지** (2026-10-12 추가): `roleCodes`에 `EMPLOYEE` 말고 다른 역할이 하나라도 있으면 `ROLE U` 권한도 있어야 합니다. 없으면 `403 ACCESS_DENIED`. 사원 관리만 맡은 인사 담당(EMPLOYEE C)이 관리소장 역할을 붙여 계정을 만드는 것을 막습니다. 화면은 역할 권한이 없으면 역할 선택을 숨기고 `["EMPLOYEE"]`로 보냅니다.
+- 에러: `409 EMAIL_ALREADY_EXISTS`, `404 DEPARTMENT_NOT_FOUND`, `404 POSITION_NOT_FOUND`, `404 ROLE_NOT_FOUND`, `422 ROLE_REQUIRED`(역할 0개), `403 ACCESS_DENIED`(위 권한 상승)
 
 ### 5.4 수정 · 상태 · 역할
-- `PATCH /api/v1/users/{id}` `{ "departmentId": 8, "positionId": 3 }`
+- `PATCH /api/v1/users/{id}` `{ "departmentId": 8, "positionId": 3, "hireDate": "2021-06-07" }`
+  - `hireDate`는 v1에서 이관한 사원처럼 입사일이 없는(NULL) 사람에게 나중에 채워 넣는 용도입니다. 아이디는 바뀌지 않습니다. (2026-10-15 추가)
   - 부서장인 사람을 다른 부서로 옮기면 `422 HEAD_MUST_BE_REASSIGNED` (먼저 부서장을 바꾸기)
+  - **이메일 변경의 권한 상승 방지** (2026-10-15 추가): 대상이 `EMPLOYEE` 말고 다른 역할을 하나라도 가지면 `ROLE U`도 있어야 합니다. 없으면 `403 ACCESS_DENIED`이고 아무것도 바뀌지 않습니다. 비밀번호 재설정과 초대 링크가 이메일로 가기 때문에, 사원 관리 권한만으로 관리소장의 이메일을 자기 주소로 바꾸면 그 계정을 가져갈 수 있습니다. 화면은 이 경우 이메일 칸을 잠급니다.
+  - 이메일이 바뀌면 그 사원의 초대 링크는 무효가 됩니다(2.2).
 - `PATCH /api/v1/users/{id}/status` `{ "status": "RETIRED" }`
   - `ON_LEAVE`·`RETIRED`로 바꾸면 `token_version + 1` → 그 사람의 기존 토큰은 바로 `401 TOKEN_REVOKED`
   - 부서장이면 `422 HEAD_MUST_BE_REASSIGNED`, 마지막 관리소장이면 `409 LAST_CHIEF`
 - `PUT /api/v1/users/{id}/roles` `{ "roleCodes": ["EMPLOYEE", "HR_MANAGER"] }`
   - 0개면 `422 ROLE_REQUIRED`, 마지막 관리소장의 CHIEF를 빼면 `409 LAST_CHIEF`
 - `POST /api/v1/users/{id}/invitation` — 이미 비밀번호를 설정했으면 `409 INVITATION_ALREADY_ACCEPTED`
+  - 대상이 사원 외 역할을 가지면 `ROLE U`도 필요(위 이메일 변경과 같은 이유). 새 링크를 보내면 이전 링크는 무효.
 
 ---
 
@@ -392,6 +406,8 @@ MariaDB Testcontainers 환경(M0)에서 돌립니다.
 5. **마지막 관리소장 보호**: 관리소장이 한 명일 때 퇴사·역할 제거가 409.
 6. **권한 즉시 반영**: 팀장 역할에서 사원 관리 V를 끄면, 같은 토큰으로 다음 요청부터 403.
 7. **조직도 쿼리 수**: 조직도 조회가 부서 수와 상관없이 쿼리 2번(부서 목록 + 인원수)으로 끝난다.
+8. **권한 상승 차단** (2026-10-15 추가): 사원 관리 권한만 가진 사람이 관리 역할을 붙여 등록하거나, 관리소장의 이메일을 바꾸거나, 관리 역할 사원에게 초대 메일을 다시 보내면 403이고 데이터·메일·토큰이 그대로다.
+9. **이전 초대 링크 무효** (2026-10-15 추가): 이메일을 바꾸거나 다시 보낸 뒤에는 이전 링크로 비밀번호를 설정할 수 없다.
 
 ---
 

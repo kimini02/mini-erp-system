@@ -1,35 +1,35 @@
 import { ROLE_LABELS } from './labels';
 
 /**
- * 로그인 사용자의 권한/직급으로 화면 분기 정보를 계산합니다.
- * - isChief: 관리소장 (ADMIN 또는 직급 '관리소장')
- * - isTeamLeader: 팀장 (TEAM_LEADER/MANAGER 또는 직급 '팀장')
- * - basePath/homePath: 라우트 권한(role) 기준 메뉴 경로
+ * 기존 화면(연차·특근 결재, 대시보드)이 쓰는 역할 값.
+ * 기준은 user.roles(역할 코드 목록)이고, 기존 role 값은 거기서 계산합니다.
+ *   CHIEF → ADMIN(관리소장), LEADER → TEAM_LEADER(팀장), 그 외 → USER
+ * 메뉴 표시와 화면 접근은 lib/permissions 의 메뉴 권한을 씁니다.
  */
+export function legacyRoleOf(user) {
+  if (Array.isArray(user?.roles)) {
+    if (user.roles.includes('CHIEF')) return 'ADMIN';
+    if (user.roles.includes('LEADER')) return 'TEAM_LEADER';
+    return 'USER';
+  }
+  return user?.role || user?.user_role || 'USER';
+}
+
 export function getRoleInfo(user) {
-  const role = user?.role || user?.user_role || '';
+  const role = legacyRoleOf(user);
   const position = user?.position || '';
-
-  const isChief = role === 'ADMIN' || position === '관리소장';
-  const isTeamLeader = role === 'MANAGER' || role === 'TEAM_LEADER' || position === '팀장';
-
-  // 메뉴 경로는 ProtectedRoute와 같은 role 기준으로 결정 (직급만으로는 /admin, /manager 접근 불가)
-  const routeRole =
-    role === 'ADMIN' || (position === '관리소장' && role !== 'USER')
-      ? 'admin'
-      : role === 'TEAM_LEADER' || role === 'MANAGER'
-        ? 'manager'
-        : 'user';
-  const basePath = `/${routeRole}`;
+  const isChief = role === 'ADMIN';
+  const isTeamLeader = role === 'TEAM_LEADER' || role === 'MANAGER';
 
   return {
     role,
     position,
     isChief,
     isTeamLeader,
-    routeRole,
-    basePath,
-    homePath: `${basePath}/dashboard`,
+    workspace: isChief ? '관리자' : isTeamLeader ? '팀장' : '임직원',
+    // 경로는 역할과 상관없이 하나입니다 (예: /approvals)
+    basePath: '',
+    homePath: '/dashboard',
     roleLabel: ROLE_LABELS[role] || position || '사원',
   };
 }

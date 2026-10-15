@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, ChevronDown, ChevronRight, LogOut, Menu, UserRound, Inbox } from 'lucide-react';
+import { Bell, ChevronDown, ChevronRight, KeyRound, LogOut, Menu, UserRound, Inbox } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { getRoleInfo, getDisplayName } from '@/lib/roles';
@@ -8,7 +8,8 @@ import { LEAVE_TYPE_LABELS, ROLE_LABELS } from '@/lib/labels';
 import { confirm } from '@/lib/confirm';
 import { cn } from '@/lib/cn';
 import { Avatar } from '@/components/ui';
-import { getNavigation, findActiveItem } from './navigation';
+import { findActiveItem } from './navigation';
+import { useNavGroups } from './useNavGroups';
 
 /** 바깥 클릭 시 닫히는 드롭다운 상태 */
 function useDropdown() {
@@ -130,6 +131,7 @@ function NotificationMenu() {
 }
 
 function UserMenu({ onOpenProfile }) {
+  const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const { roleLabel } = getRoleInfo(user);
   const { open, setOpen, ref } = useDropdown();
@@ -158,7 +160,7 @@ function UserMenu({ onOpenProfile }) {
           <div className="border-b border-gray-100 px-4 py-3">
             <p className="text-sm font-semibold text-gray-900">{name}</p>
             <p className="mt-0.5 text-xs text-gray-500">
-              {[user?.departmentName, user?.position || roleLabel].filter(Boolean).join(' · ')}
+              {[user?.department?.name || user?.departmentName, user?.position || roleLabel].filter(Boolean).join(' · ')}
             </p>
             {user?.email && <p className="mt-0.5 truncate text-xs text-gray-400">{user.email}</p>}
           </div>
@@ -172,6 +174,16 @@ function UserMenu({ onOpenProfile }) {
               className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               <UserRound size={16} className="text-gray-400" /> 내 프로필
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                navigate('/me/password');
+              }}
+              className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <KeyRound size={16} className="text-gray-400" /> 비밀번호 변경
             </button>
             <button
               type="button"
@@ -192,9 +204,7 @@ const formatToday = () =>
 
 export default function Topbar({ onOpenNav, onOpenProfile }) {
   const { pathname } = useLocation();
-  const { user } = useAuthStore();
-  const { routeRole } = getRoleInfo(user);
-  const active = findActiveItem(getNavigation(routeRole), pathname);
+  const active = findActiveItem(useNavGroups(), pathname);
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8">

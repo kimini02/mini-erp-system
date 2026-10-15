@@ -4,17 +4,16 @@ import { useApprovalStore } from '@/store/approvalStore';
 import { getRoleInfo } from '@/lib/roles';
 import { cn } from '@/lib/cn';
 import Logo from './Logo';
-import { getNavigation, findActiveItem } from './navigation';
-
-const WORKSPACE_LABELS = { admin: '관리자', manager: '팀장', user: '임직원' };
+import { findActiveItem } from './navigation';
+import { useNavGroups } from './useNavGroups';
 
 export default function Sidebar({ open, onClose }) {
   const { pathname } = useLocation();
   const { user } = useAuthStore();
   const { leave, overtime } = useApprovalStore();
-  const { routeRole, homePath } = getRoleInfo(user);
+  const { workspace, homePath } = getRoleInfo(user);
 
-  const groups = getNavigation(routeRole);
+  const groups = useNavGroups();
   const active = findActiveItem(groups, pathname)?.item;
   const pendingCount = leave.length + overtime.length;
 
@@ -33,7 +32,7 @@ export default function Sidebar({ open, onClose }) {
             <Logo />
           </Link>
           <span className="ml-auto rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-500">
-            {WORKSPACE_LABELS[routeRole]}
+            {workspace}
           </span>
         </div>
 

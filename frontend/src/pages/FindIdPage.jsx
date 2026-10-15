@@ -48,7 +48,6 @@ export default function FindIdPage() {
       links={[
         { label: '로그인', onClick: () => navigate('/login') },
         { label: '비밀번호 찾기', onClick: () => navigate('/find-pw') },
-        { label: '회원가입', onClick: () => navigate('/signup') },
       ]}
     />
   );
