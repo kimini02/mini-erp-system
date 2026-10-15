@@ -167,7 +167,7 @@ function CreateModal({ open, onClose, departments, positions, roles, canAssignRo
 
 /* ───────── 수정 ───────── */
 
-function EditModal({ user, onClose, departments, positions, roles, canAssignRoles, canInvite, onSaved }) {
+function EditModal({ user, onClose, departments, positions, roles, canAssignRoles, canInvite, canManagePrivileged, onSaved }) {
   const initial = useMemo(() => user && {
     name: user.name,
     email: user.email,
@@ -197,6 +197,14 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
   const statusChanged = form.status !== initial.status;
   const rolesChanged = [...form.roleCodes].sort().join() !== [...initial.roleCodes].sort().join();
   const leaving = statusChanged && form.status !== 'ACTIVE';
+  // 관리 역할을 가진 사원의 이메일·초대 메일은 역할 수정 권한이 있어야 다룰 수 있습니다(권한 상승 방지).
+  const privileged = user.roles.some((r) => r.code !== 'EMPLOYEE');
+  const emailLocked = privileged && !canManagePrivileged;
+  const emailHint = emailLocked
+    ? '관리 역할을 가진 사원의 이메일은 역할·권한을 바꿀 수 있는 사람만 바꿀 수 있습니다.'
+    : user.invitationPending && form.email !== initial.email
+      ? '저장하면 이전에 보낸 초대 링크는 더 이상 쓸 수 없습니다. 초대 메일을 다시 보내 주세요.'
+      : undefined;
 
   const save = async () => {
     setSaving(true);
@@ -246,7 +254,7 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
       footer={<><Button variant="secondary" onClick={onClose}>닫기</Button><Button onClick={save} loading={saving} disabled={!(profileChanged || statusChanged || rolesChanged) || !form.name.trim()}>저장</Button></>}
     >
       <div className="space-y-5">
-        {user.invitationPending && canInvite && (
+        {user.invitationPending && canInvite && !emailLocked && (
           <div className="flex flex-wrap items-center gap-3 rounded-lg bg-blue-50 px-3.5 py-3 text-[13px] text-blue-900">
             <Mail size={16} className="shrink-0 text-blue-600" />
             <span className="flex-1">아직 비밀번호를 설정하지 않았습니다 (첫 로그인 전).</span>
@@ -258,8 +266,8 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
           <Field label="이름" htmlFor="eu-name" required>
             <Input id="eu-name" value={form.name} onChange={set('name')} />
           </Field>
-          <Field label="회사 이메일" htmlFor="eu-email" required>
-            <Input id="eu-email" type="email" value={form.email} onChange={set('email')} />
+          <Field label="회사 이메일" htmlFor="eu-email" required hint={emailHint}>
+            <Input id="eu-email" type="email" value={form.email} onChange={set('email')} disabled={emailLocked} />
           </Field>
           <Field label="부서" htmlFor="eu-dept" hint="부서장인 사람은 먼저 부서장을 다른 사람으로 바꿔야 옮길 수 있습니다.">
             <Select id="eu-dept" value={form.departmentId} onChange={set('departmentId')}>
@@ -519,6 +527,7 @@ export default function EmployeesPage() {
         roles={roles}
         canAssignRoles={canAssignRoles}
         canInvite={canCreate}
+        canManagePrivileged={can(MENU.ROLE, 'U')}
         onSaved={(opts) => {
           if (!opts?.keepOpen) setEditing(null);
           load();

@@ -392,6 +392,20 @@ route('GET', '/users/:id', (ctx) => {
   return userListView(target);
 });
 
+// 사원 외 역할(팀장·관리소장·사용자 정의 역할)을 가졌는지
+const hasPrivilegedRole = (user) => user.roles.some((c) => c !== 'EMPLOYEE');
+
+// 사원마다 유효한 초대 링크는 하나. 다시 보내거나 이메일이 바뀌면 이전 링크는 바로 무효
+function revokeInvitations(userId) {
+  for (const [token, id] of Object.entries(db.setupTokens)) if (id === userId) delete db.setupTokens[token];
+}
+function issueInvitation(user) {
+  revokeInvitations(user.id);
+  user.invitationVersion = (user.invitationVersion || 0) + 1;
+  const token = user.invitationVersion === 1 ? `invite-${user.id}` : `invite-${user.id}-${user.invitationVersion}`;
+  db.setupTokens[token] = user.id;
+}
+
 function checkRoleCodes(codes) {
   if (!Array.isArray(codes) || codes.length === 0) fail(422, 'ROLE_REQUIRED', '역할이 하나 이상 있어야 합니다.');
   codes.forEach((c) => roleByCode(c) || fail(404, 'ROLE_NOT_FOUND', '역할을 찾을 수 없습니다.'));
@@ -410,11 +424,12 @@ route('POST', '/users', (ctx) => {
 
   const id = db.seq.user++;
   const loginId = nextLoginId(hireDate.slice(0, 4));
-  db.users.push({
+  const user = {
     id, loginId, name: name.trim(), email, departmentId: Number(departmentId), positionId: Number(positionId),
     roles: [...roleCodes], hireDate, status: 'ACTIVE', invitationPending: true, mustChangePw: false, tokenVersion: 0, password: null,
-  });
-  db.setupTokens[`invite-${id}`] = id;
+  };
+  db.users.push(user);
+  issueInvitation(user);
   return created({ id, loginId, invitationSent: db.mailEnabled });
 });
 
@@ -423,7 +438,11 @@ route('PATCH', '/users/:id', (ctx) => {
   const target = userById(ctx.path.id) || fail(404, 'USER_NOT_FOUND', '사용자를 찾을 수 없습니다.');
   if (!canSeeUser(ctx, perm.scope, target)) fail(403, 'ACCESS_DENIED', '접근 권한이 없습니다.');
   const { name, email, departmentId, positionId } = ctx.body;
-  if (email !== undefined && db.users.some((u) => u.email === email && u.id !== target.id)) {
+  const emailChanged = email !== undefined && email !== target.email;
+  // 권한 상승 방지: 관리 역할을 가진 사원의 이메일을 바꾸려면 역할 수정 권한도 필요
+  // (이메일로 비밀번호 재설정·초대 링크가 가므로, 바꾸면 그 계정을 가져갈 수 있음)
+  if (emailChanged && hasPrivilegedRole(target)) need(ctx, 'ROLE', 'U');
+  if (emailChanged && db.users.some((u) => u.email === email && u.id !== target.id)) {
     fail(409, 'EMAIL_ALREADY_EXISTS', '이미 사용 중인 이메일입니다.');
   }
   if (departmentId !== undefined && Number(departmentId) !== target.departmentId) {
@@ -440,7 +459,10 @@ route('PATCH', '/users/:id', (ctx) => {
     target.hireDate = ctx.body.hireDate;
   }
   if (name !== undefined) target.name = name.trim();
-  if (email !== undefined) target.email = email;
+  if (emailChanged) {
+    target.email = email;
+    revokeInvitations(target.id);
+  }
   return userListView(target);
 });
 
@@ -474,8 +496,9 @@ route('PUT', '/users/:id/roles', (ctx) => {
 route('POST', '/users/:id/invitation', (ctx) => {
   need(ctx, 'EMPLOYEE', 'C');
   const target = userById(ctx.path.id) || fail(404, 'USER_NOT_FOUND', '사용자를 찾을 수 없습니다.');
+  if (hasPrivilegedRole(target)) need(ctx, 'ROLE', 'U');
   if (!target.invitationPending) fail(409, 'INVITATION_ALREADY_ACCEPTED', '이미 비밀번호를 설정한 사원입니다.');
-  db.setupTokens[`invite-${target.id}`] = target.id;
+  issueInvitation(target);
   return { invitationSent: db.mailEnabled };
 });
 

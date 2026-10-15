@@ -117,7 +117,7 @@ export function createDb() {
     u(11, '2022010', '오태민', 'tm.oh@workflow.test', 6, 2, ['EMPLOYEE'], '2022-10-04'),
     u(12, '2023002', '김서연', 'sy.kim@workflow.test', 6, 1, ['EMPLOYEE'], '2023-03-02'),
     u(13, '2024008', '한유진', 'yj.han@workflow.test', 6, 1, ['EMPLOYEE'], '2024-07-01'),
-    u(14, '2026003', '신동현', 'dh.shin@workflow.test', 6, 1, ['EMPLOYEE'], '2026-10-05', { invitationPending: true, password: null }),
+    u(14, '2026003', '신동현', 'dh.shin@workflow.test', 6, 1, ['EMPLOYEE'], '2026-10-05', { invitationPending: true, password: null, invitationVersion: 1 }),
     u(15, '2023009', '서지우', 'jw.seo@workflow.test', 8, 1, ['EMPLOYEE'], '2023-09-04'),
     u(16, '2020004', '권태양', 'ty.kwon@workflow.test', 8, 3, ['EMPLOYEE'], '2020-11-02'),
     u(17, '2022012', '유나래', 'nr.yu@workflow.test', 8, 2, ['EMPLOYEE'], '2022-04-18', { status: 'ON_LEAVE' }),

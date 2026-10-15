@@ -27,15 +27,17 @@ if (import.meta.env.MODE === 'mock' || import.meta.env.VITE_USE_MOCK === 'true')
   };
 }
 
+const isAuthRequest = (config) => (config?.url || '').startsWith('/auth/');
+
+// 로그인·초대 링크·비밀번호 찾기(/auth/)에는 토큰을 붙이지 않습니다.
+// 남아 있던 만료 토큰 때문에 로그인이나 첫 비밀번호 설정이 막히지 않게 합니다.
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY);
-  if (token) {
+  if (token && !isAuthRequest(config)) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
-
-const isAuthRequest = (config) => (config?.url || '').startsWith('/auth/');
 
 instance.interceptors.response.use(
   (response) => response,
