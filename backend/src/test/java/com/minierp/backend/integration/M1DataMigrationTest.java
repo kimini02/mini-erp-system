@@ -23,8 +23,8 @@ class M1DataMigrationTest {
         Flyway.configure().dataSource(dataSource).locations(location).target("1").load().migrate();
         var jdbc = new JdbcTemplate(dataSource);
         String hash = "encoded-fixture-" + UUID.randomUUID();
-        String[] roles = {"ADMIN", "TEAM_LEADER", "USER"};
-        for (int i = 0; i < 3; i++) jdbc.update("""
+        String[] roles = {"ADMIN", "TEAM_LEADER", "USER", "USER"};
+        for (int i = 0; i < 4; i++) jdbc.update("""
             INSERT INTO users(created_at,user_name,user_email,user_pw,department_code,position_name,
                 user_role,is_active,total_annual_leave,used_annual_leave,remaining_annual_leave,login_id)
             VALUES('2020-01-01 09:00:00',?,?,?,?,'기존직급',?,?,15.5,2,13.5,?)
@@ -32,13 +32,13 @@ class M1DataMigrationTest {
         var migration = Flyway.configure().dataSource(dataSource).locations(location).load();
         assertThat(migration.migrate().migrationsExecuted).isEqualTo(1);
         assertThat(migration.validateWithResult().validationSuccessful).isTrue();
-        assertThat(output.getAll()).contains("M1: migrated_inactive_to_retired=1");
+        assertThat(output.getAll()).contains("M1: migrated_inactive_to_retired=1").contains("M1: migrated_unknown_department=1");
         assertThat(jdbc.queryForObject("SELECT is_nullable FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='users' AND column_name='hire_date'",String.class)).isEqualTo("YES");
         assertThat(jdbc.queryForList("SELECT login_id FROM users ORDER BY id",String.class))
-                .containsExactly("legacy0","legacy1","2026012");
+                .containsExactly("legacy0","legacy1","2026012","legacy3");
         assertThat(jdbc.queryForList("SELECT r.code FROM user_roles ur JOIN roles r ON r.id=ur.role_id ORDER BY ur.user_id",String.class))
-                .containsExactly("CHIEF","LEADER","EMPLOYEE");
-        assertThat(jdbc.queryForList("SELECT department_id FROM users ORDER BY id",Long.class)).containsExactly(2L,3L,4L);
+                .containsExactly("CHIEF","LEADER","EMPLOYEE","EMPLOYEE");
+        assertThat(jdbc.queryForList("SELECT department_id FROM users ORDER BY id",Long.class)).containsExactly(2L,3L,4L,1L);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM positions WHERE name='기존직급'",Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT COUNT(DISTINCT position_id) FROM users",Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT last_seq FROM login_id_sequences WHERE hire_year=2026",Integer.class)).isEqualTo(12);

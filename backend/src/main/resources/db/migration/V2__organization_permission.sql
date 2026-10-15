@@ -141,12 +141,15 @@ ALTER TABLE users ADD department_id BIGINT NULL, ADD position_id BIGINT NULL, AD
 ADD status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE', ADD must_change_pw BIT NOT NULL DEFAULT 0,
 ADD token_version INT NOT NULL DEFAULT 0, MODIFY user_pw VARCHAR(255) NULL;
 UPDATE users u JOIN positions p ON p.name=u.position_name
-SET u.department_id=CASE u.department_code WHEN '01' THEN 2 WHEN '02' THEN 3 WHEN '03' THEN 4 END,
+SET u.department_id=CASE u.department_code WHEN '01' THEN 2 WHEN '02' THEN 3 WHEN '03' THEN 4 ELSE 1 END,
 u.position_id=p.id,u.status=CASE WHEN u.is_active THEN 'ACTIVE' ELSE 'RETIRED' END;
 -- v1 비활성 사유를 알 수 없으므로 RETIRED로 닫고, 입사일은 NULL로 보존한다.
 -- Flyway가 이 결과를 실행 로그에 남긴다. 계정/비밀번호 없이 이관 건수만 기록한다.
 SELECT CONCAT('M1: migrated_inactive_to_retired=', COUNT(*)) AS migration_summary
 FROM users WHERE is_active=0 AND status='RETIRED';
+-- 모르는 기존 부서는 최상위 부서로 보존하고 이관 건수만 기록한다.
+SELECT CONCAT('M1: migrated_unknown_department=', COUNT(*)) AS migration_summary
+FROM users WHERE department_code NOT IN ('01','02','03') OR department_code IS NULL;
 INSERT INTO user_roles(user_id,role_id)
 SELECT id,CASE user_role WHEN 'ADMIN' THEN 1 WHEN 'TEAM_LEADER' THEN 2 ELSE 3 END FROM users;
 -- 기존 숫자형 로그인 아이디는 그대로 유지하고 해당 연도 시퀀스 충돌을 피한다.
