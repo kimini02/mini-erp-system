@@ -64,7 +64,9 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
         chief=user("chief","01",UserRole.ADMIN); leader=user("leader","01",UserRole.TEAM_LEADER);
         employee=user("employee","01",UserRole.USER); outsider=user("outside","02",UserRole.USER);
         links.clear();reset(tokens,mail);
-        doAnswer(inv->{links.put(inv.getArgument(0),inv.getArgument(1));return null;}).when(tokens).save(anyString(),anyLong());
+        doAnswer(inv->{Long id=inv.getArgument(1);links.values().removeIf(id::equals);links.put(inv.getArgument(0),id);return null;}).when(tokens).save(anyString(),anyLong());
+        doAnswer(inv->{Long id=inv.getArgument(0);links.values().removeIf(id::equals);return null;}).when(tokens).revoke(anyLong());
+        when(tokens.owner(anyString())).thenAnswer(inv->links.get(inv.getArgument(0)));
         when(tokens.consume(anyString())).thenAnswer(inv->links.remove(inv.getArgument(0)));
         chiefToken=login(chief.getLoginId());leaderToken=login(leader.getLoginId());employeeToken=login(employee.getLoginId());
     }
@@ -315,8 +317,9 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
     }
     @Test void concurrentInvitationLinksCannotOverwriteFirstPassword() throws Exception {
         var created = employees.register(create("초대경쟁"));
-        employees.invitation(created.getId());
         var invitationTokens = new ArrayList<>(links.keySet());
+        employees.invitation(created.getId());
+        invitationTokens.addAll(links.keySet());
         var pool = Executors.newFixedThreadPool(2);
         var start = new CyclicBarrier(2);
         try {

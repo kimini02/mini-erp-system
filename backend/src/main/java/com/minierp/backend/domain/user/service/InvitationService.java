@@ -19,9 +19,13 @@ public class InvitationService {
     @Value("${app.mail.enabled:false}") private boolean enabled;
     @Value("${app.invitation.setup-url:http://localhost:5173/password/setup}") private String setupUrl;
     @TransactionalEventListener(phase=TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation=org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void send(EmployeeService.InvitationRequested event) {
         if(!enabled) return;
         try {
+            // Serialize issuance with email changes and setup; ignore stale after-commit events.
+            var user=users.findByIdForUpdate(event.userId()).orElse(null);
+            if(user==null || user.getUserPw()!=null || !user.getUserEmail().equals(event.email())) return;
             String token=UUID.randomUUID().toString(); tokens.save(token,event.userId());
             String link=UriComponentsBuilder.fromUriString(setupUrl).queryParam("setupToken",token).build().encode().toUriString();
             mail.sendInvitationMail(event.email(),link); event.result().invitationDelivered();
@@ -33,10 +37,10 @@ public class InvitationService {
     @Transactional
     public void setup(String token,String password) {
         PasswordPolicy.validate(password);
-        Long userId=tokens.consume(token);
+        Long userId=tokens.owner(token);
         if(userId==null) throw new BusinessException(ErrorCode.SETUP_TOKEN_INVALID);
         var user=users.findByIdForUpdate(userId).orElseThrow(()->new BusinessException(ErrorCode.SETUP_TOKEN_INVALID));
-        if(user.getUserPw()!=null) throw new BusinessException(ErrorCode.SETUP_TOKEN_INVALID);
+        if(user.getUserPw()!=null || !userId.equals(tokens.consume(token))) throw new BusinessException(ErrorCode.SETUP_TOKEN_INVALID);
         user.updatePassword(encoder.encode(password));
     }
 }

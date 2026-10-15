@@ -17,6 +17,7 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 public class EmployeeService {
     private final SqlStore db; private final EmployeeRepository repository; private final PermissionAccess access;
     private final ApplicationEventPublisher events; private final Clock clock;
+    private final com.minierp.backend.global.service.InvitationTokenStore invitationTokens;
     public record InvitationRequested(long userId,String email,RegistrationResult result) {}
     public Map<String,Object> raw(long id) { return db.one("SELECT * FROM users WHERE id=:id",map("id",id),ErrorCode.USER_NOT_FOUND); }
     public void lockChief() { db.rows("SELECT id FROM roles WHERE code='CHIEF' FOR UPDATE",Map.of()); }
@@ -106,13 +107,15 @@ public class EmployeeService {
         var result=new RegistrationResult(id,loginId);events.publishEvent(new InvitationRequested(id,r.email(),result));return result;
     }
     @Transactional public Map<String,Object> patch(long id,Patch r) {
-        access.assertUserInScope("EMPLOYEE",id); var old=raw(id);
+        access.assertUserInScope("EMPLOYEE",id);
+        var old=r.email()==null?raw(id):db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);
         if(r.departmentId()!=null) { if(number(old,"department_id")!=r.departmentId()) notHead(id); db.one("SELECT id FROM departments WHERE id=:id",map("id",r.departmentId()),ErrorCode.DEPARTMENT_NOT_FOUND); }
         if(r.positionId()!=null) db.one("SELECT id FROM positions WHERE id=:id",map("id",r.positionId()),ErrorCode.POSITION_NOT_FOUND);
         if(r.name()!=null && r.name().isBlank() || r.email()!=null && r.email().isBlank()) throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         try { db.update("UPDATE users SET user_name=COALESCE(:name,user_name),user_email=COALESCE(:email,user_email),department_id=COALESCE(:dept,department_id),position_id=COALESCE(:position,position_id),hire_date=COALESCE(:hire,hire_date),updated_at=:now WHERE id=:id",
             map("id",id,"name",r.name(),"email",r.email(),"dept",r.departmentId(),"position",r.positionId(),"hire",r.hireDate(),"now",LocalDateTime.now(clock))); }
         catch(org.springframework.dao.DuplicateKeyException ex) { throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS); }
+        if(r.email()!=null && !r.email().equals(old.get("user_email"))) invitationTokens.revoke(id);
         return views(List.of(id)).get(0);
     }
     @Transactional public Map<String,Object> status(long id,com.minierp.backend.domain.user.entity.UserStatus status) {
@@ -129,7 +132,8 @@ public class EmployeeService {
         for(long role:ids) db.update("INSERT INTO user_roles(user_id,role_id) VALUES(:id,:role)",map("id",id,"role",role));
     }
     @Transactional public RegistrationResult invitation(long id) {
-        var user=raw(id); if(user.get("user_pw")!=null) throw new BusinessException(ErrorCode.INVITATION_ALREADY_ACCEPTED);
+        var user=db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND); if(user.get("user_pw")!=null) throw new BusinessException(ErrorCode.INVITATION_ALREADY_ACCEPTED);
+        invitationTokens.revoke(id);
         var result=new RegistrationResult(id,(String)user.get("login_id"));events.publishEvent(new InvitationRequested(id,(String)user.get("user_email"),result));return result;
     }
 }
