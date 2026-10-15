@@ -102,6 +102,9 @@ public class User extends BaseEntity {
     public static User createInitialAdmin(String userName, String loginId, String userEmail, String encodedPassword) {
         User admin = new User(userName, loginId, userEmail, encodedPassword,
                 DepartmentCode.values()[0].getCode(), "관리소장", UserRole.ADMIN);
+        admin.departmentId = 1L;
+        admin.departmentCode = "D-0001";
+        admin.departmentName = "회사";
         admin.mustChangePassword = true;
         admin.totalAnnualLeave = BigDecimal.ZERO;
         admin.usedAnnualLeave = BigDecimal.ZERO;

@@ -28,7 +28,7 @@ public class MailService {
 
     public void sendVerificationCodeMail(String toEmail, String verificationCode) {
         if (!mailEnabled) {
-            log.info("메일 발송 비활성화 상태입니다. code={}, to={}", verificationCode, toEmail);
+            log.info("메일 발송 비활성화 상태입니다.");
             return;
         }
 

@@ -47,7 +47,8 @@ class InitialAdminMariaDbTest extends MariaDbIntegrationTest {
         assertThat(admin.isMustChangePassword()).isTrue();
         assertThat(admin.roleCodeList()).containsExactly("CHIEF");
         assertThat(admin.getPositionName()).isEqualTo("관리소장");
-        assertThat(admin.getDepartmentCode()).isEqualTo(DepartmentCode.values()[0].getCode());
+        assertThat(admin.getDepartmentId()).isEqualTo(1L);
+        assertThat(admin.getDepartmentCode()).isEqualTo("D-0001");
         assertThat(admin.getTotalAnnualLeave()).isZero();
         assertThat(admin.getUsedAnnualLeave()).isZero();
         assertThat(admin.getRemainingAnnualLeave()).isZero();

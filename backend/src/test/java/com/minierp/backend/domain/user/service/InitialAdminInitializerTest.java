@@ -96,7 +96,8 @@ class InitialAdminInitializerTest {
         assertThat(admin.getUserRole()).isEqualTo(UserRole.ADMIN);
         assertThat(admin.isMustChangePassword()).isTrue();
         assertThat(admin.roleCodeList()).containsExactly("CHIEF");
-        assertThat(admin.getDepartmentCode()).isEqualTo(DepartmentCode.values()[0].getCode());
+        assertThat(admin.getDepartmentId()).isEqualTo(1L);
+        assertThat(admin.getDepartmentCode()).isEqualTo("D-0001");
         assertThat(admin.getPositionName()).isEqualTo("관리소장");
         assertThat(admin.isActive()).isTrue();
         assertThat(admin.getTotalAnnualLeave()).isZero();
