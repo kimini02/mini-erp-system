@@ -8,7 +8,18 @@ import java.util.*;
 @Repository @RequiredArgsConstructor
 public class SqlStore {
     private final NamedParameterJdbcTemplate jdbc;
-    public List<Map<String,Object>> rows(String sql,Map<String,?> args) { return jdbc.queryForList(sql,args); }
+    public List<Map<String,Object>> rows(String sql,Map<String,?> args) {
+        var rows = jdbc.queryForList(sql, args);
+        // DATETIME/DATE hold Korean local values, not instants. Preserve those values
+        // before Jackson can serialize JDBC dates using its timezone (including in M2).
+        rows.forEach(row -> row.replaceAll((column, value) -> localTemporalValue(value)));
+        return rows;
+    }
+    private static Object localTemporalValue(Object value) {
+        if (value instanceof java.sql.Timestamp timestamp) return timestamp.toLocalDateTime();
+        if (value instanceof java.sql.Date date) return date.toLocalDate();
+        return value;
+    }
     public Map<String,Object> one(String sql,Map<String,?> args,ErrorCode error) {
         var rows=rows(sql,args); if(rows.isEmpty()) throw new BusinessException(error); return rows.get(0);
     }

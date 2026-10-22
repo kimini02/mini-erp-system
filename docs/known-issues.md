@@ -9,6 +9,7 @@ M0 보고서에 기록된 문제 중 M0-4 이후에도 남는 항목이다. 날�
 | KI-03 | 연차 승인과 연차 차감에 잠금·버전 검증 없음 | M2 — 결재 동시성 | 코드상 위험, 동시 실행 재현 필요 |
 | KI-04 | 출퇴근 시각을 요청 본문으로 받고, 본인이 근태 기록을 고칠 수 있음 | M3 — 근태 재구축 | 코드 확인 (M0 검토 중 발견) |
 | KI-05 | JPA 자동 기록 시각(created_at·updated_at)이 서버 기본 시간대를 따름 | M1 — 공통 설정 | 해결됨 — `cbf71e0` (M1-7) |
+| KI-06 | JDBC 날짜가 UTC 오프셋을 포함한 JSON으로 반환되어 화면 시각이 틀어짐 | M2 선행 수정 — 공통 조회 | 해결됨 — SqlStore 날짜 타입 정규화 ([검증 기록](troubleshooting/M2-0-jdbc-local-date-time.md)) |
 
 ## KI-01 — 특근 신청 500 (M2)
 - 증상: overtimeDate와 근무 시간을 보내면 정상 신청 대신 500이 반환된다.
@@ -65,3 +66,11 @@ M0 보고서에 기록된 문제 중 M0-4 이후에도 남는 항목이다. 날�
 - DB 이메일 변경과 Redis 폐기는 분산 트랜잭션이 아니다. 커밋 뒤 삭제가 지연되거나 실패해도 토큰의 발급 이메일과 현재 이메일 검증으로 이전 주소의 링크를 거부한다. 이메일 정보가 없는 이전 형식 링크는 재발송해야 한다.
 - KI-01(특근 DTO, 기존 비활성 테스트), KI-03(연차 승인 동시성)은 M2에 남긴다. KI-04는 M3에 남긴다. 이번 작업에서 M2를 구현하지 않았다.
 - 전체 테스트 및 수정 전 실패 확인 결과: [M1 리뷰 결과](troubleshooting/M1-19-review-results.md).
+
+## KI-06 — JDBC 날짜 응답의 시간대 (M2 선행 수정, 해결됨)
+- 증상: DB의 한국 시각 DATETIME을 Timestamp 그대로 응답해 UTC JVM에서 `21:07:29.213+00:00`처럼 반환한다. 화면이 한국 시간으로 바꾸면 9시간 차이가 난다.
+- 원인: SqlStore의 queryForList 결과에 남아 있는 JDBC 날짜를 Jackson이 순간 값으로 직렬화한다. 저장 시각을 고친 KI-05와 별개다.
+- 해결: SqlStore에서 Timestamp→LocalDateTime, java.sql.Date→LocalDate로 공통 변환한다. NULL과 나머지 값은 유지하며, 시간대 표시 없이 DB 지역 시각과 마이크로초 정밀도를 보존한다.
+- 검증: SqlStoreDateTimeMariaDbTest. UTC JVM + MariaDB Testcontainers에서 GET /api/v1/users의 createdAt을 DB DATE_FORMAT 결과와 직접 비교한다. rows·one의 임의 시각 컬럼명, DATE, NULL도 확인한다. 신규 테스트 2개가 수정 전 실패했음을 확인했다.
+- M2 적용 기준: submittedAt·completedAt·이력 at·알림 createdAt은 같은 LocalDateTime 계약을 따른다. M2 API 구현 시 실제 응답 검증을 추가한다.
+- 수정 및 재현 기록: [M2-0](troubleshooting/M2-0-jdbc-local-date-time.md). 해결 코드·회귀 테스트·이슈 문서를 하나의 독립 커밋으로 묶었다.
