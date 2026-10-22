@@ -29,7 +29,7 @@ class M1DataMigrationTest {
                 user_role,is_active,total_annual_leave,used_annual_leave,remaining_annual_leave,login_id)
             VALUES('2020-01-01 09:00:00',?,?,?,?,'기존직급',?,?,15.5,2,13.5,?)
             """, "이관"+i, "migration"+i+"@example.test", hash, "0"+(i+1), roles[i], i!=2, i==2?"2026012":"legacy"+i);
-        var migration = Flyway.configure().dataSource(dataSource).locations(location).load();
+        var migration = Flyway.configure().dataSource(dataSource).locations(location).target("2").load();
         assertThat(migration.migrate().migrationsExecuted).isEqualTo(1);
         assertThat(migration.validateWithResult().validationSuccessful).isTrue();
         assertThat(output.getAll()).contains("M1: migrated_inactive_to_retired=1").contains("M1: migrated_unknown_department=1");
