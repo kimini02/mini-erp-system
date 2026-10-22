@@ -36,7 +36,7 @@ public class EmployeeService {
         if(ids.isEmpty()) return List.of();
         var rows=db.rows("""
             SELECT u.id,u.login_id,u.user_name,u.user_email,u.department_id,u.position_id,u.hire_date,u.status,u.user_pw,
-              u.remaining_annual_leave,u.created_at,u.updated_at,d.name AS department_name,d.code AS department_code,p.name AS position_name
+              (SELECT COALESCE(SUM(l.days),0) FROM leave_ledger l WHERE l.user_id=u.id) AS remaining_annual_leave,u.created_at,u.updated_at,d.name AS department_name,d.code AS department_code,p.name AS position_name
             FROM users u JOIN departments d ON d.id=u.department_id JOIN positions p ON p.id=u.position_id WHERE u.id IN (:ids)
             """,map("ids",ids));
         Map<Long,List<Map<String,Object>>> roles=new HashMap<>();
@@ -105,10 +105,11 @@ public class EmployeeService {
         long id;
         try { id=db.insert("""
             INSERT INTO users(login_id,user_name,user_email,user_pw,department_id,position_id,hire_date,status,must_change_pw,token_version,
-              total_annual_leave,used_annual_leave,remaining_annual_leave,created_at,updated_at)
-            VALUES(:login,:name,:email,NULL,:department,:position,:hire,'ACTIVE',0,0,:annual,0,:annual,:now,:now)
+              created_at,updated_at)
+            VALUES(:login,:name,:email,NULL,:department,:position,:hire,'ACTIVE',0,0,:now,:now)
             """,map("login",loginId,"name",r.name(),"email",r.email(),"department",r.departmentId(),"position",r.positionId(),"hire",r.hireDate(),"annual",annual,"now",LocalDateTime.now(clock))); }
         catch(org.springframework.dao.DuplicateKeyException ex) { throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS); }
+        db.update("INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,memo,created_at) VALUES(:id,:year,'GRANT',:annual,'기존 신규 사원 부여 정책',:now)",map("id",id,"year",LocalDate.now(clock).getYear(),"annual",annual,"now",LocalDateTime.now(clock)));
         for(long role:roles) db.update("INSERT INTO user_roles(user_id,role_id) VALUES(:user,:role)",map("user",id,"role",role));
         var result=new RegistrationResult(id,loginId);events.publishEvent(new InvitationRequested(id,r.email(),result));return result;
     }

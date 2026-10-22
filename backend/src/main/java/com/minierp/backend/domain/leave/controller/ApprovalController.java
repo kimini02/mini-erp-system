@@ -1,13 +1,13 @@
-package com.minierp.backend.domain.approval.controller;
+package com.minierp.backend.domain.leave.controller;
 
 import java.time.Clock;
 
-import com.minierp.backend.domain.approval.dto.LeaveBalanceResponseDto;
-import com.minierp.backend.domain.approval.dto.LeavePolicyResponseDto;
-import com.minierp.backend.domain.approval.dto.LeaveRequestCreateDto;
-import com.minierp.backend.domain.approval.dto.LeaveRequestResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveBalanceResponseDto;
+import com.minierp.backend.domain.leave.dto.LeavePolicyResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveRequestCreateDto;
+import com.minierp.backend.domain.leave.dto.LeaveRequestResponseDto;
 import com.minierp.backend.domain.approval.dto.RejectRequestDto;
-import com.minierp.backend.domain.approval.service.ApprovalService;
+import com.minierp.backend.domain.leave.service.ApprovalService;
 import com.minierp.backend.global.response.ApiResponse;
 import com.minierp.backend.global.security.CurrentUserResolver;
 import lombok.RequiredArgsConstructor;

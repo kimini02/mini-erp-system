@@ -1,6 +1,6 @@
 package com.minierp.backend.domain.dashboard.dto;
 
-import com.minierp.backend.domain.approval.dto.LeaveRequestResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveRequestResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

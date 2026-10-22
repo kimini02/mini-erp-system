@@ -1,13 +1,13 @@
-package com.minierp.backend.domain.approval.service;
+package com.minierp.backend.domain.leave.service;
 
-import com.minierp.backend.domain.approval.dto.LeaveBalanceResponseDto;
-import com.minierp.backend.domain.approval.dto.LeavePolicyResponseDto;
-import com.minierp.backend.domain.approval.dto.LeaveRequestCreateDto;
-import com.minierp.backend.domain.approval.dto.LeaveRequestResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveBalanceResponseDto;
+import com.minierp.backend.domain.leave.dto.LeavePolicyResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveRequestCreateDto;
+import com.minierp.backend.domain.leave.dto.LeaveRequestResponseDto;
 import com.minierp.backend.domain.approval.dto.RejectRequestDto;
-import com.minierp.backend.domain.approval.entity.LeaveRequest;
-import com.minierp.backend.domain.approval.entity.LeaveStatus;
-import com.minierp.backend.domain.approval.repository.LeaveRequestRepository;
+import com.minierp.backend.domain.leave.entity.LeaveRequest;
+import com.minierp.backend.domain.leave.entity.LeaveStatus;
+import com.minierp.backend.domain.leave.repository.LeaveRequestRepository;
 import com.minierp.backend.domain.user.entity.User;
 import com.minierp.backend.domain.user.repository.UserRepository;
 import com.minierp.backend.global.exception.BusinessException;

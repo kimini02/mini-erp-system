@@ -1,8 +1,10 @@
-package com.minierp.backend.domain.approval.entity;
+package com.minierp.backend.domain.leave.entity;
 
 import java.math.BigDecimal;
 
 public enum LeaveType {
+    SICK("병가", BigDecimal.ZERO),
+    FAMILY("경조", BigDecimal.ZERO),
     ANNUAL("연차", new BigDecimal("1.0")),
     HALF_MORNING("오전반차", new BigDecimal("0.5")),
     HALF_AFTERNOON("오후반차", new BigDecimal("0.5"));

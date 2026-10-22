@@ -1,4 +1,4 @@
-package com.minierp.backend.domain.approval.dto;
+package com.minierp.backend.domain.leave.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

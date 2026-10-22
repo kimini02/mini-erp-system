@@ -1,6 +1,6 @@
-package com.minierp.backend.domain.approval.dto;
+package com.minierp.backend.domain.leave.dto;
 
-import com.minierp.backend.domain.approval.entity.LeaveType;
+import com.minierp.backend.domain.leave.entity.LeaveType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.minierp.backend.domain.approval.entity;
+package com.minierp.backend.domain.leave.entity;
 
 import com.minierp.backend.domain.user.entity.User;
 import com.minierp.backend.global.entity.BaseEntity;
@@ -29,16 +29,19 @@ import java.util.List;
 @Getter
 public class LeaveRequest extends BaseEntity {
 
+    @Column(name="document_id",nullable=false,unique=true)
+    private Long documentId;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id", nullable = false)
+    @org.hibernate.annotations.JoinFormula("(select d.drafter_id from approval_documents d where d.id=document_id)")
     private User requester;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approver_id")
+    @org.hibernate.annotations.JoinFormula("(select l.approver_id from approval_lines l where l.document_id=document_id and l.line_kind='APPROVER' order by l.step_order desc limit 1)")
     private User approver;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "app_type", nullable = false, length = 50)
+    @org.hibernate.annotations.Formula("(case leave_type when 'HALF_AM' then 'HALF_MORNING' when 'HALF_PM' then 'HALF_AFTERNOON' else leave_type end)")
     private LeaveType appType;
 
     @Column(name = "start_date", nullable = false)
@@ -51,13 +54,13 @@ public class LeaveRequest extends BaseEntity {
     private BigDecimal usedDays;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "app_status", nullable = false, length = 50)
+    @org.hibernate.annotations.Formula("(select case d.status when 'IN_PROGRESS' then 'PENDING' when 'WITHDRAWN' then 'CANCELLED' else d.status end from approval_documents d where d.id=document_id)")
     private LeaveStatus appStatus = LeaveStatus.PENDING;
 
-    @Column(name = "reject_reason", length = 500)
+    @org.hibernate.annotations.Formula("(select h.comment from approval_histories h where h.document_id=document_id and h.action='REJECT' order by h.id desc limit 1)")
     private String rejectReason;
 
-    @Column(name = "request_reason", length = 500)
+    @Column(name = "reason", length = 500)
     private String requestReason;
 
     @Builder

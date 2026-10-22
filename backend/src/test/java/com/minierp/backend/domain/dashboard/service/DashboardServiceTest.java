@@ -2,8 +2,8 @@ package com.minierp.backend.domain.dashboard.service;
 
 import com.minierp.backend.support.TestClocks;
 
-import com.minierp.backend.domain.approval.entity.LeaveStatus;
-import com.minierp.backend.domain.approval.repository.LeaveRequestRepository;
+import com.minierp.backend.domain.leave.entity.LeaveStatus;
+import com.minierp.backend.domain.leave.repository.LeaveRequestRepository;
 import com.minierp.backend.domain.dashboard.dto.AdminDashboardResponseDto;
 import com.minierp.backend.domain.dashboard.dto.DashboardProjectDto;
 import com.minierp.backend.domain.dashboard.dto.DashboardResponseDto;

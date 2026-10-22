@@ -63,13 +63,13 @@ public class User extends BaseEntity {
     @Column(name="role_id", nullable=false)
     private Set<Long> roleIds = new HashSet<>();
 
-    @Column(name = "total_annual_leave", nullable = false, precision = 5, scale = 1)
+    @Formula("(select coalesce(sum(case when l.entry_type='GRANT' then l.days else 0 end),0) from leave_ledger l where l.user_id=id)")
     private BigDecimal totalAnnualLeave;
 
-    @Column(name = "used_annual_leave", nullable = false, precision = 5, scale = 1)
+    @Formula("(select coalesce(-sum(case when l.entry_type='USE' then l.days else 0 end),0) from leave_ledger l where l.user_id=id)")
     private BigDecimal usedAnnualLeave;
 
-    @Column(name = "remaining_annual_leave", nullable = false, precision = 5, scale = 1)
+    @Formula("(select coalesce(sum(l.days),0) from leave_ledger l where l.user_id=id)")
     private BigDecimal remainingAnnualLeave;
 
     @Column(name = "login_id", nullable = false, unique = true, length = 50)

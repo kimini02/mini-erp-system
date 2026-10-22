@@ -1,7 +1,7 @@
-package com.minierp.backend.domain.approval.repository;
+package com.minierp.backend.domain.leave.repository;
 
-import com.minierp.backend.domain.approval.entity.LeaveRequest;
-import com.minierp.backend.domain.approval.entity.LeaveStatus;
+import com.minierp.backend.domain.leave.entity.LeaveRequest;
+import com.minierp.backend.domain.leave.entity.LeaveStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum OvertimeStatus {
+    DRAFT("임시 저장"),
     PENDING("결재 대기"),
     APPROVED("승인"),
     REJECTED("반려"),

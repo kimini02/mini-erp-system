@@ -1,9 +1,9 @@
 package com.minierp.backend.global.config;
 
-import com.minierp.backend.domain.approval.dto.LeaveRequestCreateDto;
-import com.minierp.backend.domain.approval.entity.LeaveType;
-import com.minierp.backend.domain.approval.repository.LeaveRequestRepository;
-import com.minierp.backend.domain.approval.service.ApprovalService;
+import com.minierp.backend.domain.leave.dto.LeaveRequestCreateDto;
+import com.minierp.backend.domain.leave.entity.LeaveType;
+import com.minierp.backend.domain.leave.repository.LeaveRequestRepository;
+import com.minierp.backend.domain.leave.service.ApprovalService;
 import com.minierp.backend.domain.overtime.dto.OvertimeRequestDto;
 import com.minierp.backend.domain.overtime.repository.OvertimeRequestRepository;
 import com.minierp.backend.domain.overtime.service.OvertimeService;

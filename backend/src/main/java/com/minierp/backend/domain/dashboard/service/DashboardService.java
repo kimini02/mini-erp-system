@@ -1,7 +1,7 @@
 package com.minierp.backend.domain.dashboard.service;
 
-import com.minierp.backend.domain.approval.entity.LeaveStatus;
-import com.minierp.backend.domain.approval.repository.LeaveRequestRepository;
+import com.minierp.backend.domain.leave.entity.LeaveStatus;
+import com.minierp.backend.domain.leave.repository.LeaveRequestRepository;
 import com.minierp.backend.domain.dashboard.dto.AdminDashboardResponseDto;
 import com.minierp.backend.domain.dashboard.dto.DashboardProjectDto;
 import com.minierp.backend.domain.dashboard.dto.DashboardResponseDto;
@@ -18,7 +18,7 @@ import com.minierp.backend.global.service.AccessPolicy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.minierp.backend.domain.approval.dto.LeaveRequestResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveRequestResponseDto;
 
 import java.util.Comparator;
 import java.util.EnumMap;

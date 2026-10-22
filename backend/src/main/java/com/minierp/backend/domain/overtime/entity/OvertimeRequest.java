@@ -17,12 +17,15 @@ import java.time.LocalTime;
 @Getter
 public class OvertimeRequest extends BaseEntity {
 
+    @Column(name="document_id",nullable=false,unique=true)
+    private Long documentId;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id", nullable = false)
+    @org.hibernate.annotations.JoinFormula("(select d.drafter_id from approval_documents d where d.id=document_id)")
     private User requester;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approver_id")
+    @org.hibernate.annotations.JoinFormula("(select l.approver_id from approval_lines l where l.document_id=document_id and l.line_kind='APPROVER' order by l.step_order desc limit 1)")
     private User approver;
 
     @Column(name = "overtime_date", nullable = false)
@@ -38,7 +41,7 @@ public class OvertimeRequest extends BaseEntity {
     private String reason;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @org.hibernate.annotations.Formula("(select case d.status when 'IN_PROGRESS' then 'PENDING' when 'WITHDRAWN' then 'CANCELLED' else d.status end from approval_documents d where d.id=document_id)")
     private OvertimeStatus status = OvertimeStatus.PENDING;
 
     @Builder
