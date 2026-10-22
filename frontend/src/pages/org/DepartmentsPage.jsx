@@ -521,15 +521,18 @@ export default function DepartmentsPage() {
                 {!detail.head && (
                   <div className="mx-5 mb-5 flex gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-3 text-[13px] text-amber-900">
                     <AlertTriangle size={16} className="mt-px shrink-0 text-amber-600" />
-                    <p>
-                      부서장이 비어 있는 동안 이 부서 사원의 결재는{' '}
-                      {detail.fallbackHead ? (
+                    {detail.fallbackHead ? (
+                      <p>
+                        부서장이 비어 있는 동안 이 부서 사원의 결재는{' '}
                         <b className="font-semibold">{detail.fallbackHead.departmentName} {detail.fallbackHead.name} {detail.fallbackHead.position}</b>
-                      ) : (
-                        '상위 부서장'
-                      )}
-                      에게 넘어갑니다.
-                    </p>
+                        에게 넘어갑니다.
+                      </p>
+                    ) : (
+                      // 상위 부서에도 부서장이 없으면 결재선을 만들 수 없어 상신이 막힙니다(M2 명세 1.3).
+                      <p>
+                        상위 부서에도 부서장이 없어 이 부서 사원은 결재를 올릴 수 없습니다. 이 부서나 상위 부서의 부서장을 지정해 주세요.
+                      </p>
+                    )}
                   </div>
                 )}
               </Card>
