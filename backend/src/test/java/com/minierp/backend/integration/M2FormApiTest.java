@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class M2FormApiTest extends ApprovalApiTestSupport {
 
     @Test void listDetailAndPartialOptionsHaveFrontendShape() throws Exception {
-        var all=data(getAs("/api/v1/approval-forms",employeeToken));assertThat(all.size()).isEqualTo(3);
+        var all=data(getAs("/api/v1/approval-forms",employeeToken));assertThat(all.size()).isEqualTo(4);
         assertThat(all.get(0).path("shortName").asText()).isEqualTo("휴가");assertThat(all.get(0).path("approverStepCount").asInt()).isEqualTo(1);
         var changed=data(mvc.perform(patch("/api/v1/approval-forms/LEAVE").header("Authorization","Bearer "+chiefToken).contentType(MediaType.APPLICATION_JSON).content("{\"skipSelf\":false}")));
         assertThat(changed.path("options").path("skipSelf").asBoolean()).isFalse();assertThat(changed.path("options").path("dedupeApprover").asBoolean()).isTrue();

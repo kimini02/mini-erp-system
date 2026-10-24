@@ -22,8 +22,8 @@ class MariaDbMigrationTest extends MariaDbIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT VERSION()", String.class)).startsWith("10.11.");
         assertThat(environment.getProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("validate");
         assertThat(entityManagerFactory.isOpen()).isTrue();
-        assertThat(flyway.info().applied()).hasSize(3);
-        assertThat(flyway.info().current().getScript()).isEqualTo("V3__approval_and_leave_ledger.sql");
+        assertThat(flyway.info().applied()).hasSize(4);
+        assertThat(flyway.info().current().getScript()).isEqualTo("V4__attendance_and_batch_runs.sql");
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
         assertThat(jdbc.queryForList("""
                 SELECT table_name FROM information_schema.tables
@@ -32,7 +32,7 @@ class MariaDbMigrationTest extends MariaDbIntegrationTest {
                 "users", "projects", "project_members", "tasks", "task_assignments",
                 "attendances", "leave_requests", "overtime_requests",
                 "departments", "work_schedules", "positions", "roles", "user_roles",
-                "menus", "role_permissions", "login_id_sequences", "holidays", "approval_forms", "approval_form_steps", "approval_documents", "approval_lines", "approval_histories", "doc_no_sequences", "general_requests", "notifications", "leave_ledger");
+                "menus", "role_permissions", "login_id_sequences", "holidays", "approval_forms", "approval_form_steps", "approval_documents", "approval_lines", "approval_histories", "doc_no_sequences", "general_requests", "notifications", "leave_ledger", "attendance_fix_requests", "batch_runs");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM users", Long.class)).isZero();
     }
 
@@ -42,7 +42,7 @@ class MariaDbMigrationTest extends MariaDbIntegrationTest {
         assertThat(jdbc.queryForObject("""
                 SELECT COUNT(*) FROM information_schema.table_constraints
                 WHERE constraint_schema = DATABASE() AND constraint_type = 'FOREIGN KEY'
-                """, Long.class)).isEqualTo(36);
+                """, Long.class)).isEqualTo(38);
         assertThat(jdbc.queryForList("""
                 SELECT constraint_name FROM information_schema.table_constraints
                 WHERE constraint_schema = DATABASE() AND constraint_type = 'UNIQUE'
@@ -60,6 +60,6 @@ class MariaDbMigrationTest extends MariaDbIntegrationTest {
     @Test
     void repeatedMigrationDoesNotRecreateSchema() {
         assertThat(flyway.migrate().migrationsExecuted).isZero();
-        assertThat(flyway.info().applied()).hasSize(3);
+        assertThat(flyway.info().applied()).hasSize(4);
     }
 }
