@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, ChevronDown, ChevronRight, KeyRound, LogOut, Menu, UserRound, Inbox } from 'lucide-react';
+import { Bell, CheckCheck, ChevronDown, ChevronRight, KeyRound, LogOut, Menu, UserRound, Inbox } from 'lucide-react';
+import { notificationApi } from '@/api/m2';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { getRoleInfo, getDisplayName } from '@/lib/roles';
-import { LEAVE_TYPE_LABELS, ROLE_LABELS } from '@/lib/labels';
+import { MENU } from '@/lib/permissions';
+import { NOTIFICATION_TYPE_META, formatDateTime } from '@/lib/approval';
 import { confirm } from '@/lib/confirm';
 import { cn } from '@/lib/cn';
 import { Avatar } from '@/components/ui';
@@ -33,34 +35,43 @@ function useDropdown() {
 
 const panelClass = 'absolute right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-overlay';
 
+/** 앱 안 알림 (명세 13번 6장) */
 function NotificationMenu() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
-  const { leave, overtime } = useApprovalStore();
-  const { basePath, isChief, isTeamLeader } = getRoleInfo(user);
+  const canInbox = useAuthStore((s) => s.can(MENU.APPROVAL_INBOX));
+  const unread = useApprovalStore((s) => s.unread);
+  const todo = useApprovalStore((s) => s.counts.todo || 0);
+  const refresh = useApprovalStore((s) => s.refresh);
   const { open, setOpen, ref } = useDropdown();
+  const [items, setItems] = useState(null);
 
-  const isApprover = isChief || isTeamLeader;
-  const items = [
-    ...leave.map((r) => ({
-      key: `lv-${r.appId}`,
-      name: r.requesterName,
-      role: r.userRole,
-      title: LEAVE_TYPE_LABELS[r.appType] || r.appType,
-      date: r.startDate,
-    })),
-    ...overtime.map((r) => ({
-      key: `ot-${r.id}`,
-      name: r.requesterName,
-      role: r.userRole,
-      title: '특근',
-      date: r.overtimeDate,
-    })),
-  ];
+  useEffect(() => {
+    if (!open) return undefined;
+    let alive = true;
+    notificationApi.list({ page: 0, size: 10 })
+      .then((r) => alive && setItems(r.content || []))
+      .catch(() => alive && setItems([]));
+    return () => { alive = false; };
+  }, [open]);
+
+  const openItem = async (n) => {
+    setOpen(false);
+    if (!n.read) {
+      await notificationApi.read(n.id).catch(() => {});
+      refresh();
+    }
+    navigate(n.link);
+  };
+
+  const readAll = async () => {
+    await notificationApi.readAll().catch(() => {});
+    setItems((list) => list?.map((n) => ({ ...n, read: true })));
+    refresh();
+  };
 
   const goApprovals = () => {
     setOpen(false);
-    navigate(`${basePath}/approvals`);
+    navigate('/approvals');
   };
 
   return (
@@ -75,8 +86,10 @@ function NotificationMenu() {
         aria-label="알림"
       >
         <Bell size={18} />
-        {items.length > 0 && (
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+        {unread > 0 && (
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold tabular-nums text-white ring-2 ring-white">
+            {unread > 9 ? '9+' : unread}
+          </span>
         )}
       </button>
 
@@ -84,44 +97,50 @@ function NotificationMenu() {
         <div className={cn(panelClass, 'w-80')}>
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
             <p className="text-sm font-semibold text-gray-900">알림</p>
-            {items.length > 0 && <span className="text-xs text-gray-500">결재 대기 {items.length}건</span>}
+            {unread > 0 && (
+              <button type="button" onClick={readAll} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800">
+                <CheckCheck size={14} /> 모두 읽음
+              </button>
+            )}
           </div>
 
-          {items.length === 0 ? (
+          {items === null ? (
+            <p className="px-4 py-8 text-center text-[13px] text-gray-400">불러오는 중…</p>
+          ) : items.length === 0 ? (
             <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
               <Inbox size={20} className="text-gray-300" />
               <p className="text-[13px] text-gray-500">새로운 알림이 없습니다.</p>
             </div>
           ) : (
             <ul className="max-h-80 overflow-y-auto py-1">
-              {items.map((item) => (
-                <li key={item.key}>
-                  <button
-                    type="button"
-                    onClick={goApprovals}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50"
-                  >
-                    <Avatar name={item.name} size="sm" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] text-gray-900">
-                        <span className="font-medium">{item.name}</span>
-                        <span className="text-gray-500"> {ROLE_LABELS[item.role] || ''}님의 {item.title} 결재 요청</span>
-                      </p>
-                      <p className="text-xs text-gray-500">{item.date}</p>
-                    </div>
-                  </button>
-                </li>
-              ))}
+              {items.map((n) => {
+                const meta = NOTIFICATION_TYPE_META[n.type] || { label: '알림', dot: 'bg-gray-400' };
+                return (
+                  <li key={n.id}>
+                    <button
+                      type="button"
+                      onClick={() => openItem(n)}
+                      className={cn('flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-gray-50', !n.read && 'bg-blue-50/40')}
+                    >
+                      <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', n.read ? 'bg-gray-200' : meta.dot)} />
+                      <span className="min-w-0 flex-1">
+                        <span className={cn('block text-[13px]', n.read ? 'text-gray-600' : 'font-medium text-gray-900')}>{meta.sentence ? meta.sentence(n.title) : n.title}</span>
+                        <span className="block text-xs text-gray-500">{meta.label} · {formatDateTime(n.createdAt)}</span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
 
-          {isApprover && (
+          {canInbox && (
             <button
               type="button"
               onClick={goApprovals}
               className="flex w-full items-center justify-center gap-1 border-t border-gray-100 py-2.5 text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             >
-              결재함 바로가기 <ChevronRight size={14} />
+              결재함 바로가기{todo > 0 && ` · 결재 대기 ${todo}건`} <ChevronRight size={14} />
             </button>
           )}
         </div>

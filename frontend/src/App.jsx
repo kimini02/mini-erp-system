@@ -24,15 +24,19 @@ import ProjectManagement from './pages/ProjectManagement';
 import AdminProjectAuth from './pages/AdminProjectAuth';
 import ProjectPage from './pages/ProjectPage';
 import CalendarPage from './pages/CalendarPage';
-import LeaveHistoryPage from './pages/LeaveHistoryPage';
-import LeaveApplyPage from './pages/LeaveApplyPage';
-import LeaveApprovalPage from './pages/LeaveApprovalPage';
 
 // 조직·권한 (M1)
 import DepartmentsPage from './pages/org/DepartmentsPage';
 import EmployeesPage from './pages/org/EmployeesPage';
 import RolesPage from './pages/org/RolesPage';
 import HolidaysPage from './pages/org/HolidaysPage';
+
+// 전자결재 · 연차 (M2)
+import ApprovalInboxPage from './pages/approval/ApprovalInboxPage';
+import ApprovalDocumentPage from './pages/approval/ApprovalDocumentPage';
+import ApprovalDraftPage from './pages/approval/ApprovalDraftPage';
+import ApprovalFormsPage from './pages/approval/ApprovalFormsPage';
+import MyLeavePage from './pages/leave/MyLeavePage';
 
 function DashboardPage() {
   const user = useAuthStore((s) => s.user);
@@ -56,9 +60,12 @@ function App() {
         >
           <Route path="/dashboard" element={<DashboardPage />} />
 
-          <Route path="/approvals" element={<RequireLegacyRole><LeaveApprovalPage /></RequireLegacyRole>} />
-          <Route path="/leaves" element={<LeaveHistoryPage />} />
-          <Route path="/leaves/new" element={<LeaveApplyPage />} />
+          <Route path="/approvals" element={<RequirePermission menu={MENU.APPROVAL_INBOX}><ApprovalInboxPage /></RequirePermission>} />
+          <Route path="/approvals/new" element={<RequirePermission menu={MENU.APPROVAL_DRAFT} action="C"><ApprovalDraftPage /></RequirePermission>} />
+          <Route path="/approvals/:id" element={<ApprovalDocumentPage />} />
+          <Route path="/approval-forms" element={<RequirePermission menu={MENU.APPROVAL_FORM}><ApprovalFormsPage /></RequirePermission>} />
+          <Route path="/leaves" element={<MyLeavePage />} />
+          <Route path="/leaves/new" element={<Navigate to="/approvals/new?form=LEAVE" replace />} />
           <Route path="/calendar" element={<CalendarPage />} />
 
           <Route path="/projects" element={<RequireLegacyRole><ProjectManagement /></RequireLegacyRole>} />

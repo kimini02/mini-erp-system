@@ -46,9 +46,18 @@ export const userApi = {
   resendInvitation: (id) => data(api.post(`/users/${id}/invitation`)),
 };
 
+// 실제 서버는 메뉴 그룹을 menuGroup, 쓰는 동작을 문자열("VCUD")로 줍니다. 화면은 group·배열로 씁니다.
+const toMenu = (m) => ({
+  ...m,
+  group: m.group ?? m.menuGroup,
+  allowedActions: Array.isArray(m.allowedActions) ? m.allowedActions : String(m.allowedActions ?? '').match(/[VCUD]/g) ?? [],
+});
+// 역할 목록에는 locked가 없어서, 명세대로 관리소장(CHIEF)만 잠긴 역할로 봅니다.
+const toRole = (r) => ({ ...r, locked: r.locked ?? r.code === 'CHIEF' });
+
 export const roleApi = {
-  menus: () => data(api.get('/menus')),
-  list: () => data(api.get('/roles')),
+  menus: () => data(api.get('/menus')).then((menus) => menus.map(toMenu)),
+  list: () => data(api.get('/roles')).then((roles) => roles.map(toRole)),
   create: (body) => data(api.post('/roles', body)),
   update: (id, body) => data(api.patch(`/roles/${id}`, body)),
   remove: (id) => data(api.delete(`/roles/${id}`)),

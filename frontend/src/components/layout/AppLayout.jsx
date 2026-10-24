@@ -12,14 +12,23 @@ import Topbar from './Topbar';
  */
 export default function AppLayout() {
   const { user } = useAuthStore();
-  const fetchPending = useApprovalStore((s) => s.fetchPending);
+  const permissions = useAuthStore((s) => s.permissions);
+  const refresh = useApprovalStore((s) => s.refresh);
   const [navOpen, setNavOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  // 결재 대기 건수 (상단 알림, 사이드바 배지)
+  // 결재 대기 건수·안 읽은 알림 (사이드바 배지, 상단 알림). 1분마다, 창으로 돌아올 때 다시 읽음
   useEffect(() => {
-    if (user) fetchPending(user);
-  }, [user, fetchPending]);
+    if (!user || !permissions) return undefined;
+    refresh();
+    const timer = setInterval(refresh, 60_000);
+    const onFocus = () => refresh();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [user, permissions, refresh]);
 
   return (
     <div className="min-h-screen bg-gray-50">

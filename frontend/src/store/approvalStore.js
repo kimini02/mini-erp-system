@@ -1,43 +1,30 @@
 import { create } from 'zustand';
-import api from '../api/axios';
-import { getRoleInfo } from '../lib/roles';
+import { approvalInboxApi, notificationApi } from '../api/m2';
+import { MENU } from '../lib/permissions';
+import { useAuthStore } from './authStore';
+
+const valueOf = (result, fallback) => (result.status === 'fulfilled' && result.value ? result.value : fallback);
 
 /**
- * 결재 대기함 (상단 알림 + 대시보드에서 공유)
- * - 관리소장: 팀장(TEAM_LEADER)이 올린 대기 건
- * - 팀장: 사원(USER)이 올린 대기 건
+ * 결재함 건수 · 결재 대기 목록 · 안 읽은 알림 수 (사이드바 배지, 상단 알림, 대시보드가 함께 씀)
+ * 결재 처리·기안처럼 건수가 바뀌는 동작 뒤에는 refresh()를 불러 주세요.
  */
 export const useApprovalStore = create((set) => ({
-  leave: [],
-  overtime: [],
-  loading: false,
+  counts: {},
+  todoItems: [],
+  unread: 0,
 
-  fetchPending: async (user) => {
-    const { isChief, isTeamLeader } = getRoleInfo(user);
-    if (!isChief && !isTeamLeader) {
-      set({ leave: [], overtime: [] });
-      return;
-    }
-
-    const targetRole = isChief ? 'TEAM_LEADER' : 'USER';
-    set({ loading: true });
-
-    const [leaveRes, overtimeRes] = await Promise.allSettled([
-      api.get('/leave/all'),
-      api.get('/overtime/all'),
+  refresh: async () => {
+    const canInbox = useAuthStore.getState().can(MENU.APPROVAL_INBOX);
+    const [counts, todo, unread] = await Promise.allSettled([
+      canInbox ? approvalInboxApi.counts() : Promise.resolve({}),
+      canInbox ? approvalInboxApi.list({ box: 'todo', page: 0, size: 5 }) : Promise.resolve({ content: [] }),
+      notificationApi.unreadCount(),
     ]);
-
-    const pick = (res, statusKey) =>
-      res.status === 'fulfilled' && res.value?.data?.success
-        ? (res.value.data.data || []).filter(
-            (req) => (req[statusKey] ?? req.appStatus) === 'PENDING' && req.userRole === targetRole
-          )
-        : [];
-
     set({
-      leave: pick(leaveRes, 'appStatus'),
-      overtime: pick(overtimeRes, 'status'), // 특근 DTO는 status 필드 사용
-      loading: false,
+      counts: valueOf(counts, {}),
+      todoItems: valueOf(todo, { content: [] }).content || [],
+      unread: valueOf(unread, { count: 0 }).count ?? 0,
     });
   },
 }));

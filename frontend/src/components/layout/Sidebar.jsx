@@ -10,12 +10,11 @@ import { useNavGroups } from './useNavGroups';
 export default function Sidebar({ open, onClose }) {
   const { pathname } = useLocation();
   const { user } = useAuthStore();
-  const { leave, overtime } = useApprovalStore();
+  const pendingCount = useApprovalStore((s) => s.counts.todo || 0);
   const { workspace, homePath } = getRoleInfo(user);
 
   const groups = useNavGroups();
   const active = findActiveItem(groups, pathname)?.item;
-  const pendingCount = leave.length + overtime.length;
 
   return (
     <>

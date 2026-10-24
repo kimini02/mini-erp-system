@@ -45,7 +45,7 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 |---|---|
 | `DEPT_HEAD` | 기안 시점 기안자 부서의 부서장 |
 | `UPPER_DEPT_HEAD` | 기안자 부서의 상위 부서의 부서장 |
-| `ROLE` | 그 역할을 가진 재직 사원 (여러 명이면 **아이디 오름차순 첫 사람** — 1차 규칙, 결정 필요로 남김) |
+| `ROLE` | 그 역할을 가진 재직 사원 (여러 명이면 **사용자 번호(`users.id`) 오름차순 첫 사람** — 1차 규칙. 2026-10-24 확정: 로그인 아이디는 v1 형식(user01)과 섞여 있어 순서 기준으로 쓰지 않음) |
 | `USER` | 지정된 사원 (재직이 아니면 오류) |
 
 예외 처리 (양식 옵션):
@@ -54,6 +54,7 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 - `skip_self` — 결재자가 기안자 본인이면 `SKIPPED(SELF)`
 - `dedupe_approver` — 앞 단계와 같은 사람이면 `SKIPPED(DUPLICATE)`
 - 결재자가 **한 명도 남지 않으면** 상신하는 순간 바로 `APPROVED` (처리기의 `onApproved`까지 같은 트랜잭션)
+- **참조(`REFERENCE`) 단계는 대상이 없으면 오류 없이 건너뜁니다** (2026-10-24 추가). 역할 보유자가 없거나 퇴사해서 참조할 사람이 없을 때 상신 자체가 막히면 안 됩니다(예: 인사 담당이 한 명뿐인데 퇴사 → 모든 휴가 상신 불가). 미리보기는 그 줄을 `SKIPPED`, note "참조할 사람이 없어 건너뜁니다."로 보여 줍니다. 기안자 본인이 참조 대상이면 넣지 않습니다.
 
 기안자가 결재선을 바꾼 경우(`allow_line_edit = true`인 양식만): 규칙 결과 대신 기안자가 보낸 목록을 쓰되, 위 예외 처리(본인·중복)는 똑같이 적용합니다.
 
@@ -70,6 +71,10 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 | `POST /api/v1/approval-forms/{code}/line-preview` | 특정 기안자 기준 결재선 미리보기 | APPROVAL_FORM V |
 
 - 양식은 1차에서 3개 고정: `LEAVE`(HR), `OVERTIME`(OT), `GENERAL`(GN). 추가·삭제 API 없음.
+- 응답 모양 (2026-10-24 추가)
+  - 목록: `[{ "code": "LEAVE", "name": "휴가 신청", "shortName": "휴가", "prefix": "HR", "description": "연차 · 반차 · 병가 · 경조 휴가", "allowLineEdit": false, "approverStepCount": 2, "referenceStepCount": 1 }]`
+  - 상세: `{ "code", "name", "shortName", "prefix", "description", "options": { "dedupeApprover": true, "fallbackToUpper": true, "skipSelf": true, "allowLineEdit": false }, "steps": [{ "order": 1, "lineKind": "APPROVER", "approverType": "DEPT_HEAD", "roleCode": null, "userId": null, "label": "기안자의 부서장" }] }`
+  - `PATCH` 본문: `options`의 네 값 중 바꿀 것만. 응답은 상세와 같은 모양.
 - 단계 저장: `[{ "lineKind": "APPROVER", "approverType": "DEPT_HEAD" }, { "lineKind": "APPROVER", "approverType": "ROLE", "roleCode": "CUSTOM_6" }]`
   - `ROLE`이면 `roleCode`, `USER`면 `userId` 필수. 결재자(APPROVER) 단계가 0개면 `400 INVALID_APPROVAL_STEPS`
   - 저장해도 **이미 상신된 문서는 바뀌지 않습니다**(스냅샷).
@@ -86,6 +91,14 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 ```
   - `status`: `OK` / `FALLBACK`(공석이라 위로 넘김) / `SKIPPED` / `ERROR`(결재자 없음 — 이때 `error`에 메시지)
   - 시안의 '결재 양식' 화면 아래쪽 미리보기가 이 응답을 그대로 그립니다.
+  - (2026-10-24 추가) 각 줄에 `"kind": "APPROVER" | "REFERENCE"`를 넣고, 참조 대상은 `"references": [{ "id", "name", "title", "department" }]`로 따로 줍니다. `result`에도 `department`를 넣습니다. `FALLBACK` 줄의 `note`는 "개발2팀 부서장이 비어 있어 개발본부 부서장에게 넘어갑니다."처럼 이유를 적습니다.
+  - 기안 화면의 `POST /approval-documents/line-preview` `{ "formCode": "GENERAL", "line": null }`도 **같은 모양**으로 응답합니다(기안자 = 로그인한 사람).
+
+### 2.1 사원 찾기 (선택 목록용, 2026-10-24 추가)
+`GET /api/v1/users/lookup?q=김&departmentId=6&size=20` · 권한: 로그인만
+- 업무 인수자 고르기, 일반 품의 결재선 편집, 양식의 '특정 사원' 단계처럼 **사원을 고르는 칸**에 씁니다. `GET /users`는 사원 관리 권한(EMPLOYEE V)이 있어야 해서 일반 사원은 쓸 수 없습니다.
+- 재직(`ACTIVE`) 사원만, 최소 정보만: `[{ "id": 10, "name": "이도윤", "title": "대리", "department": "개발1팀", "departmentId": 6 }]`
+- `q`는 이름 또는 로그인 아이디 앞부분 일치, 이름순, `size` 최대 100. 이메일·입사일·역할은 주지 않습니다.
 
 ---
 
@@ -156,6 +169,7 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 }
 ```
 - 결재선의 이름·직급·부서는 **스냅샷 값**입니다(상신 뒤 조직이 바뀌어도 그대로).
+- (2026-10-24 추가) `line`에는 결재자(`APPROVER`) 줄만 넣고 참조는 `references`에만 둡니다. 건너뛴 줄은 `"status": "SKIPPED", "skipReason": "SELF" | "DUPLICATE"`.
 - `myActions`는 화면 버튼을 그리는 용도. 서버는 요청 때 다시 검사합니다.
 
 ### 3.4 승인 · 반려 · 회수 — 동시 처리 (KI-03)
@@ -206,6 +220,7 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 ```
 - `steps`: 기안을 포함한 진행 점(시안의 ●─●─○). `DONE` / `CURRENT` / `TODO` / `REJECTED` / `WITHDRAWN` / `SKIPPED`
 - `counts` → `{ "todo": 3, "in-progress": 2, "done": 3, "mine": 3, "drafts": 2, "reference": 1 }`
+- (2026-10-24 추가) 행에는 `formCode`와 `updatedAt`도 넣습니다. `formName`은 짧은 이름(휴가/특근/품의). 임시 보관(`drafts`)은 `docNo`·`submittedAt`이 없으므로 `updatedAt` 내림차순, 나머지 탭은 `submittedAt` 내림차순.
 - **"내 차례" 조회는 인덱스 `approval_lines(approver_id, status, document_id)`를 타야 합니다.** 목록 한 페이지를 가져오는 데 문서 수와 상관없이 쿼리 수가 일정해야 합니다(N+1 금지 — 결재선 진행 점은 한 번에 모아서).
 
 ---
@@ -223,6 +238,9 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 - 원장: `[{ "date": "2026-10-12", "type": "RESERVE", "days": -2.0, "balance": 9.0, "memo": "연차 10/19~10/20", "document": { "id": 142, "docNo": "HR-2026-0142", "status": "IN_PROGRESS" } }]` — 최신순, `balance`는 그 줄까지의 누적
 - 미리 계산 `{ "leaveType": "ANNUAL", "startDate": "2026-10-19", "endDate": "2026-10-20" }` → `{ "days": 2.0, "offDays": 0, "available": 11.0, "after": 9.0, "error": null }`
   - 반차 0.5, 병가·경조는 0(연차에서 빼지 않음). 공휴일은 `holidays` 테이블 기준
+  - (2026-10-24 추가) **연도가 바뀌는 휴가는 받지 않습니다**: 시작일과 종료일의 연도가 다르면 `422 LEAVE_CROSS_YEAR`. 미리 계산도 같은 내용을 `error`로 돌려줍니다. 연차는 연도별로 부여·소멸하므로 한 문서가 두 해의 원장을 건드리지 않게 합니다(연도별로 나눠 신청).
+  - (2026-10-24 추가) 차감 일수가 0인 휴가(병가·경조)는 원장 줄을 쓰지 않습니다.
+  - 원장 `memo`는 사람이 읽는 문구로: `"연차 10/19~10/20"`, `"예약 해제 (반려)"`, `"v1 이관"`
 - 원장 쓰기 API는 없습니다. 원장은 처리기와 (M3) 배치·연차 관리 화면만 씁니다.
 
 ### 원장 규칙 (ERD 3장 + 결정 1)
@@ -248,6 +266,7 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 
 - 알림 행은 결재 처리와 **같은 트랜잭션**에서 저장합니다. 결재가 롤백되면 알림도 없습니다.
 - 항목: `{ "id", "type": "APPROVAL_REQUESTED|APPROVED|REJECTED|WITHDRAWN|REFERENCED", "title", "link": "/approvals/142", "read": false, "createdAt" }`
+- 안 읽은 수: `{ "count": 3 }`. 목록은 결재함과 같은 페이지 모양(`content`, `page`).
 
 ---
 
@@ -273,6 +292,7 @@ REJECTED / WITHDRAWN ──재기안──▶ 새 DRAFT (resubmitted_from_id = �
 | `LEAVE_PERIOD_OVERLAP` | 409 | 같은 기간에 이미 신청한 휴가가 있습니다. |
 | `LEAVE_BALANCE_EXCEEDED` | 422 | 사용 가능한 연차보다 많이 신청할 수 없습니다. |
 | `LEAVE_NO_WORKING_DAY` | 422 | 선택한 기간이 모두 휴일입니다. |
+| `LEAVE_CROSS_YEAR` | 422 | 연도가 바뀌는 휴가는 연도별로 나눠 신청해 주세요. |
 | `APPROVER_NOT_FOUND` | 422 | 결재자를 찾을 수 없습니다. 결재 양식이나 부서장 설정을 확인해 주세요. |
 | `LINE_EDIT_NOT_ALLOWED` | 403 | 이 양식은 결재선을 바꿀 수 없습니다. |
 | `INVALID_APPROVAL_STEPS` | 400 | 결재자 단계가 하나 이상 있어야 합니다. |
