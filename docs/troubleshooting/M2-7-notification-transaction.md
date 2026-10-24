@@ -26,3 +26,8 @@ M2DocumentIntegrationTest의 다음 두 테스트가 실제 MariaDB 10.11 + UTC 
 - concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials: 10회 모두 한 요청은 200, 다른 요청은 409 DOCUMENT_STATE_CONFLICT다. 문서당 승인 알림은 1개이며 실패 요청 때문에 추가된 알림은 없다. 원장 USE와 승인 이력도 각 1개다.
 
 장애는 트랜잭션 프록시 내부의 실제 저장 대상에 주입하므로 AFTER_COMMIT이나 별도 트랜잭션으로 우회하지 않는다. 상세 동시성 전후 수치는 M2-4 문서를 따른다.
+
+## 2차 조회·읽음 API
+NotificationQueryService/NotificationController에서 본인 알림 목록, unread-count `{ "count": n }`, 단건 읽음, 모두 읽음을 제공한다. 읽음은 반복 요청에 멱등이며 다른 사원 알림은 변경 전에 403으로 거절한다. 목록/건수/읽음 SQL 모두 user_id로 제한한다. 시각은 공통 SqlStore의 LocalDateTime 변환을 따른다.
+
+M2NotificationTest 1개 통과: 다른 사원 목록 0건, 타인 읽음 403 후 미읽음 수 유지, 반복 읽음, 모두 읽음, 링크 및 시간대 없는 createdAt 확인. 기존 M2DocumentIntegrationTest는 알림 저장 실패 시 문서·원장 롤백과 409 경쟁 패자의 알림 부재를 계속 검증한다.
