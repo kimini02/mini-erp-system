@@ -20,7 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("mariadb")
 @TestPropertySource(properties = {
-        "INITIAL_ADMIN_LOGIN_ID=", "INITIAL_ADMIN_NAME=",
+        "app.batches.enabled=false", "INITIAL_ADMIN_LOGIN_ID=", "INITIAL_ADMIN_NAME=",
         "INITIAL_ADMIN_EMAIL=", "INITIAL_ADMIN_PASSWORD="
 })
 @Testcontainers(disabledWithoutDocker = true)
