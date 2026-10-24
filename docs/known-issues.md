@@ -1,16 +1,16 @@
 # 알려진 이슈
 
-M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03·KI-06을 해결했다. 기존 대시보드의 별도 권한 경로는 KI-07로 남긴다. 단계별 검증과 최종 전체 결과는 docs/troubleshooting/M2-12-phase-two-results.md를 따른다.
+M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03·KI-06을 해결했다. M3 1차에서 KI-04·KI-07을 해결했다. M2 결과는 docs/troubleshooting/M2-12-phase-two-results.md, M3 1차 결과는 [M3 1차 보고서](troubleshooting/M3-0-phase-one-results.md)를 따른다.
 
 | ID | 문제 | 처리 단계 | 상태 |
 | --- | --- | --- | --- |
 | KI-01 | 특근 요청 DTO 필드 불일치와 누락 검증 부재로 500 발생 | M2 — 특근 결재 양식 재구축 | 해결됨 — `ef2244e` 새 계약·테스트 복구, `617b7ca` 구 API 제거 |
 | KI-02 | 연차·특근 전체 조회 및 결재 권한의 부서 조건 부재 | M1 — 데이터 범위 | 해결됨 — `18d2f69` M1 범위 검사, `617b7ca` 구 API·특근 단건 경로 제거 |
 | KI-03 | 연차 승인과 연차 차감에 잠금·버전 검증 없음 | M2 — 결재 동시성 | 해결됨 — `0542307`, 재현 10/10 → 수정 후 0/10 중복 성공 |
-| KI-04 | 출퇴근 시각을 요청 본문으로 받고, 본인이 근태 기록을 고칠 수 있음 | M3 — 근태 재구축 | 코드 확인 (M0 검토 중 발견) |
+| KI-04 | 출퇴근 시각을 요청 본문으로 받고, 본인이 근태 기록을 고칠 수 있음 | M3 — 근태 재구축 | 해결됨 — `7ab4a07`, 서버 Clock·구 직접 수정 경로 삭제 |
 | KI-05 | JPA 자동 기록 시각(created_at·updated_at)이 서버 기본 시간대를 따름 | M1 — 공통 설정 | 해결됨 — `cbf71e0` (M1-7) |
 | KI-06 | JDBC 날짜가 UTC 오프셋을 포함한 JSON으로 반환되어 화면 시각이 틀어짐 | M2 선행 수정 — 공통 조회 | 해결됨 — `6c39c97` SqlStore 날짜 타입 정규화 ([검증 기록](troubleshooting/M2-0-jdbc-local-date-time.md)) |
-| KI-07 | 기존 대시보드 관리자 요약의 전체 휴가 대기 노출 | M4 — 대시보드 권한 계약 결정 | 미해결, M2 명세 밖 경로로 보고만 함 |
+| KI-07 | 기존 대시보드 관리자 요약의 전체 휴가 대기 노출 | M3 — 관리소장 전용 요약 | 해결됨 — `a2254af`, 관리소장 외 403 |
 
 ## KI-01 — 특근 신청 500 (M2, 해결됨)
 - 해결 커밋: `ef2244e` (하루 단위 처리기·기존 비활성 테스트 복구), `617b7ca` (구 API 제거).
@@ -30,11 +30,12 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 - 사용자 행 → 번호 행(상신) → 문서 행 잠금, 결재선 조건부 갱신, 문서 version으로 상태 전이를 보호한다. 결재·원장·앱 안 알림은 같은 트랜잭션이다.
 - 승인 대 회수, 잔여 초과 동시 상신, 문서번호 동시 발급, 알림 저장 실패 롤백도 검증한다. 수치와 통제 조건은 [M2-4](troubleshooting/M2-4-document-concurrency.md), [M2-7](troubleshooting/M2-7-notification-transaction.md)를 따른다.
 
-## KI-04 — 근태 시각 조작 가능 (M3)
-- 증상: 9시 20분에 출근해도 요청에 `"clockInTime": "08:50"`을 보내면 정상 출근으로 기록된다. 지난 날짜(`workDate`)로 출근을 찍을 수도 있다. 또 `PUT /api/v1/attendance?workDate=…`로 본인이 아무 날짜의 출퇴근 시각을 결재 없이 고칠 수 있다.
-- 근거: `CheckInRequestDto`(workDate, clockInTime), `CheckOutRequestDto`(clockOutTime)를 `AttendanceService.checkIn`·`checkOut`이 그대로 저장한다. `updateFullAttendance`는 본인 확인 외의 권한·승인 검사가 없다.
-- 해결 방향: 출퇴근 시각과 날짜는 서버 시계(`Clock`, Asia/Seoul)로만 정한다. 요청 본문에서 시각·날짜를 받지 않는다. 기록 정정은 본인이 직접 고치지 않고 정정 요청 → 승인 절차로 분리한다(1차 범위 밖이면 정정 API를 막는다).
-- 완료 검증: 요청에 시각을 넣어도 무시되고 서버 시각으로 기록되는지, 본인 정정 API가 403인지 통합 테스트한다.
+## KI-04 — 근태 시각 조작 가능 (M3 1차, 해결됨)
+- 해결 커밋: `7ab4a07`.
+- 수정 전 실제 구 출근 API로 과거 날짜·08:50을 보내는 조작 10회 중 10회 성공을 먼저 확인했다. 새 출근 API에서는 같은 조작 입력 10회 모두 무시하고 Asia/Seoul Clock 시각을 기록한다.
+- 본인의 직접 PUT 및 구 check-in/check-out/summary 경로를 삭제했다. 정정은 M3 2차 ATTENDANCE_FIX 결재로 연결하며 1차에는 직접 수정 경로를 제공하지 않는다.
+- 사용자 행 잠금으로 동시 출근 10회 모두 200 하나·409 하나, 날짜별 기록 1행을 검증했다.
+- 검증: M3SecurityTest, M3AttendanceTest. 상세: [M3-2](troubleshooting/M3-2-server-clock.md).
 
 ## KI-05 — 자동 기록 시각의 시간대 (M1, 해결됨)
 - 해결 커밋: `cbf71e0`. DateTimeProvider에 Clock을 연결하고 중복 시각 생성자를 제거했다. `AuditClockMariaDbTest`가 JVM UTC에서 실제 MariaDB 열 값을 검증한다.
@@ -63,7 +64,7 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 
 - V2는 배포 전 변경 허용에 따라 수정했으므로 체크섬이 바뀐다. 이미 V2가 적용된 DB는 Flyway validate 불일치가 발생한다. 로컬 MariaDB의 적용 여부는 인증 거절로 미확인이다. DB·이력 repair는 수행하지 않았다.
 - DB 이메일 변경과 Redis 폐기는 분산 트랜잭션이 아니다. 커밋 뒤 삭제가 지연되거나 실패해도 토큰의 발급 이메일과 현재 이메일 검증으로 이전 주소의 링크를 거부한다. 이메일 정보가 없는 이전 형식 링크는 재발송해야 한다.
-- 위 표는 M1 리뷰 당시 기록이다. 당시 M2로 넘긴 KI-01·KI-03은 위 M2 결과대로 해결됐고, KI-04는 M3에 남긴다.
+- 위 표는 M1 리뷰 당시 기록이다. 당시 M2로 넘긴 KI-01·KI-03은 위 M2 결과대로 해결됐고, KI-04도 M3 1차에서 해결됐다.
 - 전체 테스트 및 수정 전 실패 확인 결과: [M1 리뷰 결과](troubleshooting/M1-19-review-results.md).
 
 ## KI-06 — JDBC 날짜 응답의 시간대 (M2 선행 수정, 해결됨)
@@ -74,7 +75,8 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 - M2 적용: submittedAt·completedAt·이력 at·알림 createdAt 및 결재함 updatedAt은 같은 LocalDateTime 계약을 따른다. UTC JVM의 M2 문서·결재함·알림 API 테스트에서 시간대 없는 문자열을 검증한다.
 - 해결 커밋: `6c39c97`. 수정 및 재현 기록: [M2-0](troubleshooting/M2-0-jdbc-local-date-time.md). 해결 코드·회귀 테스트·이슈 문서를 하나의 독립 커밋으로 묶었다.
 
-## KI-07 — 대시보드 관리자 요약의 별도 조회 범위 (보고만 함)
-- GET /api/v1/dashboard/admin-summary는 관리자/팀장 자격을 검사하지만, DashboardService.getAdminSummary의 pendingApprovalCount와 pendingApprovals는 전체 휴가 대기를 조회한다. 팀장 부서나 새 결재선 멤버십으로 제한하지 않는다.
-- 사용자 지시에 따라 기존 대시보드가 새 테이블로 계속 동작하도록 보존했으며, 명세 밖 권한 우회 경로를 임의 수정하지 않았다. 허용 범위와 기존 휴가 전용 응답의 개편은 M4 전에 결정해야 한다.
-- 이는 코드 확인 사항이다. 새 결재함에는 이 경로를 재사용하지 않으며 SQL에서 본인 결재선/기안/참조 조건을 적용한다.
+## KI-07 — 대시보드 관리자 요약의 별도 조회 범위 (M3 1차, 해결됨)
+- 해결 커밋: `a2254af`.
+- M3 명세가 관리소장 전용으로 확정하여 GET /api/v1/dashboard/admin-summary는 CHIEF가 계산된 ADMIN만 허용한다. 일반 사원·팀장은 403이다.
+- 수정 전 팀장 실제 API 회귀 테스트가 기대 403 대신 200으로 실패했고, 수정 후 M3DashboardTest에서 사원·팀장 403, 관리소장 200을 확인한다.
+- 다른 dashboard 경로와 응답 재설계는 변경하지 않았다. [M3-4](troubleshooting/M3-4-dashboard-chief-only.md).
