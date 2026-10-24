@@ -47,6 +47,7 @@ public class DocumentService {
     private void storeLines(long id,List<ApprovalLineResolver.Resolved> resolved,boolean submitted) {
         boolean pending=false;
         for(var r:resolved) {
+            if(r.kind().equals("REFERENCE") && r.skipReason()!=null) continue;
             String status=null;
             if(r.kind().equals("APPROVER")) {
                 if(r.skipReason()!=null && submitted) status="SKIPPED";
@@ -130,7 +131,7 @@ public class DocumentService {
         history(id,access.actor(),"SUBMIT",null);history(id,null,"LINE_GENERATED","양식 결재선 스냅샷");
         if(pending.isPresent()) notifications.store(number(pending.get(),"approver_id"),id,"APPROVAL_REQUESTED",(String)d.get("title"));
         else notifications.store(number(d,"drafter_id"),id,"APPROVED",(String)d.get("title"));
-        for(var r:resolved) if(r.kind().equals("REFERENCE")) notifications.store(number(r.person(),"id"),id,"REFERENCED",(String)d.get("title"));
+        for(var r:resolved) if(r.kind().equals("REFERENCE") && r.skipReason()==null) notifications.store(number(r.person(),"id"),id,"REFERENCED",(String)d.get("title"));
         return detail(id);
     }
     @Transactional(isolation=Isolation.READ_COMMITTED)
@@ -181,7 +182,7 @@ public class DocumentService {
         var d=raw(id);long actor=access.actor();if(!canRead(id,actor)) throw new BusinessException(ErrorCode.ACCESS_DENIED);
         var line=lines(id);boolean pending="IN_PROGRESS".equals(d.get("status"));boolean own=number(d,"drafter_id")==actor;
         var drafter=resolver.person(number(d,"drafter_id"));
-        var publicLine=line.stream().map(l->map("order",l.get("step_order"),"kind",l.get("line_kind"),"approver",snapshot(l),"source",l.get("source"),"rule",l.get("rule_label"),"status",l.get("status"),"actedAt",l.get("acted_at"),"comment",l.get("comment"))).toList();
+        var publicLine=line.stream().filter(l->"APPROVER".equals(l.get("line_kind"))).map(l->map("order",l.get("step_order"),"kind",l.get("line_kind"),"approver",snapshot(l),"source",l.get("source"),"rule",l.get("rule_label"),"status",l.get("status"),"skipReason",l.get("skip_reason"),"actedAt",l.get("acted_at"),"comment",l.get("comment"))).toList();
         var history=db.rows("SELECT h.action,h.actor_id,u.user_name,h.comment,h.created_at FROM approval_histories h LEFT JOIN users u ON u.id=h.actor_id WHERE h.document_id=:id ORDER BY h.id",map("id",id)).stream()
             .map(h->map("action",h.get("action"),"actor",h.get("actor_id")==null?null:map("id",h.get("actor_id"),"name",h.get("user_name")),"comment",h.get("comment"),"at",h.get("created_at"))).toList();
         boolean canAct=pending && line.stream().anyMatch(l->"PENDING".equals(l.get("status")) && number(l,"approver_id")==actor);

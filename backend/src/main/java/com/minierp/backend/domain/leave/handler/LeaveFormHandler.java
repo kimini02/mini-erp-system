@@ -44,6 +44,7 @@ public class LeaveFormHandler implements ApprovalFormHandler {
         return (BigDecimal)db.one("SELECT COALESCE(SUM(days),0) AS available FROM leave_ledger WHERE user_id=:user AND leave_year=:year",map("user",user,"year",year),ErrorCode.USER_NOT_FOUND).get("available");
     }
     public BigDecimal days(String type,LocalDate start,LocalDate end) {
+        if(start.getYear()!=end.getYear()) throw new BusinessException(ErrorCode.LEAVE_CROSS_YEAR);
         if(end.isBefore(start)) throw BodyValues.invalid();
         boolean half=type.equals("HALF_AM") || type.equals("HALF_PM");
         if(half && !start.equals(end)) throw new BusinessException(ErrorCode.INVALID_HALF_LEAVE_DATE);
@@ -54,30 +55,36 @@ public class LeaveFormHandler implements ApprovalFormHandler {
     public void validate(ApprovalDraft draft) {
         var doc=draft.document();var r=raw(doc.id());var start=(LocalDate)r.get("start_date");var end=(LocalDate)r.get("end_date");
         BigDecimal days=days((String)r.get("leave_type"),start,end);
-        if(days.compareTo(available(doc.drafterId(),start.getYear()))>0) throw new BusinessException(ErrorCode.LEAVE_BALANCE_EXCEEDED);
+        if(days.signum()>0 && days.compareTo(available(doc.drafterId(),start.getYear()))>0) throw new BusinessException(ErrorCode.LEAVE_BALANCE_EXCEEDED);
         if(db.count("""
             SELECT COUNT(*) FROM leave_requests l JOIN approval_documents d ON d.id=l.document_id
             WHERE d.drafter_id=:user AND d.status IN ('IN_PROGRESS','APPROVED') AND d.id<>:id AND l.start_date<=:end AND l.end_date>=:start
             """,map("user",doc.drafterId(),"id",doc.id(),"start",start,"end",end))>0) throw new BusinessException(ErrorCode.LEAVE_PERIOD_OVERLAP);
     }
-    private void append(ApprovalDocument d,String type,BigDecimal days,int year) {
-        db.update("INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,document_id,memo,created_at) VALUES(:user,:year,:type,:days,:id,:memo,:now)",map("user",d.drafterId(),"year",year,"type",type,"days",days,"id",d.id(),"memo","휴가 결재 #"+d.id(),"now",LocalDateTime.now(clock)));
+    private void append(ApprovalDocument d,String type,BigDecimal days,int year,String memo) {
+        if(days.signum()==0) return;
+        db.update("INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,document_id,memo,created_at) VALUES(:user,:year,:type,:days,:id,:memo,:now)",map("user",d.drafterId(),"year",year,"type",type,"days",days,"id",d.id(),"memo",memo,"now",LocalDateTime.now(clock)));
     }
     public void onSubmitted(ApprovalDocument d) {
         var r=raw(d.id());var start=(LocalDate)r.get("start_date");
         var used=days((String)r.get("leave_type"),start,(LocalDate)r.get("end_date"));
         db.update("UPDATE leave_requests SET used_days=:days WHERE document_id=:id",map("id",d.id(),"days",used));
-        append(d,"RESERVE",used.negate(),start.getYear());
+        append(d,"RESERVE",used.negate(),start.getYear(),leaveMemo(d.id()));
     }
-    private void release(ApprovalDocument d,boolean approved) {
+    private void release(ApprovalDocument d,boolean approved,String reason) {
         // Legacy reservations retain their migration year; never release them into another year.
         for(var r:db.rows("SELECT leave_year,-SUM(days) AS days FROM leave_ledger WHERE document_id=:id AND entry_type='RESERVE' GROUP BY leave_year",map("id",d.id()))) {
             int year=((Number)r.get("leave_year")).intValue(); var days=(BigDecimal)r.get("days");
-            if(approved) append(d,"USE",days.negate(),year);
-            append(d,"RELEASE",days,year);
+            if(approved) append(d,"USE",days.negate(),year,leaveMemo(d.id()));
+            append(d,"RELEASE",days,year,"예약 해제 ("+reason+")");
         }
     }
-    public void onApproved(ApprovalDocument d) { release(d,true); }
-    public void onRejected(ApprovalDocument d) { release(d,false); }
-    public void onWithdrawn(ApprovalDocument d) { release(d,false); }
+    private String leaveMemo(long id) {
+        var r=raw(id);var format=java.time.format.DateTimeFormatter.ofPattern("M/d");
+        String label=switch((String)r.get("leave_type")) {case "HALF_AM"->"오전 반차";case "HALF_PM"->"오후 반차";default->"연차";};
+        return label+" "+((LocalDate)r.get("start_date")).format(format)+"~"+((LocalDate)r.get("end_date")).format(format);
+    }
+    public void onApproved(ApprovalDocument d) { release(d,true,"승인"); }
+    public void onRejected(ApprovalDocument d) { release(d,false,"반려"); }
+    public void onWithdrawn(ApprovalDocument d) { release(d,false,"회수"); }
 }
