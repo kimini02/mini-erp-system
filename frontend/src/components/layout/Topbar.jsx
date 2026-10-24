@@ -124,7 +124,7 @@ function NotificationMenu() {
                     >
                       <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', n.read ? 'bg-gray-200' : meta.dot)} />
                       <span className="min-w-0 flex-1">
-                        <span className={cn('block text-[13px]', n.read ? 'text-gray-600' : 'font-medium text-gray-900')}>{n.title}</span>
+                        <span className={cn('block text-[13px]', n.read ? 'text-gray-600' : 'font-medium text-gray-900')}>{meta.sentence ? meta.sentence(n.title) : n.title}</span>
                         <span className="block text-xs text-gray-500">{meta.label} · {formatDateTime(n.createdAt)}</span>
                       </span>
                     </button>

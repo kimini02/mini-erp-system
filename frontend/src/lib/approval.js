@@ -49,12 +49,13 @@ export const LEDGER_TYPE_META = {
   CANCEL: { label: '취소', tone: 'gray' },
 };
 
+// 알림 title에는 문서 제목이 옵니다. 화면은 종류에 맞춰 문장으로 보여 줍니다.
 export const NOTIFICATION_TYPE_META = {
-  APPROVAL_REQUESTED: { label: '결재 요청', dot: 'bg-blue-500' },
-  APPROVED: { label: '승인', dot: 'bg-emerald-500' },
-  REJECTED: { label: '반려', dot: 'bg-red-500' },
-  WITHDRAWN: { label: '회수', dot: 'bg-amber-500' },
-  REFERENCED: { label: '참조', dot: 'bg-gray-400' },
+  APPROVAL_REQUESTED: { label: '결재 요청', dot: 'bg-blue-500', sentence: (t) => `'${t}' 결재 차례입니다.` },
+  APPROVED: { label: '승인', dot: 'bg-emerald-500', sentence: (t) => `'${t}' 문서가 최종 승인되었습니다.` },
+  REJECTED: { label: '반려', dot: 'bg-red-500', sentence: (t) => `'${t}' 문서가 반려되었습니다.` },
+  WITHDRAWN: { label: '회수', dot: 'bg-amber-500', sentence: (t) => `'${t}' 문서가 회수되었습니다.` },
+  REFERENCED: { label: '참조', dot: 'bg-gray-400', sentence: (t) => `'${t}' 문서에 참조로 지정되었습니다.` },
 };
 
 export const HISTORY_ACTION_LABELS = {

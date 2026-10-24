@@ -238,6 +238,7 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
 
   /* ───────── 알림 ───────── */
 
+  // 실제 서버처럼 title에는 문서 제목만 (문장은 화면이 종류에 맞춰 만듦)
   function notify(userId, type, title, docId, at) {
     state.notifications.push({ id: state.seq.notification++, userId, type, title, link: `/approvals/${docId}`, read: false, createdAt: at });
   }
@@ -324,7 +325,7 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
     doc.status = 'APPROVED';
     doc.completedAt = at;
     handlers[doc.formCode].onApproved(doc, at);
-    notify(doc.drafterId, 'APPROVED', `'${doc.title}' 문서가 최종 승인되었습니다.`, doc.id, at);
+    notify(doc.drafterId, 'APPROVED', doc.title, doc.id, at);
   }
 
   function submit(doc, drafter, at) {
@@ -355,12 +356,12 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
     const first = doc.lines.find((l) => l.status === 'WAITING');
     if (first) {
       first.status = 'PENDING';
-      notify(first.approver.id, 'APPROVAL_REQUESTED', `${drafter.name}님이 올린 '${doc.title}' 결재 차례입니다.`, doc.id, at);
+      notify(first.approver.id, 'APPROVAL_REQUESTED', doc.title, doc.id, at);
     } else {
       history(doc, 'AUTO_APPROVE', null, '결재할 사람이 남지 않아 바로 승인되었습니다.', at);
       complete(doc, at);
     }
-    doc.references.forEach((r) => notify(r.id, 'REFERENCED', `${drafter.name}님의 '${doc.title}' 문서에 참조로 지정되었습니다.`, doc.id, at));
+    doc.references.forEach((r) => notify(r.id, 'REFERENCED', doc.title, doc.id, at));
     return doc;
   }
 
@@ -383,7 +384,7 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
     const next = doc.lines.find((l) => l.status === 'WAITING');
     if (next) {
       next.status = 'PENDING';
-      notify(next.approver.id, 'APPROVAL_REQUESTED', `${doc.drafter.name}님이 올린 '${doc.title}' 결재 차례입니다.`, doc.id, at);
+      notify(next.approver.id, 'APPROVAL_REQUESTED', doc.title, doc.id, at);
     } else {
       complete(doc, at);
     }
@@ -402,7 +403,7 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
     doc.updatedAt = at;
     history(doc, 'REJECT', actor, line.comment, at);
     handlers[doc.formCode].onClosed(doc, at, '반려');
-    notify(doc.drafterId, 'REJECTED', `'${doc.title}' 문서가 반려되었습니다.`, doc.id, at);
+    notify(doc.drafterId, 'REJECTED', doc.title, doc.id, at);
     return doc;
   }
 
@@ -417,7 +418,7 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
     doc.updatedAt = at;
     history(doc, 'WITHDRAW', actor, null, at);
     handlers[doc.formCode].onClosed(doc, at, '회수');
-    if (current) notify(current.approver.id, 'WITHDRAWN', `${actor.name}님이 '${doc.title}' 문서를 회수했습니다.`, doc.id, at);
+    if (current) notify(current.approver.id, 'WITHDRAWN', doc.title, doc.id, at);
     return doc;
   }
 
