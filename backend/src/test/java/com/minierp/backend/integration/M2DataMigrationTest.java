@@ -41,6 +41,9 @@ class M2DataMigrationTest {
         var migration=Flyway.configure().dataSource(source).target("3").load();
         assertThat(migration.migrate().migrationsExecuted).isEqualTo(1);
         assertThat(migration.validateWithResult().validationSuccessful).isTrue();
+        int migrationYear=db.queryForObject("SELECT YEAR(UTC_TIMESTAMP() + INTERVAL 9 HOUR)",Integer.class);
+        assertThat(db.queryForList("SELECT DISTINCT leave_year FROM leave_ledger",Integer.class)).containsExactly(migrationYear);
+        assertThat(db.queryForList("SELECT DISTINCT memo FROM leave_ledger",String.class)).containsExactly("v1 이관");
         for (var row:before) {
             var after=db.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=?",BigDecimal.class,row.get("id"));
             assertThat(after).isEqualByComparingTo((BigDecimal)row.get("available"));

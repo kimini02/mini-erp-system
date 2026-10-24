@@ -55,16 +55,15 @@ Docker를 실행해야 MariaDB 테스트가 실제 수행된다. 두 번째 명�
 
 추가된 ClockBehaviorTest는 3회 실행된다. 운영 시계의 Asia/Seoul 시간대와 UTC 날짜 경계를 검증하고, changingFixedDatePreservesPastRequestAndOverdueRules를 두 고정 시각에서 실행해 연차·특근 과거 신청 거부 및 업무 지연/완료 판정이 유지됨을 확인했다. 고정 시각 리터럴은 Clock의 기준점을 지정하는 곳에만 남겼으며 업무 날짜 데이터는 기준일에서 계산한다. CoreApiIntegrationTest는 성공·오류 응답의 timestamp도 주입된 Clock과 일치하는지 검사한다.
 
-+
-+### 최종 결과 (2번 작업 포함)
-+Java 17.0.16 + Docker 실행 상태에서 두 번 모두 Maven 종료 코드 0:
-+
-+| 실행 조건 | 총 | 성공 | 실패 | 오류 | 건너뜀 |
-+| --- | ---: | ---: | ---: | ---: | ---: |
-+| 기본 Clock.fixed (2026-04-06T00:00:00Z) | 107 | 106 | 0 | 0 | 1 |
-+| Clock.fixed=2026-12-31T15:00:00Z, JVM 시간대 UTC | 107 | 106 | 0 | 0 | 1 |
-+
-+두 번째 실행의 한국 날짜는 2027-01-01이다. Surefire 실행 속성에서 java.version=17.0.16, user.timezone=UTC, test.clock.instant 값을 확인했다. 두 실행 모두 유일한 건너뜀은 `CoreApiIntegrationTest.approveOvertime_shouldReturnApprovedStatus`이며 사유는 `M2에서 수정 — docs/known-issues.md 참고`다. MariaDbMigrationTest 3개와 InitialAdminMariaDbTest 1개는 실제 컨테이너에서 실행됐다.
-+
-+새 라이브러리 없이 변경 전 104개에 ClockBehaviorTest의 3회 실행을 추가했다. 운영 코드의 인자 없는 LocalDate.now()/LocalDateTime.now()/LocalTime.now() 및 인자 없는 isOverdue() 호출이 남지 않았음을 검색으로 확인했다. 금지된 frontend 및 다음 단계 설계 문서 10/11/12는 변경·커밋하지 않았다.
-+
+
+### 최종 결과 (2번 작업 포함)
+Java 17.0.16 + Docker 실행 상태에서 두 번 모두 Maven 종료 코드 0:
+
+| 실행 조건 | 총 | 성공 | 실패 | 오류 | 건너뜀 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 기본 Clock.fixed (2026-04-06T00:00:00Z) | 107 | 106 | 0 | 0 | 1 |
+| Clock.fixed=2026-12-31T15:00:00Z, JVM 시간대 UTC | 107 | 106 | 0 | 0 | 1 |
+
+두 번째 실행의 한국 날짜는 2027-01-01이다. Surefire 실행 속성에서 java.version=17.0.16, user.timezone=UTC, test.clock.instant 값을 확인했다. 두 실행 모두 유일한 건너뜀은 `CoreApiIntegrationTest.approveOvertime_shouldReturnApprovedStatus`이며 사유는 `M2에서 수정 — docs/known-issues.md 참고`다. MariaDbMigrationTest 3개와 InitialAdminMariaDbTest 1개는 실제 컨테이너에서 실행됐다.
+
+새 라이브러리 없이 변경 전 104개에 ClockBehaviorTest의 3회 실행을 추가했다. 운영 코드의 인자 없는 LocalDate.now()/LocalDateTime.now()/LocalTime.now() 및 인자 없는 isOverdue() 호출이 남지 않았음을 검색으로 확인했다. 금지된 frontend 및 다음 단계 설계 문서 10/11/12는 변경·커밋하지 않았다.
