@@ -139,22 +139,10 @@ class DashboardServiceTest {
     }
 
     @Test
-    @DisplayName("TEAM_LEADER는 본인 담당 프로젝트 기준으로 관리자 대시보드 통계를 조회한다")
-    void getAdminSummary_asTeamLeader_success() {
-        Project project1 = createProject(1L, ProjectStatus.PROGRESS);
-        Project project2 = createProject(2L, ProjectStatus.READY);
-        given(projectRepository.findByLeaderId(10L)).willReturn(List.of(project1, project2));
-        given(taskRepository.countByProjectIdIn(List.of(1L, 2L))).willReturn(10L);
-        given(taskRepository.countByProjectIdInAndTaskStatus(List.of(1L, 2L), TaskStatus.DONE)).willReturn(5L);
-        given(leaveRequestRepository.countByAppStatus(LeaveStatus.PENDING)).willReturn(2L);
-
-        AdminDashboardResponseDto response = dashboardService.getAdminSummary(10L, UserRole.TEAM_LEADER);
-
-        assertThat(response.getTotalUsers()).isZero();
-        assertThat(response.getActiveProjectCount()).isEqualTo(1L);
-        assertThat(response.getPendingApprovalCount()).isEqualTo(2L);
-        assertThat(response.getTotalTaskCount()).isEqualTo(10L);
-        assertThat(response.getTaskCompletionRate()).isEqualTo(50.0);
+    @DisplayName("TEAM_LEADER는 관리자 대시보드 요약에 접근할 수 없다")
+    void getAdminSummary_asTeamLeader_throwsAccessDenied() {
+        assertThatThrownBy(() -> dashboardService.getAdminSummary(10L,UserRole.TEAM_LEADER))
+            .isInstanceOfSatisfying(BusinessException.class,e->assertThat(e.getErrorCode()).isEqualTo(ErrorCode.ACCESS_DENIED));
     }
 
     @Test
