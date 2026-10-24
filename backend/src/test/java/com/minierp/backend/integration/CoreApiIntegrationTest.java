@@ -87,11 +87,8 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data[*].type",hasItems(expected.getValue())));
     }
     @Test void attendance_checkInAndCheckOut_shouldSucceed() throws Exception {
-        postAs("/api/v1/attendance/check-in",employeeToken,Map.of("workDate",workDate.toString(),"clockInTime","08:55:00"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$.data.attStatus").value("NORMAL"));
-        mvc.perform(patch("/api/v1/attendance/check-out").header("Authorization","Bearer "+employeeToken).param("workDate",workDate.toString())
-            .contentType(MediaType.APPLICATION_JSON).content("{\"clockOutTime\":\"18:10:00\"}"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$.data.clockOutTime").value("18:10:00"));
+        postAs("/api/v1/attendance/clock-in",employeeToken,null).andExpect(status().isOk()).andExpect(jsonPath("$.data.clockInAt").exists());
+        postAs("/api/v1/attendance/clock-out",employeeToken,null).andExpect(status().isOk()).andExpect(jsonPath("$.data.clockOutAt").exists());
     }
     @Test void createLeave_sameDateDuplicateShouldFail() throws Exception {
         leave();long duplicate=draft("LEAVE",leaveBody("ANNUAL",workDate));
