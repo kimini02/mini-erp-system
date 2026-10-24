@@ -1,7 +1,7 @@
 package com.minierp.backend.domain.calendar.service;
 
-import com.minierp.backend.domain.approval.entity.LeaveStatus;
-import com.minierp.backend.domain.approval.repository.LeaveRequestRepository;
+import com.minierp.backend.domain.leave.entity.LeaveStatus;
+import com.minierp.backend.domain.leave.repository.LeaveRequestRepository;
 import com.minierp.backend.domain.calendar.dto.CalendarEventResponseDto;
 import com.minierp.backend.domain.overtime.entity.OvertimeStatus;
 import com.minierp.backend.domain.overtime.repository.OvertimeRequestRepository;

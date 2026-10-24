@@ -1,0 +1,25 @@
+# M2-9 — 구 연차·특근 API 제거와 조회 호환
+
+## 증상
+V3 이관 뒤 구 쓰기 API가 남으면 삭제된 컬럼에 의존하는 코드를 호출한다. 특근 단건 조회의 부서 범위 우회(KI-02)도 기존 API에 남아 있었다. 구 경로를 지운 뒤 없는 경로가 404 대신 500이 되었다.
+
+## 재현 방법
+`./mvnw -Duser.timezone=UTC -Dtest=M1RegressionTest,MariaDbMigrationTest,CoreApiIntegrationTest test`.
+구 API 제거 후 공통 예외 처리 수정 전, M1RegressionTest의 읽기·쓰기 경로 제거 검증 2개에서 기대 404에 실제 500으로 실패했다. 대시보드 projects는 원래 관리자/팀장 전용이므로 호환 테스트도 관리소장으로 호출한다.
+
+## 원인
+기존 서비스·요청 DTO는 문서 통합 전 구조다. 전역 Exception 처리기가 NoResourceFoundException까지 내부 오류로 바꿨다. M1 테스트의 테이블 목록·삭제 순서·SQL fixture도 V2에 고정돼 있었다.
+
+## 검토했지만 버린 방법과 이유
+삭제한 API를 빈 200 응답이나 새 API의 우회 경로로 남기지 않았다. 대시보드·캘린더까지 삭제하는 방식은 M4 전 화면 호환 요구와 충돌해 제외했다. 사라진 서비스의 테스트를 Disabled로 숨기지 않았다.
+
+## 선택한 방법
+구 연차/특근 컨트롤러·서비스·전용 쓰기 DTO·범위 저장소를 제거하고 GET /leave/policy만 별도 유지한다. 새 /leave/balance·ledger·days-preview는 원장 조회 작업으로 제공한다. 대시보드·캘린더는 1차에서 만든 새 문서/양식 테이블 읽기 매핑을 유지한다. 사라진 경로는 공통 RESOURCE_NOT_FOUND 404를 반환한다.
+
+M1RegressionTest는 제거된 경로, 새 문서의 멤버십 권한, 새 휴가·특근 승인의 대시보드/개인 캘린더 호환을 검증한다. M1AcceptanceTest fixture와 MariaDbMigrationTest를 최신 V3 스키마에 맞춘다. V1→V2 이관 시험과 수정 전 경쟁 재현 시험은 기존처럼 버전을 고정한다. 삭제된 v1 서비스의 과거 날짜 거절 테스트는 M2 명세에 없는 규칙이므로 제거하고 ClockBehaviorTest의 UTC/한국 날짜 및 두 고정 시각의 업무 지연 판정 3회는 유지한다.
+
+## 부작용·남은 위험
+구 연차·특근 화면은 새 결재 화면으로 교체해야 한다. 기존 대시보드 관리자 요약은 여전히 전체 휴가 대기를 반환하며, 팀장의 부서 범위·새 결재 문서 멤버십과 다르다. 명세 밖 권한 우회 경로를 임의 수정하지 말라는 지시에 따라 동작만 보존하고 별도 보고한다. 기존 대시보드 요약의 범위와 휴가 전용 항목 모양은 M4에서 결정할 사항이다.
+
+## 결과
+M1RegressionTest 4개, MariaDbMigrationTest 3개, M1AcceptanceTest 37개, CoreApiIntegrationTest 9개 및 ClockBehaviorTest 3개가 모두 통과했다. 전체 199개 성공, 실패·오류·건너뜀 0. KI-02의 기존 특근 단건 경로는 삭제로 해소했다. 전체 결과는 M2-12에 기록했다.

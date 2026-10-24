@@ -1,422 +1,111 @@
 package com.minierp.backend.integration;
 
-import com.minierp.backend.support.FixedClockTestConfiguration;
-import com.minierp.backend.domain.overtime.entity.OvertimeRequest;
-import org.springframework.context.annotation.Import;
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.DayOfWeek;
-import static java.time.temporal.TemporalAdjusters.next;
-import static org.assertj.core.api.Assertions.assertThat;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.minierp.backend.domain.approval.repository.LeaveRequestRepository;
-import com.minierp.backend.domain.attendance.repository.AttendanceRepository;
-import com.minierp.backend.domain.overtime.repository.OvertimeRequestRepository;
-import com.minierp.backend.domain.user.entity.User;
-import com.minierp.backend.domain.user.entity.UserRole;
+import com.fasterxml.jackson.databind.*;
+import com.minierp.backend.support.MariaDbIntegrationTest;
+import com.minierp.backend.domain.user.entity.*;
 import com.minierp.backend.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
+import org.springframework.test.web.servlet.*;
+import java.time.*;
+import java.util.*;
+import static java.time.temporal.TemporalAdjusters.next;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Import(FixedClockTestConfiguration.class)
-@SpringBootTest
+/** Existing end-to-end coverage now uses the M2 contract and real MariaDB. */
 @AutoConfigureMockMvc
-@ActiveProfiles("integration")
-class CoreApiIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private LeaveRequestRepository leaveRequestRepository;
-
-    @Autowired
-    private OvertimeRequestRepository overtimeRequestRepository;
-
-    @Autowired
-    private AttendanceRepository attendanceRepository;
-
-    @Autowired
-    private Clock clock;
-
-    private LocalDate workDate;
-    private LocalDate overtimeDate;
-    private User adminUser;
-    private User leaderUser;
-    private User normalUser;
-
-    @BeforeEach
-    void setUp() {
-        workDate = LocalDate.now(clock).with(next(DayOfWeek.WEDNESDAY));
-        overtimeDate = workDate.with(next(DayOfWeek.SATURDAY));
-        attendanceRepository.deleteAllInBatch();
-        overtimeRequestRepository.deleteAllInBatch();
-        leaveRequestRepository.deleteAllInBatch();
-        userRepository.deleteAll();
-
-        adminUser = User.create(
-                "관리소장",
-                "manager01",
-                "manager01@test.com",
-                passwordEncoder.encode("Password123!"),
-                "01",
-                "관리소장"
-        );
-        adminUser.changeRole(UserRole.ADMIN);
-
-        leaderUser = User.create(
-                "팀장",
-                "leader01",
-                "leader01@test.com",
-                passwordEncoder.encode("Password123!"),
-                "02",
-                "팀장"
-        );
-        leaderUser.changeRole(UserRole.TEAM_LEADER);
-
-        normalUser = User.create(
-                "일반사용자",
-                "user01",
-                "user01@test.com",
-                passwordEncoder.encode("Password123!"),
-                "02",
-                "사원"
-        );
-
-        userRepository.save(adminUser);
-        userRepository.save(leaderUser);
-        userRepository.save(normalUser);
+class CoreApiIntegrationTest extends MariaDbIntegrationTest {
+    @Autowired MockMvc mvc;
+    @Autowired ObjectMapper mapper;
+    @Autowired UserRepository users;
+    @Autowired PasswordEncoder encoder;
+    @Autowired JdbcTemplate jdbc;
+    @Autowired Clock clock;
+    private User employee,leader,chief;
+    private String employeeToken,leaderToken,chiefToken,password;
+    private LocalDate workDate,overtimeDate;
+    @BeforeEach void setUp() throws Exception {
+        password="Aa1!"+UUID.randomUUID();
+        employee=user("employee",UserRole.USER);leader=user("leader",UserRole.TEAM_LEADER);chief=user("chief",UserRole.ADMIN);
+        employeeToken=login(employee);leaderToken=login(leader);chiefToken=login(chief);
+        jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2",leader.getId());
+        jdbc.update("DELETE FROM approval_form_steps WHERE form_id=1");
+        jdbc.update("INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type) VALUES(1,1,'APPROVER','DEPT_HEAD')");
+        workDate=LocalDate.now(clock).with(next(DayOfWeek.WEDNESDAY));overtimeDate=workDate.with(next(DayOfWeek.SATURDAY));
+        jdbc.update("INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,memo,created_at) VALUES(?,?,'GRANT',14,'fixture',?)",employee.getId(),workDate.getYear(),LocalDateTime.now(clock));
     }
-
-    @Test
-    @DisplayName("로그인 통합 테스트: Access Token 발급")
-    void login_shouldIssueAccessToken() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "id": "user01",
-                                  "password": "Password123!"
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
-                .andExpect(result -> assertTimestamp(result));
+    private User user(String prefix,UserRole role) {
+        String id=prefix+UUID.randomUUID();var user=User.create(prefix,id,id+"@example.test",encoder.encode(password),"01","사원");user.changeRole(role);return users.saveAndFlush(user);
     }
-
-    @Test
-    @DisplayName("사용자 목록 통합 테스트: ADMIN은 목록 조회 가능")
-    void getUsers_adminShouldSeeList() throws Exception {
-        String adminToken = loginAndGetToken("manager01", "Password123!");
-
-        mockMvc.perform(get("/api/v1/users")
-                        .header("Authorization", bearer(adminToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.content.length()").value(greaterThanOrEqualTo(3)));
+    private JsonNode body(ResultActions action) throws Exception { return mapper.readTree(action.andExpect(status().is2xxSuccessful()).andReturn().getResponse().getContentAsString()).path("data"); }
+    private ResultActions postAs(String path,String token,Object body) throws Exception {
+        var request=post(path).header("Authorization","Bearer "+token);
+        if(body!=null) request.contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(body));
+        return mvc.perform(request);
     }
-
-    @Test
-    @DisplayName("연차 승인 통합 테스트: USER 신청건을 TEAM_LEADER가 승인")
-    void approveLeave_shouldReturnApprovedStatus() throws Exception {
-        String userToken = loginAndGetToken("user01", "Password123!");
-        String leaderToken = loginAndGetToken("leader01", "Password123!");
-
-        MvcResult createResult = mockMvc.perform(post("/api/v1/leave")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "appType": "ANNUAL",
-                                  "startDate": "%s",
-                                  "endDate": "%s",
-                                  "requestReason": "병원 진료"
-                                }
-                                """.formatted(workDate, workDate)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true))
-                .andReturn();
-
-        Long appId = readLong(createResult, "data", "appId");
-
-        mockMvc.perform(patch("/api/v1/leave/{requestId}/approve", appId)
-                        .header("Authorization", bearer(leaderToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.appStatus").value("APPROVED"))
-                .andExpect(jsonPath("$.data.requestReason").value("병원 진료"))
-                .andExpect(jsonPath("$.data.approverId").value(leaderUser.getId()));
+    private String login(User user) throws Exception {
+        return body(mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(Map.of("id",user.getLoginId(),"password",password))))).path("accessToken").asText();
     }
+    private long draft(String code,Object request) throws Exception { return body(postAs("/api/v1/approval-documents",employeeToken,Map.of("formCode",code,"title","통합 검증","body",request))).path("id").asLong(); }
+    private Map<String,Object> leaveBody(String type,LocalDate end) { return Map.of("leaveType",type,"startDate",workDate.toString(),"endDate",end.toString(),"reason","병원 진료"); }
+    private long leave() throws Exception { long id=draft("LEAVE",leaveBody("ANNUAL",workDate));body(postAs("/api/v1/approval-documents/"+id+"/submit",employeeToken,null));return id; }
+    private long overtime() throws Exception { long id=draft("OVERTIME",Map.of("overtimeDate",overtimeDate.toString(),"startTime","09:00:00","endTime","12:00:00","reason","주말 긴급 작업"));body(postAs("/api/v1/approval-documents/"+id+"/submit",employeeToken,null));return id; }
+    private JsonNode approve(long id) throws Exception { return body(postAs("/api/v1/approval-documents/"+id+"/approve",leaderToken,null)); }
 
-    @Test
-    @Disabled("M2에서 수정 — docs/known-issues.md 참고")
-    @DisplayName("특근 승인 통합 테스트: USER 신청건을 TEAM_LEADER가 승인")
-    void approveOvertime_shouldReturnApprovedStatus() throws Exception {
-        String userToken = loginAndGetToken("user01", "Password123!");
-        String leaderToken = loginAndGetToken("leader01", "Password123!");
-
-        MvcResult createResult = mockMvc.perform(post("/api/v1/overtime")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "overtimeDate": "%s",
-                                  "startTime": "09:00:00",
-                                  "endTime": "12:00:00",
-                                  "reason": "주말 긴급 작업"
-                                }
-                                """.formatted(overtimeDate)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true))
-                .andReturn();
-
-        Long overtimeId = readLong(createResult, "data", "id");
-
-        mockMvc.perform(patch("/api/v1/overtime/{id}/approve", overtimeId)
-                        .header("Authorization", bearer(leaderToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.status").value("APPROVED"))
-                .andExpect(jsonPath("$.data.approverId").value(leaderUser.getId()));
+    @Test void login_shouldIssueAccessToken() throws Exception {
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(Map.of("id",employee.getLoginId(),"password",password))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.accessToken").isNotEmpty()).andExpect(jsonPath("$.data.tokenType").value("Bearer"))
+            .andExpect(r->assertThat(LocalDateTime.parse(mapper.readTree(r.getResponse().getContentAsString()).path("timestamp").asText())).isEqualTo(LocalDateTime.now(clock)));
     }
-
-    @Test
-    @DisplayName("캘린더 조회 통합 테스트: 승인된 연차/특근 이벤트가 함께 조회")
-    void calendar_shouldContainLeaveAndOvertimeEvents() throws Exception {
-        String userToken = loginAndGetToken("user01", "Password123!");
-        String leaderToken = loginAndGetToken("leader01", "Password123!");
-
-        Long leaveId = createLeave(userToken, workDate.toString(), workDate.toString());
-        approveLeave(leaderToken, leaveId);
-
-        // Calendar retrieval needs approved data, not the broken overtime request contract (M2).
-        OvertimeRequest overtime = OvertimeRequest.builder()
-                .requester(normalUser).overtimeDate(overtimeDate)
-                .startTime(LocalTime.of(9, 0)).endTime(LocalTime.of(12, 0))
-                .reason("캘린더 조회 검증").build();
-        overtime.approve(leaderUser);
-        overtimeRequestRepository.saveAndFlush(overtime);
-
-        mockMvc.perform(get("/api/v1/calendar/events")
-                        .header("Authorization", bearer(userToken))
-                        .param("year", String.valueOf(workDate.getYear()))
-                        .param("month", String.valueOf(workDate.getMonthValue())))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data[*].type", hasItems("LEAVE")));
-
-        mockMvc.perform(get("/api/v1/calendar/events")
-                        .header("Authorization", bearer(userToken))
-                        .param("year", String.valueOf(overtimeDate.getYear()))
-                        .param("month", String.valueOf(overtimeDate.getMonthValue())))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[*].type", hasItems("OVERTIME")));
+    @Test void getUsers_adminShouldSeeList() throws Exception {
+        mvc.perform(get("/api/v1/users").header("Authorization","Bearer "+chiefToken).param("q",employee.getLoginId()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].id").value(employee.getId()));
     }
-
-    @Test
-    @DisplayName("근태 체크인/체크아웃 통합 테스트")
-    void attendance_checkInAndCheckOut_shouldSucceed() throws Exception {
-        String userToken = loginAndGetToken("user01", "Password123!");
-
-        mockMvc.perform(post("/api/v1/attendance/check-in")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "workDate": "%s",
-                                  "clockInTime": "08:55:00"
-                                }
-                                """.formatted(workDate)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.attStatus").value("NORMAL"));
-
-        mockMvc.perform(patch("/api/v1/attendance/check-out")
-                        .header("Authorization", bearer(userToken))
-                        .param("workDate", workDate.toString())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "clockOutTime": "18:10:00"
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.clockOutTime").value("18:10:00"));
+    @Test void approveLeave_shouldReturnApprovedStatus() throws Exception {
+        var document=approve(leave());assertThat(document.path("status").asText()).isEqualTo("APPROVED");
+        assertThat(document.path("body").path("reason").asText()).isEqualTo("병원 진료");
+        assertThat(document.path("line").get(0).path("approver").path("id").asLong()).isEqualTo(leader.getId());
     }
-
-    @Test
-    @DisplayName("연차 중복 신청 통합 테스트: 같은 날짜 재신청은 거부")
-    void createLeave_sameDateDuplicateShouldFail() throws Exception {
-        String userToken = loginAndGetToken("user01", "Password123!");
-
-        mockMvc.perform(post("/api/v1/leave")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "appType": "ANNUAL",
-                                  "startDate": "%s",
-                                  "endDate": "%s",
-                                  "requestReason": "1차 신청"
-                                }
-                                """.formatted(workDate, workDate)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true));
-
-        mockMvc.perform(post("/api/v1/leave")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "appType": "ANNUAL",
-                                  "startDate": "%s",
-                                  "endDate": "%s",
-                                  "requestReason": "중복 신청"
-                                }
-                                """.formatted(workDate, workDate)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error.code").value("DUPLICATE_RESOURCE"))
-                .andExpect(result -> assertTimestamp(result));
+    @Test void approveOvertime_shouldReturnApprovedStatus() throws Exception {
+        var document=approve(overtime());assertThat(document.path("status").asText()).isEqualTo("APPROVED");
+        assertThat(document.path("body").path("overtimeDate").asText()).isEqualTo(overtimeDate.toString());
+        assertThat(document.path("line").get(0).path("approver").path("id").asLong()).isEqualTo(leader.getId());
     }
-
-    @Test
-    @DisplayName("반차 신청 통합 테스트: 종료일이 자동으로 시작일과 동일하게 보정된다")
-    void createHalfDayLeave_shouldNormalizeEndDate() throws Exception {
-        String userToken = loginAndGetToken("user01", "Password123!");
-
-        mockMvc.perform(post("/api/v1/leave")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "appType": "HALF_MORNING",
-                                  "startDate": "%s",
-                                  "endDate": "%s",
-                                  "requestReason": "반차 테스트"
-                                }
-                                """.formatted(workDate, workDate.plusDays(2))))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.startDate").value(workDate.toString()))
-                .andExpect(jsonPath("$.data.endDate").value(workDate.toString()));
+    @Test void calendar_shouldContainLeaveAndOvertimeEvents() throws Exception {
+        approve(leave());approve(overtime());
+        for(var expected:Map.of(workDate,"LEAVE",overtimeDate,"OVERTIME").entrySet())
+            mvc.perform(get("/api/v1/calendar/events").header("Authorization","Bearer "+employeeToken)
+                .param("year",""+expected.getKey().getYear()).param("month",""+expected.getKey().getMonthValue()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[*].type",hasItems(expected.getValue())));
     }
-
-    @Test
-    @DisplayName("연차 취소 통합 테스트: 본인 PENDING 건은 취소 가능")
-    void cancelLeave_shouldSucceedForOwnPendingRequest() throws Exception {
-        String userToken = loginAndGetToken("user01", "Password123!");
-
-        MvcResult createResult = mockMvc.perform(post("/api/v1/leave")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "appType": "ANNUAL",
-                                  "startDate": "%s",
-                                  "endDate": "%s",
-                                  "requestReason": "취소 테스트"
-                                }
-                                """.formatted(workDate, workDate)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        Long leaveId = readLong(createResult, "data", "appId");
-
-        mockMvc.perform(patch("/api/v1/leave/{requestId}/cancel", leaveId)
-                        .header("Authorization", bearer(userToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.appStatus").value("CANCELLED"));
+    @Test void attendance_checkInAndCheckOut_shouldSucceed() throws Exception {
+        postAs("/api/v1/attendance/check-in",employeeToken,Map.of("workDate",workDate.toString(),"clockInTime","08:55:00"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.attStatus").value("NORMAL"));
+        mvc.perform(patch("/api/v1/attendance/check-out").header("Authorization","Bearer "+employeeToken).param("workDate",workDate.toString())
+            .contentType(MediaType.APPLICATION_JSON).content("{\"clockOutTime\":\"18:10:00\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.clockOutTime").value("18:10:00"));
     }
-
-    private Long createLeave(String userToken, String startDate, String endDate) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/v1/leave")
-                        .header("Authorization", bearer(userToken))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "appType": "ANNUAL",
-                                  "startDate": "%s",
-                                  "endDate": "%s",
-                                  "requestReason": "테스트 연차"
-                                }
-                                """.formatted(startDate, endDate)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        return readLong(result, "data", "appId");
+    @Test void createLeave_sameDateDuplicateShouldFail() throws Exception {
+        leave();long duplicate=draft("LEAVE",leaveBody("ANNUAL",workDate));
+        postAs("/api/v1/approval-documents/"+duplicate+"/submit",employeeToken,null)
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LEAVE_PERIOD_OVERLAP"));
     }
-
-    private void approveLeave(String approverToken, Long leaveId) throws Exception {
-        mockMvc.perform(patch("/api/v1/leave/{requestId}/approve", leaveId)
-                        .header("Authorization", bearer(approverToken)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.appStatus").value("APPROVED"));
+    @Test void halfDayRequiresSameDateAndChargesHalfDay() throws Exception {
+        long invalid=draft("LEAVE",leaveBody("HALF_AM",workDate.plusDays(2)));
+        postAs("/api/v1/approval-documents/"+invalid+"/submit",employeeToken,null).andExpect(status().isBadRequest());
+        long valid=draft("LEAVE",leaveBody("HALF_AM",workDate));
+        var result=body(postAs("/api/v1/approval-documents/"+valid+"/submit",employeeToken,null));
+        assertThat(result.path("body").path("usedDays").decimalValue()).isEqualByComparingTo("0.5");
     }
-
-    private String loginAndGetToken(String loginId, String password) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "id": "%s",
-                                  "password": "%s"
-                                }
-                                """.formatted(loginId, password)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andReturn();
-
-        JsonNode json = objectMapper.readTree(result.getResponse().getContentAsString());
-        return json.path("data").path("accessToken").asText();
-    }
-
-    private Long readLong(MvcResult mvcResult, String parent, String field) throws Exception {
-        JsonNode json = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
-        return json.path(parent).path(field).asLong();
-    }
-
-    private void assertTimestamp(MvcResult result) throws Exception {
-        String timestamp = objectMapper.readTree(result.getResponse().getContentAsString())
-                .path("timestamp").asText();
-        assertThat(LocalDateTime.parse(timestamp)).isEqualTo(LocalDateTime.now(clock));
-    }
-
-    private String bearer(String accessToken) {
-        return "Bearer " + accessToken;
+    @Test void cancelLeave_shouldSucceedForOwnPendingRequest() throws Exception {
+        long id=leave();assertThat(body(postAs("/api/v1/approval-documents/"+id+"/withdraw",employeeToken,null)).path("status").asText()).isEqualTo("WITHDRAWN");
     }
 }

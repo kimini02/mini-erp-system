@@ -9,6 +9,18 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
+    DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결재 문서를 찾을 수 없습니다."),
+    DOCUMENT_STATE_CONFLICT(HttpStatus.CONFLICT, "이미 처리되었거나 지금 처리할 수 없는 문서입니다. 새로고침해 주세요."),
+    WITHDRAW_NOT_ALLOWED(HttpStatus.CONFLICT, "이미 승인한 사람이 있어 회수할 수 없습니다."),
+    LEAVE_CROSS_YEAR(HttpStatus.UNPROCESSABLE_ENTITY, "연도가 바뀌는 휴가는 연도별로 나눠 신청해 주세요."),
+    LEAVE_PERIOD_OVERLAP(HttpStatus.CONFLICT, "같은 기간에 이미 신청한 휴가가 있습니다."),
+    LEAVE_BALANCE_EXCEEDED(HttpStatus.UNPROCESSABLE_ENTITY, "사용 가능한 연차보다 많이 신청할 수 없습니다."),
+    LEAVE_NO_WORKING_DAY(HttpStatus.UNPROCESSABLE_ENTITY, "선택한 기간이 모두 휴일입니다."),
+    APPROVER_NOT_FOUND(HttpStatus.UNPROCESSABLE_ENTITY, "결재자를 찾을 수 없습니다. 결재 양식이나 부서장 설정을 확인해 주세요."),
+    LINE_EDIT_NOT_ALLOWED(HttpStatus.FORBIDDEN, "이 양식은 결재선을 바꿀 수 없습니다."),
+    INVALID_APPROVAL_STEPS(HttpStatus.BAD_REQUEST, "결재자 단계가 하나 이상 있어야 합니다."),
+    FORM_NOT_FOUND(HttpStatus.NOT_FOUND, "결재 양식을 찾을 수 없습니다."),
+
     TOKEN_REVOKED(HttpStatus.UNAUTHORIZED, "로그인이 만료되었습니다. 다시 로그인해 주세요."),
     SETUP_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "비밀번호 설정 링크가 만료되었거나 이미 사용되었습니다."),
     ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "재직 중인 계정이 아닙니다."),

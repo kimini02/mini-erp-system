@@ -12,13 +12,16 @@ import java.util.Map;
 import static com.minierp.backend.global.permission.Action.*;
 @RestController @RequestMapping("/api/v1/users") @RequiredArgsConstructor
 public class UserController {
-    private final EmployeeService service; private final Clock clock;
+    private final EmployeeService service; private final com.minierp.backend.domain.user.service.UserLookupService lookup; private final Clock clock;
     private ApiResponse<?> ok(Object value) { return ApiResponse.success(clock,value); }
     @GetMapping @RequirePermission(menu="EMPLOYEE",action=VIEW)
     public ApiResponse<?> list(@RequestParam(required=false) String q,@RequestParam(required=false) Long departmentId,
       @RequestParam(defaultValue="false") boolean includeSubDepartments,@RequestParam(required=false) String status,
       @RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size,@RequestParam(defaultValue="userName,asc") String sort) {
         return ok(service.list(q,departmentId,includeSubDepartments,status,page,size,sort));
+    }
+    @GetMapping("/lookup") public ApiResponse<?> lookup(@RequestParam(required=false) String q,@RequestParam(required=false) Long departmentId,@RequestParam(defaultValue="20") int size) {
+        return ok(lookup.lookup(q,departmentId,size));
     }
     @GetMapping("/login-id-preview") @RequirePermission(menu="EMPLOYEE",action=CREATE)
     public ApiResponse<?> preview(@RequestParam LocalDate hireDate) { return ok(Map.of("loginId",service.preview(hireDate))); }

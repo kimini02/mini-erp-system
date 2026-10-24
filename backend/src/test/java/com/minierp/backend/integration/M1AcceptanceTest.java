@@ -51,7 +51,7 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
 
     @BeforeEach void setUp() throws Exception {
         db.update("UPDATE departments SET head_user_id=NULL",Map.of());
-        for(String table:List.of("attendances","leave_requests","overtime_requests","task_assignments","project_members","tasks","projects","user_roles","users")) db.update("DELETE FROM "+table,Map.of());
+        for(String table:List.of("notifications","leave_ledger","approval_histories","approval_lines","general_requests","attendances","leave_requests","overtime_requests","approval_documents","task_assignments","project_members","tasks","projects","user_roles","users")) db.update("DELETE FROM "+table,Map.of());
         db.update("UPDATE departments SET parent_id=1 WHERE id>1",Map.of());
         db.update("DELETE FROM departments WHERE id>4",Map.of());
         db.update("DELETE FROM role_permissions",Map.of());
@@ -198,7 +198,7 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
                 try { return new TransactionTemplate(transactionManager).execute(status->{
                     long next=db.count("SELECT COALESCE(MAX(CAST(SUBSTRING(login_id,5) AS UNSIGNED)),0)+1 FROM users WHERE login_id LIKE :prefix",map("prefix",year+"%"));
                     try { rendezvous.await(10,TimeUnit.SECONDS); } catch(Exception ex) { throw new RuntimeException(ex); }
-                    db.update("INSERT INTO users(login_id,user_name,user_email,department_id,position_id,status,must_change_pw,token_version,total_annual_leave,used_annual_leave,remaining_annual_leave,created_at,updated_at) VALUES(:login,'unsafe',:email,2,1,'ACTIVE',0,0,0,0,0,:now,:now)",map("login",String.format("%d%03d",year,next),"email",UUID.randomUUID()+"@example.test","now",LocalDateTime.now(clock)));return true;
+                    db.update("INSERT INTO users(login_id,user_name,user_email,department_id,position_id,status,must_change_pw,token_version,created_at,updated_at) VALUES(:login,'unsafe',:email,2,1,'ACTIVE',0,0,:now,:now)",map("login",String.format("%d%03d",year,next),"email",UUID.randomUUID()+"@example.test","now",LocalDateTime.now(clock)));return true;
                 }); } catch(org.springframework.dao.DataIntegrityViolationException expected) { return false; }
             }));
             assertThat(List.of(unsafe.get(0).get(20,TimeUnit.SECONDS),unsafe.get(1).get(20,TimeUnit.SECONDS))).containsExactlyInAnyOrder(true,false);
