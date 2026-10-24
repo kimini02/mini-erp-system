@@ -5,7 +5,7 @@ import api from '@/api/axios';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { getRoleInfo, getDisplayName } from '@/lib/roles';
-import { LEAVE_TYPE_LABELS, ROLE_LABELS } from '@/lib/labels';
+import { formatDateTime } from '@/lib/approval';
 import { cn } from '@/lib/cn';
 import {
   Avatar,
@@ -30,7 +30,8 @@ const PROJECTS = [
 const AdminDashboard = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const { leave: pendingLeave, overtime: pendingOvertime } = useApprovalStore();
+  const todoItems = useApprovalStore((s) => s.todoItems);
+  const todoCount = useApprovalStore((s) => s.counts.todo || 0);
   const { isChief, basePath } = getRoleInfo(user);
 
   const [taskStats, setTaskStats] = useState({
@@ -60,27 +61,18 @@ const AdminDashboard = () => {
     fetchTasks();
   }, [isChief]);
 
-  const goApprovals = () => navigate(`${basePath}/approvals`);
+  const goApprovals = () => navigate('/approvals');
 
-  // 연차 + 특근 대기 건을 한 목록으로
-  const pendingItems = [
-    ...pendingLeave.map((req) => ({
-      key: `lv-${req.appId}`,
-      name: req.requesterName,
-      role: req.userRole,
-      type: LEAVE_TYPE_LABELS[req.appType] || req.appType,
-      date: req.endDate && req.endDate !== req.startDate ? `${req.startDate} ~ ${req.endDate}` : req.startDate,
-      reason: req.requestReason,
-    })),
-    ...pendingOvertime.map((req) => ({
-      key: `ot-${req.id}`,
-      name: req.requesterName,
-      role: req.userRole,
-      type: '특근',
-      date: `${req.overtimeDate} ${req.startTime?.slice(0, 5) ?? ''}~${req.endTime?.slice(0, 5) ?? ''}`,
-      reason: req.reason,
-    })),
-  ];
+  // 내 결재 차례인 문서 (결재함 '결재 대기' 상위 5건)
+  const pendingItems = todoItems.map((doc) => ({
+    key: doc.id,
+    id: doc.id,
+    name: doc.drafter.name,
+    title: doc.drafter.title,
+    type: doc.formName,
+    date: formatDateTime(doc.submittedAt),
+    subject: doc.title,
+  }));
 
   const taskBlocks = [
     { label: '대기', value: taskStats.todo, dot: 'bg-gray-400' },
@@ -106,12 +98,12 @@ const AdminDashboard = () => {
         <StatCard label="전체 사용자" value="24" unit="명" hint="이번 달 +2명" icon={Users} />
         <StatCard label="진행 중 프로젝트" value="8" unit="개" hint="전체 12개 프로젝트" icon={FolderKanban} />
         <StatCard
-          label={isChief ? '팀장 결재 대기' : '팀원 결재 대기'}
-          value={pendingItems.length}
+          label="내 결재 대기"
+          value={todoCount}
           unit="건"
-          hint={pendingItems.length > 0 ? '처리가 필요한 요청이 있습니다' : '모두 처리했습니다'}
+          hint={todoCount > 0 ? '처리가 필요한 문서가 있습니다' : '모두 처리했습니다'}
           icon={FileClock}
-          tone={pendingItems.length > 0 ? 'amber' : 'gray'}
+          tone={todoCount > 0 ? 'amber' : 'gray'}
         />
         <StatCard
           label="전체 업무"
@@ -127,7 +119,7 @@ const AdminDashboard = () => {
         <Card className="lg:col-span-7">
           <CardHeader
             title="결재 대기"
-            description={isChief ? '팀장 연차·특근 신청' : '팀원 연차·특근 신청'}
+            description="내 결재 차례인 문서"
             action={
               <Button variant="ghost" size="sm" onClick={goApprovals}>
                 전체보기 <ChevronRight size={14} />
@@ -138,19 +130,19 @@ const AdminDashboard = () => {
             <ul className="divide-y divide-gray-100">
               {pendingItems.slice(0, 5).map((item) => (
                 <li key={item.key}>
-                  <button type="button" onClick={goApprovals} className="flex w-full items-center gap-3 px-5 py-3.5 text-left hover:bg-gray-50">
+                  <button type="button" onClick={() => navigate(`/approvals/${item.id}`)} className="flex w-full items-center gap-3 px-5 py-3.5 text-left hover:bg-gray-50">
                     <Avatar name={item.name} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-gray-900">{item.name}</span>
-                        <span className="text-xs text-gray-500">{ROLE_LABELS[item.role] || ''}</span>
-                        <Badge tone={item.type === '특근' ? 'gray' : 'blue'}>{item.type}</Badge>
+                        <span className="text-xs text-gray-500">{item.title}</span>
+                        <Badge tone={item.type === '휴가' ? 'blue' : 'gray'}>{item.type}</Badge>
                       </div>
                       <p className="mt-0.5 truncate text-[13px] text-gray-500">
-                        {item.date} · {item.reason || '개인 사유'}
+                        {item.subject} · {item.date}
                       </p>
                     </div>
-                    <Badge tone="amber" dot>대기</Badge>
+                    <Badge tone="amber" dot>내 차례</Badge>
                   </button>
                 </li>
               ))}

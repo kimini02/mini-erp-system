@@ -1,5 +1,6 @@
 import { AxiosError } from 'axios';
 import { createDb, menus } from './db';
+import { installM2 } from './m2';
 
 /**
  * 개발용 가짜 서버 (VITE_USE_MOCK=true).
@@ -171,7 +172,8 @@ function nextLoginId(year) {
 const routes = [];
 const route = (method, pattern, handler, options = {}) => {
   const keys = [];
-  const regex = new RegExp(`^${pattern.replace(/:(\w+)/g, (_, k) => { keys.push(k); return '([^/]+)'; })}$`);
+  // id 자리(:id, :userId)는 숫자만 — '/users/lookup'이 '/users/:id'에 걸리지 않게
+  const regex = new RegExp(`^${pattern.replace(/:(\w+)/g, (_, k) => { keys.push(k); return /id$/i.test(k) ? '(\\d+)' : '([^/]+)'; })}$`);
   routes.push({ method, regex, keys, handler, auth: options.auth !== false, allowBeforePwChange: options.allowBeforePwChange });
 };
 
@@ -638,6 +640,9 @@ route('DELETE', '/holidays/:id', (ctx) => {
   db.holidays = db.holidays.filter((h) => h.id !== Number(ctx.path.id));
   return null;
 });
+
+// M2 전자결재 (backend/md/13-rest-api-v2-m2.md)
+installM2({ route, db, fail, created, need, userById, deptById, roleByCode, positionById, page });
 
 /* ───────── 어댑터 ───────── */
 
