@@ -38,6 +38,11 @@ import ApprovalDraftPage from './pages/approval/ApprovalDraftPage';
 import ApprovalFormsPage from './pages/approval/ApprovalFormsPage';
 import MyLeavePage from './pages/leave/MyLeavePage';
 
+// 근태·연차 관리 (M3)
+import MyAttendancePage from './pages/attendance/MyAttendancePage';
+import AttendanceMonthlyPage from './pages/attendance/AttendanceMonthlyPage';
+import LeaveAdminPage from './pages/leave/LeaveAdminPage';
+
 function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const { isChief, isTeamLeader } = getRoleInfo(user);
@@ -65,6 +70,9 @@ function App() {
           <Route path="/approvals/:id" element={<ApprovalDocumentPage />} />
           <Route path="/approval-forms" element={<RequirePermission menu={MENU.APPROVAL_FORM}><ApprovalFormsPage /></RequirePermission>} />
           <Route path="/leaves" element={<MyLeavePage />} />
+          <Route path="/attendance" element={<RequirePermission menu={MENU.MY_ATTENDANCE}><MyAttendancePage /></RequirePermission>} />
+          <Route path="/attendance/monthly" element={<RequirePermission menu={MENU.ATTENDANCE_MONTHLY}><AttendanceMonthlyPage /></RequirePermission>} />
+          <Route path="/leave/admin" element={<RequirePermission menu={MENU.LEAVE_ADMIN}><LeaveAdminPage /></RequirePermission>} />
           <Route path="/leaves/new" element={<Navigate to="/approvals/new?form=LEAVE" replace />} />
           <Route path="/calendar" element={<CalendarPage />} />
 

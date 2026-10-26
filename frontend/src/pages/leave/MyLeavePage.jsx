@@ -19,6 +19,7 @@ const TYPE_FILTERS = [
   { value: 'USE', label: '사용' },
   { value: 'RESERVE', label: '예약' },
   { value: 'RELEASE', label: '예약 해제' },
+  { value: 'ADJUST', label: '조정' },
 ];
 
 /** 사용 · 결재 중 · 사용 가능 비율 막대 */

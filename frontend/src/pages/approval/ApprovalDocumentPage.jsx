@@ -7,12 +7,19 @@ import {
   HISTORY_ACTION_LABELS, LEAVE_TYPE_NAMES, LINE_STATUS_META, SKIP_REASON_LABELS,
   formatAmount, formatDateTime, formatDay, formatDays, hoursBetween,
 } from '@/lib/approval';
+import { CELL_META } from '@/lib/attendance';
 import { getErrorCode, getErrorMessage } from '@/lib/errors';
 import { confirm } from '@/lib/confirm';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Field, Modal, PageLoader, Textarea } from '@/components/ui';
 import { DocStatusBadge, PersonText } from '@/components/approval/ApprovalBits';
+
+/** 마지막 승인 때 함께 일어나는 일 (양식별) */
+const FINAL_APPROVE_EFFECT = {
+  LEAVE: '승인하면 예약한 연차가 사용으로 바뀝니다.',
+  ATTENDANCE_FIX: '승인하면 그날 근태 기록이 바로 고쳐집니다.',
+};
 
 /** 양식별 문서 내용 */
 function DocumentBody({ doc }) {
@@ -25,6 +32,17 @@ function DocumentBody({ doc }) {
       ['기간', b.startDate === b.endDate ? formatDay(b.startDate) : `${formatDay(b.startDate)} ~ ${formatDay(b.endDate)}`],
       ['차감 일수', deducted ? `${formatDays(b.usedDays)} (주말·공휴일 제외)` : '연차에서 빼지 않음'],
       ['업무 인수자', b.handover ? `${b.handover.name} ${b.handover.title || ''}` : '지정 안 함'],
+      ['사유', b.reason || '-'],
+    ];
+  } else if (doc.form.code === 'ATTENDANCE_FIX') {
+    // 정정 전 값(before)은 상신 때 서버가 채움 (M3 명세 5장)
+    const before = b.before || {};
+    const change = (from, to) => (to ? `${from || '기록 없음'} → ${to}` : `${from || '기록 없음'} (그대로)`);
+    rows = [
+      ['정정할 날짜', formatDay(b.workDate)],
+      ['출근', change(before.clockIn, (b.clockIn || '').slice(0, 5))],
+      ['퇴근', change(before.clockOut, (b.clockOut || '').slice(0, 5))],
+      ['정정 전 판정', CELL_META[before.code]?.label || '-'],
       ['사유', b.reason || '-'],
     ];
   } else if (doc.form.code === 'OVERTIME') {
@@ -294,7 +312,7 @@ export default function ApprovalDocumentPage() {
         open={modal === 'approve'}
         onClose={() => setModal(null)}
         title="이 문서를 승인할까요?"
-        description={next ? `승인하면 다음 결재자 ${next.approver.name} ${next.approver.title}에게 넘어갑니다.` : '마지막 결재입니다. 승인하면 결재가 끝납니다.'}
+        description={next ? `승인하면 다음 결재자 ${next.approver.name} ${next.approver.title}에게 넘어갑니다.` : `마지막 결재입니다. ${FINAL_APPROVE_EFFECT[doc.form.code] || '승인하면 결재가 끝납니다.'}`}
         footer={<><Button variant="secondary" onClick={() => setModal(null)}>취소</Button><Button icon={Check} loading={busy} onClick={submitModal}>승인</Button></>}
       >
         <Field label="의견 (선택)" htmlFor="approve-comment" error={modalError || undefined}>

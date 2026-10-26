@@ -127,7 +127,7 @@ export function createDb() {
     u(21, '2018002', '임채원', 'cw.lim@workflow.test', 10, 5, ['LEADER'], '2018-02-05'),
     u(22, '2021003', '고민재', 'mj.ko@workflow.test', 10, 3, ['EMPLOYEE'], '2021-03-15'),
     u(25, 'user01', '장민혁', 'mh.jang@workflow.test', 6, 3, ['EMPLOYEE'], null),
-    u(23, '2020015', '권민지', 'mj.kwon@workflow.test', 7, 3, ['EMPLOYEE'], '2020-03-09', { status: 'RETIRED' }),
+    u(23, '2020015', '권민지', 'mj.kwon@workflow.test', 7, 3, ['EMPLOYEE'], '2020-03-09', { status: 'RETIRED', retiredDate: '2026-10-07' }),
     u(24, 'firstadmin', '최초 관리자', 'admin@workflow.test', 1, 7, ['CHIEF'], '2026-10-01', { mustChangePw: true }),
   ];
 
