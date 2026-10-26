@@ -78,8 +78,17 @@ public class AttendanceAdminService {
     @SuppressWarnings("unchecked") public byte[] csv(String month,Long department,boolean sub) {
         var table=monthly(month,department,sub);StringBuilder out=new StringBuilder("\ufeff");List<String> header=new ArrayList<>(List.of("이름","직급","부서"));
         for(var day:(Collection<Map<String,Object>>)table.get("days")) header.add(day.get("date").toString());header.addAll(List.of("지각","조퇴","결근","퇴근 누락","휴가 일수"));csvLine(out,header);
-        for(var row:(Collection<Map<String,Object>>)table.get("rows")) {var u=(Map<String,Object>)row.get("user");var values=new ArrayList<String>();for(String key:List.of("name","title","department")) values.add(Objects.toString(u.get(key),""));for(var c:cells(row))values.add(c.get("code").toString());for(String key:List.of("late","early","absent","missing","leaveDays"))values.add(totals(row).get(key).toString());csvLine(out,values);}
+        for(var row:(Collection<Map<String,Object>>)table.get("rows")) {var u=(Map<String,Object>)row.get("user");var values=new ArrayList<String>();for(String key:List.of("name","title","department")) values.add(Objects.toString(u.get(key),""));for(var c:cells(row))values.add(csvLabel(c.get("code").toString()));for(String key:List.of("late","early","absent","missing","leaveDays"))values.add(totals(row).get(key).toString());csvLine(out,values);}
         return out.toString().getBytes(StandardCharsets.UTF_8);
+    }
+    private String csvLabel(String code) {
+        return switch(code) {
+            case "ON_TIME" -> "정상";case "LATE" -> "지각";case "EARLY" -> "조퇴";
+            case "MISSING" -> "퇴근 누락";case "ABSENT" -> "결근";case "LEAVE" -> "휴가";
+            case "HALF_AM" -> "오전 반차";case "HALF_PM" -> "오후 반차";case "HOLIDAY_WORK" -> "휴일 근무";
+            case "HOLIDAY","NONE","FUTURE" -> "";
+            default -> throw new IllegalArgumentException("Unknown attendance code: "+code);
+        };
     }
     private void csvLine(StringBuilder out,List<String> values) {for(int i=0;i<values.size();i++){if(i>0)out.append(',');String v=values.get(i);if(v.matches("^[=+@-].*"))v="'"+v;out.append('"').append(v.replace("\"","\"\"")).append('"');}out.append("\r\n");}
 }
