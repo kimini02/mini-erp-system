@@ -1,6 +1,6 @@
 # 알려진 이슈
 
-M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03·KI-06을 해결했다. M3에서 KI-04·KI-07을 해결했다. 2차 근태·휴가와 퇴사일 검증은 [M3 최종 보고서](troubleshooting/M3-10-phase-two-results.md)를 따른다. M2 결과는 docs/troubleshooting/M2-12-phase-two-results.md, M3 1차 결과는 [M3 1차 보고서](troubleshooting/M3-0-phase-one-results.md)를 따른다.
+M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03·KI-06을 해결했다. M3에서 KI-04·KI-07을 해결했다. 2차 결과는 [M3 2차 보고서](troubleshooting/M3-10-phase-two-results.md), 보완된 결근·정정·부여 정책은 [M3 3차 보고서](troubleshooting/M3-17-phase-three-results.md)를 따른다. M2 결과는 docs/troubleshooting/M2-12-phase-two-results.md, M3 1차 결과는 [M3 1차 보고서](troubleshooting/M3-0-phase-one-results.md)를 따른다.
 
 | ID | 문제 | 처리 단계 | 상태 |
 | --- | --- | --- | --- |
@@ -82,6 +82,20 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 - 다른 dashboard 경로와 응답 재설계는 변경하지 않았다. [M3-4](troubleshooting/M3-4-dashboard-chief-only.md).
 
 ## M3에서 확인한 미수정 항목·정책 결정
-- 코드 확인: 기존 사용자 호환 필드 remainingAnnualLeave와 User 연차 Formula는 원장 전체 연도를 합산한다. 새 연차 API는 연도별이다. 기존 화면이 어느 필드를 사용할지와 호환 응답 계약은 프론트 전환 시 결정한다.
-- 정책 결정 필요: 기존 v1/신규 등록 GRANT와 새 소급 자동 부여의 정산 기준, 상태 변경 이력, 과거 근무시간 이력. 기존 원장을 자동 삭제·상계하거나 과거 날짜를 추정하지 않았다.
+- 코드 확인: 기존 사용자 호환 필드 remainingAnnualLeave와 User 연차 Formula는 원장 전체 연도를 합산한다. 새 연차 API는 연도별이다. 사용자 지시대로 이번 수정에서는 유지한다. 프론트는 /leave/balance로 전환했다고 전달받았으며, 호환 필드 제거는 별도 작업이다.
+- 부여 정산 결정 반영 완료: `f73cc0e`. 실행 연도만 소급하며, 그해 키 없는 GRANT가 있으면 자동 부여를 전부 건너뛰고 다음 해는 규칙대로 계산한다. 기존 원장은 삭제·상계하지 않는다. [M3-14](troubleshooting/M3-14-current-year-legacy-grants.md).
+- 결정 필요: 상태 변경 이력과 과거 근무시간 이력. 상태·계정 활성화는 배치 시점 값으로 판단하며 과거 기간을 추정하지 않았다.
 - 근거와 영향은 [M3 최종 보고서](troubleshooting/M3-10-phase-two-results.md)의 결정 필요·미수정 항목을 따른다.
+
+## M3 3차 리뷰 수정
+
+| 항목 | 해결 커밋 | 검증 문서 |
+| --- | --- | --- |
+| 퇴사일 없는 RETIRED·초대 대기 사원의 신규 결근 제외, 기존 행 재판정 유지 | `b130515` | [M3-11](troubleshooting/M3-11-absence-eligibility.md) |
+| 현재 기록과 합친 정정 시각을 상신·승인 모두 검사 | `9da9d04` | [M3-12](troubleshooting/M3-12-correction-submit-validation.md) |
+| 미래 날짜 연차 부여 실행 400 | `bd3879e` | [M3-13](troubleshooting/M3-13-grant-run-date.md) |
+| 현재 연도 소급·옛 GRANT 인정 및 건너뜀 구분 | `f73cc0e` | [M3-14](troubleshooting/M3-14-current-year-legacy-grants.md) |
+| 실행 API에서 실제 저장한 batch_runs 한 건 반환 | `6d1d062` | [M3-15](troubleshooting/M3-15-batch-run-response.md) |
+| CSV 날짜 칸 한글 표시·비근태 칸 빈칸 | `315fcce` | [M3-16](troubleshooting/M3-16-csv-korean-labels.md) |
+
+이미 잘못 생성된 운영 근태·자동 부여 행을 일괄 삭제하는 작업은 수행하지 않았다. 개발 DB는 사용하지 않았으며, 사용자별 기록 정리는 확인 후 별도 결정이 필요하다. 전체 테스트와 수정 전 실패 근거는 [M3 3차 결과](troubleshooting/M3-17-phase-three-results.md)를 따른다.
