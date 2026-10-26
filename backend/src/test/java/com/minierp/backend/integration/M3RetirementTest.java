@@ -12,8 +12,22 @@ class M3RetirementTest extends AttendanceTestSupport {
         at(date.plusDays(3),java.time.LocalTime.of(0,10));batch.run(date);batch.run(date.plusDays(1));
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?",Integer.class,employee.getId())).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id IN (?,?)",Integer.class,leader.getId(),outsider.getId())).isZero();
-        jdbc.update("UPDATE users SET retired_date=NULL WHERE id=?",employee.getId());batch.run(date.plusDays(1));
+        jdbc.update("UPDATE users SET status='ACTIVE',retired_date=NULL WHERE id=?",employee.getId());batch.run(date.plusDays(1));
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?",Integer.class,employee.getId())).isEqualTo(2);
+    }
+
+    @Test void legacyRetireeAndInvitationPendingHaveNoNewAbsenceRows() {
+        jdbc.update("UPDATE users SET status='RETIRED',retired_date=NULL WHERE id=?",employee.getId());
+        jdbc.update("UPDATE users SET user_pw=NULL WHERE id=?",outsider.getId());
+        at(date.plusDays(2),java.time.LocalTime.of(0,10));batch.run(date);batch.run(date.plusDays(1));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?",Integer.class,employee.getId())).isZero();
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?",Integer.class,outsider.getId())).isZero();
+    }
+    @Test void existingRowsAreRejudgedEvenWhenNewRowEligibilityIsLost() {
+        jdbc.update("INSERT INTO attendances(user_id,work_date,clock_in_at,created_at) VALUES(?,?,?,?)",employee.getId(),date,date.atTime(9,0),date.atTime(9,0));
+        jdbc.update("UPDATE users SET status='RETIRED',retired_date=NULL,user_pw=NULL WHERE id=?",employee.getId());
+        at(date.plusDays(1),java.time.LocalTime.of(0,10));batch.run(date);
+        assertThat(jdbc.queryForObject("SELECT out_result FROM attendances WHERE user_id=?",String.class,employee.getId())).isEqualTo("MISSING");
     }
 
     @Test void retirementRecordsKoreanDateAndReactivationClearsIt() throws Exception {
