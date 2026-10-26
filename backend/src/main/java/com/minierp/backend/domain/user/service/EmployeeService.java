@@ -101,15 +101,13 @@ public class EmployeeService {
         long next=number(db.one("SELECT last_seq FROM login_id_sequences WHERE hire_year=:year FOR UPDATE",map("year",year),ErrorCode.RESOURCE_NOT_FOUND),"last_seq")+1;
         db.update("UPDATE login_id_sequences SET last_seq=:next WHERE hire_year=:year",map("year",year,"next",next));
         String loginId=String.format("%d%03d",year,next);
-        var annual=com.minierp.backend.domain.user.entity.User.resolveInitialAnnualLeave((String)position.get("name"));
         long id;
         try { id=db.insert("""
             INSERT INTO users(login_id,user_name,user_email,user_pw,department_id,position_id,hire_date,status,must_change_pw,token_version,
               created_at,updated_at)
             VALUES(:login,:name,:email,NULL,:department,:position,:hire,'ACTIVE',0,0,:now,:now)
-            """,map("login",loginId,"name",r.name(),"email",r.email(),"department",r.departmentId(),"position",r.positionId(),"hire",r.hireDate(),"annual",annual,"now",LocalDateTime.now(clock))); }
+            """,map("login",loginId,"name",r.name(),"email",r.email(),"department",r.departmentId(),"position",r.positionId(),"hire",r.hireDate(),"now",LocalDateTime.now(clock))); }
         catch(org.springframework.dao.DuplicateKeyException ex) { throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS); }
-        db.update("INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,memo,created_at) VALUES(:id,:year,'GRANT',:annual,'기존 신규 사원 부여 정책',:now)",map("id",id,"year",LocalDate.now(clock).getYear(),"annual",annual,"now",LocalDateTime.now(clock)));
         for(long role:roles) db.update("INSERT INTO user_roles(user_id,role_id) VALUES(:user,:role)",map("user",id,"role",role));
         var result=new RegistrationResult(id,loginId);events.publishEvent(new InvitationRequested(id,r.email(),result));return result;
     }

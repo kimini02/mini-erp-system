@@ -1,5 +1,6 @@
 package com.minierp.backend.domain.attendance.service;
 import com.minierp.backend.global.exception.*;
+import com.minierp.backend.global.batch.BatchRunRecorder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.*;

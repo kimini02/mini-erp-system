@@ -1,4 +1,4 @@
-package com.minierp.backend.domain.attendance.service;
+package com.minierp.backend.global.batch;
 import com.minierp.backend.global.persistence.SqlStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
