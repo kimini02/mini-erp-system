@@ -1,6 +1,6 @@
 # 알려진 이슈
 
-M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03·KI-06을 해결했다. M3 1차에서 KI-04·KI-07을 해결했다. M2 결과는 docs/troubleshooting/M2-12-phase-two-results.md, M3 1차 결과는 [M3 1차 보고서](troubleshooting/M3-0-phase-one-results.md)를 따른다.
+M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03·KI-06을 해결했다. M3에서 KI-04·KI-07을 해결했다. 2차 근태·휴가와 퇴사일 검증은 [M3 최종 보고서](troubleshooting/M3-10-phase-two-results.md)를 따른다. M2 결과는 docs/troubleshooting/M2-12-phase-two-results.md, M3 1차 결과는 [M3 1차 보고서](troubleshooting/M3-0-phase-one-results.md)를 따른다.
 
 | ID | 문제 | 처리 단계 | 상태 |
 | --- | --- | --- | --- |
@@ -33,7 +33,7 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 ## KI-04 — 근태 시각 조작 가능 (M3 1차, 해결됨)
 - 해결 커밋: `7ab4a07`.
 - 수정 전 실제 구 출근 API로 과거 날짜·08:50을 보내는 조작 10회 중 10회 성공을 먼저 확인했다. 새 출근 API에서는 같은 조작 입력 10회 모두 무시하고 Asia/Seoul Clock 시각을 기록한다.
-- 본인의 직접 PUT 및 구 check-in/check-out/summary 경로를 삭제했다. 정정은 M3 2차 ATTENDANCE_FIX 결재로 연결하며 1차에는 직접 수정 경로를 제공하지 않는다.
+- 본인의 직접 PUT 및 구 check-in/check-out/summary 경로를 삭제했다. 정정은 `7aac727`의 ATTENDANCE_FIX 결재 처리기로 연결했다. `66a52fc`에서 구 DTO·호환 코드를 정리하고 구 네 경로 404를 검증했다.
 - 사용자 행 잠금으로 동시 출근 10회 모두 200 하나·409 하나, 날짜별 기록 1행을 검증했다.
 - 검증: M3SecurityTest, M3AttendanceTest. 상세: [M3-2](troubleshooting/M3-2-server-clock.md).
 
@@ -80,3 +80,8 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 - M3 명세가 관리소장 전용으로 확정하여 GET /api/v1/dashboard/admin-summary는 CHIEF가 계산된 ADMIN만 허용한다. 일반 사원·팀장은 403이다.
 - 수정 전 팀장 실제 API 회귀 테스트가 기대 403 대신 200으로 실패했고, 수정 후 M3DashboardTest에서 사원·팀장 403, 관리소장 200을 확인한다.
 - 다른 dashboard 경로와 응답 재설계는 변경하지 않았다. [M3-4](troubleshooting/M3-4-dashboard-chief-only.md).
+
+## M3에서 확인한 미수정 항목·정책 결정
+- 코드 확인: 기존 사용자 호환 필드 remainingAnnualLeave와 User 연차 Formula는 원장 전체 연도를 합산한다. 새 연차 API는 연도별이다. 기존 화면이 어느 필드를 사용할지와 호환 응답 계약은 프론트 전환 시 결정한다.
+- 정책 결정 필요: 기존 v1/신규 등록 GRANT와 새 소급 자동 부여의 정산 기준, 상태 변경 이력, 과거 근무시간 이력. 기존 원장을 자동 삭제·상계하거나 과거 날짜를 추정하지 않았다.
+- 근거와 영향은 [M3 최종 보고서](troubleshooting/M3-10-phase-two-results.md)의 결정 필요·미수정 항목을 따른다.

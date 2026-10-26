@@ -94,3 +94,5 @@ MariaDB 10.11·Redis(기존 초대/인증 테스트 용도)는 Testcontainers가
 - 관리소장 외 화면에서 admin-summary를 호출하면 403이다. 화면 수정은 하지 않았다.
 - 2차의 월간 50×31 쿼리/EXPLAIN, 근태 정정 결재, 연차 부여 규칙 수치는 이번 1차 검증에 포함하지 않는다.
 - frontend/, backend/md/, V1~V3, .claude/를 수정하지 않았고 병합·푸시하지 않았다.
+
+> 후속 확정(2026-10-26): 퇴사일과 배치 대상 규칙은 사용자 답변·d689d15 명세대로 [M3-5](M3-5-retirement-window.md)에 반영했다. 2차 구현과 최종 검증은 [M3-10](M3-10-phase-two-results.md)을 따른다.
