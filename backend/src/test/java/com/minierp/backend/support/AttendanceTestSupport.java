@@ -43,7 +43,7 @@ public abstract class AttendanceTestSupport extends MariaDbIntegrationTest {
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=1",chief.getId());
         jdbc.update("UPDATE approval_forms SET allow_line_edit=(code='GENERAL'),skip_self=1,dedupe_approver=1,fallback_to_upper=1");
         jdbc.update("DELETE FROM approval_form_steps");
-        jdbc.update("INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type) VALUES(1,1,'APPROVER','DEPT_HEAD'),(2,1,'APPROVER','DEPT_HEAD'),(3,1,'APPROVER','DEPT_HEAD')");
+        jdbc.update("INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type) VALUES(1,1,'APPROVER','DEPT_HEAD'),(2,1,'APPROVER','DEPT_HEAD'),(3,1,'APPROVER','DEPT_HEAD'),(4,1,'APPROVER','DEPT_HEAD')");
         jdbc.update("UPDATE users SET hire_date=? WHERE id IN (?,?,?,?)",date.minusYears(1),employee.getId(),leader.getId(),chief.getId(),outsider.getId());
         jdbc.update("UPDATE work_schedules SET start_time='09:00',end_time='18:00',late_grace_min=10 WHERE is_default=1");
         employeeToken=token(employee);leaderToken=token(leader);chiefToken=token(chief);outsideToken=token(outsider);

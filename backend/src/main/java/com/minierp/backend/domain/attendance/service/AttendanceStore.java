@@ -53,6 +53,6 @@ public class AttendanceStore {
         db.update("""
           UPDATE attendances SET clock_in_at=:in,clock_out_at=:out,day_type=:day,in_result=:inResult,out_result=:outResult,absent=:absent,judged_at=:now,updated_at=:now
           WHERE id=:id AND NOT(clock_in_at<=>:in AND clock_out_at<=>:out AND day_type<=>:day AND in_result<=>:inResult AND out_result<=>:outResult AND absent<=>:absent)
-          """,map("id",row.get("id"),"in",in,"out",out,"day",day,"inResult",judged.inResult(),"outResult",judged.outResult(),"absent",judged.absent(),"now",now));
+          """,map("id",row.get("id"),"in",in,"out",out,"day",day,"inResult",judged.inResult(),"outResult",judged.outResult(),"absent",row.get("fix_document_id")!=null && (in!=null || out!=null)?false:judged.absent(),"now",now));
     }
 }
