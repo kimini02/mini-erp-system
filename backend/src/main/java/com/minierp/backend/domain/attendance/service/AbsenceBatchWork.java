@@ -13,14 +13,14 @@ public class AbsenceBatchWork {
     public Counts run(LocalDate date) {
         int processed=0,skipped=0;var now=LocalDateTime.now(clock);
         var candidates=db.rows("""
-          SELECT u.id FROM users u WHERE (u.status='ACTIVE' AND COALESCE(u.hire_date,DATE(u.created_at))<=:date)
+          SELECT u.id FROM users u WHERE (u.status<>'ON_LEAVE' AND COALESCE(u.hire_date,DATE(u.created_at))<=:date AND (u.retired_date IS NULL OR u.retired_date>:date))
           OR EXISTS(SELECT 1 FROM attendances a WHERE a.user_id=u.id AND a.work_date=:date) ORDER BY u.id
           """,map("date",date));
         for(var candidate:candidates) {
             long id=number(candidate,"id");var user=records.lockUser(id);var row=records.record(id,date,true);var day=records.day(id,date);
             LocalDate eligible=user.get("hire_date")==null?((LocalDateTime)user.get("created_at")).toLocalDate():(LocalDate)user.get("hire_date");
             if(row==null) {
-                if(!"ACTIVE".equals(user.get("status")) || eligible.isAfter(date) || day.type().equals("HOLIDAY")) {skipped++;continue;}
+                if("ON_LEAVE".equals(user.get("status")) || eligible.isAfter(date) || (user.get("retired_date")!=null && !date.isBefore((LocalDate)user.get("retired_date"))) || day.type().equals("HOLIDAY")) {skipped++;continue;}
                 records.insert(id,date,records.schedule(id),day.type(),null,null,true,now);
             } else records.judge(row,day.type(),(LocalDateTime)row.get("clock_in_at"),(LocalDateTime)row.get("clock_out_at"),true,now);
             processed++;

@@ -28,7 +28,7 @@ class M3BatchTest extends AttendanceTestSupport {
     }
     @Test void weekendHolidayAndEmploymentBoundariesDoNotCreateAbsence() {
         var future=user("입사 전",UserRole.USER);jdbc.update("UPDATE users SET hire_date=? WHERE id=?",date.plusDays(3),future.getId());
-        var retired=user("퇴사",UserRole.USER);jdbc.update("UPDATE users SET status='RETIRED',hire_date=? WHERE id=?",date.minusYears(1),retired.getId());
+        var retired=user("퇴사",UserRole.USER);jdbc.update("UPDATE users SET status='RETIRED',retired_date=DATE(created_at),hire_date=? WHERE id=?",date.minusYears(1),retired.getId());
         at(date.plusDays(1),LocalTime.of(0,5));batch.runPreviousDay();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id IN (?,?)",Integer.class,future.getId(),retired.getId())).isZero();
         at(date.plusWeeks(1),LocalTime.of(0,10));batch.runPreviousDay();assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE work_date=?",Integer.class,date.plusDays(6))).isZero();

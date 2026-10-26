@@ -35,7 +35,7 @@ public class EmployeeService {
     public List<Map<String,Object>> views(List<Long> ids) {
         if(ids.isEmpty()) return List.of();
         var rows=db.rows("""
-            SELECT u.id,u.login_id,u.user_name,u.user_email,u.department_id,u.position_id,u.hire_date,u.status,u.user_pw,
+            SELECT u.id,u.login_id,u.user_name,u.user_email,u.department_id,u.position_id,u.hire_date,u.retired_date,u.status,u.user_pw,
               (SELECT COALESCE(SUM(l.days),0) FROM leave_ledger l WHERE l.user_id=u.id) AS remaining_annual_leave,u.created_at,u.updated_at,d.name AS department_name,d.code AS department_code,p.name AS position_name
             FROM users u JOIN departments d ON d.id=u.department_id JOIN positions p ON p.id=u.position_id WHERE u.id IN (:ids)
             """,map("ids",ids));
@@ -49,7 +49,7 @@ public class EmployeeService {
             // M1 프론트 작업 후 제거: departmentCode, departmentName, position, role aliases.
             byId.put(id,map("id",id,"loginId",row.get("login_id"),"name",row.get("user_name"),"email",row.get("user_email"),
                 "department",map("id",row.get("department_id"),"name",row.get("department_name")),"positionId",row.get("position_id"),"position",row.get("position_name"),
-                "departmentCode",code,"departmentName",row.get("department_name"),"role",legacy,"roles",userRoles,"hireDate",row.get("hire_date"),"status",row.get("status"),
+                "departmentCode",code,"departmentName",row.get("department_name"),"role",legacy,"roles",userRoles,"hireDate",row.get("hire_date"),"retiredDate",row.get("retired_date"),"status",row.get("status"),
                 "invitationPending",row.get("user_pw")==null,"remainingAnnualLeave",row.get("remaining_annual_leave"),"createdAt",row.get("created_at"),"updatedAt",row.get("updated_at")));
         }
         return ids.stream().map(byId::get).toList();
@@ -134,7 +134,7 @@ public class EmployeeService {
         var user=db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);
         if(!status.name().equals(user.get("status"))) {
             if(status!=com.minierp.backend.domain.user.entity.UserStatus.ACTIVE) { notHead(id);protectLastChief(id); }
-            db.update("UPDATE users SET status=:status,token_version=token_version+:increment,updated_at=:now WHERE id=:id",map("id",id,"status",status.name(),"increment",status==com.minierp.backend.domain.user.entity.UserStatus.ACTIVE?0:1,"now",LocalDateTime.now(clock)));
+            db.update("UPDATE users SET retired_date=CASE WHEN :status='RETIRED' THEN :date WHEN :status='ACTIVE' AND status='RETIRED' THEN NULL ELSE retired_date END,status=:status,token_version=token_version+:increment,updated_at=:now WHERE id=:id",map("id",id,"status",status.name(),"date",LocalDate.now(clock),"increment",status==com.minierp.backend.domain.user.entity.UserStatus.ACTIVE?0:1,"now",LocalDateTime.now(clock)));
         } return views(List.of(id)).get(0);
     }
     @Transactional public void replaceRoles(long id,List<String> codes) {

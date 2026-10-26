@@ -22,8 +22,8 @@ class MariaDbMigrationTest extends MariaDbIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT VERSION()", String.class)).startsWith("10.11.");
         assertThat(environment.getProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("validate");
         assertThat(entityManagerFactory.isOpen()).isTrue();
-        assertThat(flyway.info().applied()).hasSize(4);
-        assertThat(flyway.info().current().getScript()).isEqualTo("V4__attendance_and_batch_runs.sql");
+        assertThat(flyway.info().applied()).hasSize(5);
+        assertThat(flyway.info().current().getScript()).isEqualTo("V5__user_retirement_date.sql");
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
         assertThat(jdbc.queryForList("""
                 SELECT table_name FROM information_schema.tables
@@ -60,6 +60,6 @@ class MariaDbMigrationTest extends MariaDbIntegrationTest {
     @Test
     void repeatedMigrationDoesNotRecreateSchema() {
         assertThat(flyway.migrate().migrationsExecuted).isZero();
-        assertThat(flyway.info().applied()).hasSize(4);
+        assertThat(flyway.info().applied()).hasSize(5);
     }
 }

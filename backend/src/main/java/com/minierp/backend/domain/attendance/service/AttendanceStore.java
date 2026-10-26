@@ -15,7 +15,7 @@ public class AttendanceStore {
     }
     public record Day(String type,String holiday,Map<String,Object> leave) {}
     public static LocalTime time(Object value) {return value instanceof java.sql.Time t?t.toLocalTime():value instanceof LocalTime t?t:LocalTime.parse(value.toString());}
-    public Map<String,Object> lockUser(long id) {return db.one("SELECT id,status,hire_date,created_at FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);}
+    public Map<String,Object> lockUser(long id) {return db.one("SELECT id,status,hire_date,retired_date,created_at FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);}
     public Schedule schedule(long user) {
         var s=db.one("""
           SELECT w.start_time,w.end_time,w.late_grace_min,d.name,IF(d.work_schedule_id IS NULL,'COMPANY','DEPARTMENT') AS source
