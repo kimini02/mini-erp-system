@@ -149,8 +149,11 @@ export function installM3({ route, db, fail, need, mergedPermissions, userById, 
     const workday = isWorkday(date);
     let processed = 0;
     for (const user of db.users) {
-      if (!employed(user, date) || user.status === 'ON_LEAVE') continue;
+      // 대상(명세 4.2): 그날 재직 · 휴직 아님 · 퇴사일 없는 퇴사자 아님 · 계정 활성화함. 기록이 이미 있으면 다시 판정만
+      const target = employed(user, date) && user.status !== 'ON_LEAVE'
+        && !(user.status === 'RETIRED' && !user.retiredDate) && !user.invitationPending;
       let rec = getRec(user.id, date);
+      if (!target && !rec) continue;
       if (!rec && workday) {
         const leave = approvedLeave(user.id, date);
         rec = newRecord(user, date, { absent: !leave || leave.kind !== 'LEAVE' });
@@ -177,10 +180,17 @@ export function installM3({ route, db, fail, need, mergedPermissions, userById, 
   function runGrant(date, at = nowLocal()) {
     let processed = 0;
     const skipped = [];
+    const legacy = [];
+    const year = Number(date.slice(0, 4));
     for (const user of db.users) {
       if (!['ACTIVE', 'ON_LEAVE'].includes(user.status)) continue;
       if (!user.hireDate) {
         skipped.push(user.name);
+        continue;
+      }
+      // 그해 키 없는 옛 부여(v1 이관 등)가 있으면 그해 몫으로 인정하고 건너뜀 (명세 4.1)
+      if (m2state.ledger.some((l) => l.userId === user.id && l.year === year && l.type === 'GRANT' && !l.grantKey)) {
+        legacy.push(user.name);
         continue;
       }
       // 실행 시점까지 받아야 할 부여를 모두 계산하고, 이미 받은 키는 건너뜀 (grant_key 유니크)
@@ -191,7 +201,8 @@ export function installM3({ route, db, fail, need, mergedPermissions, userById, 
         processed += 1;
       }
     }
-    return recordRun('LEAVE_GRANT', date, processed, skipped.length, skipped.length ? `입사일 없음: ${skipped.join(', ')}` : null, at);
+    const message = [skipped.length && `입사일 없음: ${skipped.join(', ')}`, legacy.length && `옛 부여 있음: ${legacy.join(', ')}`].filter(Boolean).join(' · ') || null;
+    return recordRun('LEAVE_GRANT', date, processed, skipped.length + legacy.length, message, at);
   }
 
   /* ───────── 처음 데이터 ───────── */
@@ -256,6 +267,11 @@ export function installM3({ route, db, fail, need, mergedPermissions, userById, 
       const duplicate = m2state.documents.some((d) => d.id !== doc.id && d.formCode === 'ATTENDANCE_FIX' && d.drafterId === drafter.id
         && d.status === 'IN_PROGRESS' && d.body.workDate === date);
       if (duplicate) fail(409, 'ATTENDANCE_FIX_DUPLICATE', '같은 날짜로 진행 중인 정정 문서가 있습니다.');
+      // 지금 기록과 합친 결과로 검사 (승인 때 실패하지 않게 상신 때 막음)
+      const inAt = doc.body.clockIn ? `${date}T${doc.body.clockIn}` : rec?.clockInAt?.slice(0, 16);
+      const outAt = doc.body.clockOut ? `${date}T${doc.body.clockOut}` : rec?.clockOutAt?.slice(0, 16);
+      if (!inAt) fail(422, 'ATTENDANCE_FIX_CLOCK_IN_REQUIRED', '출근 기록이 없는 날은 출근 시각을 함께 정정해야 합니다.');
+      if (outAt && outAt <= inAt) fail(400, 'INVALID_ATTENDANCE_TIME', '퇴근 시각은 출근 시각보다 늦어야 합니다.');
       doc.body.before = { clockIn: hhmm(rec?.clockInAt), clockOut: hhmm(rec?.clockOutAt), code: cellCode(drafter, date, rec) };
     },
     onSubmitted() {},

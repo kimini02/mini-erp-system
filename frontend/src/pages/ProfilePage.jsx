@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Eye, EyeOff, Mail } from 'lucide-react';
 import axios from '@/api/axios';
+import { leaveApi } from '@/api/m2';
+import { formatDays } from '@/lib/approval';
 import { toast } from '@/lib/toast';
 import { Avatar, Badge, Button, Field, Input, InfoRow, Modal } from '@/components/ui';
 
@@ -19,6 +21,7 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
   });
 
   const [serverUser, setServerUser] = useState(null);
+  const [balance, setBalance] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -35,6 +38,12 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
     fetchUserData();
   }, [isOpen, initialUser]);
 
+  // 잔여 연차는 올해 원장 합계 (옛 remainingAnnualLeave 는 모든 연도를 더한 값이라 쓰지 않음)
+  useEffect(() => {
+    if (!isOpen) return;
+    leaveApi.balance(new Date().getFullYear()).then(setBalance).catch(() => setBalance(null));
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const d = serverUser?.data || serverUser || initialUser || {};
@@ -46,7 +55,7 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
     email: d.email || '이메일 미확인',
     position: d.position || '직급 미확인',
     dept: d.departmentName || d.department || d.departmentCode || '소속 부서 미지정',
-    leave: d.remainingAnnualLeave ?? 15
+    leave: balance ? formatDays(balance.available) : '-'
   };
 
   const handleClose = () => {
@@ -131,7 +140,7 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
           <InfoRow label="아이디" value={displayInfo.id} />
           <InfoRow label="이메일" value={displayInfo.email} />
           <InfoRow label="소속 부서" value={displayInfo.dept} />
-          <InfoRow label="잔여 연차" value={<span className="text-blue-600">{displayInfo.leave}일</span>} />
+          <InfoRow label="잔여 연차" value={<span className="text-blue-600">{displayInfo.leave}</span>} />
         </dl>
       </Modal>
     );

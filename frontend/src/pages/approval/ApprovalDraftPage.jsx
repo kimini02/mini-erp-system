@@ -67,7 +67,7 @@ function fromDocument(doc) {
   return { content: b.content || '', amount: b.amount ?? '' };
 }
 
-function isComplete(formCode, title, body) {
+function isComplete(formCode, title, body, fixRecord = null) {
   if (formCode === 'LEAVE') {
     if (!body.startDate) return false;
     return isHalfDay(body.leaveType) || (body.endDate && body.endDate >= body.startDate);
@@ -75,13 +75,29 @@ function isComplete(formCode, title, body) {
   if (formCode === 'OVERTIME') return Boolean(body.overtimeDate && body.startTime && body.endTime && body.endTime > body.startTime && body.reason.trim());
   if (formCode === 'GENERAL') return Boolean(title.trim() && body.content.trim());
   if (formCode === 'ATTENDANCE_FIX') {
-    return Boolean(body.workDate && (body.clockIn || body.clockOut) && body.reason.trim() && !(body.clockIn && body.clockOut && body.clockOut <= body.clockIn));
+    return Boolean(body.workDate && (body.clockIn || body.clockOut) && body.reason.trim() && !fixProblem(body, fixRecord));
   }
   return false;
 }
 
+/**
+ * 근태 정정 입력을 지금 기록과 합쳐 본 문제 (M3 명세 5장)
+ * - 출근 기록이 없는 날(결근·기록 없음)은 출근 시각이 꼭 있어야 함
+ * - 합친 결과의 퇴근이 출근보다 늦어야 함 (비워 둔 칸은 지금 기록을 그대로 씀)
+ */
+function fixProblem(body, record) {
+  if (record && !record.clockInAt && !body.clockIn) return { field: 'in', message: '이날은 출근 기록이 없어 출근 시각을 꼭 적어야 합니다.' };
+  const at = (hhmm, existing) => (hhmm ? `${body.workDate}T${hhmm}` : existing ? existing.slice(0, 16) : null);
+  const inAt = at(body.clockIn, record?.clockInAt);
+  const outAt = at(body.clockOut, record?.clockOutAt);
+  if (inAt && outAt && outAt <= inAt) {
+    return { field: 'out', message: body.clockOut ? '퇴근 시각은 출근 시각보다 늦어야 합니다.' : `지금 퇴근 기록(${timeOf(record.clockOutAt)})보다 늦은 출근 시각입니다. 퇴근 시각도 함께 고쳐 주세요.` };
+  }
+  return null;
+}
+
 /** 근태 정정: 정정할 날의 지금 기록을 보여 주고, 바꿀 시각만 입력 (M3 명세 5장) */
-function AttendanceFixFields({ body, set }) {
+function AttendanceFixFields({ body, set, onRecord }) {
   const [current, setCurrent] = useState(null);
   const today = todayLocal();
   const min = shiftDate(today, -30);
@@ -100,8 +116,11 @@ function AttendanceFixFields({ body, set }) {
     return () => { alive = false; };
   }, [body.workDate, validDate]);
 
+  useEffect(() => { onRecord?.(current); }, [current, onRecord]);
+
   const meta = current ? CELL_META[current.code] || CELL_META.NONE : null;
-  const invalidTime = body.clockIn && body.clockOut && body.clockOut <= body.clockIn;
+  const needIn = Boolean(current && !current.clockInAt);
+  const problem = fixProblem(body, current);
   return (
     <div className="space-y-4">
       <Field label="정정할 날짜" htmlFor="fix-date" required hint="최근 30일 안의 지난 날짜만 고칠 수 있습니다." error={body.workDate && !validDate ? '최근 30일 안의 지난 날짜를 골라 주세요.' : undefined}>
@@ -116,11 +135,17 @@ function AttendanceFixFields({ body, set }) {
         </div>
       )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="바른 출근 시각" htmlFor="fix-in" hint="바꾸지 않을 시각은 비워 두세요.">
+        <Field
+          label="바른 출근 시각"
+          htmlFor="fix-in"
+          required={needIn}
+          hint={needIn ? '이날은 출근 기록이 없어 출근 시각을 꼭 적어야 합니다.' : '바꾸지 않을 시각은 비워 두세요.'}
+          error={problem?.field === 'in' && body.clockOut ? problem.message : undefined}
+        >
           <Input id="fix-in" type="time" value={body.clockIn} onChange={(e) => set('clockIn', e.target.value)} />
         </Field>
-        <Field label="바른 퇴근 시각" htmlFor="fix-out" error={invalidTime ? '퇴근 시각은 출근 시각보다 늦어야 합니다.' : undefined}>
-          <Input id="fix-out" type="time" value={body.clockOut} onChange={(e) => set('clockOut', e.target.value)} invalid={invalidTime} />
+        <Field label="바른 퇴근 시각" htmlFor="fix-out" error={problem?.field === 'out' ? problem.message : undefined}>
+          <Input id="fix-out" type="time" value={body.clockOut} onChange={(e) => set('clockOut', e.target.value)} invalid={problem?.field === 'out'} />
         </Field>
       </div>
       <Field label="사유" htmlFor="fix-reason" required hint="예: 출입카드 오류로 출근을 늦게 찍었습니다.">
@@ -378,6 +403,7 @@ export default function ApprovalDraftPage() {
   const [body, setBody] = useState(() => initialBody(searchParams.get('form'), searchParams));
   const [customLine, setCustomLine] = useState(null);
   const [draftId, setDraftId] = useState(draftParam ? Number(draftParam) : null);
+  const [fixRecord, setFixRecord] = useState(null); // 근태 정정: 고칠 날의 지금 기록
   const [loadError, setLoadError] = useState('');
   const [loadingDraft, setLoadingDraft] = useState(Boolean(draftParam));
 
@@ -483,7 +509,7 @@ export default function ApprovalDraftPage() {
     : formCode === 'OVERTIME' ? overtimeTitle(body?.overtimeDate)
       : formCode === 'ATTENDANCE_FIX' ? `근태 정정${body?.workDate ? ` · ${Number(body.workDate.slice(5, 7))}/${Number(body.workDate.slice(8, 10))}` : ''}`
         : title;
-  const complete = Boolean(form && body && isComplete(formCode, title, body));
+  const complete = Boolean(form && body && isComplete(formCode, title, body, fixRecord));
   const lineReady = Boolean(preview && !preview.error && !previewError && (preview.finalLine?.length > 0 || (preview.rows || []).length > 0));
   const canSubmit = complete && lineReady && !(formCode === 'LEAVE' && daysError);
 
@@ -604,7 +630,7 @@ export default function ApprovalDraftPage() {
                 {formCode === 'LEAVE' && <LeaveFields body={body} set={set} handoverOptions={handoverOptions} days={days} daysError={daysError} />}
                 {formCode === 'OVERTIME' && <OvertimeFields body={body} set={set} />}
                 {formCode === 'GENERAL' && <GeneralFields title={title} setTitle={setTitle} body={body} set={set} />}
-                {formCode === 'ATTENDANCE_FIX' && <AttendanceFixFields body={body} set={set} />}
+                {formCode === 'ATTENDANCE_FIX' && <AttendanceFixFields body={body} set={set} onRecord={setFixRecord} />}
                 {formCode !== 'GENERAL' && autoTitle && (
                   <p className="mt-4 text-xs text-gray-500">제목: <span className="text-gray-700">{autoTitle}</span></p>
                 )}

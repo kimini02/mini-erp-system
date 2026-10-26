@@ -122,7 +122,7 @@ export default function AttendanceMonthlyPage() {
     setBusy('rejudge');
     try {
       const run = await attendanceApi.rejudge(rejudgeDate);
-      toast.success(`${formatDay(rejudgeDate)}을 다시 판정했습니다 (새로 만든 기록 ${run.processedCount}건).`);
+      toast.success(`${formatDay(rejudgeDate)}을 다시 판정했습니다 (처리 ${run.processedCount ?? run.processed}건).`);
       setRejudgeOpen(false);
       load();
     } catch (err) {

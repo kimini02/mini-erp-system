@@ -140,7 +140,10 @@ function GrantRunsBar() {
     setRunning(true);
     try {
       const r = await leaveAdminApi.runGrant(date);
-      toast.success(`부여 ${r.processedCount}건${r.skippedCount ? ` · 건너뜀 ${r.skippedCount}건` : ''}. 같은 날짜로 다시 실행해도 두 번 부여되지 않습니다.`);
+      // 실행 응답은 건수만 ({ processed, skipped }), 실행 기록 목록은 processedCount 로 옴
+      const done = r.processedCount ?? r.processed;
+      const skipped = r.skippedCount ?? r.skipped;
+      toast.success(`부여 ${done}건${skipped ? ` · 건너뜀 ${skipped}건` : ''}. 같은 날짜로 다시 실행해도 두 번 부여되지 않습니다.`);
       load();
     } catch (err) {
       toast.error(getErrorMessage(err));
