@@ -38,7 +38,9 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
     public void validate(ApprovalDraft draft) {
         var d=draft.document();var r=raw(d.id());var date=(LocalDate)r.get("work_date");var today=LocalDate.now(clock);
         if(!date.isBefore(today) || date.isBefore(today.minusDays(30)))throw new BusinessException(ErrorCode.ATTENDANCE_FIX_OUT_OF_RANGE);
-        if(records.day(d.drafterId(),date).type().equals("HOLIDAY") && records.record(d.drafterId(),date,false)==null)throw BodyValues.invalid();
+        var old=records.record(d.drafterId(),date,false);
+        if(records.day(d.drafterId(),date).type().equals("HOLIDAY") && old==null)throw BodyValues.invalid();
+        mergedTimes(r,old,date);
         if(db.count("SELECT COUNT(*) FROM attendance_fix_requests f JOIN approval_documents d ON d.id=f.document_id WHERE d.drafter_id=:user AND d.status='IN_PROGRESS' AND f.work_date=:date AND d.id<>:id",map("user",d.drafterId(),"date",date,"id",d.id()))>0)throw new BusinessException(ErrorCode.ATTENDANCE_FIX_DUPLICATE);
     }
     public void onSubmitted(ApprovalDocument d) {
@@ -49,11 +51,17 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         try {db.update("UPDATE attendance_fix_requests SET before_json=:json WHERE document_id=:id",map("id",d.id(),"json",mapper.writeValueAsString(map("clockIn",in==null?null:hh(in.toLocalTime()),"clockOut",out==null?null:hh(out.toLocalTime()),"code",code))));}
         catch(com.fasterxml.jackson.core.JsonProcessingException ex){throw new IllegalStateException(ex);}
     }
+    private record Times(LocalDateTime in,LocalDateTime out) {}
+    private Times mergedTimes(Map<String,Object> correction,Map<String,Object> old,LocalDate date) {
+        LocalDateTime in=correction.get("clock_in")==null?(old==null?null:(LocalDateTime)old.get("clock_in_at")):date.atTime(AttendanceStore.time(correction.get("clock_in")));
+        LocalDateTime out=correction.get("clock_out")==null?(old==null?null:(LocalDateTime)old.get("clock_out_at")):date.atTime(AttendanceStore.time(correction.get("clock_out")));
+        if(in==null)throw new BusinessException(ErrorCode.ATTENDANCE_FIX_CLOCK_IN_REQUIRED);
+        if(out!=null && !out.isAfter(in))throw new BusinessException(ErrorCode.INVALID_ATTENDANCE_TIME);
+        return new Times(in,out);
+    }
     public void onApproved(ApprovalDocument d) {
         var r=raw(d.id());var date=(LocalDate)r.get("work_date");var old=records.record(d.drafterId(),date,true);var day=records.day(d.drafterId(),date);var now=LocalDateTime.now(clock);
-        LocalDateTime in=r.get("clock_in")==null?(old==null?null:(LocalDateTime)old.get("clock_in_at")):date.atTime(AttendanceStore.time(r.get("clock_in")));
-        LocalDateTime out=r.get("clock_out")==null?(old==null?null:(LocalDateTime)old.get("clock_out_at")):date.atTime(AttendanceStore.time(r.get("clock_out")));
-        if(in!=null && out!=null && !out.isAfter(in))throw new BusinessException(ErrorCode.INVALID_ATTENDANCE_TIME);
+        var times=mergedTimes(r,old,date);var in=times.in();var out=times.out();
         if(old==null)records.insert(d.drafterId(),date,records.schedule(d.drafterId()),day.type(),in,out,true,now);
         else records.judge(old,day.type(),in,out,true,now);
         db.update("UPDATE attendances SET absent=0,fix_document_id=:doc,judged_at=:now,updated_at=:now WHERE user_id=:user AND work_date=:date",map("doc",d.id(),"user",d.drafterId(),"date",date,"now",now));

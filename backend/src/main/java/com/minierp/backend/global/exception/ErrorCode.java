@@ -13,6 +13,7 @@ public enum ErrorCode {
     NOT_CLOCKED_IN(HttpStatus.CONFLICT,"출근 기록이 없습니다. 출근부터 해 주세요."),
     ATTENDANCE_ON_LEAVE(HttpStatus.CONFLICT,"오늘은 휴가입니다. 휴가를 회수한 뒤 출근하세요."),
     ATTENDANCE_FIX_OUT_OF_RANGE(HttpStatus.UNPROCESSABLE_ENTITY,"최근 30일 안의 지난 날짜만 정정할 수 있습니다."),
+    ATTENDANCE_FIX_CLOCK_IN_REQUIRED(HttpStatus.UNPROCESSABLE_ENTITY,"출근 기록이 없는 날은 출근 시각을 함께 정정해야 합니다."),
     ATTENDANCE_FIX_DUPLICATE(HttpStatus.CONFLICT,"같은 날짜로 진행 중인 정정 문서가 있습니다."),
     INVALID_ATTENDANCE_TIME(HttpStatus.BAD_REQUEST,"퇴근 시각은 출근 시각보다 늦어야 합니다."),
     LEAVE_BALANCE_NEGATIVE(HttpStatus.UNPROCESSABLE_ENTITY,"조정하면 사용 가능 연차가 0보다 작아집니다."),

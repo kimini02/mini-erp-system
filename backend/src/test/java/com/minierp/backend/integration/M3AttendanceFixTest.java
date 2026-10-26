@@ -35,7 +35,28 @@ class M3AttendanceFixTest extends AttendanceTestSupport {
         try {postAs("/api/v1/approval-documents/"+id+"/approve",leaderToken,null).andExpect(status().isInternalServerError());assertThat(attendance(day)).isEqualTo(before);assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?",String.class,id)).isEqualTo("IN_PROGRESS");assertThat(count("notifications",id)).isEqualTo(alerts);}finally{reset(target);}
         data(postAs("/api/v1/approval-documents/"+id+"/approve",leaderToken,null));long done=count("notifications",id);postAs("/api/v1/approval-documents/"+id+"/approve",leaderToken,null).andExpect(status().isConflict());assertThat(count("notifications",id)).isEqualTo(done);
     }
-    @Test void checkoutOnlyCorrectionCreatesRecordAndSurvivesRejudging() throws Exception {
-        var day=date.minusWeeks(1);long id=draft("ATTENDANCE_FIX",body(day,null,"18:00"));submit(id);data(postAs("/api/v1/approval-documents/"+id+"/approve",leaderToken,null));assertThat(attendance(day).get("absent")).isEqualTo(false);batch.run(day);assertThat(attendance(day).get("absent")).isEqualTo(false);
+    @Test void checkoutOnlyCorrectionUsesExistingClockInAndSurvivesRejudging() throws Exception {
+        var day=date.minusWeeks(1);old(day);long id=draft("ATTENDANCE_FIX",body(day,null,"18:00"));submit(id);data(postAs("/api/v1/approval-documents/"+id+"/approve",leaderToken,null));assertThat(attendance(day).get("absent")).isEqualTo(false);batch.run(day);assertThat(attendance(day).get("absent")).isEqualTo(false);
+    }
+    @Test void absentDayCheckoutOnlyIsRejectedAtSubmission() throws Exception {
+        var day=date.minusWeeks(1);batch.run(day);var before=attendance(day);
+        long id=draft("ATTENDANCE_FIX",body(day,null,"18:00"));
+        postAs("/api/v1/approval-documents/"+id+"/submit",employeeToken,null).andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.error.code").value("ATTENDANCE_FIX_CLOCK_IN_REQUIRED"));
+        assertThat(attendance(day)).isEqualTo(before);assertThat(count("notifications",id)).isZero();
+        assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?",String.class,id)).isEqualTo("DRAFT");
+        assertThat(jdbc.queryForObject("SELECT before_json FROM attendance_fix_requests WHERE document_id=?",String.class,id)).isNull();
+    }
+    @Test void clockInAfterExistingClockOutIsRejectedAtSubmission() throws Exception {
+        var day=date.minusWeeks(1);old(day);jdbc.update("UPDATE attendances SET clock_out_at=? WHERE user_id=?",day.atTime(18,0),employee.getId());var before=attendance(day);
+        long id=draft("ATTENDANCE_FIX",body(day,"18:01",null));
+        postAs("/api/v1/approval-documents/"+id+"/submit",employeeToken,null).andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("INVALID_ATTENDANCE_TIME"));
+        assertThat(attendance(day)).isEqualTo(before);assertThat(count("notifications",id)).isZero();
+        assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?",String.class,id)).isEqualTo("DRAFT");
+    }
+    @Test void approvalRechecksMergedTimesWhenAttendanceChangedSinceSubmission() throws Exception {
+        var day=date.minusWeeks(1);old(day);long id=draft("ATTENDANCE_FIX",body(day,null,"18:00"));submit(id);
+        jdbc.update("UPDATE attendances SET clock_in_at=NULL WHERE user_id=?",employee.getId());long alerts=count("notifications",id);
+        postAs("/api/v1/approval-documents/"+id+"/approve",leaderToken,null).andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.error.code").value("ATTENDANCE_FIX_CLOCK_IN_REQUIRED"));
+        assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?",String.class,id)).isEqualTo("IN_PROGRESS");assertThat(count("notifications",id)).isEqualTo(alerts);
     }
 }
