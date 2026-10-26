@@ -22,8 +22,4 @@ public class Attendance extends BaseEntity {
     @Column(name="absent",nullable=false) private boolean absent;
     @Column(name="judged_at") private LocalDateTime judgedAt;
     @Column(name="fix_document_id") private Long fixDocumentId;
-    // Read-only compatibility for legacy DTOs until the M3 API removal task.
-    public LocalTime getClockInTime() {return clockInAt==null?null:clockInAt.toLocalTime();}
-    public LocalTime getClockOutTime() {return clockOutAt==null?null:clockOutAt.toLocalTime();}
-    public AttendanceStatus getAttStatus() {return "LEAVE".equals(dayType)?AttendanceStatus.LEAVE:absent?AttendanceStatus.ABSENT:"LATE".equals(inResult)?AttendanceStatus.LATE:AttendanceStatus.NORMAL;}
 }
