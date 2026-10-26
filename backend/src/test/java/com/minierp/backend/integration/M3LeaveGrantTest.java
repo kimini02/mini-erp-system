@@ -27,10 +27,10 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
         assertThat(amount("Y-"+ids.get(1)+"-"+year)).isEqualByComparingTo("16");assertThat(amount("Y-"+ids.get(2)+"-"+year)).isEqualByComparingTo("25");
         System.out.println("M3_GRANT_RULES july_anniversary=8 january_anniversary=15 tenure3=16 tenure21=25 duplicate_jan1=0");
     }
-    @Test void backfillKeepsDueYearSkipsUnknownHireAndIsIdempotent() throws Exception {
+    @Test void backfillOnlyCurrentYearSkipsUnknownHireAndIsIdempotent() throws Exception {
         var hire=LocalDate.of(date.getYear()-1,11,1);long id=hired(hire,"ACTIVE"),missing=hired(null,"ACTIVE"),retired=hired(hire,"RETIRED");
         var run=LocalDate.of(date.getYear(),1,2);at(run,LocalTime.of(0,30));data(postAs("/api/v1/leave/admin/grant-runs",chiefToken,Map.of("date",run.toString())));
-        assertThat(jdbc.queryForObject("SELECT leave_year FROM leave_ledger WHERE grant_key=?",Integer.class,"M-"+id+"-1")).isEqualTo(hire.getYear());assertThat(amount("M-"+id+"-2")).isEqualByComparingTo("1");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE grant_key=?",Integer.class,"M-"+id+"-1")).isZero();assertThat(amount("M-"+id+"-2")).isEqualByComparingTo("1");
         long count=jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger",Long.class);grants.runToday();assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger",Long.class)).isEqualTo(count);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id IN (?,?)",Integer.class,missing,retired)).isZero();
         var runs=data(getAs("/api/v1/leave/admin/grant-runs",chiefToken));assertThat(runs.get(0).path("message").asText()).contains(Long.toString(missing));assertThat(runs.get(0).path("processedCount").asInt()).isZero();
@@ -57,5 +57,19 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
         } finally {jdbc.update("UPDATE role_permissions SET can_update=0,can_create=0 WHERE role_id=2 AND menu_id=6");}
         var balances=data(getAs("/api/v1/leave/admin/balances?year="+date.getYear()+"&q=employee",chiefToken));assertThat(balances.path("content")).anySatisfy(r->{assertThat(r.path("user").path("id").asLong()).isEqualTo(employee.getId());assertThat(r.path("adjusted").decimalValue()).isEqualByComparingTo("-0.5");});
         assertThat(data(getAs("/api/v1/leave/admin/ledger/"+employee.getId()+"?year="+date.getYear(),chiefToken)).get(0).path("type").asText()).isEqualTo("ADJUST");
+    }
+    @Test void legacyGrantSkipsWholeYearAndNextJanuaryResumesWithoutDeletingLedger() throws Exception {
+        jdbc.update("UPDATE users SET status='RETIRED' WHERE id<>?",chief.getId());
+        jdbc.update("UPDATE users SET hire_date=? WHERE id=?",date.minusYears(3),chief.getId());
+        long id=hired(date.minusYears(3),"ACTIVE"),missing=hired(null,"ACTIVE");
+        jdbc.update("INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,memo,created_at) VALUES(?,?,'GRANT',7,'v1 이관',?)",id,date.getYear(),LocalDateTime.now(clock));
+        grants.run(date);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NOT NULL",Integer.class,id)).isZero();
+        var run=data(getAs("/api/v1/leave/admin/grant-runs",chiefToken)).get(0);
+        assertThat(run.path("skippedCount").asInt()).isEqualTo(2);assertThat(run.path("message").asText()).contains("입사일 없음: ["+missing+"]","옛 부여 있음: ["+id+"]");
+        var next=LocalDate.of(date.getYear()+1,1,1);at(next,LocalTime.of(0,30));grants.runToday();
+        assertThat(amount("Y-"+id+"-"+next.getYear())).isEqualByComparingTo("16");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NULL AND days=7",Integer.class,id)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NOT NULL AND leave_year<?",Integer.class,id,next.getYear())).isZero();
     }
 }
