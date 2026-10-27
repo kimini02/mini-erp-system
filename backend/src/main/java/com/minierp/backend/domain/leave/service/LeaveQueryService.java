@@ -29,10 +29,12 @@ public class LeaveQueryService {
             """,map("user",access.actor(),"year",y),ErrorCode.USER_NOT_FOUND);
         result.put("year",y);return result;
     }
-    public List<Map<String,Object>> ledger(Integer requestedYear,String type) {
+    public List<Map<String,Object>> ledger(Integer requestedYear,String type) {return ledger(access.actor(),requestedYear,type);}
+    public List<Map<String,Object>> ledgerFor(long user,Integer requestedYear) {return ledger(user,requestedYear,null);}
+    private List<Map<String,Object>> ledger(long user,Integer requestedYear,String type) {
         if(type!=null && !type.isBlank() && !Set.of("GRANT","USE","RESERVE","RELEASE","EXPIRE","ADJUST").contains(type)) throw BodyValues.invalid();
         // Calculate balance before filtering: a USE-only view must still include earlier GRANTs in its balance.
-        var args=map("user",access.actor(),"year",year(requestedYear));String filter="";
+        var args=map("user",user,"year",year(requestedYear));String filter="";
         if(type!=null && !type.isBlank()) {args.put("type",type);filter=" WHERE l.entry_type=:type";}
         return db.rows("""
             SELECT l.*,d.doc_no,d.status FROM (

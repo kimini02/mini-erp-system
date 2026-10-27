@@ -72,7 +72,7 @@ public class DashboardService {
     }
 
     public AdminDashboardResponseDto getAdminSummary(Long currentUserId, UserRole currentUserRole) {
-        accessPolicy.requireAdminOrLeader(currentUserRole);
+        accessPolicy.requireAdmin(currentUserRole);
 
         long totalUsers = 0L;
         long activeProjectCount;

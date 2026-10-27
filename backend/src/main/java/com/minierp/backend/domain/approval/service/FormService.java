@@ -12,10 +12,10 @@ public class FormService {
     private final ApprovalLineResolver resolver;
     public record Options(Boolean dedupeApprover,Boolean fallbackToUpper,Boolean skipSelf,Boolean allowLineEdit) {}
     public record Step(String lineKind,String approverType,String roleCode,Long userId) {}
-    public static String shortName(String code) { return switch(code) {case "LEAVE"->"휴가";case "OVERTIME"->"특근";case "GENERAL"->"품의";default->throw new BusinessException(ErrorCode.FORM_NOT_FOUND);}; }
+    public static String shortName(String code) { return switch(code) {case "LEAVE"->"휴가";case "OVERTIME"->"특근";case "GENERAL"->"품의";case "ATTENDANCE_FIX"->"근태 정정";default->throw new BusinessException(ErrorCode.FORM_NOT_FOUND);}; }
     private Map<String,Object> presentation(Map<String,Object> f) {
         String code=(String)f.get("code");
-        String description=switch(code) {case "LEAVE"->"연차·반차·병가·경조 휴가를 신청합니다.";case "OVERTIME"->"하루 단위의 특근을 신청합니다.";default->"업무에 필요한 일반 품의를 올립니다.";};
+        String description=switch(code) {case "LEAVE"->"연차·반차·병가·경조 휴가를 신청합니다.";case "OVERTIME"->"하루 단위의 특근을 신청합니다.";case "ATTENDANCE_FIX"->"지난 근무일의 출퇴근 기록 정정을 신청합니다.";default->"업무에 필요한 일반 품의를 올립니다.";};
         return map("code",code,"name",f.get("name"),"shortName",shortName(code),"prefix",f.get("doc_prefix"),"description",description);
     }
     public List<Map<String,Object>> list() {
