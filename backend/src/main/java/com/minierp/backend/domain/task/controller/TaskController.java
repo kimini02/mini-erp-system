@@ -45,20 +45,16 @@ public class TaskController {
     private final Clock clock;
 
     private final TaskService taskService;
+    private final com.minierp.backend.domain.task.service.BoardTaskService board;
     private final CurrentUserResolver currentUserResolver;
 
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @PostMapping
-    public ResponseEntity<ApiResponse<TaskResponseDto>> createTask(
+    public ResponseEntity<?> createTask(
             @Valid @RequestBody TaskCreateRequestDto request,
             Authentication authentication
     ) {
-        TaskResponseDto response = taskService.createTask(
-                request,
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(clock, response, "Task가 생성되었습니다."));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(clock,board.create(request.getProjectId(),new com.minierp.backend.domain.task.dto.BoardTaskRequests.Create(request.getTaskTitle(),request.getTaskContent(),request.getTaskStatus(),request.getAssigneeIds(),request.getEndDate(),request.getPriority()))));
     }
 
     @GetMapping
@@ -70,63 +66,36 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success(clock, response, "업무 목록 조회가 완료되었습니다."));
     }
 
-    @GetMapping("/{taskId}")
-    public ResponseEntity<ApiResponse<TaskResponseDto>> getTask(
-            @PathVariable Long taskId,
-            Authentication authentication
-    ) {
-        TaskResponseDto response = taskService.getTask(
-                taskId,
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.ok(ApiResponse.success(clock, response, "업무 상세 조회가 완료되었습니다."));
-    }
 
+
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @PutMapping("/{taskId}")
-    public ResponseEntity<ApiResponse<TaskResponseDto>> updateTask(
+    public ResponseEntity<?> updateTask(
             @PathVariable Long taskId,
             @Valid @RequestBody TaskUpdateRequestDto request,
             Authentication authentication
     ) {
-        TaskResponseDto response = taskService.updateTask(
-                taskId,
-                request,
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.ok(ApiResponse.success(clock, response, "업무가 수정되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock,board.patch(taskId,new com.minierp.backend.domain.task.dto.BoardTaskRequests.Patch(request.getTaskTitle(),request.getTaskContent(),request.getEndDate(),request.getPriority(),null))));
     }
 
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @PatchMapping("/{taskId}/status")
-    public ResponseEntity<ApiResponse<TaskResponseDto>> changeTaskStatus(
+    public ResponseEntity<?> changeTaskStatus(
             @PathVariable Long taskId,
             @Valid @RequestBody TaskStatusUpdateDto request,
             Authentication authentication
     ) {
-        TaskResponseDto response = taskService.changeTaskStatus(
-                taskId,
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication),
-                request
-        );
-        return ResponseEntity.ok(ApiResponse.success(clock, response, "Task 상태가 변경되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock,board.move(taskId,new com.minierp.backend.domain.task.dto.BoardTaskRequests.Move(request.getTaskStatus(),null,request.getVersion()))));
     }
 
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @PostMapping("/{taskId}/assignments")
-    public ResponseEntity<ApiResponse<TaskAssignmentResponseDto>> addAssignment(
+    public ResponseEntity<?> addAssignment(
             @PathVariable Long taskId,
             @Valid @RequestBody TaskAssignmentRequestDto request,
             Authentication authentication
     ) {
-        TaskAssignmentResponseDto response = taskService.addAssignment(
-                taskId,
-                request.getUserId(),
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(clock, response, "업무 담당자가 배정되었습니다."));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(clock,board.changeAssignment(taskId,request.getUserId(),true)));
     }
 
     @GetMapping("/{taskId}/assignments")
@@ -142,19 +111,15 @@ public class TaskController {
         return ResponseEntity.ok(ApiResponse.success(clock, response, "업무 담당자 목록 조회가 완료되었습니다."));
     }
 
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @DeleteMapping("/{taskId}/assignments/{userId}")
-    public ResponseEntity<ApiResponse<Void>> removeAssignment(
+    public ResponseEntity<?> removeAssignment(
             @PathVariable Long taskId,
             @PathVariable Long userId,
             Authentication authentication
     ) {
-        taskService.removeAssignment(
-                taskId,
-                userId,
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.ok(ApiResponse.successMessage(clock, "업무 담당자 배정이 해제되었습니다."));
+        board.changeAssignment(taskId,userId,false);
+        return ResponseEntity.ok(ApiResponse.successMessage(clock,"업무 담당자 배정이 해제되었습니다."));
     }
 
     @GetMapping("/recent-assignments")

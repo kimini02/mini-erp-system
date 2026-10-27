@@ -21,9 +21,11 @@ public class TaskCreateRequestDto {
     private Long projectId;
 
     @NotBlank(message = "업무 제목은 필수입니다.")
+    @jakarta.validation.constraints.Size(max=100)
     private String taskTitle;
 
     @NotBlank(message = "업무 내용은 필수입니다.")
+    @jakarta.validation.constraints.Size(max=1000)
     private String taskContent;
 
     @NotNull(message = "업무 종료일은 필수입니다.")
@@ -36,7 +38,7 @@ public class TaskCreateRequestDto {
     private Priority priority;
 
     @NotEmpty(message = "담당자 ID 목록은 비어 있을 수 없습니다.")
-    private List<Long> assigneeIds;
+    private List<@jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Positive Long> assigneeIds;
 
     public static TaskCreateRequestDto of(
             Long projectId,

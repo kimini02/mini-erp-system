@@ -14,9 +14,11 @@ import java.time.LocalDate;
 public class TaskUpdateRequestDto {
 
     @NotBlank(message = "업무 제목은 필수입니다.")
+    @jakarta.validation.constraints.Size(max=100)
     private String taskTitle;
 
     @NotBlank(message = "업무 내용은 필수입니다.")
+    @jakarta.validation.constraints.Size(max=1000)
     private String taskContent;
 
     @NotNull(message = "업무 종료일은 필수입니다.")

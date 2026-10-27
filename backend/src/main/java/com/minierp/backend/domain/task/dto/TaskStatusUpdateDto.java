@@ -15,6 +15,10 @@ public class TaskStatusUpdateDto {
     @JsonProperty("taskState")
     private TaskStatus taskStatus;
 
+    @NotNull(message = "업무 version은 필수입니다.")
+    @jakarta.validation.constraints.Min(0)
+    private Integer version;
+
     public static TaskStatusUpdateDto of(TaskStatus taskStatus) {
         TaskStatusUpdateDto dto = new TaskStatusUpdateDto();
         dto.taskStatus = taskStatus;
