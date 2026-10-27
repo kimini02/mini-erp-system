@@ -20,4 +20,9 @@ public class NotificationService {
         db.update("INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,NULL,'TASK_ASSIGNED',:title,:link,:now)",
             map("user",user,"title",title,"link",link,"now",LocalDateTime.now(clock)));
     }
+    @Transactional(propagation=Propagation.MANDATORY)
+    public void storeTaskOverdue(long user,String title,String link) {
+        db.update("INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,NULL,'TASK_OVERDUE',:title,:link,:now)",
+            map("user",user,"title",title,"link",link,"now",LocalDateTime.now(clock)));
+    }
 }
