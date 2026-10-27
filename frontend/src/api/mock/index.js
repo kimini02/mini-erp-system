@@ -2,6 +2,7 @@ import { AxiosError } from 'axios';
 import { createDb, menus } from './db';
 import { installM2 } from './m2';
 import { installM3 } from './m3';
+import { installM4 } from './m4';
 
 /**
  * 개발용 가짜 서버 (VITE_USE_MOCK=true).
@@ -16,14 +17,16 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const timestamp = () => new Date().toISOString().slice(0, 19);
 
 class ApiFail extends Error {
-  constructor(status, code, message) {
+  constructor(status, code, message, details) {
     super(message);
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
-const fail = (status, code, message) => {
-  throw new ApiFail(status, code, message);
+// details: 공통 에러에 덧붙이는 값 (예: 409 TASK_VERSION_CONFLICT 의 currentTask)
+const fail = (status, code, message, details) => {
+  throw new ApiFail(status, code, message, details);
 };
 const created = (data) => ({ __status: 201, data });
 
@@ -652,6 +655,26 @@ const m2 = installM2({ route, db, fail, created, need, userById, deptById, roleB
 // M3 근태·휴가 (backend/md/14-rest-api-v2-m3.md)
 installM3({ route, db, fail, created, need, mergedPermissions, userById, deptById, positionById, subtreeIds, page, m2 });
 
+/** 다른 라우트를 같은 사용자로 불러 결과만 받음 (홈처럼 여러 위젯을 모으는 응답용). 권한이 없으면 null */
+function callRoute(method, path, ctx, params = {}) {
+  for (const r of routes) {
+    if (r.method !== method) continue;
+    const m = r.regex.exec(path);
+    if (!m) continue;
+    try {
+      const result = r.handler({ ...ctx, body: {}, params, path: Object.fromEntries(r.keys.map((k, i) => [k, m[i + 1]])) });
+      return result?.__status ? result.data : result;
+    } catch (err) {
+      if (err instanceof ApiFail && err.status === 403) return null;
+      throw err;
+    }
+  }
+  return null;
+}
+
+// M4 홈 · 프로젝트 보드 (backend/md/15-rest-api-v2-m4.md)
+installM4({ route, db, fail, created, need, mergedPermissions, userById, deptById, positionById, subtreeIds, page, m2, callRoute });
+
 /* ───────── 어댑터 ───────── */
 
 function currentUser(config) {
@@ -712,7 +735,8 @@ export async function handleMock(config, realAdapter) {
     return toResponse(config, status, { success: true, data, message: '요청이 성공적으로 처리되었습니다.', timestamp: timestamp() });
   } catch (err) {
     if (!(err instanceof ApiFail)) throw err;
-    const response = toResponse(config, err.status, { success: false, error: { code: err.code, message: err.message }, timestamp: timestamp() });
+    const error = { code: err.code, message: err.message, ...(err.details ? { details: err.details } : {}) };
+    const response = toResponse(config, err.status, { success: false, error, timestamp: timestamp() });
     throw new AxiosError(err.message, err.status >= 500 ? 'ERR_BAD_RESPONSE' : 'ERR_BAD_REQUEST', config, {}, response);
   }
 }

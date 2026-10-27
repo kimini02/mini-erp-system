@@ -57,6 +57,9 @@ export const NOTIFICATION_TYPE_META = {
   REJECTED: { label: '반려', dot: 'bg-red-500', sentence: (t) => `'${t}' 문서가 반려되었습니다.` },
   WITHDRAWN: { label: '회수', dot: 'bg-amber-500', sentence: (t) => `'${t}' 문서가 회수되었습니다.` },
   REFERENCED: { label: '참조', dot: 'bg-gray-400', sentence: (t) => `'${t}' 문서에 참조로 지정되었습니다.` },
+  // M4: title 은 '업무 키 + 제목' (backend/md/15-rest-api-v2-m4.md 4.5)
+  TASK_ASSIGNED: { label: '업무 배정', dot: 'bg-violet-500', sentence: (t) => `'${t}' 업무를 맡았습니다.` },
+  TASK_OVERDUE: { label: '마감 지남', dot: 'bg-red-500', sentence: (t) => `'${t}' 업무의 마감일이 지났습니다.` },
 };
 
 export const HISTORY_ACTION_LABELS = {

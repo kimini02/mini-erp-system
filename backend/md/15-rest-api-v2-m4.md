@@ -36,6 +36,7 @@
 - **카드 이동·상태 변경** = 관리할 수 있는 사람 **또는 그 업무의 담당자**. (시안: "담당자와 프로젝트 담당 팀장만 상태를 바꿀 수 있습니다")
 - 프로젝트 등록 = `PROJECT C`. 팀장(`leaderId`)은 재직 중인 사원 아무나 지정할 수 있고, 팀장은 자동으로 멤버가 됩니다.
 - 응답의 `permissions`(`canManage`, `canCreateTask`)와 카드의 `canMove`는 화면 표시용이고, 서버가 같은 규칙으로 다시 검사합니다.
+- (2026-10-27 확정) **모든 쓰기에도 `PROJECT V`가 먼저 필요**합니다. V가 없는 팀장 예외는 두지 않습니다(기본 역할은 모두 V 보유).
 
 ---
 
@@ -143,7 +144,10 @@
 - 순서: **프로젝트 행 잠금 → 업무 `version` 비교(다르면 `409 TASK_VERSION_CONFLICT`, 최신 카드를 같이 돌려줌) → 위치 계산 → 저장(`version + 1`) → 이력 → 프로젝트 상태 재계산**.
 - 위치 계산: 위 카드와 아래 카드 `position`의 중간값. 간격이 1 이하로 좁아지면 **그 열만** 1024 간격으로 다시 번호를 매기고 계산합니다(드물게 일어남, 8장 측정 3에서 횟수 기록).
 - `afterTaskId`가 다른 열이거나 다른 프로젝트 카드면 `422 INVALID_TASK_POSITION`.
-- 응답: 옮긴 카드 + 바뀐 `project`(진행률·상태). 열 안 순서만 바뀌면 이력은 `MOVED`, 열이 바뀌면 `STATUS`.
+- 응답(2026-10-27 확정): `{ "task": 카드, "project": { "id", "status", "taskCount", "doneCount", "progressPct" } }`. 열 안 순서만 바뀌면 이력은 `MOVED`, 열이 바뀌면 `STATUS`.
+- 409 응답은 공통 에러에 최신 카드를 붙입니다: `{ "error": { "code": "TASK_VERSION_CONFLICT", "message": "…", "details": { "currentTask": 카드 } } }`. 화면은 그 카드로 바꿔 그리고 다시 옮기게 합니다.
+- 다시 번호를 매긴 다른 카드의 `version`은 그대로입니다(상대 순서가 같으므로). 직접 옮기거나 고친 카드만 `version + 1`.
+- `PATCH /tasks/{id}`는 `version`을 검사하지 않습니다(필드 단위 마지막 저장 우선). 고치면 `version`이 올라가서 다른 화면의 이동은 409가 됩니다.
 
 ### 4.4 프로젝트 상태 재계산 (이동·추가·수정 공통)
 - 잠금 안에서 `SELECT task_status, COUNT(*) FROM tasks WHERE project_id = ? GROUP BY task_status` 한 번.
@@ -158,6 +162,8 @@
   "history": [{ "action": "STATUS", "from": "TODO", "to": "DOING", "actor": { "id": 12, "name": "김서연" }, "at": "2026-10-08T10:02:00" }] }
 ```
 - `history`: 최근 50건, 새것부터. `action`: `CREATED`/`STATUS`/`MOVED`/`ASSIGNED`/`UNASSIGNED`/`UPDATED`/`OVERDUE_NOTIFIED`.
+  - (2026-10-27 확정) `MOVED`는 `from`/`to` 없이(위치 숫자는 의미가 없음), `ASSIGNED`·`UNASSIGNED`는 `target: { "id", "name" }`을 함께 내보냅니다(멤버에서 빠진 사람도 이름이 보이게). `STATUS`의 `from`/`to`는 상태 코드, `UPDATED`의 `to`는 바뀐 항목 이름(예: "제목, 마감일"), `CREATED`의 `to`는 제목.
+- 알림(2026-10-27 확정): `TASK_ASSIGNED`·`TASK_OVERDUE`의 `title`은 **키 + 제목**(`"GW-21 결재선 규칙 해석 API"`), 문장은 화면이 `type`으로 만듭니다(M2 규칙). `link`는 `/projects/{projectId}/board?taskId={taskId}`, `document_id`는 NULL.
 
 ---
 
