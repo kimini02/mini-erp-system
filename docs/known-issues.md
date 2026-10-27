@@ -99,3 +99,10 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 | CSV 날짜 칸 한글 표시·비근태 칸 빈칸 | `315fcce` | [M3-16](troubleshooting/M3-16-csv-korean-labels.md) |
 
 이미 잘못 생성된 운영 근태·자동 부여 행을 일괄 삭제하는 작업은 수행하지 않았다. 개발 DB는 사용하지 않았으며, 사용자별 기록 정리는 확인 후 별도 결정이 필요하다. 전체 테스트와 수정 전 실패 근거는 [M3 3차 결과](troubleshooting/M3-17-phase-three-results.md)를 따른다.
+
+
+## M4 1차 — 구 조회 경로는 2차 제거 예정
+- 새 프로젝트·보드 API는 PROJECT 메뉴 권한과 SQL 데이터 범위를 적용한다. 프로젝트 팀장 관리 예외·담당자 카드 이동·잠금/번호/version 보호는 `4b7b6d8`, `fbbf0e2`에 구현했다.
+- 구 쓰기 경로는 사용자 승인에 따라 새 서비스에 연결했다. V6 이후 구 업무 등록 500, version 없는 구 상태 변경, USER인 프로젝트 팀장의 배정 불가를 먼저 재현한 뒤 수정했다. [M4-08](troubleshooting/M4-08-legacy-write-bridge.md).
+- **남은 경로**: GET /tasks, /tasks/{id}/assignments 및 구 프로젝트 멤버·progress·permissions 조회 등은 v1 전역 역할로 판단하며 PROJECT V/새 범위를 검사하지 않는다. 새 권한을 회수해도 구 조회를 통해 읽을 수 있는 경우가 있으므로 M4 2차에 구 API와 서비스를 삭제해야 한다. 1차에서는 구 읽기 유지라는 사용자 지시에 따라 바꾸지 않았다.
+- 홈/대시보드 N+1 재구축과 마감 알림 배치는 2차 범위다. 전체 검증·측정·결정 필요는 [M4 1차 결과](troubleshooting/M4-00-phase-one-results.md)를 따른다.

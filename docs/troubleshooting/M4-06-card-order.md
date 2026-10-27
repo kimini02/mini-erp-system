@@ -38,4 +38,5 @@ JDBC executeUpdate 반환값을 합산했으며 프로젝트 상태 UPDATE는 �
 재정렬은 목적지 열 O(N) 쓰기다. 그때 다른 카드의 물리적 position은 바뀌지만 상대 순서는 같으므로 다른 카드의 version은 증가시키지 않았다. 이동 카드 version은 항상 증가한다. 실험의 중복 20/20은 취약한 순서를 강제로 만든 재현율이며 운영 빈도가 아니다. 명세대로 별도 position 유니크 제약은 추가하지 않았다.
 
 ## 커밋
-[1차 결과의 커밋 표](M4-00-phase-one-results.md) 참조.
+`ba520b5` — 비교 알고리즘, `fbbf0e2` — 간격·version·프로젝트 잠금.
+전체 검증 결과는 [1차 결과](M4-00-phase-one-results.md)를 따른다.
