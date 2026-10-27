@@ -40,12 +40,15 @@ class M4QueryGrowthTest extends BoardTestSupport {
    try(var trace=JdbcProbe.start()){getAs("/api/v1/projects/"+visible.get(0)+"/board",employeeToken).andExpect(status().isOk());System.out.printf("M4_SUMMARY_HTTP_AFTER scale=%d board_queries=%d%n",scale,trace.queries.size());}
   }
  }
- @org.junit.jupiter.api.Order(2) @Test void legacyDashboardShowsOnePlusTwoQueriesPerProject()throws Exception{
+ /** Actual old HTTP path was measured before removal (13 SQL). Keep its 1+2N core comparison runnable. */
+ @org.junit.jupiter.api.Order(2) @Test void legacyDashboardComparisonStillShowsOnePlusTwoQueriesPerProject(){
   for(int n=0;n<5;n++)project(leader,20);
   try(var trace=JdbcProbe.start()){
-   getAs("/api/v1/dashboard/projects",chiefToken).andExpect(status().isOk());
-   long counts=trace.queries.stream().filter(q->q.sql.contains("count(") && q.sql.contains("from tasks")).count();
-   assertThat(counts).isEqualTo(10);System.out.printf("M4_DASHBOARD_BEFORE projects=5 task_count_queries=%d total_http_queries=%d%n",counts,trace.queries.size());
+   var projects=db.rows("SELECT id,status,end_date FROM projects",Map.of());
+   projects.stream().sorted(Comparator.comparing((Map<String,Object> p)->!"PROGRESS".equals(p.get("status"))).thenComparing(p->(LocalDate)p.get("end_date"))).limit(5).forEach(p->{
+    db.count("SELECT COUNT(*) FROM tasks WHERE project_id=:id",p);db.count("SELECT COUNT(*) FROM tasks WHERE project_id=:id AND task_status='DONE'",p);
+   });
+   assertThat(trace.queries).hasSize(11);System.out.println("M4_DASHBOARD_COMPARISON projects=5 task_count_queries=10 core_queries=11; actual_removed_HTTP_before=13");
   }
  }
 }

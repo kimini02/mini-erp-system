@@ -11,7 +11,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import com.minierp.backend.domain.task.entity.TaskStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -106,28 +105,6 @@ public class Project extends BaseEntity {
 
     public void assignLeader(User leader) {
         this.leader = leader;
-    }
-
-    /**
-     * Task 상태 변경 시 프로젝트 상태를 자동으로 갱신
-     * - 모든 Task가 DONE → 프로젝트 DONE
-     * - READY 상태에서 Task가 하나라도 진행되면 → PROGRESS
-     */
-    public void updateStatusByTasks() {
-        if (tasks.isEmpty()) {
-            return;
-        }
-        boolean allDone = tasks.stream()
-                .allMatch(task -> task.getTaskStatus() == TaskStatus.DONE);
-        if (allDone) {
-            this.status = ProjectStatus.DONE;
-        } else if (this.status == ProjectStatus.READY) {
-            boolean anyStarted = tasks.stream()
-                    .anyMatch(task -> task.getTaskStatus() != TaskStatus.TODO);
-            if (anyStarted) {
-                this.status = ProjectStatus.PROGRESS;
-            }
-        }
     }
 
     @PrePersist

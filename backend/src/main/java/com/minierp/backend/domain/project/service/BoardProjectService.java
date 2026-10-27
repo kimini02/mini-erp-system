@@ -97,23 +97,4 @@ public class BoardProjectService {
   for(long user:selected)if(!old.contains(user))db.update("INSERT INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)",map("p",id,"u",user,"now",LocalDateTime.now(clock)));
   db.update("UPDATE projects SET updated_at=:now WHERE id=:id",map("id",id,"now",LocalDateTime.now(clock)));
  }
- /** Temporary v1 write adapter. Removed together with old routes in M4 phase 2. */
- @Transactional(isolation=Isolation.READ_COMMITTED)
- public Map<String,Object> changeMember(long id,long user,boolean add){
-  var p=lock(id);requireManage(p);var ids=new ArrayList<>(memberIds(id));if(add && !ids.contains(user))ids.add(user);if(!add)ids.remove(user);
-  applyMembers(id,validateMembers(p,ids));return detail(id);
- }
- /** Legacy bulk replacement locks projects in id order and validates every plan before any mutation. */
- @Transactional(isolation=Isolation.READ_COMMITTED)
- public void replaceUserProjects(long user,List<Long> requested){
-  Set<Long> selected=new HashSet<>(requested);Set<Long> affected=new TreeSet<>(selected);
-  db.rows("SELECT project_id FROM project_members WHERE user_id=:user",map("user",user)).forEach(r->affected.add(number(r,"project_id")));
-  Map<Long,Map<String,Object>> locked=new LinkedHashMap<>();for(long id:affected){var p=lock(id);requireManage(p);locked.put(id,p);}
-  Map<Long,Set<Long>> plans=new LinkedHashMap<>();
-  for(var entry:locked.entrySet()){
-   long id=entry.getKey();var ids=new ArrayList<>(memberIds(id));if(selected.contains(id) && !ids.contains(user))ids.add(user);if(!selected.contains(id))ids.remove(user);
-   plans.put(id,validateMembers(entry.getValue(),ids));
-  }
-  plans.forEach(this::applyMembers);
- }
 }

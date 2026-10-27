@@ -95,15 +95,6 @@ public class BoardTaskService {
   boolean changed=!status.equals(task.get("task_status"));history(id,changed?"STATUS":"MOVED",changed?(String)task.get("task_status"):task.get("position").toString(),changed?status:Long.toString(pos));
   var summary=states.recalculate(project);return map("task",card(raw(id),p,people),"project",summary);
  }
- /** Temporary v1 assignment adapter; list read and replacement share the project lock. */
- @Transactional(isolation=Isolation.READ_COMMITTED)
- public Map<String,Object> changeAssignment(long id,long user,boolean add){
-  long project=projectId(id);var p=projects.lock(project);projects.requireManage(p);var task=raw(id);
-  var selected=new LinkedHashSet<>(assignees(id).stream().map(r->number(r,"id")).toList());if(add)selected.add(user);else selected.remove(user);
-  validateAssignees(project,new ArrayList<>(selected));assign(id,project,p.get("project_key")+"-"+task.get("task_no")+" "+task.get("task_title"),selected);
-  db.update("UPDATE tasks SET version=version+1,updated_at=:now WHERE id=:id",map("id",id,"now",LocalDateTime.now(clock)));
-  states.recalculate(project);return detail(id,p);
- }
  /** Requires the project lock. Only the destination column is rebalanced, excluding the moving card. */
  private long position(long project,String status,long moving,Long after,boolean append){
   var args=map("p",project,"status",status,"moving",moving);

@@ -43,6 +43,19 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(clock,ErrorCode.RESOURCE_NOT_FOUND));
     }
 
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleRemovedBoardMethod(
+            org.springframework.web.HttpRequestMethodNotSupportedException e,
+            jakarta.servlet.http.HttpServletRequest request) {
+        // These v1 methods were removed in M4; their URLs still serve different v2 methods.
+        String path=request.getRequestURI().substring(request.getContextPath().length());
+        boolean removed=(request.getMethod().equals("PUT") && path.matches("/api/v1/(projects|tasks)/[0-9]+"))
+            || ((request.getMethod().equals("GET") || request.getMethod().equals("POST")) && path.matches("/api/v1/projects/[0-9]+/members"));
+        if(removed) return handleNotFound(e);
+        // Preserve unrelated error behavior; general method-status cleanup is outside M4.
+        return handleException(e);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
