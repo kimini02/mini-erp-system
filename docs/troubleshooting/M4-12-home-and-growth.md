@@ -26,7 +26,7 @@
 
 팀 조회는 부서 사원 → 담당 관계/문서 → 업무/휴가 순서를 STRAIGHT_JOIN으로 고정한다. 내 최다 업무 프로젝트는 한 번 선택한 파생 결과에서 그 프로젝트의 업무만 집계한다. 해당 사용자의 업무·알림 증가 비용은 남으며 O(1) 응답 비용을 주장하지 않는다.
 
-권한 해석(사용자 추가 결정): today=MY_ATTENDANCE V, approvals=APPROVAL_INBOX V, myTasks=PROJECT V. teamWeek의 휴가는 MY_ATTENDANCE V, 업무는 PROJECT V+보기 범위이고 둘 다 없으면 null. 개인 leave/notifications는 기존 API처럼 로그인만 요구한다. 사용자가 항목별 메뉴 권한 적용을 확정했다. myTasks.items는 선택된 프로젝트에 국한하지 않고 내 보기 범위의 미완료 전체 중 마감일순 5건이다.
+권한 해석(사용자 추가 결정): today=MY_ATTENDANCE V, approvals=APPROVAL_INBOX V, myTasks=PROJECT V. teamWeek의 휴가는 MY_ATTENDANCE V, 업무는 PROJECT V+보기 범위이고 둘 다 없으면 null. 개인 leave/notifications는 기존 API처럼 로그인만 요구한다. 사용자가 항목별 메뉴 권한 적용을 확정했다. myTasks.items는 선택된 프로젝트에 국한하지 않고 내가 담당인 미완료 업무 중 보기 범위 안의 마감일순 5건이다.
 
 ## 전후 수치
 동일 실행의 paired team SQL 비교(2026-10-27). 시간은 참고치다.
