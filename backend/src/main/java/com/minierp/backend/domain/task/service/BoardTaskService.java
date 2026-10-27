@@ -38,8 +38,19 @@ public class BoardTaskService {
  public Map<String,Object> detail(long id){var p=projects.visible(projectId(id));return detail(id,p);}
  private Map<String,Object> detail(long id,Map<String,Object> p){
   var task=raw(id);var result=card(task,p,assignees(id));result.put("projectId",task.get("project_id"));result.put("content",task.get("task_content"));result.put("canManage",projects.canManage(p));
-  var history=db.rows("SELECT h.*,u.user_name AS actor_name FROM task_histories h LEFT JOIN users u ON u.id=h.actor_id WHERE task_id=:id ORDER BY h.id DESC LIMIT 50",map("id",id));
-  result.put("history",history.stream().map(h->map("action",h.get("action"),"from",h.get("from_value"),"to",h.get("to_value"),"actor",h.get("actor_id")==null?null:map("id",h.get("actor_id"),"name",h.get("actor_name")),"at",h.get("created_at"))).toList());return result;
+  var history=db.rows("""
+   SELECT h.*,u.user_name AS actor_name,target.user_name AS target_name,
+     CASE h.action WHEN 'ASSIGNED' THEN CAST(h.to_value AS UNSIGNED) WHEN 'UNASSIGNED' THEN CAST(h.from_value AS UNSIGNED) END AS target_id
+   FROM task_histories h LEFT JOIN users u ON u.id=h.actor_id
+   LEFT JOIN users target ON target.id=CASE h.action WHEN 'ASSIGNED' THEN CAST(h.to_value AS UNSIGNED) WHEN 'UNASSIGNED' THEN CAST(h.from_value AS UNSIGNED) END
+   WHERE task_id=:id ORDER BY h.id DESC LIMIT 50
+   """,map("id",id));
+  result.put("history",history.stream().map(h->{
+   var event=map("action",h.get("action"),"actor",h.get("actor_id")==null?null:map("id",h.get("actor_id"),"name",h.get("actor_name")),"at",h.get("created_at"));
+   if(!"MOVED".equals(h.get("action"))){event.put("from",h.get("from_value"));event.put("to",h.get("to_value"));}
+   if(h.get("target_id")!=null)event.put("target",map("id",h.get("target_id"),"name",h.get("target_name")));
+   return event;
+  }).toList());return result;
  }
  private void history(long id,String action,String from,String to){db.update("INSERT INTO task_histories(task_id,actor_id,action,from_value,to_value,created_at) VALUES(:id,:actor,:action,:from,:to,:now)",map("id",id,"actor",projects.actor(),"action",action,"from",from,"to",to,"now",LocalDateTime.now(clock)));}
  private Set<Long> validateAssignees(long project,List<Long> ids){
@@ -52,7 +63,7 @@ public class BoardTaskService {
   for(long user:old)if(!selected.contains(user)){db.update("DELETE FROM task_assignments WHERE task_id=:id AND user_id=:user",map("id",task,"user",user));history(task,"UNASSIGNED",Long.toString(user),null);}
   for(long user:selected)if(!old.contains(user)){
    db.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(:id,:user,:now)",map("id",task,"user",user,"now",LocalDateTime.now(clock)));history(task,"ASSIGNED",null,Long.toString(user));
-   notifications.storeTask(user,task,"업무 배정 · "+title,"/projects/"+project+"/board?taskId="+task);
+   notifications.storeTask(user,task,title,"/projects/"+project+"/board?taskId="+task);
   }
  }
  @Transactional(isolation=Isolation.READ_COMMITTED)
@@ -62,7 +73,7 @@ public class BoardTaskService {
   long seq=number(p,"last_task_seq")+1;if(seq>Integer.MAX_VALUE)throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
   long position=position(project,status,0,null,true);
   long id=db.insert("INSERT INTO tasks(project_id,task_no,position,version,created_by,task_title,task_content,end_date,priority,task_status,created_at) VALUES(:p,:seq,:pos,0,:actor,:title,:content,:end,:priority,:status,:now)",map("p",project,"seq",seq,"pos",position,"actor",projects.actor(),"title",r.title(),"content",r.content()==null?"":r.content(),"end",end,"priority",r.priority()==null?"MEDIUM":r.priority().name(),"status",status,"now",LocalDateTime.now(clock)));
-  db.update("UPDATE projects SET last_task_seq=:seq WHERE id=:id",map("seq",seq,"id",project));history(id,"CREATED",null,r.title());assign(id,project,r.title(),assigned);states.recalculate(project);return detail(id,p);
+  db.update("UPDATE projects SET last_task_seq=:seq WHERE id=:id",map("seq",seq,"id",project));history(id,"CREATED",null,r.title());assign(id,project,p.get("project_key")+"-"+seq+" "+r.title(),assigned);states.recalculate(project);return detail(id,p);
  }
  @Transactional(isolation=Isolation.READ_COMMITTED)
  public Map<String,Object> patch(long id,Patch r){
@@ -70,7 +81,7 @@ public class BoardTaskService {
   Set<Long> selected=r.assigneeIds()==null?null:validateAssignees(project,r.assigneeIds());
   if(r.title()!=null && r.title().isBlank())throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
   db.update("UPDATE tasks SET task_title=COALESCE(:title,task_title),task_content=COALESCE(:content,task_content),end_date=COALESCE(:end,end_date),priority=COALESCE(:priority,priority),version=version+1,updated_at=:now WHERE id=:id",map("id",id,"title",r.title(),"content",r.content(),"end",r.endDate(),"priority",r.priority()==null?null:r.priority().name(),"now",LocalDateTime.now(clock)));
-  if(selected!=null)assign(id,project,r.title()==null?(String)task.get("task_title"):r.title(),selected);
+  if(selected!=null)assign(id,project,p.get("project_key")+"-"+task.get("task_no")+" "+(r.title()==null?task.get("task_title"):r.title()),selected);
   List<String> changed=new ArrayList<>();if(r.title()!=null)changed.add("제목");if(r.content()!=null)changed.add("설명");if(r.endDate()!=null)changed.add("마감일");if(r.priority()!=null)changed.add("우선순위");
   if(!changed.isEmpty())history(id,"UPDATED",null,String.join(", ",changed));states.recalculate(project);return detail(id,p);
  }
@@ -89,7 +100,7 @@ public class BoardTaskService {
  public Map<String,Object> changeAssignment(long id,long user,boolean add){
   long project=projectId(id);var p=projects.lock(project);projects.requireManage(p);var task=raw(id);
   var selected=new LinkedHashSet<>(assignees(id).stream().map(r->number(r,"id")).toList());if(add)selected.add(user);else selected.remove(user);
-  validateAssignees(project,new ArrayList<>(selected));assign(id,project,(String)task.get("task_title"),selected);
+  validateAssignees(project,new ArrayList<>(selected));assign(id,project,p.get("project_key")+"-"+task.get("task_no")+" "+task.get("task_title"),selected);
   db.update("UPDATE tasks SET version=version+1,updated_at=:now WHERE id=:id",map("id",id,"now",LocalDateTime.now(clock)));
   states.recalculate(project);return detail(id,p);
  }

@@ -61,7 +61,7 @@ public class BoardProjectService {
   access.require("PROJECT",Action.VIEW);if(page<0||size<1||size>100)throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
   var args=map("today",LocalDate.now(clock),"offset",(long)page*size,"size",size);String where=scope(args);
   if(status!=null){where+=" AND p.status=:status";args.put("status",status.name());}
-  if(q!=null && !q.isBlank()){where+=" AND (p.title LIKE :q OR p.project_key LIKE :q)";args.put("q","%"+q+"%");}
+  if(q!=null && !q.isBlank()){where+=" AND (p.title LIKE :q ESCAPE '!' OR p.project_key LIKE :q ESCAPE '!')";args.put("q","%"+q.replace("!","!!").replace("%","!%").replace("_","!_")+"%");}
   long total=db.count("SELECT COUNT(*) FROM projects p LEFT JOIN users u ON u.id=p.leader_id WHERE "+where,args);
   var rows=db.rows(SELECT+" WHERE "+where+" ORDER BY COALESCE(p.updated_at,p.created_at) DESC,p.id DESC LIMIT :size OFFSET :offset",args);
   return EmployeeService.page(rows.stream().map(this::view).toList(),page,size,total);
@@ -72,7 +72,7 @@ public class BoardProjectService {
  private void period(LocalDate start,LocalDate end){if(end.isBefore(start))throw new BusinessException(ErrorCode.INVALID_PROJECT_PERIOD);}
  @Transactional(isolation=Isolation.READ_COMMITTED)
  public Map<String,Object> create(Create r){
-  access.require("PROJECT",Action.CREATE);period(r.startDate(),r.endDate());active(r.leaderId());
+  access.require("PROJECT",Action.VIEW);access.require("PROJECT",Action.CREATE);period(r.startDate(),r.endDate());active(r.leaderId());
   long id;try{id=db.insert("INSERT INTO projects(project_key,title,content,start_date,end_date,priority,status,leader_id,created_at) VALUES(:key,:title,:content,:start,:end,:priority,'READY',:leader,:now)",map("key",r.key(),"title",r.title(),"content",r.content(),"start",r.startDate(),"end",r.endDate(),"priority",r.priority()==null?"MEDIUM":r.priority().name(),"leader",r.leaderId(),"now",LocalDateTime.now(clock)));}
   catch(org.springframework.dao.DuplicateKeyException e){throw new BusinessException(ErrorCode.PROJECT_KEY_DUPLICATE);}
   db.update("INSERT INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)",map("p",id,"u",r.leaderId(),"now",LocalDateTime.now(clock)));
@@ -94,8 +94,8 @@ public class BoardProjectService {
  }
  private Set<Long> validateMembers(Map<String,Object> p,List<Long> requested){
   long id=number(p,"id");Set<Long> selected=new LinkedHashSet<>(requested);if(p.get("leader_id")!=null)selected.add(number(p,"leader_id"));
-  for(long user:selected)active(user);
-  var removed=memberIds(id).stream().filter(u->!selected.contains(u)).toList();
+  var existing=memberIds(id);for(long user:selected)if(!existing.contains(user))active(user);
+  var removed=existing.stream().filter(u->!selected.contains(u)).toList();
   if(!removed.isEmpty() && db.count("SELECT COUNT(*) FROM tasks t JOIN task_assignments a ON a.task_id=t.id WHERE t.project_id=:id AND t.task_status<>'DONE' AND a.user_id IN (:removed)",map("id",id,"removed",removed))>0)throw new BusinessException(ErrorCode.PROJECT_MEMBER_HAS_TASKS);
   return selected;
  }

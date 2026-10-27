@@ -14,7 +14,7 @@ public class ProjectBoardController {
  private final BoardProjectService service;private final Clock clock;
  @GetMapping @RequirePermission(menu="PROJECT",action=Action.VIEW)
  public ApiResponse<?> list(@RequestParam(required=false) ProjectStatus status,@RequestParam(required=false) String q,@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size){return ApiResponse.success(clock,service.list(status,q,page,size));}
- @PostMapping @RequirePermission(menu="PROJECT",action=Action.CREATE)
+ @PostMapping @RequirePermission(menu="PROJECT",action=Action.VIEW)
  public ResponseEntity<?> create(@Valid @RequestBody Create body){return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(clock,service.create(body)));}
  @GetMapping("/{id}") @RequirePermission(menu="PROJECT",action=Action.VIEW)
  public ApiResponse<?> detail(@PathVariable long id){return ApiResponse.success(clock,service.detail(id));}
