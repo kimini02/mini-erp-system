@@ -28,7 +28,7 @@ public final class JdbcProbe {
         public final List<Query> queries = new ArrayList<>();
         public long taskUpdates() { return queries.stream().filter(q -> q.sql.startsWith("update tasks")).mapToLong(q -> q.updates).sum(); }
         public long rebalances() { return queries.stream().filter(q -> q.sql.startsWith("update tasks") && q.sql.contains("row_number()")).count(); }
-        public long projectReads() { return queries.stream().filter(q -> q.sql.startsWith("select") && (q.sql.contains("from projects") || q.sql.contains("from tasks") || q.sql.contains("from project_members"))).count(); }
+        public long projectReads() { return queries.stream().filter(q -> (q.sql.startsWith("select") || q.sql.startsWith("with")) && (q.sql.contains("from projects") || q.sql.contains("from tasks") || q.sql.contains("from project_members"))).count(); }
         public void close() { CURRENT.remove(); }
     }
     public static Trace start() {

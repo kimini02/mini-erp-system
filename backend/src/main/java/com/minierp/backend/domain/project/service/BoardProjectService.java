@@ -14,17 +14,8 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @Service @RequiredArgsConstructor @Transactional(readOnly=true,isolation=Isolation.READ_COMMITTED)
 public class BoardProjectService {
  private final SqlStore db;private final PermissionAccess access;private final Clock clock;
- private static final String SELECT="""
- SELECT p.*,u.user_name AS leader_name,pos.name AS leader_title,
- COALESCE(m.members,0) AS member_count,COALESCE(m.mine,0) AS is_member,COALESCE(t.total,0) AS task_count,
- COALESCE(t.done,0) AS done_count,COALESCE(t.overdue,0) AS overdue_count
- FROM projects p LEFT JOIN users u ON u.id=p.leader_id LEFT JOIN positions pos ON pos.id=u.position_id
- LEFT JOIN (SELECT project_id,COUNT(*) AS members,SUM(user_id=:actor) AS mine FROM project_members GROUP BY project_id) m ON m.project_id=p.id
- LEFT JOIN (SELECT project_id,COUNT(*) AS total,SUM(task_status='DONE') AS done,
- SUM(task_status<>'DONE' AND end_date<:today) AS overdue FROM tasks GROUP BY project_id) t ON t.project_id=p.id
- """;
  public long actor(){return access.actor();}
- private String scope(Map<String,Object> args){
+ public String visibilityPredicate(Map<String,Object> args){
   var scope=access.scope("PROJECT");args.put("actor",actor());
   String self="(p.leader_id=:actor OR EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=:actor))";
   if(scope.scope()==DataScope.ALL)return "1=1";
@@ -33,9 +24,9 @@ public class BoardProjectService {
  }
  public Map<String,Object> visible(long id){return visible(id,true);}
  private Map<String,Object> visible(long id,boolean summary){
-  access.require("PROJECT",Action.VIEW);var args=map("id",id,"today",LocalDate.now(clock));String where=scope(args);
-  String select=summary?SELECT:"SELECT p.*,u.user_name AS leader_name,pos.name AS leader_title FROM projects p LEFT JOIN users u ON u.id=p.leader_id LEFT JOIN positions pos ON pos.id=u.position_id";
-  var rows=db.rows(select+" WHERE p.id=:id AND "+where,args);
+  access.require("PROJECT",Action.VIEW);var args=map("id",id,"today",LocalDate.now(clock));String where=visibilityPredicate(args);
+  String select=summary?ProjectSummaryQuery.sql("p.id=:id AND "+where,false):ProjectSummaryQuery.ROWS+" WHERE p.id=:id AND "+where;
+  var rows=db.rows(select,args);
   if(rows.isEmpty()){
    if(db.count("SELECT COUNT(*) FROM projects WHERE id=:id",map("id",id))==0)throw new BusinessException(ErrorCode.PROJECT_NOT_FOUND);
    throw new BusinessException(ErrorCode.ACCESS_DENIED);
@@ -59,11 +50,11 @@ public class BoardProjectService {
  public Map<String,Object> permissions(Map<String,Object> p){boolean manage=canManage(p);return map("canManage",manage,"canCreateTask",manage);}
  public Map<String,Object> list(ProjectStatus status,String q,int page,int size){
   access.require("PROJECT",Action.VIEW);if(page<0||size<1||size>100)throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
-  var args=map("today",LocalDate.now(clock),"offset",(long)page*size,"size",size);String where=scope(args);
+  var args=map("today",LocalDate.now(clock),"offset",(long)page*size,"size",size);String where=visibilityPredicate(args);
   if(status!=null){where+=" AND p.status=:status";args.put("status",status.name());}
   if(q!=null && !q.isBlank()){where+=" AND (p.title LIKE :q ESCAPE '!' OR p.project_key LIKE :q ESCAPE '!')";args.put("q","%"+q.replace("!","!!").replace("%","!%").replace("_","!_")+"%");}
   long total=db.count("SELECT COUNT(*) FROM projects p LEFT JOIN users u ON u.id=p.leader_id WHERE "+where,args);
-  var rows=db.rows(SELECT+" WHERE "+where+" ORDER BY COALESCE(p.updated_at,p.created_at) DESC,p.id DESC LIMIT :size OFFSET :offset",args);
+  var rows=db.rows(ProjectSummaryQuery.sql(where,true),args);
   return EmployeeService.page(rows.stream().map(this::view).toList(),page,size,total);
  }
  public List<Map<String,Object>> members(long id){return db.rows("SELECT u.id,u.user_name AS name,pos.name AS title FROM project_members m JOIN users u ON u.id=m.user_id LEFT JOIN positions pos ON pos.id=u.position_id WHERE m.project_id=:id ORDER BY u.user_name,u.id",map("id",id));}
@@ -77,7 +68,7 @@ public class BoardProjectService {
   catch(org.springframework.dao.DuplicateKeyException e){throw new BusinessException(ErrorCode.PROJECT_KEY_DUPLICATE);}
   db.update("INSERT INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)",map("p",id,"u",r.leaderId(),"now",LocalDateTime.now(clock)));
   // Creation may designate an owner outside the creator's viewing scope. Return the created data, not an unrestricted read endpoint.
-  var p=db.one(SELECT+" WHERE p.id=:id",map("id",id,"today",LocalDate.now(clock),"actor",actor()),ErrorCode.PROJECT_NOT_FOUND);var result=view(p);result.put("members",members(id));return result;
+  var p=db.one(ProjectSummaryQuery.sql("p.id=:id",false),map("id",id,"today",LocalDate.now(clock),"actor",actor()),ErrorCode.PROJECT_NOT_FOUND);var result=view(p);result.put("members",members(id));return result;
  }
  @Transactional(isolation=Isolation.READ_COMMITTED)
  public Map<String,Object> patch(long id,Patch r){
@@ -86,7 +77,7 @@ public class BoardProjectService {
   if(r.leaderId()!=null){active(r.leaderId());db.update("INSERT IGNORE INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)",map("p",id,"u",r.leaderId(),"now",LocalDateTime.now(clock)));}
   db.update("UPDATE projects SET title=COALESCE(:title,title),content=COALESCE(:content,content),start_date=:start,end_date=:end,priority=COALESCE(:priority,priority),leader_id=COALESCE(:leader,leader_id),updated_at=:now WHERE id=:id",map("id",id,"title",r.title(),"content",r.content(),"start",start,"end",end,"priority",r.priority()==null?null:r.priority().name(),"leader",r.leaderId(),"now",LocalDateTime.now(clock)));
   // A manager can transfer ownership out of their scope. Return this completed mutation without a second scope denial/rollback.
-  var changed=db.one(SELECT+" WHERE p.id=:id",map("id",id,"today",LocalDate.now(clock),"actor",actor()),ErrorCode.PROJECT_NOT_FOUND);var result=view(changed);result.put("members",members(id));return result;
+  var changed=db.one(ProjectSummaryQuery.sql("p.id=:id",false),map("id",id,"today",LocalDate.now(clock),"actor",actor()),ErrorCode.PROJECT_NOT_FOUND);var result=view(changed);result.put("members",members(id));return result;
  }
  @Transactional(isolation=Isolation.READ_COMMITTED)
  public Map<String,Object> replaceMembers(long id,List<Long> requested){
