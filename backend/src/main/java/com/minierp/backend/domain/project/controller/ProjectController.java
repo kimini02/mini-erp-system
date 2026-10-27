@@ -45,84 +45,52 @@ public class ProjectController {
     private final Clock clock;
 
     private final ProjectService projectService;
+    private final com.minierp.backend.domain.project.service.BoardProjectService board;
     private final CurrentUserResolver currentUserResolver;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<ProjectResponseDto>> createProject(
-            @Valid @RequestBody ProjectCreateRequestDto request,
-            Authentication authentication
-    ) {
-        ProjectResponseDto response = projectService.createProject(request, currentUserResolver.resolveUserRole(authentication));
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(clock, response, "프로젝트가 생성되었습니다."));
-    }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<ProjectResponseDto>>> getProjects(Authentication authentication) {
-        List<ProjectResponseDto> response = projectService.getProjects(
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.ok(ApiResponse.success(clock, response, "프로젝트 목록 조회가 완료되었습니다."));
-    }
 
+
+
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @PutMapping("/{projectId}")
-    public ResponseEntity<ApiResponse<ProjectResponseDto>> updateProject(
+    public ResponseEntity<?> updateProject(
             @PathVariable Long projectId,
             @Valid @RequestBody ProjectUpdateRequestDto request,
             Authentication authentication
     ) {
-        ProjectResponseDto response = projectService.updateProject(
-                projectId,
-                request,
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.ok(ApiResponse.success(clock, response, "프로젝트가 수정되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, board.patch(projectId, new com.minierp.backend.domain.project.dto.BoardProjectRequests.Patch(null,request.getTitle(),request.getContent(),request.getStartDate(),request.getEndDate(),request.getPriority(),null))));
     }
 
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @PatchMapping("/{projectId}/leader")
-    public ResponseEntity<ApiResponse<ProjectResponseDto>> updateProjectLeader(
+    public ResponseEntity<?> updateProjectLeader(
             @PathVariable Long projectId,
             @Valid @RequestBody ProjectLeaderUpdateRequestDto request,
             Authentication authentication
     ) {
-        ProjectResponseDto response = projectService.updateProjectLeader(
-                projectId,
-                request.getLeaderId(),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.ok(ApiResponse.success(clock, response, "프로젝트 팀장이 변경되었습니다."));
+        return ResponseEntity.ok(ApiResponse.success(clock, board.patch(projectId, new com.minierp.backend.domain.project.dto.BoardProjectRequests.Patch(null,null,null,null,null,null,request.getLeaderId()))));
     }
 
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @PostMapping("/{projectId}/members")
-    public ResponseEntity<ApiResponse<ProjectMemberResponseDto>> addMember(
+    public ResponseEntity<?> addMember(
             @PathVariable Long projectId,
             @Valid @RequestBody MemberRequestDto request,
             Authentication authentication
     ) {
-        ProjectMemberResponseDto response = projectService.addMember(
-                projectId,
-                request.getUserId(),
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(clock, response, "프로젝트 팀원이 배정되었습니다."));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(clock, board.changeMember(projectId,request.getUserId(),true)));
     }
 
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @DeleteMapping("/{projectId}/members/{userId}")
-    public ResponseEntity<ApiResponse<Void>> removeMember(
+    public ResponseEntity<?> removeMember(
             @PathVariable Long projectId,
             @PathVariable Long userId,
             Authentication authentication
     ) {
-        projectService.removeMember(
-                projectId,
-                userId,
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.ok(ApiResponse.successMessage(clock, "프로젝트 팀원 배정이 해제되었습니다."));
+        board.changeMember(projectId,userId,false);
+        return ResponseEntity.ok(ApiResponse.successMessage(clock,"프로젝트 팀원 배정이 해제되었습니다."));
     }
 
     @GetMapping("/{projectId}/members")
@@ -179,19 +147,15 @@ public class ProjectController {
         return ResponseEntity.ok(ApiResponse.success(clock, response, "사용자 프로젝트 권한 조회가 완료되었습니다."));
     }
 
+    @com.minierp.backend.global.permission.RequirePermission(menu="PROJECT",action=com.minierp.backend.global.permission.Action.VIEW)
     @PutMapping("/permissions/{userId}")
-    public ResponseEntity<ApiResponse<Void>> updateUserProjectPermissions(
+    public ResponseEntity<?> updateUserProjectPermissions(
             @PathVariable Long userId,
             @Valid @RequestBody ProjectPermissionUpdateRequestDto request,
             Authentication authentication
     ) {
-        projectService.updateUserProjectPermissions(
-                userId,
-                request,
-                currentUserResolver.resolveUserId(authentication),
-                currentUserResolver.resolveUserRole(authentication)
-        );
-        return ResponseEntity.ok(ApiResponse.success(clock, null, "프로젝트 권한이 저장되었습니다."));
+        board.replaceUserProjects(userId,request.getAssignedProjectIds());
+        return ResponseEntity.ok(ApiResponse.successMessage(clock,"프로젝트 권한이 저장되었습니다."));
     }
 
     @GetMapping("/leaders")

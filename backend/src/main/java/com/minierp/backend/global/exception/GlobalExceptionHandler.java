@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity
                 .status(e.getStatus())
-                .body(ErrorResponse.of(clock, errorCode, e.getMessage()));
+                .body(ErrorResponse.of(clock, errorCode, e.getMessage(), e.getDetails()));
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class, org.springframework.http.converter.HttpMessageNotReadableException.class, IllegalArgumentException.class})

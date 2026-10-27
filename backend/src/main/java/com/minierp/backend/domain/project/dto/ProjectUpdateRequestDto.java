@@ -14,8 +14,10 @@ import java.time.LocalDate;
 public class ProjectUpdateRequestDto {
 
     @NotBlank(message = "프로젝트 제목은 필수입니다.")
+    @jakarta.validation.constraints.Size(max=100)
     private String title;
 
+    @jakarta.validation.constraints.Size(max=1000)
     private String content;
 
     @NotNull(message = "시작일은 필수입니다.")

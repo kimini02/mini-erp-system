@@ -9,6 +9,11 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
+    PROJECT_KEY_DUPLICATE(HttpStatus.CONFLICT,"이미 쓰는 프로젝트 키입니다."),
+    PROJECT_MEMBER_HAS_TASKS(HttpStatus.CONFLICT,"담당 중인 미완료 업무가 있어 멤버에서 뺄 수 없습니다. 담당자를 먼저 바꿔 주세요."),
+    TASK_ASSIGNEE_NOT_MEMBER(HttpStatus.UNPROCESSABLE_ENTITY,"프로젝트 멤버만 담당자로 지정할 수 있습니다."),
+    TASK_VERSION_CONFLICT(HttpStatus.CONFLICT,"다른 사람이 먼저 이 업무를 옮겼습니다. 보드를 새로 고칩니다."),
+    INVALID_TASK_POSITION(HttpStatus.UNPROCESSABLE_ENTITY,"옮길 위치가 올바르지 않습니다."),
     ALREADY_CLOCKED_IN(HttpStatus.CONFLICT,"오늘은 이미 출근했습니다."),
     NOT_CLOCKED_IN(HttpStatus.CONFLICT,"출근 기록이 없습니다. 출근부터 해 주세요."),
     ATTENDANCE_ON_LEAVE(HttpStatus.CONFLICT,"오늘은 휴가입니다. 휴가를 회수한 뒤 출근하세요."),
