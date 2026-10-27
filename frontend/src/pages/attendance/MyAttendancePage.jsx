@@ -5,7 +5,7 @@ import { attendanceApi } from '@/api/m3';
 import { useAuthStore } from '@/store/authStore';
 import { MENU } from '@/lib/permissions';
 import {
-  CELL_META, DAY_TYPE_LABELS, FIXABLE_CODES, IN_RESULT_LABELS, OUT_RESULT_LABELS,
+  CELL_META, DAY_TYPE_LABELS, FIXABLE_CODES, dayCode, IN_RESULT_LABELS, OUT_RESULT_LABELS,
   monthLabel, shiftDate, shiftMonth, thisMonth, timeOf, todayLocal,
 } from '@/lib/attendance';
 import { formatDay } from '@/lib/approval';
@@ -101,7 +101,7 @@ export default function MyAttendancePage() {
   if (!today) return <PageLoader />;
 
   const limit = shiftDate(todayLocal(), -30);
-  const canFix = (d) => canDraft && d.date < todayLocal() && d.date >= limit && FIXABLE_CODES.has(d.code) && !d.fixDocument;
+  const canFix = (d) => canDraft && d.date < todayLocal() && d.date >= limit && FIXABLE_CODES.has(dayCode(d)) && !d.fixDocument;
   const s = data?.summary;
   const outBase = today.dayType === 'HALF_PM' ? today.schedule.halfBoundary : today.schedule.endTime;
 
@@ -149,8 +149,9 @@ export default function MyAttendancePage() {
                   <TableEmpty colSpan={5}>이 달 기록이 없습니다.</TableEmpty>
                 ) : (
                   data.days.filter((d) => d.date <= todayLocal()).reverse().map((d) => {
-                    const meta = CELL_META[d.code] || CELL_META.NONE;
-                    const off = d.code === 'HOLIDAY';
+                    const code = dayCode(d);
+                    const meta = CELL_META[code] || CELL_META.NONE;
+                    const off = code === 'HOLIDAY';
                     return (
                       <Tr key={d.date} className={cn(off && 'bg-gray-50/60')}>
                         <Td className={cn('tabular-nums', off ? 'text-gray-400' : 'text-gray-700')}>

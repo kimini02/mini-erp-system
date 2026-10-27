@@ -22,6 +22,23 @@ export const LEGEND_CODES = ['ON_TIME', 'LATE', 'EARLY', 'MISSING', 'ABSENT', 'L
 /** 정정 신청을 권할 만한 칸 */
 export const FIXABLE_CODES = new Set(['LATE', 'EARLY', 'MISSING', 'ABSENT']);
 
+/**
+ * 내 근태 하루(`GET /attendance/me`의 days 항목)를 칸 코드 하나로 (명세 3.1 우선순위)
+ * 월간 근태표는 서버가 code를 주지만, 내 근태는 원래 값(dayType·inResult·outResult·absent)만 줍니다.
+ */
+export function dayCode(day, today = todayLocal()) {
+  if (day.code) return day.code;
+  if (day.absent) return 'ABSENT';
+  if (day.dayType === 'LEAVE') return 'LEAVE';
+  if (day.outResult === 'MISSING') return 'MISSING';
+  if (day.inResult === 'LATE') return 'LATE';
+  if (day.outResult === 'EARLY') return 'EARLY';
+  if (day.dayType === 'HALF_AM' || day.dayType === 'HALF_PM') return day.dayType;
+  if (day.inResult === 'ON_TIME') return 'ON_TIME';
+  if (day.dayType === 'HOLIDAY') return day.clockInAt ? 'HOLIDAY_WORK' : 'HOLIDAY';
+  return day.date > today ? 'FUTURE' : 'NONE';
+}
+
 export const DAY_TYPE_LABELS = {
   WORKDAY: '근무일',
   HOLIDAY: '휴일',

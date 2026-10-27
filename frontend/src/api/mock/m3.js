@@ -385,7 +385,6 @@ export function installM3({ route, db, fail, need, mergedPermissions, userById, 
     date, dayType: rec?.dayType || dayTypeFor(user, date), holidayName: holidayName(date),
     clockInAt: rec?.clockInAt || null, clockOutAt: rec?.clockOutAt || null,
     inResult: rec?.inResult || null, outResult: rec?.outResult || null, absent: Boolean(rec?.absent),
-    code: cellCode(user, date, rec),
     fixDocument: rec?.fixDocumentId ? { id: rec.fixDocumentId, docNo: rec.fixDocNo } : null,
   });
 

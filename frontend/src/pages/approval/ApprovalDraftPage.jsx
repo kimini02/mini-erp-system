@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowDown, ArrowUp, FileText, Plus, RotateCcw, Save, Send, Trash2, X } from 'lucide-react';
 import { approvalDocumentApi, approvalFormApi, leaveApi, userLookupApi } from '@/api/m2';
 import { attendanceApi } from '@/api/m3';
-import { CELL_META, shiftDate, timeOf, todayLocal } from '@/lib/attendance';
+import { CELL_META, dayCode, shiftDate, timeOf, todayLocal } from '@/lib/attendance';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import {
@@ -118,7 +118,7 @@ function AttendanceFixFields({ body, set, onRecord }) {
 
   useEffect(() => { onRecord?.(current); }, [current, onRecord]);
 
-  const meta = current ? CELL_META[current.code] || CELL_META.NONE : null;
+  const meta = current ? CELL_META[dayCode(current)] || CELL_META.NONE : null;
   const needIn = Boolean(current && !current.clockInAt);
   const problem = fixProblem(body, current);
   return (
