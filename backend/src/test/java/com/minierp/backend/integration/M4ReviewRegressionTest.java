@@ -9,6 +9,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class M4ReviewRegressionTest extends BoardTestSupport {
+ @org.springframework.beans.factory.annotation.Autowired com.minierp.backend.domain.task.service.TaskOverdueService overdue;
+ @Test void overdueHistoryResolvesRecipientEvenAfterMemberRemoval()throws Exception{
+  long p=project(leader,1),task=taskIds(p).get(0);
+  jdbc.update("UPDATE tasks SET end_date=? WHERE id=?",date.minusDays(1),task);
+  jdbc.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(?,?,?)",task,employee.getId(),java.time.LocalDateTime.now(clock));overdue.runToday();
+  jdbc.update("DELETE FROM task_assignments WHERE task_id=?",task);
+  jdbc.update("DELETE FROM project_members WHERE project_id=(SELECT project_id FROM tasks WHERE id=?) AND user_id=?",task,employee.getId());
+  var event=data(getAs("/api/v1/tasks/"+task,leaderToken)).path("history").get(0);
+  assertThat(event.path("action").asText()).isEqualTo("OVERDUE_NOTIFIED");assertThat(event.path("actor").isNull()).isTrue();
+  assertThat(event.path("target").path("id").asLong()).isEqualTo(employee.getId());assertThat(event.path("target").path("name").asText()).isEqualTo(employee.getUserName());
+ }
+
  @Test void movedHistoryHidesStoragePositions() throws Exception {
   long p=project(leader,2),task=taskIds(p).get(1);
   data(postAs("/api/v1/tasks/"+task+"/move",leaderToken,map("status","DOING","afterTaskId",null,"version",0)));

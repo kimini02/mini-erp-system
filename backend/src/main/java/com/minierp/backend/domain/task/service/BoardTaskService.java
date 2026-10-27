@@ -40,9 +40,9 @@ public class BoardTaskService {
   var task=raw(id);var result=card(task,p,assignees(id));result.put("projectId",task.get("project_id"));result.put("content",task.get("task_content"));result.put("canManage",projects.canManage(p));
   var history=db.rows("""
    SELECT h.*,u.user_name AS actor_name,target.user_name AS target_name,
-     CASE h.action WHEN 'ASSIGNED' THEN CAST(h.to_value AS UNSIGNED) WHEN 'UNASSIGNED' THEN CAST(h.from_value AS UNSIGNED) END AS target_id
+     CASE h.action WHEN 'ASSIGNED' THEN CAST(h.to_value AS UNSIGNED) WHEN 'UNASSIGNED' THEN CAST(h.from_value AS UNSIGNED) WHEN 'OVERDUE_NOTIFIED' THEN CAST(h.to_value AS UNSIGNED) END AS target_id
    FROM task_histories h LEFT JOIN users u ON u.id=h.actor_id
-   LEFT JOIN users target ON target.id=CASE h.action WHEN 'ASSIGNED' THEN CAST(h.to_value AS UNSIGNED) WHEN 'UNASSIGNED' THEN CAST(h.from_value AS UNSIGNED) END
+   LEFT JOIN users target ON target.id=CASE h.action WHEN 'ASSIGNED' THEN CAST(h.to_value AS UNSIGNED) WHEN 'UNASSIGNED' THEN CAST(h.from_value AS UNSIGNED) WHEN 'OVERDUE_NOTIFIED' THEN CAST(h.to_value AS UNSIGNED) END
    WHERE task_id=:id ORDER BY h.id DESC LIMIT 50
    """,map("id",id));
   result.put("history",history.stream().map(h->{
