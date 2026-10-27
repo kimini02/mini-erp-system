@@ -132,7 +132,7 @@ public class EmployeeService {
         var user=db.one("SELECT * FROM users WHERE id=:id FOR UPDATE",map("id",id),ErrorCode.USER_NOT_FOUND);
         if(!status.name().equals(user.get("status"))) {
             if(status!=com.minierp.backend.domain.user.entity.UserStatus.ACTIVE) { notHead(id);protectLastChief(id); }
-            db.update("UPDATE users SET retired_date=CASE WHEN :status='RETIRED' THEN :date WHEN :status='ACTIVE' AND status='RETIRED' THEN NULL ELSE retired_date END,status=:status,token_version=token_version+:increment,updated_at=:now WHERE id=:id",map("id",id,"status",status.name(),"date",LocalDate.now(clock),"increment",status==com.minierp.backend.domain.user.entity.UserStatus.ACTIVE?0:1,"now",LocalDateTime.now(clock)));
+            db.update("UPDATE users SET retired_date=CASE WHEN :status='RETIRED' THEN :date WHEN :status<>'RETIRED' AND status='RETIRED' THEN NULL ELSE retired_date END,status=:status,token_version=token_version+:increment,updated_at=:now WHERE id=:id",map("id",id,"status",status.name(),"date",LocalDate.now(clock),"increment",status==com.minierp.backend.domain.user.entity.UserStatus.ACTIVE?0:1,"now",LocalDateTime.now(clock)));
         } return views(List.of(id)).get(0);
     }
     @Transactional public void replaceRoles(long id,List<String> codes) {

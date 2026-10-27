@@ -37,4 +37,25 @@ class M3RetirementTest extends AttendanceTestSupport {
         var active=data(mvc.perform(patch("/api/v1/users/"+employee.getId()+"/status").header("Authorization","Bearer "+chiefToken).contentType("application/json").content("{\"status\":\"ACTIVE\"}")));
         assertThat(active.path("retiredDate").isNull()).isTrue();
     }
+
+    @Test void retirementThroughLeaveToActiveClearsDateAndShowsAbsenceInMonthlyTable() throws Exception {
+        String url="/api/v1/users/"+employee.getId()+"/status";
+        var retired=data(mvc.perform(patch(url).header("Authorization","Bearer "+chiefToken).contentType("application/json").content("{\"status\":\"RETIRED\"}")));
+        assertThat(retired.path("retiredDate").asText()).isEqualTo(date.toString());
+        var onLeave=data(mvc.perform(patch(url).header("Authorization","Bearer "+chiefToken).contentType("application/json").content("{\"status\":\"ON_LEAVE\"}")));
+        var workDate=date.plusDays(1);at(workDate,java.time.LocalTime.of(9,0));
+        var active=data(mvc.perform(patch(url).header("Authorization","Bearer "+chiefToken).contentType("application/json").content("{\"status\":\"ACTIVE\"}")));
+        at(workDate.plusDays(1),java.time.LocalTime.of(0,10));batch.run(workDate);
+        assertThat(jdbc.queryForObject("SELECT absent FROM attendances WHERE user_id=? AND work_date=?",Boolean.class,employee.getId(),workDate)).isTrue();
+        var table=data(getAs("/api/v1/attendance/monthly?month="+java.time.YearMonth.from(workDate),chiefToken));
+        var row=java.util.stream.StreamSupport.stream(table.path("rows").spliterator(),false)
+            .filter(r->r.path("user").path("id").asLong()==employee.getId()).findFirst().orElseThrow();
+        org.junit.jupiter.api.Assertions.assertAll(
+            ()->assertThat(onLeave.path("retiredDate").isNull()).as("RETIRED to ON_LEAVE clears retirement date").isTrue(),
+            ()->assertThat(active.path("retiredDate").isNull()).as("ACTIVE response has no retirement date").isTrue(),
+            ()->assertThat(jdbc.queryForObject("SELECT retired_date FROM users WHERE id=?",java.sql.Date.class,employee.getId())).isNull(),
+            ()->assertThat(row.path("cells").get(workDate.getDayOfMonth()-1).path("code").asText()).isEqualTo("ABSENT"),
+            ()->assertThat(row.path("totals").path("absent").asInt()).isEqualTo(1)
+        );
+    }
 }
