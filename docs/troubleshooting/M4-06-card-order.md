@@ -40,3 +40,6 @@ JDBC executeUpdate 반환값을 합산했으며 프로젝트 상태 UPDATE는 �
 ## 커밋
 `ba520b5` — 비교 알고리즘, `fbbf0e2` — 간격·version·프로젝트 잠금.
 전체 검증 결과는 [1차 결과](M4-00-phase-one-results.md)를 따른다.
+
+## 2차 리뷰 보완 — 순서 이동의 잠금 대기
+같은 열 재정렬에도 첫 UPDATE 뒤 정지 → 두 번째 FOR UPDATE 대기 행 확인 → 첫 commit 후 위치 계산의 결정적 순서를 적용했다. 대기 행 1개, 첫 변경 가시성 true, 최종 위치 중복 0을 확인했다. [M4-09](M4-09-deterministic-lock-wait.md).

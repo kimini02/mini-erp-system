@@ -11,6 +11,14 @@ import org.springframework.context.annotation.Bean;
 /** Test-only JDBC boundary measurement. Counts executed statements and returned rows, not engine page reads. */
 public final class JdbcProbe {
     private static final ThreadLocal<Trace> CURRENT = new ThreadLocal<>();
+    private static final ThreadLocal<Observer> OBSERVER = new ThreadLocal<>();
+    public interface Observer {
+        default void before(Statement statement,String sql) throws Exception {}
+        default void after(Statement statement,String sql) throws Exception {}
+    }
+    /** Only test worker threads install hooks; production code has no test synchronization. */
+    public static AutoCloseable observe(Observer observer) { OBSERVER.set(observer);return () -> OBSERVER.remove(); }
+
     public static final class Query {
         public final String sql;
         public long rows, updates;
@@ -44,11 +52,16 @@ public final class JdbcProbe {
         Class<? extends Statement> type=statement instanceof PreparedStatement?PreparedStatement.class:Statement.class;
         return proxy(type,statement,(p,m,a)->{
             String name=m.getName();
-            if(name.equals("execute") || name.equals("executeQuery") || name.equals("executeUpdate") || name.equals("executeLargeUpdate")) {
+            boolean executing=name.equals("execute") || name.equals("executeQuery") || name.equals("executeUpdate") || name.equals("executeLargeUpdate");
+            Observer observer=OBSERVER.get();
+            String observed=executing?(sql!=null?sql:(String)a[0]).replaceAll("\\s+"," ").trim().toLowerCase(Locale.ROOT):null;
+            if(executing && observer!=null)observer.before(statement,observed);
+            if(executing) {
                 Trace trace=CURRENT.get();current[0]=trace==null?null:new Query(sql!=null?sql:(String)a[0]);
                 if(trace!=null)trace.queries.add(current[0]);
             }
             Object value=call(statement,m,a);Query query=current[0];
+            if(executing && observer!=null)observer.after(statement,observed);
             if(query!=null) {
                 if(value instanceof ResultSet rs && !name.equals("getGeneratedKeys"))return result(rs,query);
                 if(name.equals("executeUpdate") || name.equals("executeLargeUpdate"))query.updates=((Number)value).longValue();
