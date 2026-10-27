@@ -321,6 +321,7 @@ erDiagram
 
 ## 4. 그대로 두는 테이블
 `projects`, `project_members`, `tasks`, `task_assignments` — 구조는 유지합니다. M4(프로젝트 보드)에서 `tasks`에 보드 안 순서 컬럼 추가 정도만 검토합니다.
+- (2026-10-27, M4 명세에서 추가) `projects.project_key`·`last_task_seq`, `tasks.task_no`·`position`·`version`·`created_by`, `task_histories`(업무 변경 이력), `task_due_alerts`(마감 알림 한 번만). 프로젝트 행이 업무 쓰기의 잠금 단위입니다. 자세한 규칙은 [15-rest-api-v2-m4.md](15-rest-api-v2-m4.md).
 
 ---
 
