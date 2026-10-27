@@ -47,6 +47,7 @@ export const LEDGER_TYPE_META = {
   RESERVE: { label: '예약', tone: 'amber' },
   RELEASE: { label: '예약 해제', tone: 'blue' },
   CANCEL: { label: '취소', tone: 'gray' },
+  ADJUST: { label: '조정', tone: 'gray' },
 };
 
 // 알림 title에는 문서 제목이 옵니다. 화면은 종류에 맞춰 문장으로 보여 줍니다.

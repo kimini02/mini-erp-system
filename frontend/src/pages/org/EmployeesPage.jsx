@@ -476,6 +476,7 @@ export default function EmployeesPage() {
                     <Td>
                       <span className="flex flex-wrap gap-1">
                         <Badge tone={USER_STATUS_META[u.status].tone} dot>{USER_STATUS_META[u.status].label}</Badge>
+                        {u.status === 'RETIRED' && u.retiredDate && <span className="text-xs tabular-nums text-gray-500">{u.retiredDate}</span>}
                         {u.invitationPending && <Badge tone="blue">첫 로그인 전</Badge>}
                       </span>
                     </Td>

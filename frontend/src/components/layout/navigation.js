@@ -7,6 +7,9 @@ import {
   FileCog,
   FileCheck2,
   NotebookText,
+  Clock3,
+  CalendarRange,
+  Scale,
   FolderKanban,
   ShieldCheck,
   ListTodo,
@@ -39,7 +42,10 @@ const NAVIGATION = [
   {
     title: '근태·휴가',
     items: [
+      { label: '내 근태', path: '/attendance', icon: Clock3, visible: (ctx) => ctx.can(MENU.MY_ATTENDANCE) },
       { label: '내 연차', path: '/leaves', icon: NotebookText },
+      { label: '월간 근태표', path: '/attendance/monthly', icon: CalendarRange, visible: (ctx) => ctx.can(MENU.ATTENDANCE_MONTHLY) },
+      { label: '연차 관리', path: '/leave/admin', icon: Scale, visible: (ctx) => ctx.can(MENU.LEAVE_ADMIN) },
       { label: '캘린더', path: '/calendar', icon: CalendarDays },
       { label: '공휴일', path: '/holidays', icon: CalendarOff, visible: (ctx) => ctx.can(MENU.HOLIDAY) },
     ],

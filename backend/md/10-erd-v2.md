@@ -311,6 +311,7 @@ erDiagram
   - 사람당 한 해 수십 행이라 SUM으로 충분합니다. 느려지면 그때 측정하고 요약 테이블을 둡니다.
 - **잔여 초과 동시 신청**: 같은 사람이 두 건을 동시에 상신해서 잔여를 넘기는 경우를 막으려고, 상신 트랜잭션에서 그 사용자 행을 잠근(`SELECT ... FOR UPDATE`) 뒤 잔여를 계산합니다.
 - **연차 자동 부여 배치**: `grant_key` 유니크 제약 때문에 두 번 실행해도 한 번만 부여됩니다. (MariaDB는 UNIQUE 컬럼에 NULL이 여러 개 들어갈 수 있어서 정기 부여 외의 행은 NULL로 둡니다.)
+- (2026-10-24, M3 명세에서 추가) `attendances.fix_document_id`(근태 정정 결재 문서), `attendance_fix_requests`(정정 양식 본문, 정정 전 값 `before_json`), `batch_runs`(배치 실행 기록). 연도별 원장이라 `EXPIRE` 행은 쓰지 않습니다(전년도 잔여는 그 해 원장에 남고 넘어오지 않음). 자세한 규칙은 [14-rest-api-v2-m3.md](14-rest-api-v2-m3.md).
 
 ### 기존 데이터 이관
 - `users.total_annual_leave` → GRANT 행, `users.used_annual_leave` → USE 행 (memo: "v1 이관")

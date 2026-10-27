@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios';
 import { createDb, menus } from './db';
 import { installM2 } from './m2';
+import { installM3 } from './m3';
 
 /**
  * 개발용 가짜 서버 (VITE_USE_MOCK=true).
@@ -95,6 +96,7 @@ function userListView(u) {
     roles: u.roles.map((code) => ({ code, name: roleByCode(code)?.name || code })),
     hireDate: u.hireDate,
     status: u.status,
+    retiredDate: u.retiredDate || null,
     invitationPending: u.invitationPending,
   };
 }
@@ -479,6 +481,9 @@ route('PATCH', '/users/:id/status', (ctx) => {
     if (target.roles.includes('CHIEF') && activeChiefs().length <= 1) fail(409, 'LAST_CHIEF', '관리소장이 한 명 이상 있어야 합니다.');
     target.tokenVersion += 1; // 기존 토큰 즉시 무효
   }
+  // 퇴사일: 퇴사 처리한 날 기록, 재직으로 되돌리면 지움 (M3 명세 6장)
+  if (next === 'RETIRED' && target.status !== 'RETIRED') target.retiredDate = new Date().toLocaleDateString('sv-SE');
+  if (next === 'ACTIVE') target.retiredDate = null;
   target.status = next;
   return null;
 });
@@ -642,7 +647,10 @@ route('DELETE', '/holidays/:id', (ctx) => {
 });
 
 // M2 전자결재 (backend/md/13-rest-api-v2-m2.md)
-installM2({ route, db, fail, created, need, userById, deptById, roleByCode, positionById, page });
+const m2 = installM2({ route, db, fail, created, need, userById, deptById, roleByCode, positionById, page });
+
+// M3 근태·휴가 (backend/md/14-rest-api-v2-m3.md)
+installM3({ route, db, fail, created, need, mergedPermissions, userById, deptById, positionById, subtreeIds, page, m2 });
 
 /* ───────── 어댑터 ───────── */
 
@@ -688,6 +696,17 @@ export async function handleMock(config, realAdapter) {
       }
     }
     const result = matched.route.handler(ctx);
+    // CSV 내려받기처럼 JSON이 아닌 응답
+    if (result?.__raw !== undefined) {
+      return {
+        data: new Blob([result.__raw], { type: result.contentType }),
+        status: 200,
+        statusText: '200',
+        headers: { 'content-type': result.contentType, 'content-disposition': `attachment; filename="${result.filename}"` },
+        config,
+        request: {},
+      };
+    }
     const status = result?.__status || 200;
     const data = result?.__status ? result.data : result ?? null;
     return toResponse(config, status, { success: true, data, message: '요청이 성공적으로 처리되었습니다.', timestamp: timestamp() });

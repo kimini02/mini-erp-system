@@ -4,7 +4,8 @@ const alignClass = { left: 'text-left', center: 'text-center', right: 'text-righ
 
 export function Table({ className, children }) {
   return (
-    <div className="overflow-x-auto">
+    // relative: 머리칸의 sr-only(절대 위치) 글자가 스크롤 영역 밖으로 나가 페이지를 가로로 넓히지 않게
+    <div className="relative overflow-x-auto">
       <table className={cn('w-full border-collapse text-sm', className)}>{children}</table>
     </div>
   );

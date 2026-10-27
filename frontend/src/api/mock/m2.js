@@ -4,6 +4,8 @@
  * 처음 데이터도 같은 처리 함수로 만들어서 원장·알림·결재선이 서로 맞습니다.
  */
 
+import { grantsDue } from './grant';
+
 const FORMS = [
   {
     code: 'LEAVE', name: '휴가 신청', shortName: '휴가', prefix: 'HR', ruleName: '휴가 기본',
@@ -232,8 +234,8 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
     return { days, workDays: work, offDays: off };
   }
 
-  function addLedger(userId, year, date, type, days, memo, documentId = null) {
-    state.ledger.push({ id: state.seq.ledger++, userId, year, date, type, days, memo, documentId });
+  function addLedger(userId, year, date, type, days, memo, documentId = null, extra = {}) {
+    state.ledger.push({ id: state.seq.ledger++, userId, year, date, type, days, memo, documentId, ...extra });
   }
 
   /* ───────── 알림 ───────── */
@@ -505,9 +507,10 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
   /* ───────── 처음 데이터 ───────── */
 
   function seed() {
-    const year = 2026;
-    db.users.filter((u) => u.status !== 'RETIRED' && u.hireDate && u.hireDate < `${year}-01-01`).forEach((u) => {
-      addLedger(u.id, year, `${year}-01-01`, 'GRANT', 15, `${year}년 연차 부여`);
+    // 올해 오늘까지 받았어야 할 부여 (M3 부여 배치와 같은 규칙, 같은 키)
+    const today = new Date().toLocaleDateString('sv-SE');
+    db.users.forEach((u) => {
+      grantsDue(u, today).forEach((g) => addLedger(u.id, Number(g.date.slice(0, 4)), g.date, 'GRANT', g.days, g.memo, null, { grantKey: g.key }));
     });
     const u = (id) => userById(id);
     const run = (drafterId, form, title, body, at, actions = [], line = null) => {
@@ -742,4 +745,17 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
     myNotifications(ctx).forEach((n) => { n.read = true; });
     return null;
   });
+
+  /** 다른 단계(M3 근태 정정 등)가 양식을 하나 더 꽂을 때 씁니다. 결재 흐름·결재함·알림은 그대로 공유 */
+  function registerForm(def, handler) {
+    state.forms.push({ ...def, options: { ...def.options }, steps: def.steps.map((s) => ({ ...s })) });
+    handlers[def.code] = handler;
+    if (!(def.prefix in state.docNo)) state.docNo[def.prefix] = 0;
+  }
+
+  return {
+    state,
+    registerForm,
+    helpers: { person, nowLocal, addLedger, balance, ledgerOf, sumDays, countDays, holidaySet, notify, docOf, formOf },
+  };
 }
