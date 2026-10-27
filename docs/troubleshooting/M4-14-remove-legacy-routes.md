@@ -26,11 +26,13 @@
 rg -n '\b(ProjectService|TaskService|DashboardService|updateStatusByTasks)\b|changeAssignment\(|changeMember\(|replaceUserProjects\(' backend/src/main/java
 ```
 
+추가로 운영 소스의 ProjectRepository/TaskRepository/ProjectMemberRepository/TaskAssignmentRepository 검색은 인터페이스 선언 4개만 반환하며, 프로젝트·업무 패키지의 save/saveAll/delete 호출 검색은 0개였다. 새 HTTP 경로는 JDBC 보드 서비스만 호출한다.
+
 ## 전후 수치·결과
 - 제거 전: 실제 dashboard/projects 200, 업무 COUNT 10번/HTTP SQL 13번.
 - 경로 제거 직후: 삭제 계약 테스트 2개 중 1개 실패(겹치는 members GET 500), 클래스 부재 검증 1개 통과.
 - 겹친 메서드 처리 후: 삭제 테스트 2/2, 관련 보드·M1/M3 호환·확장 검증 합계 18/18 통과. 구 읽기 12개·쓰기 10개 404, 새 상세·보드 200, 쓰기 흔적 증가 0.
-- 삭제한 구 서비스 전용 테스트 67개와 임시 쓰기 어댑터 테스트 4개는 기능 폐기에 따라 제거했다. 새 MariaDB 보드·홈·권한·정합성·삭제 테스트가 최종 계약을 검증한다. 전체 테스트 수 감소는 이 변경 때문이며 실패 테스트를 건너뛴 것이 아니다.
+- 삭제한 구 서비스 전용 테스트 64개와 임시 쓰기 어댑터 테스트 4개는 기능 폐기에 따라 제거했다. 새 MariaDB 보드·홈·권한·정합성·삭제 테스트가 최종 계약을 검증한다. 전체 테스트 수 감소는 이 변경 때문이며 실패 테스트를 건너뛴 것이 아니다.
 - V6 이관 검증 M4DataMigrationTest는 그대로 유지한다.
 
 ## 부작용·남은 위험
