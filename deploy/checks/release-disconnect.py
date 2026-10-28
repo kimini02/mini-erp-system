@@ -146,6 +146,7 @@ def release_checks(before_source=None):
             output = (directory/'run.log').read_text()
             expected = (NEW, NEW, OLD) if scenario == 'SUCCESS' else (OLD, OLD, 'MISSING')
             assert code == (0 if scenario == 'SUCCESS' else 1), output
+            assert f'exit={code} interrupted=NO' in output
             assert state(root) == expected, (state(root), output)
             assert 'CHANGE_ME_REDACTION_CHECK' not in output
             assert ('result=UP' if scenario == 'SUCCESS' else 'ROLLBACK_OK') in output
@@ -176,12 +177,86 @@ def release_checks(before_source=None):
                 output = (directory/'run.log').read_text()
                 assert (directory/'exit.code').read_text().strip() == '0' and state(root) == (OLD,OLD,NEW), output
                 assert 'ROLLBACK_OK' in output
-                print(f'DISCONNECT_AFTER scenario=MANUAL_ROLLBACK follower_exit={follower_code} worker_exit=0 links={state(root)}', flush=True)
+                reconnect = subprocess.run(['bash', helper, 'follow', job], capture_output=True, text=True)
+                assert reconnect.returncode == 0 and 'exit=0 interrupted=NO' in output
+                print(f'DISCONNECT_AFTER scenario=MANUAL_ROLLBACK follower_exit={follower_code} worker_exit=0 reconnect_exit={reconnect.returncode} links={state(root)}', flush=True)
                 print(output.strip(), flush=True)
             wait_for(lambda: subprocess.check_output(['/usr/bin/systemctl','show','workflow-release.service','-p','ActiveState','--value'], text=True).strip() in ('inactive','failed'), 'unit stopped')
+
+    if not before_source:
+        interruption_checks()
+
+
+def interruption_checks(before_source=None):
+    """Same two stop points against the original source first, then the corrected source."""
+    assert os.geteuid() == 0 and Path('/run/m5-release-test-container').exists(), 'Use the marked disposable container only'
+    assert Path('/proc/1/comm').read_text().strip() == 'systemd', 'Real systemd PID 1 required'
+    source = Path(before_source) if before_source else DEPLOY/'server'
+    # TERM is the systemctl stop/reboot path, repeated three times per stop point.
+    # INT/HUP additionally verify the other explicit handlers after the fix.
+    signals = ['TERM'] * 3 + ([] if before_source else ['INT', 'HUP'])
+    for phase in ('WAITING', 'RUNNING'):
+        for attempt, sig in enumerate(signals, 1):
+            with tempfile.TemporaryDirectory(prefix='m5-interrupt-') as folder:
+                root = Path(folder)
+                archive = fixture(root, source, 'SUCCESS')
+                helper = str(root/'scripts/release-job.sh')
+                held = (root/'locks/workflow-maintenance.lock').open('w')
+                if phase == 'WAITING':
+                    fcntl.flock(held, fcntl.LOCK_EX)
+                began = time.monotonic()
+                try:
+                    start = subprocess.run(['bash', helper, 'start', 'activate', NEW, str(archive), '6'], capture_output=True, text=True, check=True, timeout=10)
+                    job = start.stdout.strip()
+                    directory = root/'jobs'/job
+                    wait_for(lambda: 'WAITING_FOR_MAINTENANCE' in (directory/'run.log').read_text(), 'worker waiting')
+                    if phase == 'RUNNING':
+                        wait_for(lambda: (root/'ready').exists(), 'health gate before interruption')
+                    else:
+                        assert not (root/'ready').exists()
+                    expected_links = (OLD, OLD, 'MISSING') if phase == 'WAITING' else (NEW, OLD, 'MISSING')
+                    assert state(root) == expected_links
+                    if sig == 'TERM':
+                        command = ['/usr/bin/systemctl', 'stop', 'workflow-release.service']
+                    else:
+                        command = ['/usr/bin/systemctl', 'kill', '--kill-who=all', '--signal='+sig, 'workflow-release.service']
+                    stopped = subprocess.run(command, capture_output=True, text=True, timeout=12)
+                    assert stopped.returncode == 0, stopped.stderr
+                    wait_for(lambda: (directory/'exit.code').exists(), 'interrupted result recording')
+                    wait_for(lambda: subprocess.check_output(['/usr/bin/systemctl', 'show', 'workflow-release.service', '-p', 'ActiveState', '--value'], text=True).strip() in ('inactive', 'failed'), 'interrupted unit stopped')
+                    code = int((directory/'exit.code').read_text())
+                    follow = subprocess.run(['bash', helper, 'follow', job], capture_output=True, text=True, timeout=5)
+                    expected_code = 0 if before_source else 128 + getattr(signal, 'SIG'+sig)
+                    assert code == expected_code and follow.returncode == expected_code, (code, follow.returncode, follow.stdout, follow.stderr)
+                    output = (directory/'run.log').read_text()
+                    assert state(root) == expected_links, (state(root), output)
+                    assert 'ROLLBACK_OK' not in output and 'ACTIVATE release=' not in output
+                    restarts = (root/'restarts').read_text().splitlines() if (root/'restarts').exists() else []
+                    assert restarts == ([] if phase == 'WAITING' else ['restart']), restarts
+                    if not before_source:
+                        assert f'exit={expected_code} interrupted=YES' in output, output
+                        assert 'INTERRUPTED:' in follow.stderr and '확인 후 재시도' in follow.stderr
+                    # Releasing our test lock must not resume the cancelled work.
+                    held.close()
+                    assert subprocess.run(['flock', '-n', str(root/'locks/workflow-maintenance.lock'), 'true']).returncode == 0
+                    assert not (root/'go').exists() and state(root) == expected_links
+                    print(f'INTERRUPT_{"BEFORE" if before_source else "AFTER"} scenario={phase}_STOP signal={sig} attempt={attempt} stop_exit={stopped.returncode} exit.code={code} follow_exit={follow.returncode} links={state(root)} restart_calls={len(restarts)} elapsed_s={time.monotonic()-began:.3f}', flush=True)
+                    print(next(line for line in output.splitlines() if line.startswith('RELEASE_RESULT ')), flush=True)
+                    if follow.stderr.strip():
+                        print(follow.stderr.strip(), flush=True)
+                finally:
+                    subprocess.run(['/usr/bin/systemctl', 'stop', 'workflow-release.service'], capture_output=True, timeout=12)
+                    held.close()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--before-source')
-    release_checks(parser.parse_args().before_source)
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument('--before-source', help='Original SSH disconnect baseline')
+    modes.add_argument('--before-interrupt-source', help='Original interruption result baseline')
+    modes.add_argument('--interrupt-only', action='store_true')
+    args = parser.parse_args()
+    if args.before_interrupt_source or args.interrupt_only:
+        interruption_checks(args.before_interrupt_source)
+    else:
+        release_checks(args.before_source)

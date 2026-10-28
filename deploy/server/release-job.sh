@@ -61,16 +61,28 @@ case $command in
     [[ -d $directory && ! -e $directory/exit.code ]] || exit 2
     # Only the fixed system service executes jobs, never a caller's interactive session.
     [[ -n ${INVOCATION_ID:-} ]] || { printf '%s\n' 'Jobs must run through systemd.' >&2; exit 2; }
+    interrupted=NO
+    interrupt_job() {
+      interrupted=YES
+      # Preserve the first caught signal while EXIT records its explicit status.
+      trap '' TERM INT HUP
+      exit "$1"
+    }
     finish() {
       result=$?
       trap - EXIT
-      printf 'RELEASE_RESULT job=%s exit=%s\n' "$job" "$result"
+      trap '' TERM INT HUP
+      printf 'RELEASE_RESULT job=%s exit=%s interrupted=%s\n' "$job" "$result" "$interrupted"
       rm -f -- "$directory/archive.tar.gz"
       printf '%s\n' "$result" >"$directory/.exit.code"
       mv -f "$directory/.exit.code" "$directory/exit.code"
       # Descriptor 9 is still open here, so maintenance remains locked through result recording.
       exit "$result"
     }
+    # Install signal handlers before EXIT: an interrupted wait can otherwise report $?=0.
+    trap 'interrupt_job 143' TERM
+    trap 'interrupt_job 130' INT
+    trap 'interrupt_job 129' HUP
     trap finish EXIT
     printf 'RELEASE_JOB job=%s state=WAITING_FOR_MAINTENANCE\n' "$job"
     lock_ops
@@ -104,7 +116,12 @@ while True:
     result=folder/'exit.code'
     if result.exists():
         flush_log()
-        raise SystemExit(int(result.read_text()))
+        code=int(result.read_text())
+        if code in (129,130,143):
+            print('INTERRUPTED: 링크가 반쯤 바뀌었을 수 있음, 확인 후 재시도',file=sys.stderr)
+        elif code not in (0,1):
+            print(f'ABNORMAL_EXIT: code={code}; inspect server logs and release links before retrying.',file=sys.stderr)
+        raise SystemExit(code)
     state=subprocess.run(['systemctl','show','workflow-release.service','--property=ActiveState','--value'],capture_output=True,text=True,timeout=10)
     if state.returncode or state.stdout.strip() not in ('active','activating','deactivating','reloading'):
         if result.exists():
