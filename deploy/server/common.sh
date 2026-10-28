@@ -21,7 +21,7 @@ schema_version() {
 backup_now() (
   umask 077
   # A distinct lock lets measurements detect any backup, including pre-deploy dumps.
-  install -d -m 755 /run/lock
+  mkdir -p /run/lock
   exec 8>/run/lock/workflow-backup.lock
   flock -x 8
   install -d -o root -g root -m 700 /var/backups/workflow

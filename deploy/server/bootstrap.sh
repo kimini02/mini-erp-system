@@ -30,7 +30,8 @@ id workflow >/dev/null 2>&1 || useradd --system --gid workflow --home-dir /var/l
 install -d -o root -g root -m 755 /opt/workflow/releases /var/www/workflow/releases /var/www/letsencrypt /usr/local/lib/workflow /etc/nginx/snippets/workflow
 install -d -o root -g root -m 700 /etc/workflow /var/backups/workflow
 install -d -o workflow -g workflow -m 700 /var/lib/workflow
-install -d -o mysql -g adm -m 750 /var/log/mysql /var/log/mysql/workflow
+mkdir -p /var/log/mysql
+install -d -o mysql -g adm -m 750 /var/log/mysql/workflow
 printf '%s\n' "$domain" >/etc/workflow/domain
 chmod 644 /etc/workflow/domain
 # Keep OS/DB SYSTEM time UTC; application business time remains Clock(Asia/Seoul).
@@ -47,7 +48,7 @@ p=Path('/etc/redis/redis.conf')
 s='\n'.join(line for line in p.read_text().splitlines() if line!='include /etc/redis/workflow.conf')
 p.write_text(s.rstrip()+'\n\ninclude /etc/redis/workflow.conf\n')
 PY
-install -d /etc/systemd/journald.conf.d /etc/systemd/system /etc/letsencrypt/renewal-hooks/deploy /etc/ssh/sshd_config.d
+mkdir -p /etc/systemd/journald.conf.d /etc/systemd/system /etc/letsencrypt/renewal-hooks/deploy /etc/ssh/sshd_config.d
 install -m 644 "$here/journald-workflow.conf" /etc/systemd/journald.conf.d/60-workflow.conf
 for unit in "$here"/*.service "$here"/*.timer; do install -m 644 "$unit" /etc/systemd/system/; done
 install -m 644 "$here/logrotate-workflow" /etc/logrotate.d/workflow
@@ -62,7 +63,7 @@ printf '#!/bin/sh\n/usr/sbin/nginx -t && /bin/systemctl reload nginx\n' >/etc/le
 chmod 755 /etc/letsencrypt/renewal-hooks/deploy/workflow
 printf 'PermitRootLogin no\nPasswordAuthentication no\n' >/etc/ssh/sshd_config.d/00-workflow.conf
 sed -i 's/^ENABLED=.*/ENABLED="true"/' /etc/default/sysstat
-install -d /etc/systemd/system/sysstat-collect.timer.d
+mkdir -p /etc/systemd/system/sysstat-collect.timer.d
 printf '[Timer]\nOnCalendar=\nOnCalendar=*-*-* *:*:00\n' >/etc/systemd/system/sysstat-collect.timer.d/workflow.conf
 nginx -t
 if ((no_systemd)); then
