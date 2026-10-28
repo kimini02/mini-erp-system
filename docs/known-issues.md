@@ -99,3 +99,17 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 | CSV 날짜 칸 한글 표시·비근태 칸 빈칸 | `315fcce` | [M3-16](troubleshooting/M3-16-csv-korean-labels.md) |
 
 이미 잘못 생성된 운영 근태·자동 부여 행을 일괄 삭제하는 작업은 수행하지 않았다. 개발 DB는 사용하지 않았으며, 사용자별 기록 정리는 확인 후 별도 결정이 필요하다. 전체 테스트와 수정 전 실패 근거는 [M3 3차 결과](troubleshooting/M3-17-phase-three-results.md)를 따른다.
+
+
+## M4 2차 — 구 조회·쓰기 경로 제거 완료
+- `ad3e33f`에서 구 ProjectController/TaskController/DashboardController와 ProjectService/TaskService/DashboardService, 1차 임시 쓰기 어댑터를 제거했다. 구 읽기 12개·쓰기 10개는 404이며 새 보드/상세는 유지한다. 정확한 구 클래스·어댑터 참조의 운영 소스 검색 결과는 0개다. [M4-14](troubleshooting/M4-14-remove-legacy-routes.md).
+- KI-07의 M3 해결은 당시 관리소장 전용 제한이었다. M4에서는 해당 대시보드 경로 자체를 제거했으며 홈은 위젯별 권한·본인 및 부서 범위를 적용한다. M3DashboardTest도 삭제 계약으로 갱신했다.
+- 홈·확장 비용 개선은 `027b992`, 목록/보드 요약 범위 개선은 `1b45159`, 마감 알림 배치는 `51f753c`다. [M4-11](troubleshooting/M4-11-scoped-summary.md), [M4-12](troubleshooting/M4-12-home-and-growth.md), [M4-13](troubleshooting/M4-13-overdue-batch.md).
+- 1차 리뷰 보완은 `ac7355e`(결정적 잠금 대기 증거), `abb2b60`(이력 target·MOVED 필드, 알림 제목, 검색 이스케이프, 기존 퇴사 멤버 유지)다.
+
+## M4 남은 범위·확정한 정책
+- 사용자 호환 remainingAnnualLeave의 전 연도 합산은 이전 지시대로 유지한다.
+- 코드 확인: 일반 HTTP 메서드 불일치가 공통 catch-all에서 500이 될 수 있다. M4에서 삭제한 메서드만 404로 처리했으며 다른 도메인 계약은 변경하지 않았다.
+- 홈 teamWeek 전용 메뉴가 명세에 없다. 현재 휴가는 MY_ATTENDANCE V, 업무는 PROJECT V+보기 범위를 적용한다. 개인 leave/notifications는 기존 API처럼 로그인 기준이다. 사용자가 이 항목별 메뉴 권한을 확정했다.
+- 구 화면과 API는 호환되지 않는다. 사용자 결정대로 M4 새 화면과 함께 병합해야 하며 이번 작업에서는 프론트·병합·푸시를 수행하지 않았다.
+- 부서 상태·근무시간 이력, 캘린더의 별도 권한 재설계는 이번 범위 밖이다.

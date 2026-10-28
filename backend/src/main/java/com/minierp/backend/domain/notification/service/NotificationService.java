@@ -15,4 +15,14 @@ public class NotificationService {
         db.update("INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,:doc,:type,:title,:link,:now)",
             map("user",user,"doc",document,"type",type,"title",title,"link","/approvals/"+document,"now",LocalDateTime.now(clock)));
     }
+    @Transactional(propagation=Propagation.MANDATORY)
+    public void storeTask(long user,long task,String title,String link) {
+        db.update("INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,NULL,'TASK_ASSIGNED',:title,:link,:now)",
+            map("user",user,"title",title,"link",link,"now",LocalDateTime.now(clock)));
+    }
+    @Transactional(propagation=Propagation.MANDATORY)
+    public void storeTaskOverdue(long user,String title,String link) {
+        db.update("INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,NULL,'TASK_OVERDUE',:title,:link,:now)",
+            map("user",user,"title",title,"link",link,"now",LocalDateTime.now(clock)));
+    }
 }

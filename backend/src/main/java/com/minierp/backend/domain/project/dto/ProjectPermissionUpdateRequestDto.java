@@ -12,7 +12,7 @@ import java.util.List;
 public class ProjectPermissionUpdateRequestDto {
 
     @NotNull(message = "프로젝트 ID 목록은 필수입니다.")
-    private List<Long> assignedProjectIds;
+    private List<@jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Positive Long> assignedProjectIds;
 
     public static ProjectPermissionUpdateRequestDto of(List<Long> assignedProjectIds) {
         ProjectPermissionUpdateRequestDto dto = new ProjectPermissionUpdateRequestDto();

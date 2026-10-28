@@ -22,10 +22,10 @@ class M1RegressionTest extends ApprovalApiTestSupport {
         assertThat(count("leave_ledger",id)).isEqualTo(1);assertThat(count("notifications",id)).isEqualTo(1);
         getAs("/api/v1/approval-documents/"+id,chiefToken).andExpect(status().isOk());data(postAs("/api/v1/approval-documents/"+id+"/approve",leaderToken,null));
     }
-    @Test void dashboardAndCalendarReadNewDocumentsWithoutDuplicateEvents() throws Exception {
+    @Test void homeAndCalendarReadNewDocumentsWithoutDuplicateEvents() throws Exception {
         long leave=submittedLeave();
-        var pending=data(getAs("/api/v1/dashboard/admin-summary",chiefToken));assertThat(pending.path("pendingApprovalCount").asLong()).isPositive();
-        for(String path:List.of("progress","projects")) getAs("/api/v1/dashboard/"+path,chiefToken).andExpect(status().isOk());
+        var pending=data(getAs("/api/v1/home",leaderToken));assertThat(pending.path("approvals").path("todoCount").asLong()).isPositive();
+        for(String path:List.of("progress","projects")) getAs("/api/v1/dashboard/"+path,chiefToken).andExpect(status().isNotFound());
         data(postAs("/api/v1/approval-documents/"+leave+"/approve",leaderToken,null));
         long overtime=draft("OVERTIME",Map.of("overtimeDate",start.toString(),"startTime","09:00","endTime","12:00","reason","호환 검증"));submit(overtime);data(postAs("/api/v1/approval-documents/"+overtime+"/approve",leaderToken,null));
         var events=data(getAs("/api/v1/calendar/events?year="+start.getYear()+"&month="+start.getMonthValue(),employeeToken));assertThat(events.size()).isEqualTo(2);

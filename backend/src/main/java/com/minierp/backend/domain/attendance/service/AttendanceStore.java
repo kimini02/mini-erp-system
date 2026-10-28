@@ -40,6 +40,25 @@ public class AttendanceStore {
     public Map<String,Object> record(long user,LocalDate date,boolean lock) {
         var rows=db.rows("SELECT a.*,d.doc_no AS fix_doc_no FROM attendances a LEFT JOIN approval_documents d ON d.id=a.fix_document_id WHERE a.user_id=:user AND a.work_date=:date"+(lock?" FOR UPDATE":""),map("user",user,"date",date));return rows.isEmpty()?null:rows.get(0);
     }
+    public Map<String,Object> homeSnapshot(long user,LocalDate date) {
+        var month=YearMonth.from(date);
+        return db.one("""
+          SELECT a.id,a.clock_in_at,a.clock_out_at,a.day_type,a.in_result,a.out_result,
+            COALESCE(a.sched_start,w.start_time) AS sched_start,COALESCE(a.sched_end,w.end_time) AS sched_end,
+            COALESCE(a.sched_grace_min,w.late_grace_min) AS sched_grace_min,
+            COALESCE(a.sched_source,IF(d.work_schedule_id IS NULL,'COMPANY','DEPARTMENT')) AS sched_source,
+            COALESCE(a.sched_department_name,d.name) AS sched_department_name,h.name AS holiday_name,
+            l.id AS leave_id,l.doc_no AS leave_no,l.leave_type,
+            (SELECT COUNT(*) FROM attendances WHERE user_id=:user AND work_date BETWEEN :begin AND :end AND in_result='LATE') AS late_count
+          FROM users u JOIN departments d ON d.id=u.department_id
+          JOIN work_schedules w ON (w.id=d.work_schedule_id OR (d.work_schedule_id IS NULL AND w.is_default=1))
+          LEFT JOIN attendances a ON a.user_id=u.id AND a.work_date=:date
+          LEFT JOIN holidays h ON h.holiday_date=:date
+          LEFT JOIN (SELECT x.leave_type,doc.id,doc.doc_no FROM approval_documents doc JOIN leave_requests x ON x.document_id=doc.id
+            WHERE doc.drafter_id=:user AND doc.status='APPROVED' AND x.start_date<=:date AND x.end_date>=:date ORDER BY doc.id LIMIT 1) l ON 1=1
+          WHERE u.id=:user
+          """,map("user",user,"date",date,"begin",month.atDay(1),"end",month.atEndOfMonth()),ErrorCode.USER_NOT_FOUND);
+    }
     public void insert(long user,LocalDate date,Schedule schedule,String day,LocalDateTime in,LocalDateTime out,boolean finalized,LocalDateTime now) {
         var judged=AttendanceRules.judge(date,day,schedule.start(),schedule.end(),schedule.grace(),in,out,finalized);
         db.update("""
