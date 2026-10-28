@@ -350,6 +350,7 @@ export function installM3({ route, db, fail, need, mergedPermissions, userById, 
       canClockOut: Boolean(rec?.clockInAt),
       earlyIfNow: Boolean(rec?.clockInAt) && ['WORKDAY', 'HALF_AM', 'HALF_PM'].includes(dayType) && nowMin < outLimit,
       monthLateCount: [...st.records.values()].filter((r) => r.userId === user.id && r.workDate.startsWith(month) && r.inResult === 'LATE').length,
+      monthAbsentCount: [...st.records.values()].filter((r) => r.userId === user.id && r.workDate.startsWith(month) && r.absent).length,
     };
   }
 

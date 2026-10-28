@@ -366,9 +366,9 @@ export function installM4({ route, db, fail, created, need, mergedPermissions, u
       .sort((a, b) => (overdueDays(b) > 0) - (overdueDays(a) > 0) || a.endDate.localeCompare(b.endDate))
       .slice(0, 5)
       .map((t) => ({ id: t.id, projectId: t.projectId, key: keyOf(t), title: t.title, status: t.status, endDate: t.endDate, overdueDays: overdueDays(t) }));
-    if (!p) return { project: null, items };
+    if (!p) return { project: null, count: open.length, items };
     const s = summary(p);
-    return { project: { id: p.id, key: p.key, title: p.title, total: s.taskCount, done: s.doneCount, overdue: s.overdueCount, progressPct: s.progressPct }, items };
+    return { project: { id: p.id, key: p.key, title: p.title, total: s.taskCount, done: s.doneCount, overdue: s.overdueCount, progressPct: s.progressPct }, count: open.length, items };
   }
 
   route('GET', '/home', (ctx) => {
