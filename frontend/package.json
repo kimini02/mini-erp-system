@@ -8,6 +8,8 @@
     "dev:mock": "vite --mode mock",
     "build": "vite build",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -32,6 +34,7 @@
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.12.0",
     "postcss": "^8.4.49",
+    "prettier": "3.3.3",
     "tailwindcss": "^3.4.15",
     "vite": "^6.0.1"
   }
