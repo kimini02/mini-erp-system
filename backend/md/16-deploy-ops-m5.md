@@ -10,20 +10,20 @@
 
 | 결정 | 이유 · 버린 것 |
 |---|---|
-| **AWS EC2 t3.small 1대** (2 vCPU, 2 GiB), 서울 리전, Ubuntu 24.04 LTS, gp3 30 GiB | 새 무료 플랜에서 쓸 수 있는 2 GiB 중 가장 흔한 사양. t3.micro(1 GiB)는 MariaDB와 JVM을 함께 올리면 swap에 기대게 됨. 디스크 30 GiB는 다음 단계 데이터 + 7일치 백업 + swap 여유 |
+| **AWS EC2 t3.small 1대** (2 vCPU, 2 GiB), 서울 리전, Ubuntu 24.04 LTS, gp3 30 GiB | 새 무료 플랜에서 쓸 수 있는 2 GiB 중 가장 흔한 사양. t3.micro(1 GiB)는 MariaDB와 JVM을 함께 올리면 swap에 기대게 됨. 디스크 30 GiB는 다음 단계 데이터 + 최근 7세트 백업 + swap 여유 |
 | **새 무료 플랜 계정** (크레딧). 유료 전환 금지, AWS Organizations 가입 금지 | 무료 플랜은 유료로 바꾸지 않는 한 청구하지 않고, 6개월이 지나거나 크레딧을 다 쓰면 계정이 닫힘. Organizations 가입 등은 **자동 유료 전환**이라 하지 않음 |
 | 한 대에 **Nginx · Spring Boot(systemd) · MariaDB 10.11 · Redis** | AD-01·AD-08 그대로. RDS는 버림: 크레딧을 더 쓰고, 느린 쿼리 로그·버퍼 풀 같은 DB 설정을 직접 다루는 게 이 프로젝트의 목표 |
 | 주소는 **DuckDNS 무료 서브도메인 + Let's Encrypt 90일 인증서** | 도메인 구입은 돈이 듦. IP 인증서는 수명이 6일이라 갱신이 하루만 멈춰도 접속이 막힘. DuckDNS는 서버를 옮겨도 IP만 바꾸면 같은 주소 |
 | **고정 IP(Elastic IP) 없이 자동 공인 IP + 부팅 때 DuckDNS 갱신** (2026-10-28 변경) | 실험할 때만 켜고 끄는 운영이라, 꺼져 있는 동안 IP 요금을 내지 않으려고. Elastic IP는 인스턴스를 꺼 둬도 시간당 요금이 붙음. 대가: 켤 때마다 IP가 바뀌므로 부팅 때 DuckDNS를 갱신하는 서비스와 DuckDNS 토큰(비밀값)이 필요. 인증서는 도메인에 붙으므로 IP가 바뀌어도 그대로 |
 | **T3 CPU 크레딧은 standard 모드** | t3는 기본이 unlimited라 부하 실험 중 초과 크레딧이 조용히 과금(크레딧 차감)됨. 대신 크레딧이 바닥나면 기준 성능(vCPU당 20%)으로 묶이므로, 측정할 때는 `CPUCreditBalance`를 같이 기록. t3는 **시작 크레딧이 없고**(새 인스턴스는 0에서 시작, t3.small은 시간당 24씩 쌓임) 끈 뒤 **7일이 지나면 쌓인 크레딧이 사라짐** → 부하 실험은 켜고 2~3시간 뒤 잔액을 확인하고 시작 |
 | 외부에는 **80·443만**, 22는 내 IP만. 앱 8080·관리 8081·DB 3306·Redis 6379는 **127.0.0.1에만 바인딩** | 보안 그룹을 실수로 열어도 바깥에서 닿지 않게 두 겹으로 막음 |
-| **DB 계정 3개로 분리**: Flyway용(DDL) · 앱 실행용(SELECT·INSERT·UPDATE·DELETE만) · 백업은 root unix_socket | 앱이 뚫려도 테이블을 지우거나 바꾸지 못함. 백업은 비밀번호 없이 OS 권한으로 |
+| **DB 계정 3개로 분리**: Flyway용(DDL) · 앱 실행용(SELECT·INSERT·UPDATE·DELETE만) · 백업은 root unix_socket | 앱의 DB 연결로는(예: SQL 주입) 테이블을 지우거나 바꾸지 못함. 단 Flyway가 같은 앱 프로세스에서 돌아 migrator 비밀번호도 앱 환경에 있으므로 **서버 프로세스를 장악당한 경우까지 막지는 못함**(2026-10-28 리뷰로 범위를 좁힘). 백업은 비밀번호 없이 OS 권한으로 |
 | 시간대: **OS · JVM · DB 모두 UTC**, 업무 날짜·시각은 지금처럼 `Clock`(Asia/Seoul) | 테스트 조합(`-Duser.timezone=UTC`)과 같음. 운영 코드 SQL에 `NOW()`·`CURDATE()`·`CURRENT_TIMESTAMP`가 없음을 확인함(2026-10-28 grep, V1~V6 포함) |
 | 격리 수준: MariaDB 기본값(REPEATABLE READ) 그대로 | 서비스마다 `@Transactional(isolation = READ_COMMITTED)`를 이미 명시함. 서버 기본값을 바꾸면 테스트와 달라짐 |
 | 배포: 로컬 빌드 → 릴리스 폴더 → 링크 교체 → 재시작 → 헬스 체크 → **실패하면 직전 릴리스로 자동 되돌림** | 서버에서 빌드하지 않음(2 GiB에서 Maven·npm 빌드는 운영 프로세스와 메모리를 다툼) |
 | **무중단 배포는 이번에 하지 않음 — 먼저 끊기는 시간을 잼** | 사내 시스템이라 업무 시간 외 배포 + 점검 안내로 충분할 수 있음. 두 프로세스를 번갈아 띄우면 2 GiB에 JVM 두 개, 겹치는 동안 배치 중복 실행, 구·신 코드의 스키마 호환 문제가 따라옴. 측정값을 보고 판단 |
 | 관측: **Nginx 접근 로그(JSON, 응답 시간 포함) · MariaDB 느린 쿼리 로그 · sysstat 1분 · CloudWatch 기본 지표** | "어느 API가 느린가, 그때 DB·CPU가 바빴나"를 답하기에 충분. Prometheus·Grafana는 버림: 2 GiB를 나눠 써야 하고 지금 질문에 비해 무거움 |
-| 백업: 매일 03:30(KST) 전체 덤프, 서버에 7일, **로컬로 내려받는 스크립트** | S3·EBS 스냅샷은 이번엔 버림(짧게 운영하는 데모라 IAM·비용 설정 대비 이득이 작음). 대신 "서버 디스크에만 있다"는 한계를 기록하고, 데이터 투입 전후·종료 전에 로컬로 받음 |
+| 백업: 매일 03:30(KST) 전체 덤프, 서버에 **최근 7세트**, **로컬로 내려받는 스크립트** | S3·EBS 스냅샷은 이번엔 버림(짧게 운영하는 데모라 IAM·비용 설정 대비 이득이 작음). 대신 "서버 디스크에만 있다"는 한계를 기록하고, 데이터 투입 전후·종료 전에 로컬로 받음 |
 | 메일은 **끔**(`APP_MAIL_ENABLED=false`) | 켜려면 사용자의 SMTP 비밀값이 필요해 따로 결정. 꺼져 있으면 사원 등록 응답이 `invitationSent=false` |
 | 실패 알림: **Discord 웹후크(선택)** | 주소를 넣으면 앱 비정상 종료·백업 실패·배치 미실행을 알림. 주소가 없으면 스크립트는 아무것도 하지 않음 |
 
@@ -119,7 +119,7 @@
 ```
 deploy/
   README.md                    순서대로 따라 하는 운영 문서 (처음 설치 · 배포 · 되돌리기 · 백업 · 복구 · 종료)
-  server/bootstrap.sh          패키지 · 사용자 · 폴더 · swap · 설정 파일 배치 (여러 번 실행해도 같은 결과)
+  server/bootstrap.sh          패키지 · 사용자 · 폴더 · swap · 설정 파일 배치 (여러 번 실행해도 같은 결과, 이미 있는 시스템 폴더의 권한은 바꾸지 않음, 백업·배포와 같은 잠금)
   server/setup-secrets.sh      비밀값 파일 만들기 (사용자가 직접, 숨김 입력)
   server/workflow.service
   server/workflow-backup.service, workflow-backup.timer
@@ -156,7 +156,7 @@ deploy/
 | 프로세스 | 설정 | 예상 |
 |---|---|---|
 | MariaDB | `innodb_buffer_pool_size=512M`, `max_connections=40` | 약 700 MB |
-| Spring Boot | `-Xms256m -Xmx512m -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/lib/workflow` | 약 750 MB |
+| Spring Boot | `-Xms256m -Xmx512m -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/lib/workflow/heap.hprof`(파일로 고정해 첫 덤프 하나만 남김 — 폴더로 두면 OOM마다 수백 MB가 쌓이고, 덤프에는 비밀값·개인정보가 들어 있음) | 약 750 MB |
 | Redis | `maxmemory 64mb` | 약 10 MB |
 | Nginx · OS | | 약 250 MB |
 
@@ -171,9 +171,11 @@ deploy/
 
 | 계정 | 권한 |
 |---|---|
-| `workflow_migrator@localhost` | `mini_erp.*` 전체(GRANT OPTION 제외) |
-| `workflow_app@localhost` | `mini_erp.*`에 `SELECT, INSERT, UPDATE, DELETE`만 |
+| `workflow_migrator@127.0.0.1` | `mini_erp.*` 전체(GRANT OPTION 제외) |
+| `workflow_app@127.0.0.1` | `mini_erp.*`에 `SELECT, INSERT, UPDATE, DELETE`만 |
 | `root@localhost` | unix_socket (백업·관리, 비밀번호 없음) |
+
+> **2026-10-28 변경: 앱·Flyway 계정 `@localhost` → `@127.0.0.1`.** 앱은 JDBC로 `127.0.0.1`에 TCP 접속합니다. `skip-name-resolve`를 켜면 MariaDB가 접속 주소를 이름으로 바꾸지 않아 TCP 접속이 `@localhost`(unix socket 전용) 계정과 맞지 않고 1045(접근 거부)가 납니다(구현 중 재현, `docs/troubleshooting/M5-05`). 버린 방법: `@'%'`(loopback보다 허용 범위가 넓음), `skip-name-resolve` 끄기(이름 해석에 기대게 됨), 앱을 unix socket으로 연결(JDBC TCP 구성을 바꿔야 함).
 
 ### 3.3 Redis
 
@@ -222,19 +224,21 @@ AWS 보안 그룹: 22(내 IP/32), 80·443(전체). SSH는 키만(Ubuntu AMI 기�
 `deploy/bin/deploy.sh <서버주소>` (로컬):
 
 1. 작업 트리가 깨끗한지, 배포할 커밋이 무엇인지 확인. 릴리스 이름 = `<UTC시각>-<커밋7자리>`.
-2. 백엔드 `./mvnw -DskipTests package`, 프론트 `npm ci && npm run build`. **테스트 통과는 배포 전에 리뷰에서 확인**합니다(스크립트는 빌드만).
+2. 백엔드 `./mvnw -DskipTests clean package`(지난 빌드의 파일, 특히 지우거나 이름을 바꾼 마이그레이션 SQL이 jar에 섞이지 않게), 프론트 `npm ci && npm run build`. **테스트 통과는 배포 전에 리뷰에서 확인**합니다(스크립트는 빌드만).
 3. 저장소에 서버의 `flyway_schema_history` 최신 버전보다 큰 `V` 파일이 있으면 **배포 전에 백업 1회**.
 4. 릴리스 폴더로 전송, 최근 3개만 남김.
-5. 백엔드 링크 교체 → `systemctl restart workflow` → `/healthz`를 최대 90초 확인.
+5. 백엔드 링크 교체 → `systemctl restart workflow` → `/healthz` 확인. 기다리는 시간은 **스키마 버전이 올라가는 배포 900초, 그 외 배포와 되돌리기 90초**입니다(Flyway 실행 시간이 기동 시간에 들어가므로. 큰 DDL 도중에 재시작하면 MariaDB DDL은 되돌아가지 않음, 2026-10-28 리뷰). 대기 중 systemd의 `NRestarts`가 늘거나 `ActiveState=failed`가 되면 제한을 채우지 않고 바로 실패로 봅니다. 로그: `HEALTH_WAIT limit_s=… migration=YES|NO result=…`.
    - 성공: 프론트 링크 교체. (백엔드가 먼저 — 새 화면이 옛 API를 부르는 순간을 없앰)
    - 실패: 직전 릴리스로 링크를 되돌리고 재시작, 헬스 확인, 실패 이유(최근 로그 50줄)를 보여 주고 종료 코드 1.
 6. 기록: 릴리스 이름, 단계별 걸린 시간, 로그의 `Started BackendApplication in N seconds`.
+7. 서버 쪽 활성화·되돌리기는 **SSH 연결이 끊겨도 끝까지 진행**하고 진행 로그와 결과를 서버에 남깁니다. 로컬은 그 로그를 따라 읽고 종료 코드를 받습니다(대기가 최대 15분이라 그사이 노트북 잠자기·네트워크 변경으로 끊기면 링크가 반쯤 바뀐 채 멈출 수 있음, 2026-10-28 재리뷰).
 
 `deploy/bin/rollback.sh <서버주소>`: 직전 릴리스로 교체 + 재시작 + 헬스.
 
 **마이그레이션 규칙**
 - 운영에 적용된 `V` 파일은 **절대 고치지 않습니다.** 바꿀 게 생기면 V7부터 새 파일. (`docs/known-issues.md`의 V2 체크섬 변경 같은 일은 운영 DB에서는 허용하지 않음)
 - jar를 되돌려도 스키마는 되돌아가지 않습니다. 새 마이그레이션은 **이전 버전 코드와 같이 돌 수 있게**(컬럼 추가 먼저, 삭제는 다음 배포) 만들고, 그게 안 되면 되돌리기 = 배포 직전 백업 복구입니다.
+- 큰 테이블의 DDL은 배포 전에 최신 덤프를 로컬 MariaDB 10.11에 복구해 **같은 DDL의 시간을 먼저 잽니다.** 900초를 넘을 것 같으면 배포 스크립트로 하지 않고 점검 시간을 잡아 따로 진행합니다.
 - 03:30 백업 시간에는 배포하지 않습니다(`--single-transaction` 덤프 중 DDL이 겹치면 덤프가 실패함).
 
 ---
@@ -242,9 +246,10 @@ AWS 보안 그룹: 22(내 IP/32), 80·443(전체). SSH는 키만(Ubuntu AMI 기�
 ## 5. 백업 · 복구 리허설
 
 - `workflow-backup.timer`: `OnCalendar=*-*-* 03:30:00 Asia/Seoul`, `Persistent=true`(서버가 꺼져 있었으면 켜진 뒤 실행).
-- 백업: `mariadb-dump --single-transaction --quick --routines --triggers --events --hex-blob --default-character-set=utf8mb4 mini_erp | gzip` → 임시 파일 → 성공하면 이름 변경 → sha256 기록 → 7일 지난 파일 삭제. `set -euo pipefail`(덤프가 중간에 실패하면 반쯤 쓴 파일을 남기지 않음).
+- 백업: `mariadb-dump --single-transaction --quick --routines --triggers --events --hex-blob --default-character-set=utf8mb4 mini_erp | gzip` → 임시 파일 → 성공하면 이름 변경 → sha256·Flyway 버전 기록 → **파일 이름(UTC 시각) 순으로 최근 7세트만 남김**(덤프와 짝 파일 `.sha256`·`.version`·`.counts.tsv`, 배포 전 백업도 같은 세트로 셈). `set -euo pipefail`(덤프가 중간에 실패하면 반쯤 쓴 파일을 남기지 않음).
+  - 일수가 아니라 세트 수로 셉니다(2026-10-28 리뷰). 끄고 켜는 운영에서 "7일 지난 파일 삭제"는 7일 넘게 꺼 두었다가 켜는 순간 이전 백업을 모두 지워 한 세대만 남깁니다. 세트 수는 디스크 총량의 상한이 아니고, 배포가 잦으면 오래된 세대가 밀려납니다.
   - `--single-transaction`이라 InnoDB 읽기·쓰기를 막지 않습니다.
-- `restore-rehearsal.sh`(서버): 최신 덤프를 `mini_erp_restore`에 복구 → 테이블별 `COUNT(*)`를 원본과 비교 → `flyway_schema_history` 최신 버전 일치 확인 → 걸린 시간 출력 → `mini_erp_restore` 삭제. 쓰기가 없는 시간에 실행하고, 다르면 테이블 이름과 차이를 출력.
+- `restore-rehearsal.sh`(서버): 최신 덤프를 `mini_erp_restore`에 복구 → 테이블별 `COUNT(*)`를 원본과 비교 → `flyway_schema_history` 최신 버전 일치 확인 → 걸린 시간 출력 → `mini_erp_restore` 삭제. 쓰기가 없는 시간에 실행하고, 다르면 테이블 이름과 차이를 출력. 성공하면 테이블별 건수를 `.counts.tsv`로 백업 옆에 저장합니다(로컬 복구는 이 파일이 있는 세트만 받으므로, 자동 백업을 내려받기 전에 먼저 리허설).
 - **서버가 통째로 사라지는 경우**: `pull-backup.sh`로 받은 파일을 로컬 Docker MariaDB 10.11에 복구해 같은 비교를 1회 기록.
 
 ---
