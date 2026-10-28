@@ -40,13 +40,41 @@ backup_now() (
 )
 latest_backup() { find /var/backups/workflow -maxdepth 1 -type f -name '*.sql.gz' -printf '%f\n' | LC_ALL=C sort | tail -1; }
 valid_release() { [[ $1 =~ ^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{7}$ ]]; }
+health_snapshot() {
+  local snapshot key value
+  snapshot=$(systemctl show workflow --property=NRestarts --property=ActiveState) || return 1
+  health_restarts=''; health_active=''
+  while IFS='=' read -r key value; do
+    case $key in NRestarts) health_restarts=$value;; ActiveState) health_active=$value;; esac
+  done <<<"$snapshot"
+  [[ $health_restarts =~ ^[0-9]+$ && $health_active =~ ^[a-z-]+$ ]]
+}
 health_wait() {
-  local until=$((SECONDS+90)) domain
-  domain=$(cat /etc/workflow/domain)
+  local limit=$1 migration=$2 began=$SECONDS domain initial until up=0
+  local health_restarts health_active
+  [[ $limit =~ ^[1-9][0-9]*$ && $migration =~ ^(YES|NO)$ ]] || return 2
+  until=$((SECONDS+limit)); domain=$(cat /etc/workflow/domain)
+  if ! health_snapshot; then
+    printf 'HEALTH_WAIT limit_s=%s migration=%s result=STATUS_UNAVAILABLE elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 1
+  fi
+  initial=$health_restarts
   while (( SECONDS < until )); do
-    if curl --silent --fail --max-time 2 --resolve "$domain:443:127.0.0.1" "https://$domain/healthz" | jq -e '.status == "UP"' >/dev/null 2>&1; then return 0; fi
+    if ! health_snapshot; then
+      printf 'HEALTH_WAIT limit_s=%s migration=%s result=STATUS_UNAVAILABLE elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 1
+    fi
+    if [[ $health_active == failed ]] || ((health_restarts>initial)); then
+      printf 'HEALTH_WAIT limit_s=%s migration=%s result=APP_FAILED elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 1
+    fi
+    # Recheck systemd after UP too: a restarted process must not be accepted as the original start.
+    if ((up)); then
+      printf 'HEALTH_WAIT limit_s=%s migration=%s result=UP elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 0
+    fi
+    local remaining=$((until-SECONDS)) request_limit=2
+    ((remaining<request_limit)) && request_limit=$remaining
+    if curl --silent --fail --max-time "$request_limit" --resolve "$domain:443:127.0.0.1" "https://$domain/healthz" | jq -e '.status == "UP"' >/dev/null 2>&1; then up=1; continue; fi
     sleep 1
   done
+  printf 'HEALTH_WAIT limit_s=%s migration=%s result=TIMEOUT elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"
   return 1
 }
 point_link() { local base=$1 release=$2; rm -f "$base/.current.next"; ln -s "$base/releases/$release" "$base/.current.next"; mv -Tf "$base/.current.next" "$base/current"; }

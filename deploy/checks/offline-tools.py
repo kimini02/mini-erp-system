@@ -73,5 +73,6 @@ def probe_and_log_checks():
 
 if __name__ == '__main__':
     runpy.run_path(str(DEPLOY / "checks/duckdns-local.py"))["duckdns_checks"]()
+    runpy.run_path(str(DEPLOY / "checks/health-wait.py"))["health_checks"]()
     domain_checks()
     probe_and_log_checks()

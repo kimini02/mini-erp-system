@@ -42,7 +42,8 @@ case $command in
     [[ $now < 0330 || $now > 0339 ]] || { printf '%s\n' 'Do not deploy in the 03:30-03:39 KST backup window.' >&2; exit 1; }
     current_version=$(schema_version)
     [[ $current_version =~ ^[0-9]+$ ]] || { printf '%s\n' 'Non-integer migration version requires operator review.' >&2; exit 1; }
-    if ((local_version>current_version)); then backup_now;fi
+    health_limit=90; migration=NO
+    if ((local_version>current_version)); then health_limit=900; migration=YES; backup_now; fi
     [[ ! -e /opt/workflow/releases/$release && ! -e /var/www/workflow/releases/$release ]] || { printf '%s\n' 'Release already exists.' >&2;exit 1; }
     stage=$(mktemp -d /opt/workflow/.stage.XXXXXX)
     trap 'rm -rf -- "$stage"' EXIT
@@ -65,7 +66,7 @@ PY
     old=''; if [[ -L /opt/workflow/current ]]; then old=$(basename "$(readlink -f /opt/workflow/current)");valid_release "$old";fi
     began=$SECONDS
     point_link /opt/workflow "$release"
-    if systemctl restart workflow && health_wait; then
+    if systemctl restart workflow && health_wait "$health_limit" "$migration"; then
       point_link /var/www/workflow "$release"
       install -m 644 "$stage/dist/maintenance.html" /var/www/workflow/maintenance.html
       printf '%s\n' "$old" >/etc/workflow/previous-release
@@ -77,7 +78,7 @@ PY
       redacted_logs || true
       if [[ -n $old ]]; then
         point_link /opt/workflow "$old"
-        if systemctl restart workflow && health_wait;then printf 'ROLLBACK_OK release=%s\n' "$old";else printf '%s\n' 'ROLLBACK_FAILED; stop and inspect schema compatibility/backup.' >&2;fi
+        if systemctl restart workflow && health_wait 90 NO;then printf 'ROLLBACK_OK release=%s\n' "$old";else printf '%s\n' 'ROLLBACK_FAILED; stop and inspect schema compatibility/backup.' >&2;fi
       else systemctl stop workflow;rm -f /opt/workflow/current;fi
       exit 1
     fi
@@ -87,14 +88,14 @@ PY
     [[ -f /opt/workflow/releases/$previous/app.jar && -f /var/www/workflow/releases/$previous/index.html ]]
     current=$(basename "$(readlink -f /opt/workflow/current)");valid_release "$current"
     point_link /opt/workflow "$previous"
-    if systemctl restart workflow && health_wait; then
+    if systemctl restart workflow && health_wait 90 NO; then
       point_link /var/www/workflow "$previous"
       printf '%s\n' "$current" >/etc/workflow/previous-release
       printf 'ROLLBACK_OK release=%s\n' "$previous"
     else
       redacted_logs || true
       point_link /opt/workflow "$current"
-      systemctl restart workflow && health_wait || true
+      systemctl restart workflow && health_wait 90 NO || true
       printf '%s\n' 'ROLLBACK_FAILED; original backend link restored. Inspect schema compatibility.' >&2
       exit 1
     fi
