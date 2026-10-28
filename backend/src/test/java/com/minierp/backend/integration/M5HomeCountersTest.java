@@ -30,6 +30,20 @@ class M5HomeCountersTest extends BoardTestSupport {
         assertThat(data(postAs("/api/v1/attendance/clock-out", employeeToken, null)).path("monthAbsentCount").asInt(-1)).isEqualTo(2);
     }
 
+    @Test void monthAbsentCountUsesSeoulMonthAtMidnightOnTheFirst() throws Exception {
+        date = date.withDayOfMonth(1);
+        at(date, LocalTime.of(0,30));
+        assertThat(clock.instant().atZone(ZoneOffset.UTC).toLocalDate()).isEqualTo(date.minusDays(1));
+        // Two last-month absences versus one this month: counting the UTC month must fail.
+        for (LocalDate day : new LocalDate[]{date.minusDays(2), date.minusDays(1), date}) {
+            attendance.insert(employee.getId(), day, attendance.schedule(employee.getId()), "WORKDAY", null, null, true, LocalDateTime.now(clock));
+        }
+        org.junit.jupiter.api.Assertions.assertAll(
+            () -> assertThat(data(getAs("/api/v1/attendance/today", employeeToken)).path("monthAbsentCount").asInt(-1)).as("attendance month").isEqualTo(1),
+            () -> assertThat(data(getAs("/api/v1/home", employeeToken)).path("today").path("monthAbsentCount").asInt(-1)).as("home month").isEqualTo(1)
+        );
+    }
+
     @Test void taskCountIncludesAllSevenVisibleAssignedOpenTasksWhileItemsStayAtFive() throws Exception {
         long visible = project(leader, 9), hidden = project(chief, 1);
         var tasks = taskIds(visible);
