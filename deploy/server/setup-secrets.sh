@@ -20,7 +20,7 @@ if path.exists():
     if path.stat().st_uid!=0 or path.stat().st_mode & 0o777 != 0o600: raise SystemExit('Existing env must be root:root 600.')
     print('Existing DB/JWT secrets will be preserved. No values will be displayed.')
 else:
-    values.update(DB_APP_USERNAME='workflow_app',DB_APP_PASSWORD=random_secret(),DB_MIGRATOR_USERNAME='workflow_migrator',DB_MIGRATOR_PASSWORD=random_secret(),JWT_SECRET=random_secret(),APP_MAIL_ENABLED='false',JAVA_OPTS='-Duser.timezone=UTC -Xms256m -Xmx512m -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/lib/workflow')
+    values.update(DB_APP_USERNAME='workflow_app',DB_APP_PASSWORD=random_secret(),DB_MIGRATOR_USERNAME='workflow_migrator',DB_MIGRATOR_PASSWORD=random_secret(),JWT_SECRET=random_secret(),APP_MAIL_ENABLED='false',JAVA_OPTS='-Duser.timezone=UTC -Xms256m -Xmx512m -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/lib/workflow/heap.hprof')
 if not path.exists():
     for key,label in [('INITIAL_ADMIN_LOGIN_ID','Initial administrator login ID'),('INITIAL_ADMIN_NAME','Initial administrator name'),('INITIAL_ADMIN_EMAIL','Initial administrator email'),('INITIAL_ADMIN_PASSWORD','Initial administrator password')]:
         value=getpass.getpass(label+' (hidden): ')

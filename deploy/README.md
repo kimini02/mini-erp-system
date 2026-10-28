@@ -128,6 +128,17 @@ sudo systemctl restart workflow
 
 파일에서만 지우면 기존 프로세스 환경에는 남으므로 재시작까지 합니다. 이미 관리자가 있으면 계정은 다시 생성하지 않습니다. 메일은 기본 꺼짐이고 초대 응답은 `invitationSent=false`입니다.
 
+### OOM 힙 덤프 관리
+
+새 비밀 설정의 HeapDumpPath는 **/var/lib/workflow/heap.hprof**입니다. 첫 OOM 덤프 한 개만 남기며 JVM은 기존 파일을 덮어쓰지 않습니다. 이 파일이 있으면 다음 OOM에서는 새 덤프를 만들지 못합니다. 기존 /etc/workflow/env는 재실행해도 자동 변경하지 않으므로, 예전 설정을 쓰는 운영자는 점검 시간에 JAVA_OPTS의 HeapDumpPath만 이 파일 경로로 바꾸고 앱을 재시작해야 합니다. 다른 비밀값은 보존합니다.
+
+내용을 출력하지 않고 서버에서 크기·소유자·권한만 확인합니다. **힙 덤프에는 비밀값·개인정보가 포함될 수 있으므로 로컬로 옮기거나 공유하지 않습니다.** 서버에서 필요한 확인을 마친 뒤 파일 하나만 삭제합니다. 실행 예시는 운영자가 승인된 점검 시간에 수행합니다.
+
+```bash
+sudo stat -c '%s bytes %U:%G %a %n' /var/lib/workflow/heap.hprof
+sudo rm -- /var/lib/workflow/heap.hprof
+```
+
 ## 7. 배포 실패와 되돌리기
 
 ```bash
