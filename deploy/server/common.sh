@@ -20,6 +20,10 @@ schema_version() {
 }
 backup_now() (
   umask 077
+  # A distinct lock lets measurements detect any backup, including pre-deploy dumps.
+  install -d -m 755 /run/lock
+  exec 8>/run/lock/workflow-backup.lock
+  flock -x 8
   install -d -o root -g root -m 700 /var/backups/workflow
   local_path=/var/backups/workflow
   name="$(date -u +%Y%m%dT%H%M%S.%NZ).sql.gz"

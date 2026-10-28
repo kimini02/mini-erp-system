@@ -21,7 +21,7 @@
 1. 리전을 **서울(ap-northeast-2)**로 선택합니다.
 2. EC2 → 인스턴스 시작: Ubuntu Server **24.04 LTS, x86_64**, **t3.small**, 루트 볼륨 **gp3 30 GiB**. 기본 보안 업데이트를 유지합니다.
 3. 키 페어를 만들고 개인 키는 저장소 밖에 보관합니다. 개인 키 권한은 `chmod 600`으로 제한합니다. 키 내용은 공유하지 않습니다.
-4. 네트워크는 인터넷 게이트웨이가 있는 퍼블릭 서브넷, **자동 공인 IPv4 할당 활성화**. Elastic IP는 만들지 않습니다. 중지 후 시작하면 공인 IP가 바뀝니다.
+4. 네트워크는 인터넷 게이트웨이가 있는 퍼블릭 서브넷, **자동 공인 IPv4 할당 활성화**. 중지 후 시작하면 공인 IP가 바뀝니다.
 5. 보안 그룹 인바운드: TCP **22는 내 IP/32**, **80·443은 0.0.0.0/0**. 3306·6379·8080·8081은 추가하지 않습니다. IPv6를 별도 구성하지 않는다면 IPv6 인바운드는 추가하지 않습니다.
 6. 고급 세부 정보의 **크레딧 사양을 Standard**로 지정합니다. 시작 후 인스턴스의 크레딧 사양 변경 화면에서도 Standard인지 확인합니다. Unlimited로 두지 않습니다.
 7. 메타데이터 서비스는 활성화, **IMDSv2 필수**, hop limit 1. DuckDNS 부팅 서비스가 현재 공인 IPv4를 읽습니다. AWS 액세스 키나 IAM 인스턴스 역할은 이 작업에 필요 없습니다.
@@ -40,7 +40,11 @@ T3의 기본 Unlimited와 Standard 차이: [AWS 문서](https://docs.aws.amazon.
 ssh -i /저장소밖/키파일.pem ubuntu@CHANGE_ME.duckdns.org
 ```
 
-키 페어에 암호를 걸었다면 로컬 ssh-agent에 먼저 등록합니다. 로컬 스크립트는 BatchMode를 사용합니다. 이후 중지/시작으로 IP가 바뀌면 DNS 갱신·전파를 기다립니다. 자동 갱신이 실패하면 콘솔의 현재 IP로 접속해 아래 서비스를 확인합니다. SSH 키가 바뀌었다는 경고는 지문을 재확인하기 전까지 무시하지 않습니다.
+키 페어에 암호를 걸었다면 로컬 ssh-agent에 먼저 등록합니다. 로컬 스크립트는 BatchMode를 사용합니다. 이후 중지/시작으로 IP가 바뀌면 DNS 갱신·전파를 기다립니다. 자동 갱신이 실패하면 EC2 콘솔의 시스템 로그·상태와 DuckDNS 사이트를 확인해 주소를 복구한 뒤 **도메인으로** 접속합니다. deploy·rollback·pull-backup·probe는 DuckDNS 도메인만 받으며 공인 IP를 인자로 쓰지 않습니다.
+
+Stop/Start로 공인 IP는 바뀌어도 디스크에 저장된 SSH 호스트 키는 보통 그대로입니다. 로컬 known_hosts의 옛 IP 매핑이나 재할당된 IP의 이전 키 때문에 경고가 날 수 있습니다. 콘솔에서 인스턴스 ID·현재 IP를 확인하고 `dig` 결과와 비교한 뒤, 신뢰할 수 있는 EC2 시스템 로그의 SSH 키 지문을 대조합니다. 키 자체가 달라졌다면 재설치·다른 서버 접속 여부를 확인합니다. 확인 없이 StrictHostKeyChecking을 끄거나 known_hosts 전체를 지우지 않습니다. 같은 서버·같은 키임을 확인한 경우에만 해당 낡은 IP/호스트 항목을 정리합니다.
+
+집·회사·모바일망 이동으로 **내 공인 IP**가 바뀌면 보안 그룹의 22번 출처를 콘솔의 ‘내 IP’ `/32`로 바꿉니다. 이 문제를 서버의 IP 변경과 혼동하거나 22번을 전체 공개하지 않습니다.
 
 ## 4. 서버 파일 배치와 bootstrap
 
@@ -59,7 +63,7 @@ sudo bash ~/workflow-setup/bootstrap.sh --domain CHANGE_ME.duckdns.org
 ```
 
 - 첫 실행: Java 17·MariaDB 10.11·Redis·Nginx·certbot·sysstat 등 설치, workflow 시스템 사용자(nologin), 폴더·설정·유닛·UTC·2 GiB swap·swappiness 10 배치. 인증서가 없으므로 HTTP ACME 설정을 사용합니다.
-- 숨김 입력: 관리자 아이디·이름·이메일·비밀번호 및 확인, 선택 Discord 웹후크, DuckDNS 토큰. 비밀번호는 기존 정책(8~20자, 대문자·소문자·숫자·기호)을 만족해야 합니다. DB 비밀번호 두 개와 JWT 비밀값은 서버 `openssl rand`로 생성하며 화면에 출력하지 않습니다.
+- 숨김 입력: 관리자 아이디·이름·이메일·비밀번호 및 확인, 선택 Discord 웹후크, DuckDNS 서브도메인(접미사 제외)·토큰. 서브도메인도 숨김 입력이며 bootstrap의 도메인과 다르면 저장하지 않습니다. 비밀번호는 기존 정책(8~20자, 대문자·소문자·숫자·기호)을 만족해야 합니다. DB 비밀번호 두 개와 JWT 비밀값은 서버 `openssl rand`로 생성하며 화면에 출력하지 않습니다.
 - `/etc/workflow/env`, `/etc/workflow/duckdns`는 root:root 600, 부모 폴더는 700. 재실행 시 기존 DB/JWT 비밀값·DuckDNS 토큰을 유지합니다. 자동 회전 도구는 아닙니다.
 - 두 번째 bootstrap: root unix_socket으로 계정 권한을 맞추고 백업·배치 확인 타이머 및 DuckDNS 갱신 서비스를 시작합니다. `workflow_migrator@127.0.0.1`은 mini_erp.* 전체 권한(GRANT OPTION 없음), `workflow_app@127.0.0.1`은 SELECT/INSERT/UPDATE/DELETE만 보유합니다. 명세의 @localhost는 skip-name-resolve + JDBC TCP 접속에서 1045가 재현되어 실제 접속 IP로 명시했습니다. root는 Unix socket을 유지합니다([재현 기록](../docs/troubleshooting/M5-05-loopback-db-accounts.md)).
 - bootstrap은 **업로드 원본 폴더**에서 재실행합니다. `/usr/local/lib/workflow/bootstrap.sh`만 따로 실행하면 옆의 설정 템플릿이 없으므로 안 됩니다.
@@ -77,7 +81,7 @@ swapon --show
 sysctl vm.swappiness
 ```
 
-DuckDNS 서비스는 IMDSv2로 IPv4를 읽고 HTTPS로 한 번 갱신합니다. 실패하면 30초 간격으로 재시도하고 5회/5분 제한 후 실패 상태로 남깁니다. 오류에는 URL·토큰을 출력하지 않습니다. 재시도하려면 원인을 고친 뒤 `sudo systemctl reset-failed duckdns-update; sudo systemctl restart duckdns-update`를 실행합니다. [DuckDNS API](https://www.duckdns.org/spec.jsp), [IMDSv2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html).
+DuckDNS 서비스는 network-online.target 뒤에 IMDSv2로 IPv4를 읽고 HTTPS 갱신의 OK를 확인합니다. 그 뒤 OS의 IPv4 도메인 조회 결과가 현재 공인 IP 하나와 일치하는지 확인해 두 주소와 MATCH/PENDING을 로그에 남깁니다. 네트워크/전파 지연은 2·4·8·16·20초(이후 최대 20초) 간격으로 재시도하며 전체 180초 안에 같아지지 않으면 실패합니다(systemd 강제 제한 195초). OnFailure가 기존 실패 알림에 연결됩니다. 웹후크 미설정 시 외부 알림은 없고 서비스 실패와 journal로 확인합니다. URL·토큰은 프로세스 인자·화면·오류 로그에 출력하지 않습니다. 재시도하려면 원인을 고친 뒤 `sudo systemctl reset-failed duckdns-update; sudo systemctl restart duckdns-update`를 실행합니다. [DuckDNS API](https://www.duckdns.org/spec.jsp), [IMDSv2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html).
 
 ## 5. HTTPS 발급
 
@@ -138,7 +142,7 @@ bash deploy/bin/rollback.sh CHANGE_ME.duckdns.org
 
 ## 8. 백업과 복구 리허설
 
-서버 03:30 KST 전체 덤프, Persistent 타이머, 7일 보관. 압축 임시 파일을 성공 시에만 공개하고 sha256과 Flyway 버전을 저장합니다. root socket 접속이며 비밀번호 인자가 없습니다.
+서버 03:30 KST 전체 덤프, `Persistent=true` 타이머, 7일 보관. 03:30에 꺼져 있었다면 켜서 타이머가 활성화될 때 놓친 실행 한 번이 즉시 예약됩니다. 빠진 날짜마다 백업을 재현하는 것은 아닙니다. **이 백업이 끝난 뒤에 측정합니다.** 압축 임시 파일을 성공 시에만 공개하고 sha256과 Flyway 버전을 저장합니다. root socket 접속이며 비밀번호 인자가 없습니다.
 
 쓰기 없는 점검 시간에 서버에서:
 
@@ -163,6 +167,21 @@ bash deploy/bin/restore-local.sh "$HOME/workflow-backups/CHANGE_ME.duckdns.org/C
 한계: 서버 백업만으로는 디스크 장애에 대비할 수 없습니다. 데이터 투입 전후·시연 뒤·종료 전에 로컬로 내려받습니다. 기본 하루 한 번이므로 최대 하루치를 잃을 수 있습니다. 이 목표가 부족하면 외부 binlog/관리형 DB 등 후속 설계를 합니다.
 
 ## 9. 관측과 M5 서버 측정
+
+실험 전 체크리스트:
+
+1. 서버를 켠 뒤 **2~3시간** 지났는지 확인합니다. T3는 시작 크레딧이 없으며 중지 후 7일이 지나면 남은 크레딧이 사라지는 조건을 기준으로 준비합니다. 실제 `CPUCreditBalance`는 AWS 콘솔에서 읽어 기록합니다. 2~3시간이 지났다는 사실만으로 충분한 크레딧을 보장하지 않습니다.
+2. 놓친 백업 실행이 끝났는지 `systemctl status workflow-backup.service`와 아래 `backup_in_progress`를 함께 봅니다. `activating`(잠금 대기 포함)이거나 YES면 기다립니다.
+3. 아래 출력을 저장소 밖에 저장합니다. 서버·MariaDB 가동 시간, 버퍼 풀 적재량/물리 읽기/요청, 메모리·swap, 마지막 완료 백업, 진행 중 백업, 릴리스가 나옵니다.
+4. 같은 대상·같은 요청으로 **예열 1회** 후 같은 출력을 한 번 더 저장하고 측정합니다. 개별 측정 명세가 예열 횟수를 더 요구하면 그 조건도 따릅니다. 예열 전/후 조건을 섞어 비교하지 않습니다.
+
+```bash
+sudo /usr/local/lib/workflow/measure-context.sh | tee "$HOME/workflow-context-before.txt"
+# 위젯/측정 대상에 같은 요청으로 예열 1회, 토큰은 기존 0600 헤더 파일로만 전달
+sudo /usr/local/lib/workflow/measure-context.sh | tee "$HOME/workflow-context-after.txt"
+```
+
+측정 기록은 [M5 측정 양식](../docs/troubleshooting/M5-09-measurement-template.md)을 복사해 씁니다. CPUCreditBalance는 서버 스크립트가 AWS를 호출해서 읽지 않으므로 콘솔 값을 직접 적습니다. 일반 컨테이너에서는 `/proc/uptime`이 호스트 커널 가동 시간이고 systemd 항목은 확인 못 함으로 표시됩니다.
 
 ```bash
 # 서버
@@ -206,7 +225,7 @@ bash deploy/bin/probe.sh https://CHANGE_ME.duckdns.org/api/v1/home /tmp/workflow
 
 각 기록에 UTC 측정 시각·릴리스·인스턴스 기동 후 경과·CPU 크레딧·예열 여부를 적습니다. 수치가 나빠도 JVM/풀 설정부터 바꾸지 말고 쿼리·CPU·메모리 근거를 먼저 모읍니다.
 
-로컬 도구의 재현 검사는 `python3 deploy/checks/offline-tools.py`로 실행할 수 있습니다. DuckDNS/IMDS 전송은 모두 모킹하고 probe는 localhost의 가짜 API만 호출합니다. Java 테스트 수에는 포함하지 않습니다.
+로컬 도구의 재현 검사는 `python3 deploy/checks/offline-tools.py`로 실행할 수 있습니다. DuckDNS/IMDS는 로컬 가짜 HTTP 서버로 OK·KO·무응답·지연을 검증합니다. 테스트 복사본에서 고정 endpoint·시간 제한·파일 경로만 바꾸며, 운영 스크립트에는 외부 endpoint 변경 옵션이 없습니다. DNS 판정은 가짜 getent, probe는 테스트 curl의 로컬 주소 고정으로 검증하며 외부 요청은 없습니다. Java 테스트 수에는 포함하지 않습니다.
 
 ## 10. 운영상의 선택과 한계
 
@@ -219,12 +238,41 @@ bash deploy/bin/probe.sh https://CHANGE_ME.duckdns.org/api/v1/home /tmp/workflow
 - DuckDNS와 IMDS 장애 시 DNS가 낡은 IP를 가리킬 수 있습니다. 현재 IP는 콘솔에서 확인합니다. DuckDNS 토큰은 계정의 다른 도메인도 변경할 수 있으므로 root 전용 파일을 유지합니다.
 - systemd·실제 swap·SSH 정책 적용·타이머 발화·인증서 갱신·부팅 DNS 갱신·실제 배포/rollback·EC2 메모리 예산은 실제 서버에서 검증해야 합니다.
 
-## 11. 잠깐 끄기와 최종 종료
+## 11. 잠깐 끄고 다시 켜기
 
-1. 쓰기를 중지한 시간에 최종 백업 → 서버 리허설 → 로컬 내려받기 → 로컬 복구를 완료합니다.
-2. 시연 영상·주소창 포함 화면·측정 CSV를 비밀값 없이 보존합니다. README에 운영 기간과 종료 상태를 남깁니다.
-3. 잠깐 중지할 때 서버에서 `sudo systemctl stop workflow` 후 AWS 콘솔에서 **Stop**합니다. 데이터/EBS는 유지되고 디스크 요금은 남습니다. 다시 Start하면 IP가 바뀌고 부팅 DuckDNS 서비스가 갱신합니다. CPU 크레딧도 확인합니다.
-4. 최종 종료할 때만 콘솔에서 **Terminate**합니다. 먼저 백업이 실제로 복구되는지 확인합니다. 남은 EBS 볼륨·스냅샷·미사용 공인 IP·기타 과금 리소스를 콘솔에서 확인합니다. 이번 구성에는 Elastic IP를 할당하지 않습니다.
-5. DuckDNS의 불필요한 도메인과 Discord 웹후크를 사용자 계정에서 정리하고, 로컬 키·비밀값·백업 보관 계획을 결정합니다. 백업에는 개인정보가 있으므로 접근을 제한합니다.
+이번 운영은 실험할 때만 켜는 데모입니다. **잠깐 끄기는 Stop만** 사용합니다. 작업 저장·쓰기 중단 후 백업 실행이 끝났는지 확인하고, 서버의 `sudo systemctl stop workflow` 후 AWS 콘솔에서 Stop합니다. 디스크·데이터는 유지됩니다. 실행 중 백업이나 측정을 끊지 않습니다.
+
+다시 Start한 뒤 확인 순서:
+
+1. **DuckDNS 갱신**: 콘솔의 현재 공인 IPv4와 도메인 조회가 같은지 확인합니다. 도메인으로 SSH 접속한 뒤 `systemctl status duckdns-update`와 journal의 `result=SUCCESS`, `dns=MATCH`를 봅니다.
+2. **헬스**: `https://CHANGE_ME.duckdns.org/healthz`가 200/UP인지 확인합니다. 앱 기동 중 503이면 서비스 journal을 확인합니다. 서버 내부 health 진단만 loopback 주소를 씁니다.
+3. **인증서**: HTTPS 접속과 인증서 만료일, certbot.timer 상태를 확인합니다. 오래 꺼 두어 만료됐다면 80번/DNS를 확인하고 certbot 갱신 뒤 Nginx 설정 검사·reload를 합니다.
+4. **놓친 백업**: workflow-backup.timer의 LAST/NEXT와 service 상태를 확인합니다. Persistent=true로 재개 시 실행된 백업이 끝나고 `measure-context.sh`에 완료 백업 시각이 갱신됐는지 확인합니다. 데이터가 아직 없는 첫 설치는 첫 배포 후 백업을 확인합니다.
+5. 아래 앱 배치 누락을 확인하고 필요한 수동 실행을 합니다. 이후 실험 전 체크리스트를 따릅니다.
+
+### 앱 배치 누락과 기존 수동 실행 경로
+
+앱의 Spring 스케줄러는 systemd의 Persistent 타이머와 달라 꺼진 시간의 실행을 자동 재생하지 않습니다. 수동 API도 로그인·해당 메뉴 권한·ALL 범위가 필요하며, 명시한 날짜의 작업 한 번을 요청합니다. 인증값을 명령 인자에 붙이지 않습니다.
+
+| 배치 | 실제 코드의 한국 시각 | 기존 수동 실행 | 제한 |
+|---|---|---|---|
+| 결근 판정 | 매일 00:10, 전날 대상 | `POST /api/v1/attendance/rejudge`, 본문 `{"date":"YYYY-MM-DD"}` | ATTENDANCE_MONTHLY U + ALL. 오늘 이전만 가능. 누락 날짜별로 실행·응답의 batch_runs 확인 |
+| 연차 부여 | **매일 00:30**. 연초 Y 부여와 입사일 기준 월별 부여를 같은 코드에서 검사 | `POST /api/v1/leave/admin/grant-runs`, 본문 `{"date":"YYYY-MM-DD"}` | LEAVE_ADMIN U + ALL. 오늘 이후 거부. 실행 날짜의 해만 계산, 옛 GRANT가 있는 해는 건너뜀. 결과는 GET /api/v1/leave/admin/grant-runs로 확인 |
+| 마감 업무 알림 | 매일 09:00 | **없음, 데모 운영의 한계** | 다음 예정 시각의 현재 조건으로 실행. 꺼진 날의 알림은 자동 소급하지 않음 |
+
+명세의 ‘연차 1/1’은 연간 부여 시점이며 현재 스케줄러 자체는 매일입니다. 기존 수동 경로만 문서화했고 새 배치 기능은 만들지 않았습니다. 연차의 현재 해 누락은 같은 해 실행으로 따라잡지만 지난 해 자동 소급은 하지 않습니다. 결근 재판정은 현재 휴직 상태로 대상을 판단하는 기존 한계가 있으므로 오래된 누락 날짜를 실행하기 전에 사원 상태도 확인합니다.
+
+### 비용 기준
+
+예산 가정은 계속 켰을 때 **약 $25/월**, 껐을 때 디스크만 **약 $3/월**입니다. 확정 청구액이 아니며 사용 시간·지역·스냅샷/트래픽 등과 계정 조건에 따라 달라집니다. 같은 AWS 계정의 다른 프로젝트와 크레딧을 나눠 쓰므로 이 프로젝트만의 잔액처럼 계산하지 않습니다. 사용량·잔여 크레딧은 콘솔에서 함께 확인합니다.
+
+## 12. 최종 종료 체크리스트
+
+**Terminate는 다음을 마친 뒤에만** 실행합니다.
+
+1. 쓰기를 멈추고 최종 백업 → 서버 리허설 → 로컬 내려받기 → 로컬 Docker 복구 확인.
+2. 로컬에 덤프·검증값·버전·행 수와 필요한 시연/측정 기록이 있는지 확인. 원문 데이터·비밀값은 포트폴리오에 올리지 않음.
+3. 최종 종료할 때만 콘솔에서 Terminate. 남은 EBS 볼륨·스냅샷·기타 과금 리소스를 콘솔에서 확인. 단순 중지와 달리 루트 디스크가 삭제될 수 있음.
+4. DuckDNS의 불필요한 도메인과 Discord 웹후크를 사용자 계정에서 정리하고 로컬 키·비밀값·백업 보관 계획을 결정.
 
 재구축은 이 문서 2절부터 진행하고 검증한 백업을 복구합니다.
