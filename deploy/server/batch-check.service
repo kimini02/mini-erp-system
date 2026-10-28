@@ -1,0 +1,8 @@
+[Unit]
+Description=Optional WorkFlow batch completion check
+After=mariadb.service
+OnFailure=notify-failure@%n.service
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/lib/workflow/batch-check.sh

@@ -1,0 +1,11 @@
+[mariadb]
+bind-address=127.0.0.1
+skip-name-resolve
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+innodb_buffer_pool_size=512M
+max_connections=40
+slow_query_log=1
+slow_query_log_file=/var/log/mysql/workflow/slow.log
+long_query_time=1
+log_slow_verbosity=query_plan,explain

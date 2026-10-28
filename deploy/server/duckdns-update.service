@@ -1,0 +1,22 @@
+[Unit]
+Description=Update DuckDNS from EC2 IMDSv2 public IPv4 on boot
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/workflow/duckdns-update.sh
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=30
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

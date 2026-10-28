@@ -1,0 +1,26 @@
+/var/log/nginx/workflow-access.json {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        test ! -f /run/nginx.pid || kill -USR1 "$(cat /run/nginx.pid)"
+    endscript
+}
+/var/log/mysql/workflow/slow.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 mysql adm
+    sharedscripts
+    postrotate
+        /usr/bin/mariadb-admin --protocol=socket --user=root flush-logs >/dev/null 2>&1 || true
+    endscript
+}
