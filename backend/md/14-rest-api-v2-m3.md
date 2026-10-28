@@ -80,9 +80,11 @@
   "leave": null,
   "canClockIn": false, "canClockOut": true,
   "earlyIfNow": true,
-  "monthLateCount": 1
+  "monthLateCount": 1,
+  "monthAbsentCount": 0
 }
 ```
+- (2026-10-28 추가) `monthAbsentCount`: 이번 달 내 기록 중 결근으로 판정된 날 수(결근 배치가 만든 기록 기준). 홈 프로필 카드의 "결근 n회"에 씁니다.
 - `schedule`: 출근 전이면 지금 기준(부서·회사), 출근 뒤에는 **기록에 저장된 스냅샷**. `source`: `DEPARTMENT` / `COMPANY`
 - `leave`: 오늘 승인된 휴가 `{ "type": "HALF_PM", "documentId": 142, "docNo": "HR-2026-0142" }`
 - `earlyIfNow`: 지금 퇴근하면 조퇴로 기록되는지 (화면의 "그래도 퇴근" 확인용)
