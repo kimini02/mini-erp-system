@@ -14,9 +14,9 @@ public class AttendanceService {
     public Map<String,Object> today() {return view(access.actor(),LocalDate.now(clock));}
     private Map<String,Object> view(long user,LocalDate date) {
         var row=records.record(user,date,false);var context=records.day(user,date);var schedule=row==null?records.schedule(user):records.snapshot(row);
-        var month=YearMonth.from(date);
-        long late=db.count("SELECT COUNT(*) FROM attendances WHERE user_id=:user AND work_date BETWEEN :begin AND :end AND in_result='LATE'",map("user",user,"begin",month.atDay(1),"end",month.atEndOfMonth()));
-        return render(date,row,context,schedule,late);
+        var month=YearMonth.now(clock);
+        var counts=db.one("SELECT COALESCE(SUM(in_result='LATE'),0) AS late_count,COALESCE(SUM(absent=1),0) AS absent_count FROM attendances WHERE user_id=:user AND work_date BETWEEN :begin AND :end",map("user",user,"begin",month.atDay(1),"end",month.atEndOfMonth()),ErrorCode.USER_NOT_FOUND);
+        return render(date,row,context,schedule,number(counts,"late_count"),number(counts,"absent_count"));
     }
     /** Home uses one joined snapshot; the response rules are shared with /attendance/today. */
     public Map<String,Object> homeToday() {
@@ -24,16 +24,16 @@ public class AttendanceService {
         Map<String,Object> leave=r.get("leave_id")==null?null:map("type",r.get("leave_type"),"documentId",r.get("leave_id"),"docNo",r.get("leave_no"));
         String holiday=(String)r.get("holiday_name");boolean off=holiday!=null || date.getDayOfWeek()==DayOfWeek.SATURDAY || date.getDayOfWeek()==DayOfWeek.SUNDAY;
         String type=off?"HOLIDAY":leave==null?"WORKDAY":leave.get("type").toString().startsWith("HALF_")?leave.get("type").toString():"LEAVE";
-        return render(date,r.get("id")==null?null:r,new AttendanceStore.Day(type,holiday,leave),records.snapshot(r),number(r,"late_count"));
+        return render(date,r.get("id")==null?null:r,new AttendanceStore.Day(type,holiday,leave),records.snapshot(r),number(r,"late_count"),number(r,"absent_count"));
     }
-    private Map<String,Object> render(LocalDate date,Map<String,Object> row,AttendanceStore.Day context,AttendanceStore.Schedule schedule,long late) {
+    private Map<String,Object> render(LocalDate date,Map<String,Object> row,AttendanceStore.Day context,AttendanceStore.Schedule schedule,long late,long absent) {
         var in=row==null?null:(LocalDateTime)row.get("clock_in_at");var out=row==null?null:(LocalDateTime)row.get("clock_out_at");
         String day=row==null?context.type():(String)row.get("day_type");
         var now=LocalDateTime.now(clock);var hypothetical=AttendanceRules.judge(date,day,schedule.start(),schedule.end(),schedule.grace(),in,now,false);
         return map("workDate",date,"dayType",day,"holidayName",context.holiday(),"schedule",schedule.view(),"clockInAt",in,"clockOutAt",out,
           "inResult",row==null?null:row.get("in_result"),"outResult",row==null?null:row.get("out_result"),"leave",context.leave(),
           "canClockIn",in==null && !context.type().equals("LEAVE") && date.equals(now.toLocalDate()),"canClockOut",in!=null,
-          "earlyIfNow","EARLY".equals(hypothetical.outResult()),"monthLateCount",late);
+          "earlyIfNow","EARLY".equals(hypothetical.outResult()),"monthLateCount",late,"monthAbsentCount",absent);
     }
     @Transactional(isolation=Isolation.READ_COMMITTED) public Map<String,Object> clockIn() {
         long user=access.actor();records.lockUser(user);var now=LocalDateTime.now(clock);var date=now.toLocalDate();

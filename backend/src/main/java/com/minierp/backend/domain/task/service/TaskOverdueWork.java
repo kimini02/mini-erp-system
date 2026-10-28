@@ -24,9 +24,8 @@ public class TaskOverdueWork {
      """,map("project",project,"today",today));
    for(var t:tasks){
     var args=map("task",t.get("id"),"user",t.get("user_id"),"due",t.get("end_date"),"now",LocalDateTime.now(clock));
-    // All claim writers hold the project lock. Exclude an existing key so JDBC's default
-    // CLIENT_FOUND_ROWS cannot report a no-op duplicate update as a fresh insert (1).
-    // The unique key remains the final guard; non-duplicate errors must roll back the batch.
+    // All claim writers hold the project lock; NOT EXISTS excludes previously claimed keys.
+    // The unique key rejects any unexpected competing writer and rolls back the batch.
     int inserted=db.update("""
       INSERT INTO task_due_alerts(task_id,user_id,due_date,created_at)
       SELECT :task,:user,:due,:now FROM DUAL

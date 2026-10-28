@@ -1,0 +1,6 @@
+[Unit]
+Description=Optional WorkFlow failure notification
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/lib/workflow/notify.sh %i

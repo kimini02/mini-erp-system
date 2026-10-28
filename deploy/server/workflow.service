@@ -1,0 +1,27 @@
+[Unit]
+Description=WorkFlow application
+After=network.target mariadb.service redis-server.service
+Wants=mariadb.service redis-server.service
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=simple
+User=workflow
+Group=workflow
+EnvironmentFile=/etc/workflow/env
+ExecStart=/usr/bin/java $JAVA_OPTS -jar /opt/workflow/current/app.jar --spring.profiles.active=prod
+Restart=on-failure
+RestartSec=5
+SuccessExitStatus=143
+TimeoutStopSec=30
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/workflow
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
