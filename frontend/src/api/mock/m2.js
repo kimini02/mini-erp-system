@@ -978,6 +978,39 @@ export function installM2({ route, db, fail, created, need, userById, deptById, 
     );
   });
 
+  /* ───────── 라우트: 캘린더 (기존 GET /calendar/events, 내 승인 휴가·특근) ───────── */
+
+  // 실제 서버(CalendarService)의 제목 규칙을 따릅니다: "연차 - {휴가 종류}", "특근 - {사유}"
+  const SERVER_LEAVE_NAMES = { ANNUAL: '연차', HALF_AM: '오전반차', HALF_PM: '오후반차', SICK: '병가', FAMILY: '경조' };
+
+  route('GET', '/calendar/events', (ctx) => {
+    const year = Number(ctx.params.year);
+    const month = Number(ctx.params.month);
+    if (!year || !(month >= 1 && month <= 12)) fail(400, 'INVALID_INPUT_VALUE', 'year/month 값이 유효하지 않습니다.');
+    const first = `${year}-${pad(month)}-01`;
+    const last = `${year}-${pad(month)}-${pad(new Date(year, month, 0).getDate())}`;
+    const mine = state.documents.filter((d) => d.drafterId === ctx.user.id && d.status === 'APPROVED');
+    const leaves = mine
+      .filter((d) => d.formCode === 'LEAVE' && d.body.startDate <= last && d.body.endDate >= first)
+      .map((d) => ({
+        eventId: d.id,
+        title: `연차 - ${SERVER_LEAVE_NAMES[d.body.leaveType] || d.body.leaveType}`,
+        start: `${d.body.startDate}T00:00:00`,
+        end: `${d.body.endDate}T23:59:59`,
+        type: 'LEAVE',
+      }));
+    const overtimes = mine
+      .filter((d) => d.formCode === 'OVERTIME' && d.body.overtimeDate >= first && d.body.overtimeDate <= last)
+      .map((d) => ({
+        eventId: d.id,
+        title: `특근 - ${d.body.reason || '특근 업무'}`,
+        start: `${d.body.overtimeDate}T${d.body.startTime}:00`,
+        end: `${d.body.overtimeDate}T${d.body.endTime}:00`,
+        type: 'OVERTIME',
+      }));
+    return [...leaves, ...overtimes].sort((a, b) => a.start.localeCompare(b.start));
+  });
+
   /* ───────── 라우트: 연차 ───────── */
 
   const yearOf = (ctx) => Number(ctx.params.year) || new Date().getFullYear();
