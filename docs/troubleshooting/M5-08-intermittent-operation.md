@@ -54,7 +54,7 @@ Mem:            3919        1682         248          22        2193        2236
 Swap:           1023           0        1023
 [swap_bytes]
 NAME          TYPE       SIZE USED PRIO UUID LABEL
-/var/lib/swap file 1073737728    0   -2      
+/var/lib/swap file 1073737728    0   -2
 SwapTotal:       1048572 kB
 SwapFree:        1048572 kB
 last_backup_utc=NONE
@@ -81,7 +81,7 @@ Mem:            3919        1681         249          22        2193        2237
 Swap:           1023           0        1023
 [swap_bytes]
 NAME          TYPE       SIZE USED PRIO UUID LABEL
-/var/lib/swap file 1073737728    0   -2      
+/var/lib/swap file 1073737728    0   -2
 SwapTotal:       1048572 kB
 SwapFree:        1048572 kB
 last_backup_utc=NONE
@@ -104,7 +104,7 @@ Mem:            3919        1684         247          22        2193        2235
 Swap:           1023           0        1023
 [swap_bytes]
 NAME          TYPE       SIZE USED PRIO UUID LABEL
-/var/lib/swap file 1073737728    0   -2      
+/var/lib/swap file 1073737728    0   -2
 SwapTotal:       1048572 kB
 SwapFree:        1048572 kB
 last_backup_file=20261028T053916.025543461Z.sql.gz
