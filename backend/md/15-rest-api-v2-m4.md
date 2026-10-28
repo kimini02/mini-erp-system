@@ -65,7 +65,7 @@
   },
   "myTasks": {
     "project": { "id": 3, "key": "GW", "title": "사내 그룹웨어 개발", "total": 10, "done": 3, "overdue": 1, "progressPct": 30 },
-    "items": [{ "id": 18, "key": "GW-18", "title": "사원 등록·아이디 생성", "status": "DOING", "endDate": "2026-10-09", "overdueDays": 3 }]
+    "items": [{ "id": 18, "projectId": 3, "key": "GW-18", "title": "사원 등록·아이디 생성", "status": "DOING", "endDate": "2026-10-09", "overdueDays": 3 }]
   },
   "notifications": { "unread": 3, "items": [{ "id": 901, "type": "APPROVAL_REQUESTED", "title": "연차 · 10/19~10/20", "link": "/approvals/151", "read": false, "createdAt": "2026-10-12T09:14:00" }] }
 }
@@ -73,7 +73,8 @@
 
 - `approvals.todo`: 내 결재 차례 문서 최근 3건(M2 결재함 '결재 대기'와 같은 조건), `todoCount`는 전체 건수. `mine`: 내가 올린 진행 중 문서 최근 3건.
 - `teamWeek`: **내 부서**(하위 부서 제외) 사원의 이번 주 월~금. 승인됐거나 결재 중인 휴가(`LEAVE`/`HALF_AM`/`HALF_PM`, 결재 중이면 `status: IN_PROGRESS`)와, 내 부서 사람이 담당인 미완료 업무의 마감일(`TASK_DUE`). 휴가 사유는 내보내지 않음.
-- `myTasks.project`: 내가 담당인 미완료 업무가 가장 많은 프로젝트(같으면 최근 수정순). `items`: 내 미완료 업무 5건, **마감 지난 것 먼저**, 그다음 마감일 순.
+- `myTasks.project`: 내가 담당인 미완료 업무가 가장 많은 프로젝트(같으면 최근 수정순). `items`: 내가 담당인 미완료 업무 중 보기 범위 안의 5건, **마감 지난 것 먼저**, 그다음 마감일 순.
+  - (2026-10-28 보완) 항목마다 `projectId`를 줍니다. 항목의 프로젝트가 `myTasks.project`와 다를 수 있어서, 화면은 이 값으로 `/projects/{projectId}/board?taskId={id}` 링크를 만듭니다.
 - `notifications`: 안 읽은 수와 최근 5건(M2 알림).
 - **쿼리 수가 데이터 양과 상관없이 고정**이어야 합니다(목표 15번 이하, 8장 측정 4).
 
