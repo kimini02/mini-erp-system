@@ -62,6 +62,7 @@ sudo /usr/local/lib/workflow/setup-secrets.sh
 sudo bash ~/workflow-setup/bootstrap.sh --domain CHANGE_ME.duckdns.org
 ```
 
+- **앱 운영 중 bootstrap 재실행은 짧은 중단을 일으키므로 점검 시간에만 합니다.** 패키지 설치·설정 배치·서비스 재시작을 배포/백업과 같은 maintenance 잠금으로 직렬화합니다. SSH 설정 검사·reload를 DuckDNS보다 먼저 마치며, DNS 실패 시 bootstrap은 실패하고 journalctl·reset-failed 안내를 출력합니다. 타이머 시작과 DNS 대기 전에 잠금을 풀어 밀린 백업이 진행될 수 있게 합니다.
 - 첫 실행: Java 17·MariaDB 10.11·Redis·Nginx·certbot·sysstat 등 설치, workflow 시스템 사용자(nologin), 폴더·설정·유닛·UTC·2 GiB swap·swappiness 10 배치. 인증서가 없으므로 HTTP ACME 설정을 사용합니다.
 - 숨김 입력: 관리자 아이디·이름·이메일·비밀번호 및 확인, 선택 Discord 웹후크, DuckDNS 서브도메인(접미사 제외)·토큰. 서브도메인도 숨김 입력이며 bootstrap의 도메인과 다르면 저장하지 않습니다. 비밀번호는 기존 정책(8~20자, 대문자·소문자·숫자·기호)을 만족해야 합니다. DB 비밀번호 두 개와 JWT 비밀값은 서버 `openssl rand`로 생성하며 화면에 출력하지 않습니다.
 - `/etc/workflow/env`, `/etc/workflow/duckdns`는 root:root 600, 부모 폴더는 700. 재실행 시 기존 DB/JWT 비밀값·DuckDNS 토큰을 유지합니다. 자동 회전 도구는 아닙니다.

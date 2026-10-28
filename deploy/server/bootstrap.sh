@@ -17,6 +17,8 @@ if [[ -z $domain && -f /etc/workflow/domain ]]; then domain=$(cat /etc/workflow/
 [[ $domain =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ && $domain == *.* && $domain != *..* ]] || { printf '%s\n' 'A DNS hostname is required.' >&2; exit 2; }
 source /etc/os-release
 [[ $ID == ubuntu && $VERSION_ID == 24.04 ]] || { printf '%s\n' 'Ubuntu 24.04 is required.' >&2; exit 1; }
+# Serialize package-triggered restarts, config placement and explicit restarts with backups/deploys.
+lock_ops
 export DEBIAN_FRONTEND=noninteractive
 # Avoid service start attempts only in the disposable, non-systemd verification environment.
 policy_created=0
@@ -78,11 +80,19 @@ sysctl --system >/dev/null
 systemctl daemon-reload
 systemctl enable mariadb redis-server nginx sysstat sysstat-collect.timer certbot.timer workflow-backup.timer batch-check.timer workflow duckdns-update.service
 systemctl restart mariadb redis-server nginx systemd-journald
+if [[ -f /etc/workflow/env ]]; then "$here/provision-db.sh"; fi
+# Apply SSH policy before a potentially failing external DNS update.
+if command -v sshd >/dev/null; then sshd -t;sshd -T | grep -E '^(permitrootlogin|passwordauthentication) ';systemctl reload ssh;fi
+flock -u 9
+exec 9>&-
+# Persistent timers may launch jobs that need the same maintenance lock.
 systemctl start sysstat-collect.timer certbot.timer
 if [[ -f /etc/workflow/env ]]; then
-  "$here/provision-db.sh"
   systemctl start workflow-backup.timer batch-check.timer
-  systemctl restart duckdns-update.service
+  if ! systemctl restart duckdns-update.service; then
+    printf '%s\n' 'DuckDNS update failed after SSH policy was applied. Inspect: sudo journalctl -u duckdns-update.service -n 50 --no-pager' >&2
+    printf '%s\n' 'After fixing the cause: sudo systemctl reset-failed duckdns-update.service; sudo systemctl restart duckdns-update.service' >&2
+    exit 1
+  fi
 else printf '%s\n' 'Next: run setup-secrets.sh interactively, then bootstrap.sh again.'; fi
-if command -v sshd >/dev/null; then sshd -t;sshd -T | grep -E '^(permitrootlogin|passwordauthentication) ';systemctl reload ssh;fi
 printf '%s\n' 'Bootstrap complete. Certificate issuance and release activation are separate operator steps.'
