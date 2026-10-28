@@ -33,7 +33,8 @@ function useDropdown() {
   return { open, setOpen, ref };
 }
 
-const panelClass = 'absolute right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-overlay';
+const panelClass =
+  'absolute right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-overlay';
 
 /** 앱 안 알림 (명세 13번 6장) */
 function NotificationMenu() {
@@ -48,10 +49,13 @@ function NotificationMenu() {
   useEffect(() => {
     if (!open) return undefined;
     let alive = true;
-    notificationApi.list({ page: 0, size: 10 })
+    notificationApi
+      .list({ page: 0, size: 10 })
       .then((r) => alive && setItems(r.content || []))
       .catch(() => alive && setItems([]));
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [open]);
 
   const openItem = async (n) => {
@@ -81,7 +85,7 @@ function NotificationMenu() {
         onClick={() => setOpen((v) => !v)}
         className={cn(
           'relative flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700',
-          open && 'bg-gray-100 text-gray-700'
+          open && 'bg-gray-100 text-gray-700',
         )}
         aria-label="알림"
       >
@@ -98,7 +102,11 @@ function NotificationMenu() {
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
             <p className="text-sm font-semibold text-gray-900">알림</p>
             {unread > 0 && (
-              <button type="button" onClick={readAll} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800">
+              <button
+                type="button"
+                onClick={readAll}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800"
+              >
                 <CheckCheck size={14} /> 모두 읽음
               </button>
             )}
@@ -120,12 +128,21 @@ function NotificationMenu() {
                     <button
                       type="button"
                       onClick={() => openItem(n)}
-                      className={cn('flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-gray-50', !n.read && 'bg-blue-50/40')}
+                      className={cn(
+                        'flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-gray-50',
+                        !n.read && 'bg-blue-50/40',
+                      )}
                     >
                       <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', n.read ? 'bg-gray-200' : meta.dot)} />
                       <span className="min-w-0 flex-1">
-                        <span className={cn('block text-[13px]', n.read ? 'text-gray-600' : 'font-medium text-gray-900')}>{meta.sentence ? meta.sentence(n.title) : n.title}</span>
-                        <span className="block text-xs text-gray-500">{meta.label} · {formatDateTime(n.createdAt)}</span>
+                        <span
+                          className={cn('block text-[13px]', n.read ? 'text-gray-600' : 'font-medium text-gray-900')}
+                        >
+                          {meta.sentence ? meta.sentence(n.title) : n.title}
+                        </span>
+                        <span className="block text-xs text-gray-500">
+                          {meta.label} · {formatDateTime(n.createdAt)}
+                        </span>
                       </span>
                     </button>
                   </li>
@@ -167,7 +184,10 @@ function UserMenu({ onOpenProfile }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={cn('flex h-9 items-center gap-2 rounded-lg pl-1 pr-2 transition-colors hover:bg-gray-100', open && 'bg-gray-100')}
+        className={cn(
+          'flex h-9 items-center gap-2 rounded-lg pl-1 pr-2 transition-colors hover:bg-gray-100',
+          open && 'bg-gray-100',
+        )}
       >
         <Avatar name={name} size="sm" />
         <span className="hidden text-sm font-medium text-gray-800 sm:block">{name}</span>
@@ -179,7 +199,9 @@ function UserMenu({ onOpenProfile }) {
           <div className="border-b border-gray-100 px-4 py-3">
             <p className="text-sm font-semibold text-gray-900">{name}</p>
             <p className="mt-0.5 text-xs text-gray-500">
-              {[user?.department?.name || user?.departmentName, user?.position || roleLabel].filter(Boolean).join(' · ')}
+              {[user?.department?.name || user?.departmentName, user?.position || roleLabel]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
             {user?.email && <p className="mt-0.5 truncate text-xs text-gray-400">{user.email}</p>}
           </div>

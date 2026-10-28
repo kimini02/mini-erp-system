@@ -24,5 +24,6 @@ export const boardApi = {
   task: (id) => data(api.get(`/tasks/${id}`)),
   updateTask: (id, body) => data(api.patch(`/tasks/${id}`, body)),
   /** 성공: { task, project } · 409 TASK_VERSION_CONFLICT 면 error.details.currentTask 에 최신 카드 */
-  move: (id, { status, afterTaskId = null, version }) => data(api.post(`/tasks/${id}/move`, { status, afterTaskId, version })),
+  move: (id, { status, afterTaskId = null, version }) =>
+    data(api.post(`/tasks/${id}/move`, { status, afterTaskId, version })),
 };

@@ -14,11 +14,12 @@ export const attendanceApi = {
   monthly: (params) => data(api.get('/attendance/monthly', { params })),
   record: (userId, date) => data(api.get(`/attendance/records/${userId}/${date}`)),
   /** CSV 파일(Blob)과 파일 이름 */
-  exportCsv: (params) => api.get('/attendance/monthly/export', { params, responseType: 'blob' }).then((res) => {
-    const disposition = res.headers?.['content-disposition'] || '';
-    const filename = /filename="?([^";]+)"?/.exec(disposition)?.[1] || `attendance-${params.month}.csv`;
-    return { blob: res.data, filename };
-  }),
+  exportCsv: (params) =>
+    api.get('/attendance/monthly/export', { params, responseType: 'blob' }).then((res) => {
+      const disposition = res.headers?.['content-disposition'] || '';
+      const filename = /filename="?([^";]+)"?/.exec(disposition)?.[1] || `attendance-${params.month}.csv`;
+      return { blob: res.data, filename };
+    }),
   rejudge: (date) => data(api.post('/attendance/rejudge', { date })),
 };
 

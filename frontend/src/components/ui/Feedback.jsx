@@ -24,7 +24,12 @@ export function Toaster() {
         >
           <span className="mt-px">{toastIcons[t.type]}</span>
           <p className="flex-1 text-sm text-gray-800">{t.message}</p>
-          <button type="button" onClick={() => dismiss(t.id)} className="text-gray-400 hover:text-gray-600" aria-label="닫기">
+          <button
+            type="button"
+            onClick={() => dismiss(t.id)}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label="닫기"
+          >
             <X size={16} />
           </button>
         </div>

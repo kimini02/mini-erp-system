@@ -17,7 +17,7 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
     authCode: '',
     newPassword: '',
     confirmPassword: '',
-    resetProof: ''
+    resetProof: '',
   });
 
   const [serverUser, setServerUser] = useState(null);
@@ -41,7 +41,10 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
   // 잔여 연차는 올해 원장 합계 (옛 remainingAnnualLeave 는 모든 연도를 더한 값이라 쓰지 않음)
   useEffect(() => {
     if (!isOpen) return;
-    leaveApi.balance(new Date().getFullYear()).then(setBalance).catch(() => setBalance(null));
+    leaveApi
+      .balance(new Date().getFullYear())
+      .then(setBalance)
+      .catch(() => setBalance(null));
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -55,7 +58,7 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
     email: d.email || '이메일 미확인',
     position: d.position || '직급 미확인',
     dept: d.departmentName || d.department || d.departmentCode || '소속 부서 미지정',
-    leave: balance ? formatDays(balance.available) : '-'
+    leave: balance ? formatDays(balance.available) : '-',
   };
 
   const handleClose = () => {
@@ -81,10 +84,10 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
     try {
       const response = await axios.post('/auth/password/reset/verify', {
         email: displayInfo.email,
-        verificationCode: formData.authCode
+        verificationCode: formData.authCode,
       });
       if (response.data.success) {
-        setFormData(prev => ({ ...prev, resetProof: response.data.data.resetProof }));
+        setFormData((prev) => ({ ...prev, resetProof: response.data.data.resetProof }));
         setStep(3);
       }
     } catch {
@@ -101,7 +104,7 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
       const response = await axios.post('/auth/password/reset/confirm', {
         resetProof: formData.resetProof,
         newPassword: formData.newPassword,
-        newPasswordConfirm: formData.confirmPassword
+        newPasswordConfirm: formData.confirmPassword,
       });
       if (response.data.success) {
         setStep(4);
@@ -121,7 +124,9 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={handleClose}>닫기</Button>
+            <Button variant="secondary" onClick={handleClose}>
+              닫기
+            </Button>
             <Button onClick={() => setMode('changePw')}>비밀번호 변경</Button>
           </>
         }
@@ -148,10 +153,26 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
 
   // ---- 비밀번호 변경 ----
   const stepFooter = {
-    1: <Button block onClick={handleRequestAuth}>인증번호 발송</Button>,
-    2: <Button block onClick={handleVerifyCode}>인증 확인</Button>,
-    3: <Button block onClick={handleConfirmReset}>비밀번호 변경</Button>,
-    4: <Button block onClick={handleClose}>확인</Button>,
+    1: (
+      <Button block onClick={handleRequestAuth}>
+        인증번호 발송
+      </Button>
+    ),
+    2: (
+      <Button block onClick={handleVerifyCode}>
+        인증 확인
+      </Button>
+    ),
+    3: (
+      <Button block onClick={handleConfirmReset}>
+        비밀번호 변경
+      </Button>
+    ),
+    4: (
+      <Button block onClick={handleClose}>
+        확인
+      </Button>
+    ),
   };
 
   return (

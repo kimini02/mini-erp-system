@@ -85,19 +85,21 @@ const CalendarPage = () => {
         axios.get('/calendar/events', { params: { year: currentYear, month: currentMonthInt } }),
         axios.get('/attendance/summary', { params: { month: formattedMonth } }),
         axios.get('/projects'),
-        axios.get('/overtime/list')
+        axios.get('/overtime/list'),
       ]);
 
-      const getSafeData = (res) => (res.status === 'fulfilled' && res.value.data) ? (res.value.data.data || res.value.data || []) : [];
+      const getSafeData = (res) =>
+        res.status === 'fulfilled' && res.value.data ? res.value.data.data || res.value.data || [] : [];
 
       const lDataRaw = getSafeData(results[0]);
       const cEventsRaw = getSafeData(results[1]);
-      const sData = (results[2].status === 'fulfilled' && results[2].value.data?.success) ? (results[2].value.data.data || {}) : {};
+      const sData =
+        results[2].status === 'fulfilled' && results[2].value.data?.success ? results[2].value.data.data || {} : {};
       const pData = getSafeData(results[3]);
       const oData = getSafeData(results[4]);
 
       // 1. 연차 데이터 가공
-      const mappedLeaveData = lDataRaw.map(l => {
+      const mappedLeaveData = lDataRaw.map((l) => {
         const type = l.app_type || l.appType;
         let typePrefix = '[연차]';
         if (type === 'HALF_MORNING') typePrefix = '[오전반차]';
@@ -112,12 +114,12 @@ const CalendarPage = () => {
           endDate: l.end_date || l.endDate,
           usedDays: Number(l.usedDays || l.used_days || 0),
           displayTitle: `${typePrefix} ${l.request_reason || l.requestReason || '개인 사유'}`,
-          createdAt: l.created_at || l.createdAt
+          createdAt: l.created_at || l.createdAt,
         };
       });
 
       const myApprovedLeaveTotal = mappedLeaveData
-        .filter(l => l.appStatus === 'APPROVED')
+        .filter((l) => l.appStatus === 'APPROVED')
         .reduce((acc, cur) => acc + (cur.usedDays || 0), 0);
 
       // 2. 출근 기록 가공
@@ -127,13 +129,13 @@ const CalendarPage = () => {
         clock_in_time: record.clockInTime || '--:--',
         clock_out_time: record.clockOutTime || '--:--',
         status: record.status || '정상',
-        recordType: 'ATTENDANCE' // 타입 구분자
+        recordType: 'ATTENDANCE', // 타입 구분자
       }));
 
       // 3. 이벤트 가공 (캘린더 표시용)
       const leaveEvents = mappedLeaveData
-        .filter(l => l.appStatus === 'APPROVED')
-        .map(l => ({
+        .filter((l) => l.appStatus === 'APPROVED')
+        .map((l) => ({
           id: `lv-${l.appId}`,
           title: l.displayTitle,
           start: l.startDate,
@@ -142,13 +144,13 @@ const CalendarPage = () => {
         }));
 
       const overtimeEvents = oData
-        .filter(o => (o.status || o.appStatus) === 'APPROVED')
-        .map(o => ({
+        .filter((o) => (o.status || o.appStatus) === 'APPROVED')
+        .map((o) => ({
           id: `ot-${o.id}`,
           title: `[특근] ${o.reason || '주말특근'}`,
           start: o.overtime_date || o.overtimeDate,
           end: o.overtime_date || o.overtimeDate,
-          type: 'OVERTIME'
+          type: 'OVERTIME',
         }));
 
       const projectEvents = pData.map((p, idx) => ({
@@ -156,7 +158,7 @@ const CalendarPage = () => {
         title: `[P] ${p.title || p.projectName || '무제 프로젝트'}`,
         start: p.startDate || p.start_date,
         end: p.endDate || p.end_date,
-        type: 'PROJECT'
+        type: 'PROJECT',
       }));
 
       const rawEvents = [
@@ -164,13 +166,15 @@ const CalendarPage = () => {
         ...cEventsRaw.map((e, idx) => ({ ...e, id: e.eventId ? `srv-${e.eventId}` : `ce-${idx}` })),
         ...leaveEvents,
         ...projectEvents,
-        ...overtimeEvents
+        ...overtimeEvents,
       ];
 
       const uniqueEventsMap = new Map();
-      rawEvents.forEach(evt => { if (evt.start) uniqueEventsMap.set(evt.id, evt); });
+      rawEvents.forEach((evt) => {
+        if (evt.start) uniqueEventsMap.set(evt.id, evt);
+      });
 
-      const finalEvents = Array.from(uniqueEventsMap.values()).map(event => ({
+      const finalEvents = Array.from(uniqueEventsMap.values()).map((event) => ({
         ...event,
         classNames: [typeOf(event.type).className],
         allDay: true,
@@ -186,7 +190,6 @@ const CalendarPage = () => {
         leaveUsedTotal: sData.leaveUsedCount || myApprovedLeaveTotal,
         attendanceRecords: attendanceRecords,
       });
-
     } catch (error) {
       console.error('데이터 가공 에러:', error);
     } finally {
@@ -202,18 +205,20 @@ const CalendarPage = () => {
   const handleDateClick = (arg) => {
     const clickedDate = arg.dateStr;
 
-    const attendanceOnDate = summary.attendanceRecords.filter(r => r.work_date === clickedDate);
+    const attendanceOnDate = summary.attendanceRecords.filter((r) => r.work_date === clickedDate);
 
-    const eventsOnDate = events.filter(evt => {
-      const start = evt.start;
-      const end = evt.end || evt.start; // 종료일이 없으면 시작일과 동일하게 처리
-      return clickedDate >= start && clickedDate <= end;
-    }).map(evt => ({
-      id: evt.id,
-      title: evt.title,
-      type: evt.type,
-      recordType: 'EVENT'
-    }));
+    const eventsOnDate = events
+      .filter((evt) => {
+        const start = evt.start;
+        const end = evt.end || evt.start; // 종료일이 없으면 시작일과 동일하게 처리
+        return clickedDate >= start && clickedDate <= end;
+      })
+      .map((evt) => ({
+        id: evt.id,
+        title: evt.title,
+        type: evt.type,
+        recordType: 'EVENT',
+      }));
 
     setDisplayRecords([...attendanceOnDate, ...eventsOnDate]);
     setSelectedDate(clickedDate);
@@ -228,15 +233,19 @@ const CalendarPage = () => {
       if (type === 'IN') {
         await axios.post('/attendance/check-in', {
           workDate: workDate,
-          clockInTime: currentTime
+          clockInTime: currentTime,
         });
         toast.success(`출근이 기록되었습니다. (${currentTime.slice(0, 5)})`);
       } else {
-        await axios.patch('/attendance/check-out', {
-          clockOutTime: currentTime
-        }, {
-          params: { workDate: workDate }
-        });
+        await axios.patch(
+          '/attendance/check-out',
+          {
+            clockOutTime: currentTime,
+          },
+          {
+            params: { workDate: workDate },
+          },
+        );
         toast.success(`퇴근이 기록되었습니다. (${currentTime.slice(0, 5)})`);
       }
 
@@ -254,8 +263,8 @@ const CalendarPage = () => {
       toast.error('검색할 기간을 선택해주세요.');
       return;
     }
-    const filtered = originalLeaveRequests.filter(req =>
-      (req.startDate >= start && req.startDate <= end) || (req.endDate >= start && req.endDate <= end)
+    const filtered = originalLeaveRequests.filter(
+      (req) => (req.startDate >= start && req.startDate <= end) || (req.endDate >= start && req.endDate <= end),
     );
     setFilteredLeaveRequests(filtered);
   };
@@ -276,8 +285,12 @@ const CalendarPage = () => {
         description="출퇴근 기록과 연차·특근·프로젝트 일정을 확인하세요."
         actions={
           <>
-            <Button variant="secondary" icon={LogOut} onClick={() => handleAttendance('OUT')}>퇴근</Button>
-            <Button icon={LogIn} onClick={() => handleAttendance('IN')}>출근</Button>
+            <Button variant="secondary" icon={LogOut} onClick={() => handleAttendance('OUT')}>
+              퇴근
+            </Button>
+            <Button icon={LogIn} onClick={() => handleAttendance('IN')}>
+              출근
+            </Button>
           </>
         }
       />
@@ -325,7 +338,13 @@ const CalendarPage = () => {
           <CardHeader
             title={selectedDate ? `${selectedDate} 상세` : '이번 달 출근 기록'}
             description={selectedDate ? '선택한 날짜의 기록과 일정' : '날짜를 누르면 해당 일의 상세를 볼 수 있습니다'}
-            action={selectedDate && <Button variant="ghost" size="sm" onClick={handleReset}>전체</Button>}
+            action={
+              selectedDate && (
+                <Button variant="ghost" size="sm" onClick={handleReset}>
+                  전체
+                </Button>
+              )
+            }
           />
           <div className="max-h-[560px] flex-1 overflow-y-auto">
             {displayRecords.length > 0 ? (
@@ -356,7 +375,7 @@ const CalendarPage = () => {
                         <p className="truncate text-sm font-medium text-gray-900">{item.title}</p>
                       </div>
                     </li>
-                  )
+                  ),
                 )}
               </ul>
             ) : (
@@ -379,14 +398,29 @@ const CalendarPage = () => {
         <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 px-5 py-3">
           <span className="mr-1 text-[13px] text-gray-500">기간</span>
           <div className="w-40">
-            <Input type="date" value={dateRange.start} className="h-8" onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} />
+            <Input
+              type="date"
+              value={dateRange.start}
+              className="h-8"
+              onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+            />
           </div>
           <span className="text-gray-400">~</span>
           <div className="w-40">
-            <Input type="date" value={dateRange.end} min={dateRange.start} className="h-8" onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} />
+            <Input
+              type="date"
+              value={dateRange.end}
+              min={dateRange.start}
+              className="h-8"
+              onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+            />
           </div>
-          <Button size="sm" variant="secondary" onClick={handleSearch}>조회</Button>
-          <Button size="sm" variant="ghost" onClick={handleReset}>초기화</Button>
+          <Button size="sm" variant="secondary" onClick={handleSearch}>
+            조회
+          </Button>
+          <Button size="sm" variant="ghost" onClick={handleReset}>
+            초기화
+          </Button>
         </div>
         <Table>
           <thead>
@@ -404,9 +438,15 @@ const CalendarPage = () => {
                 <Tr key={req.appId || index}>
                   <Td className="tabular-nums text-gray-500">{req.createdAt?.split('T')[0] || '-'}</Td>
                   <Td className="font-medium text-gray-900">{LEAVE_TYPE_LABELS[req.appType] || req.appType}</Td>
-                  <Td className="whitespace-nowrap tabular-nums">{req.startDate} ~ {req.endDate}</Td>
-                  <Td align="right" className="tabular-nums">{req.usedDays}일</Td>
-                  <Td align="center"><StatusBadge status={req.appStatus} /></Td>
+                  <Td className="whitespace-nowrap tabular-nums">
+                    {req.startDate} ~ {req.endDate}
+                  </Td>
+                  <Td align="right" className="tabular-nums">
+                    {req.usedDays}일
+                  </Td>
+                  <Td align="center">
+                    <StatusBadge status={req.appStatus} />
+                  </Td>
                 </Tr>
               ))
             ) : (

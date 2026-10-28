@@ -65,7 +65,7 @@ export function Avatar({ name, size = 'md', className }) {
       className={cn(
         'inline-flex shrink-0 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700',
         sizes[size],
-        className
+        className,
       )}
     >
       {name?.trim()?.charAt(0) || '?'}
@@ -73,13 +73,22 @@ export function Avatar({ name, size = 'md', className }) {
   );
 }
 
-const barTones = { blue: 'bg-blue-600', green: 'bg-emerald-500', amber: 'bg-amber-500', red: 'bg-red-500', gray: 'bg-gray-400' };
+const barTones = {
+  blue: 'bg-blue-600',
+  green: 'bg-emerald-500',
+  amber: 'bg-amber-500',
+  red: 'bg-red-500',
+  gray: 'bg-gray-400',
+};
 
 export function Progress({ value = 0, tone = 'blue', className }) {
   const pct = Math.max(0, Math.min(100, Number(value) || 0));
   return (
     <div className={cn('h-1.5 w-full overflow-hidden rounded-full bg-gray-100', className)}>
-      <div className={cn('h-full rounded-full transition-[width] duration-300', barTones[tone])} style={{ width: `${pct}%` }} />
+      <div
+        className={cn('h-full rounded-full transition-[width] duration-300', barTones[tone])}
+        style={{ width: `${pct}%` }}
+      />
     </div>
   );
 }

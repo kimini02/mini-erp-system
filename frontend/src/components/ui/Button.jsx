@@ -3,10 +3,12 @@ import { cn } from '@/lib/cn';
 
 const variants = {
   primary: 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300',
-  secondary: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:text-gray-900 disabled:text-gray-400 disabled:bg-white',
+  secondary:
+    'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:text-gray-900 disabled:text-gray-400 disabled:bg-white',
   ghost: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 disabled:text-gray-300 disabled:bg-transparent',
   danger: 'bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300',
-  'danger-outline': 'bg-white text-red-600 border border-gray-300 hover:bg-red-50 hover:border-red-200 disabled:text-red-300',
+  'danger-outline':
+    'bg-white text-red-600 border border-gray-300 hover:bg-red-50 hover:border-red-200 disabled:text-red-300',
 };
 
 const sizes = {
@@ -45,7 +47,7 @@ export default function Button({
         variants[variant],
         sizes[size],
         block && 'w-full',
-        className
+        className,
       )}
       {...props}
     >

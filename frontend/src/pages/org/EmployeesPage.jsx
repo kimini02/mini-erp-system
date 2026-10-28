@@ -8,12 +8,28 @@ import { getErrorMessage } from '@/lib/errors';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/cn';
 import {
-  Avatar, Badge, Button, Card, EmptyState, Field, Input, Modal, PageHeader, PageLoader, Select, Table, TableEmpty, Td, Th, Tr,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  Input,
+  Modal,
+  PageHeader,
+  PageLoader,
+  Select,
+  Table,
+  TableEmpty,
+  Td,
+  Th,
+  Tr,
 } from '@/components/ui';
 
 const PAGE_SIZE = 15;
 const STATUS_TABS = ['ACTIVE', 'ON_LEAVE', 'RETIRED'];
-const roleTone = (code) => (code === 'CHIEF' ? 'red' : code === 'LEADER' ? 'blue' : code === 'EMPLOYEE' ? 'gray' : 'green');
+const roleTone = (code) =>
+  code === 'CHIEF' ? 'red' : code === 'LEADER' ? 'blue' : code === 'EMPLOYEE' ? 'gray' : 'green';
 const today = () => new Date().toLocaleDateString('sv-SE');
 
 function useDebounced(value, delay) {
@@ -41,7 +57,7 @@ function RoleChips({ roles, value, onChange }) {
             onClick={() => toggle(r.code)}
             className={cn(
               'inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-colors',
-              on ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-600 hover:border-gray-400'
+              on ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-600 hover:border-gray-400',
             )}
           >
             {on && <Check size={13} strokeWidth={2.5} />}
@@ -64,7 +80,11 @@ function CreateModal({ open, onClose, departments, positions, roles, canAssignRo
 
   useEffect(() => {
     if (open) {
-      setForm({ ...blank, departmentId: departments[1]?.id ?? departments[0]?.id ?? '', positionId: positions[0]?.id ?? '' });
+      setForm({
+        ...blank,
+        departmentId: departments[1]?.id ?? departments[0]?.id ?? '',
+        positionId: positions[0]?.id ?? '',
+      });
       setError('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,14 +93,23 @@ function CreateModal({ open, onClose, departments, positions, roles, canAssignRo
   useEffect(() => {
     if (!open || !/^\d{4}-\d{2}-\d{2}$/.test(form.hireDate)) return undefined;
     let alive = true;
-    userApi.previewLoginId(form.hireDate)
+    userApi
+      .previewLoginId(form.hireDate)
       .then((r) => alive && setPreview(r.loginId))
       .catch(() => alive && setPreview(''));
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [open, form.hireDate]);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
-  const valid = form.name.trim() && form.email.includes('@') && form.hireDate && form.departmentId && form.positionId && form.roleCodes.length;
+  const valid =
+    form.name.trim() &&
+    form.email.includes('@') &&
+    form.hireDate &&
+    form.departmentId &&
+    form.positionId &&
+    form.roleCodes.length;
 
   const submit = async (e) => {
     e.preventDefault();
@@ -97,7 +126,10 @@ function CreateModal({ open, onClose, departments, positions, roles, canAssignRo
         roleCodes: form.roleCodes,
       });
       toast.success(`${form.name.trim()} 사원을 등록했습니다. 아이디 ${result.loginId}`);
-      if (!result.invitationSent) toast.info('메일 발송이 꺼져 있어 초대 메일을 보내지 못했습니다. 나중에 "초대 메일 다시 보내기"를 눌러 주세요.');
+      if (!result.invitationSent)
+        toast.info(
+          '메일 발송이 꺼져 있어 초대 메일을 보내지 못했습니다. 나중에 "초대 메일 다시 보내기"를 눌러 주세요.',
+        );
       onCreated();
     } catch (err) {
       setError(getErrorMessage(err));
@@ -113,7 +145,16 @@ function CreateModal({ open, onClose, departments, positions, roles, canAssignRo
       title="사원 등록"
       description="회원가입 없이 관리자가 등록합니다. 등록하면 아이디가 정해지고 초대 메일이 갑니다."
       size="xl"
-      footer={<><Button variant="secondary" onClick={onClose}>취소</Button><Button type="submit" form="create-user" loading={saving} disabled={!valid}>등록하고 초대 메일 보내기</Button></>}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            취소
+          </Button>
+          <Button type="submit" form="create-user" loading={saving} disabled={!valid}>
+            등록하고 초대 메일 보내기
+          </Button>
+        </>
+      }
     >
       <form id="create-user" onSubmit={submit} className="space-y-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -125,24 +166,58 @@ function CreateModal({ open, onClose, departments, positions, roles, canAssignRo
           </Field>
           <Field label="부서" htmlFor="cu-dept" required>
             <Select id="cu-dept" value={form.departmentId} onChange={set('departmentId')}>
-              {departments.map((d) => <option key={d.id} value={d.id}>{'　'.repeat(d.depth)}{d.name}</option>)}
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {'　'.repeat(d.depth)}
+                  {d.name}
+                </option>
+              ))}
             </Select>
           </Field>
           <Field label="직급" htmlFor="cu-pos" required>
             <Select id="cu-pos" value={form.positionId} onChange={set('positionId')}>
-              {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {positions.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </Select>
           </Field>
-          <Field label="회사 이메일" htmlFor="cu-email" required hint="초대 메일과 비밀번호 재설정 메일이 이 주소로 갑니다." className="sm:col-span-2">
-            <Input id="cu-email" type="email" value={form.email} onChange={set('email')} placeholder="name@company.com" />
+          <Field
+            label="회사 이메일"
+            htmlFor="cu-email"
+            required
+            hint="초대 메일과 비밀번호 재설정 메일이 이 주소로 갑니다."
+            className="sm:col-span-2"
+          >
+            <Input
+              id="cu-email"
+              type="email"
+              value={form.email}
+              onChange={set('email')}
+              placeholder="name@company.com"
+            />
           </Field>
         </div>
 
-        <Field label="역할" hint={canAssignRoles ? '역할마다 볼 수 있는 메뉴와 데이터 범위가 다릅니다.' : '역할 변경 권한이 없어 기본 역할(사원)로 등록합니다.'}>
+        <Field
+          label="역할"
+          hint={
+            canAssignRoles
+              ? '역할마다 볼 수 있는 메뉴와 데이터 범위가 다릅니다.'
+              : '역할 변경 권한이 없어 기본 역할(사원)로 등록합니다.'
+          }
+        >
           {canAssignRoles ? (
-            <RoleChips roles={roles} value={form.roleCodes} onChange={(roleCodes) => setForm((f) => ({ ...f, roleCodes }))} />
+            <RoleChips
+              roles={roles}
+              value={form.roleCodes}
+              onChange={(roleCodes) => setForm((f) => ({ ...f, roleCodes }))}
+            />
           ) : (
-            <div><Badge tone="gray">사원</Badge></div>
+            <div>
+              <Badge tone="gray">사원</Badge>
+            </div>
           )}
         </Field>
 
@@ -159,7 +234,11 @@ function CreateModal({ open, onClose, departments, positions, roles, canAssignRo
           </div>
         </div>
 
-        {error && <p role="alert" className="text-[13px] text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-[13px] text-red-600">
+            {error}
+          </p>
+        )}
       </form>
     </Modal>
   );
@@ -167,16 +246,30 @@ function CreateModal({ open, onClose, departments, positions, roles, canAssignRo
 
 /* ───────── 수정 ───────── */
 
-function EditModal({ user, onClose, departments, positions, roles, canAssignRoles, canInvite, canManagePrivileged, onSaved }) {
-  const initial = useMemo(() => user && {
-    name: user.name,
-    email: user.email,
-    departmentId: String(user.department?.id ?? ''),
-    positionId: String(positions.find((p) => p.name === user.position)?.id ?? ''),
-    hireDate: user.hireDate || '',
-    status: user.status,
-    roleCodes: user.roles.map((r) => r.code),
-  }, [user, positions]);
+function EditModal({
+  user,
+  onClose,
+  departments,
+  positions,
+  roles,
+  canAssignRoles,
+  canInvite,
+  canManagePrivileged,
+  onSaved,
+}) {
+  const initial = useMemo(
+    () =>
+      user && {
+        name: user.name,
+        email: user.email,
+        departmentId: String(user.department?.id ?? ''),
+        positionId: String(positions.find((p) => p.name === user.position)?.id ?? ''),
+        hireDate: user.hireDate || '',
+        status: user.status,
+        roleCodes: user.roles.map((r) => r.code),
+      },
+    [user, positions],
+  );
 
   const [form, setForm] = useState(initial);
   const [saving, setSaving] = useState(false);
@@ -191,9 +284,12 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
   if (!user || !form) return null;
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
-  const profileChanged = form.name !== initial.name || form.email !== initial.email
-    || form.departmentId !== initial.departmentId || form.positionId !== initial.positionId
-    || form.hireDate !== initial.hireDate;
+  const profileChanged =
+    form.name !== initial.name ||
+    form.email !== initial.email ||
+    form.departmentId !== initial.departmentId ||
+    form.positionId !== initial.positionId ||
+    form.hireDate !== initial.hireDate;
   const statusChanged = form.status !== initial.status;
   const rolesChanged = [...form.roleCodes].sort().join() !== [...initial.roleCodes].sort().join();
   const leaving = statusChanged && form.status !== 'ACTIVE';
@@ -251,14 +347,29 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
       title={`${user.name} · ${user.loginId}`}
       description={user.hireDate ? `${user.hireDate} 입사` : '입사일 미입력 (v1에서 옮겨 온 사원)'}
       size="xl"
-      footer={<><Button variant="secondary" onClick={onClose}>닫기</Button><Button onClick={save} loading={saving} disabled={!(profileChanged || statusChanged || rolesChanged) || !form.name.trim()}>저장</Button></>}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            닫기
+          </Button>
+          <Button
+            onClick={save}
+            loading={saving}
+            disabled={!(profileChanged || statusChanged || rolesChanged) || !form.name.trim()}
+          >
+            저장
+          </Button>
+        </>
+      }
     >
       <div className="space-y-5">
         {user.invitationPending && canInvite && !emailLocked && (
           <div className="flex flex-wrap items-center gap-3 rounded-lg bg-blue-50 px-3.5 py-3 text-[13px] text-blue-900">
             <Mail size={16} className="shrink-0 text-blue-600" />
             <span className="flex-1">아직 비밀번호를 설정하지 않았습니다 (첫 로그인 전).</span>
-            <Button size="sm" variant="secondary" onClick={resend} loading={inviting}>초대 메일 다시 보내기</Button>
+            <Button size="sm" variant="secondary" onClick={resend} loading={inviting}>
+              초대 메일 다시 보내기
+            </Button>
           </div>
         )}
 
@@ -269,17 +380,34 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
           <Field label="회사 이메일" htmlFor="eu-email" required hint={emailHint}>
             <Input id="eu-email" type="email" value={form.email} onChange={set('email')} disabled={emailLocked} />
           </Field>
-          <Field label="부서" htmlFor="eu-dept" hint="부서장인 사람은 먼저 부서장을 다른 사람으로 바꿔야 옮길 수 있습니다.">
+          <Field
+            label="부서"
+            htmlFor="eu-dept"
+            hint="부서장인 사람은 먼저 부서장을 다른 사람으로 바꿔야 옮길 수 있습니다."
+          >
             <Select id="eu-dept" value={form.departmentId} onChange={set('departmentId')}>
-              {departments.map((d) => <option key={d.id} value={d.id}>{'　'.repeat(d.depth)}{d.name}</option>)}
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {'　'.repeat(d.depth)}
+                  {d.name}
+                </option>
+              ))}
             </Select>
           </Field>
           <Field label="직급" htmlFor="eu-pos">
             <Select id="eu-pos" value={form.positionId} onChange={set('positionId')}>
-              {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {positions.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </Select>
           </Field>
-          <Field label="입사일" htmlFor="eu-hire" hint={user.hireDate ? undefined : '연차 자동 부여에 필요합니다. 채워 주세요.'}>
+          <Field
+            label="입사일"
+            htmlFor="eu-hire"
+            hint={user.hireDate ? undefined : '연차 자동 부여에 필요합니다. 채워 주세요.'}
+          >
             <Input id="eu-hire" type="date" value={form.hireDate} onChange={set('hireDate')} invalid={!form.hireDate} />
           </Field>
           <Field
@@ -288,20 +416,41 @@ function EditModal({ user, onClose, departments, positions, roles, canAssignRole
             error={leaving ? '저장하면 이 사람의 로그인이 바로 끊깁니다.' : undefined}
           >
             <Select id="eu-status" value={form.status} onChange={set('status')} invalid={leaving}>
-              {STATUS_TABS.map((s) => <option key={s} value={s}>{USER_STATUS_META[s].label}</option>)}
+              {STATUS_TABS.map((s) => (
+                <option key={s} value={s}>
+                  {USER_STATUS_META[s].label}
+                </option>
+              ))}
             </Select>
           </Field>
         </div>
 
-        <Field label="역할" hint={canAssignRoles ? undefined : '역할은 역할·권한을 바꿀 수 있는 사람만 바꿀 수 있습니다.'}>
+        <Field
+          label="역할"
+          hint={canAssignRoles ? undefined : '역할은 역할·권한을 바꿀 수 있는 사람만 바꿀 수 있습니다.'}
+        >
           {canAssignRoles ? (
-            <RoleChips roles={roles} value={form.roleCodes} onChange={(roleCodes) => setForm((f) => ({ ...f, roleCodes }))} />
+            <RoleChips
+              roles={roles}
+              value={form.roleCodes}
+              onChange={(roleCodes) => setForm((f) => ({ ...f, roleCodes }))}
+            />
           ) : (
-            <div className="flex flex-wrap gap-1">{user.roles.map((r) => <Badge key={r.code} tone={roleTone(r.code)}>{r.name}</Badge>)}</div>
+            <div className="flex flex-wrap gap-1">
+              {user.roles.map((r) => (
+                <Badge key={r.code} tone={roleTone(r.code)}>
+                  {r.name}
+                </Badge>
+              ))}
+            </div>
           )}
         </Field>
 
-        {error && <p role="alert" className="text-[13px] text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-[13px] text-red-600">
+            {error}
+          </p>
+        )}
       </div>
     </Modal>
   );
@@ -343,9 +492,19 @@ export default function EmployeesPage() {
   }, [tree, departments, scope, myDepartmentId]);
 
   useEffect(() => {
-    departmentApi.tree().then(setTree).catch(() => {});
-    positionApi.list().then(setPositions).catch(() => {});
-    if (canAssignRoles) roleApi.list().then(setRoles).catch(() => {});
+    departmentApi
+      .tree()
+      .then(setTree)
+      .catch(() => {});
+    positionApi
+      .list()
+      .then(setPositions)
+      .catch(() => {});
+    if (canAssignRoles)
+      roleApi
+        .list()
+        .then(setRoles)
+        .catch(() => {});
   }, [canAssignRoles]);
 
   useEffect(() => setPage(0), [debouncedQ, departmentId, includeSub, status]);
@@ -384,7 +543,13 @@ export default function EmployeesPage() {
       <PageHeader
         title="사원 관리"
         description="회원가입 없이 관리자가 사원을 등록합니다. 아이디는 자동으로 만들어지고 초대 메일로 첫 로그인을 돕습니다."
-        actions={canCreate && <Button icon={UserPlus} onClick={() => setCreating(true)}>사원 등록</Button>}
+        actions={
+          canCreate && (
+            <Button icon={UserPlus} onClick={() => setCreating(true)}>
+              사원 등록
+            </Button>
+          )
+        }
       />
 
       <Card className="overflow-hidden">
@@ -392,18 +557,34 @@ export default function EmployeesPage() {
           <div className="flex flex-1 flex-col gap-2 sm:flex-row">
             <label className="sm:w-72">
               <span className="sr-only">이름 또는 아이디 검색</span>
-              <Input icon={Search} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="이름 또는 아이디 앞부분" />
+              <Input
+                icon={Search}
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="이름 또는 아이디 앞부분"
+              />
             </label>
             <label className="sm:w-56">
               <span className="sr-only">부서</span>
               <Select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
                 <option value="">{scope === 'ALL' ? '전체 부서' : '볼 수 있는 모든 부서'}</option>
-                {filterDepartments.map((d) => <option key={d.id} value={d.id}>{'　'.repeat(d.depth)}{d.name}</option>)}
+                {filterDepartments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {'　'.repeat(d.depth)}
+                    {d.name}
+                  </option>
+                ))}
               </Select>
             </label>
             {departmentId && (
               <label className="flex h-10 items-center gap-2 text-[13px] text-gray-600">
-                <input type="checkbox" checked={includeSub} onChange={(e) => setIncludeSub(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <input
+                  type="checkbox"
+                  checked={includeSub}
+                  onChange={(e) => setIncludeSub(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
                 하위 부서 포함
               </label>
             )}
@@ -421,7 +602,9 @@ export default function EmployeesPage() {
                   onClick={() => setStatus(s)}
                   className={cn(
                     'h-8 rounded-md px-3 text-[13px] font-medium transition-colors',
-                    active ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200' : 'text-gray-600 hover:text-gray-900'
+                    active
+                      ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
+                      : 'text-gray-600 hover:text-gray-900',
                   )}
                 >
                   {USER_STATUS_META[s].label} <span className="tabular-nums text-gray-500">{counts[s] ?? 0}</span>
@@ -446,7 +629,11 @@ export default function EmployeesPage() {
                 <Th>역할</Th>
                 <Th>입사일</Th>
                 <Th>상태</Th>
-                {canUpdate && <Th align="right"><span className="sr-only">수정</span></Th>}
+                {canUpdate && (
+                  <Th align="right">
+                    <span className="sr-only">수정</span>
+                  </Th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -469,20 +656,36 @@ export default function EmployeesPage() {
                     <Td className="text-gray-600">{u.position}</Td>
                     <Td>
                       <span className="flex flex-wrap gap-1">
-                        {u.roles.map((r) => <Badge key={r.code} tone={roleTone(r.code)}>{r.name}</Badge>)}
+                        {u.roles.map((r) => (
+                          <Badge key={r.code} tone={roleTone(r.code)}>
+                            {r.name}
+                          </Badge>
+                        ))}
                       </span>
                     </Td>
-                    <Td className="tabular-nums text-gray-500">{u.hireDate || <span className="text-amber-700">미입력</span>}</Td>
+                    <Td className="tabular-nums text-gray-500">
+                      {u.hireDate || <span className="text-amber-700">미입력</span>}
+                    </Td>
                     <Td>
                       <span className="flex flex-wrap gap-1">
-                        <Badge tone={USER_STATUS_META[u.status].tone} dot>{USER_STATUS_META[u.status].label}</Badge>
-                        {u.status === 'RETIRED' && u.retiredDate && <span className="text-xs tabular-nums text-gray-500">{u.retiredDate}</span>}
+                        <Badge tone={USER_STATUS_META[u.status].tone} dot>
+                          {USER_STATUS_META[u.status].label}
+                        </Badge>
+                        {u.status === 'RETIRED' && u.retiredDate && (
+                          <span className="text-xs tabular-nums text-gray-500">{u.retiredDate}</span>
+                        )}
                         {u.invitationPending && <Badge tone="blue">첫 로그인 전</Badge>}
                       </span>
                     </Td>
                     {canUpdate && (
                       <Td align="right">
-                        <Button variant="ghost" size="sm" icon={Pencil} onClick={() => setEditing(u)} aria-label={`${u.name} 정보 수정`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={Pencil}
+                          onClick={() => setEditing(u)}
+                          aria-label={`${u.name} 정보 수정`}
+                        >
                           수정
                         </Button>
                       </Td>
@@ -497,11 +700,26 @@ export default function EmployeesPage() {
         {pageInfo && pageInfo.totalElements > 0 && (
           <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-[13px] text-gray-500">
             <span>
-              총 <b className="font-semibold text-gray-900">{pageInfo.totalElements}</b>명 · {pageInfo.number + 1} / {pageInfo.totalPages} 쪽
+              총 <b className="font-semibold text-gray-900">{pageInfo.totalElements}</b>명 · {pageInfo.number + 1} /{' '}
+              {pageInfo.totalPages} 쪽
             </span>
             <div className="flex gap-1">
-              <Button variant="secondary" size="sm" icon={ChevronLeft} disabled={pageInfo.first} onClick={() => setPage((p) => p - 1)} aria-label="이전 쪽" />
-              <Button variant="secondary" size="sm" icon={ChevronRight} disabled={pageInfo.last} onClick={() => setPage((p) => p + 1)} aria-label="다음 쪽" />
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={ChevronLeft}
+                disabled={pageInfo.first}
+                onClick={() => setPage((p) => p - 1)}
+                aria-label="이전 쪽"
+              />
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={ChevronRight}
+                disabled={pageInfo.last}
+                onClick={() => setPage((p) => p + 1)}
+                aria-label="다음 쪽"
+              />
             </div>
           </div>
         )}

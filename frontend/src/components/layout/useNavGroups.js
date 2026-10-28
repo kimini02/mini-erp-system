@@ -11,7 +11,8 @@ export function useNavGroups() {
   const { isChief, isTeamLeader } = getRoleInfo(user);
 
   return useMemo(
-    () => getNavigation({ can: (menu, action = 'V') => hasPermission(permissions, menu, action), isChief, isTeamLeader }),
-    [permissions, isChief, isTeamLeader]
+    () =>
+      getNavigation({ can: (menu, action = 'V') => hasPermission(permissions, menu, action), isChief, isTeamLeader }),
+    [permissions, isChief, isTeamLeader],
   );
 }

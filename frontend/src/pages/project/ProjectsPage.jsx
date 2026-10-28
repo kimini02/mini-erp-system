@@ -44,7 +44,10 @@ function ProjectCard({ p }) {
         <p className="text-xs tabular-nums text-gray-500">{formatPeriod(p)}</p>
         <div>
           <div className="flex justify-between text-[13px]">
-            <span className="text-gray-600">완료 {p.doneCount} / 전체 {p.taskCount}{p.overdueCount > 0 && <span className="text-red-600"> · 지연 {p.overdueCount}</span>}</span>
+            <span className="text-gray-600">
+              완료 {p.doneCount} / 전체 {p.taskCount}
+              {p.overdueCount > 0 && <span className="text-red-600"> · 지연 {p.overdueCount}</span>}
+            </span>
             <span className="font-semibold tabular-nums text-gray-900">{p.progressPct}%</span>
           </div>
           <Progress value={p.progressPct} tone={p.status === 'DONE' ? 'green' : 'blue'} className="mt-1.5" />
@@ -54,7 +57,9 @@ function ProjectCard({ p }) {
             <PersonAvatar person={p.leader} size="sm" />
             {p.leader?.name} {p.leader?.title}
           </span>
-          <span className="flex items-center gap-1 text-gray-500"><Users size={14} /> {p.memberCount}명</span>
+          <span className="flex items-center gap-1 text-gray-500">
+            <Users size={14} /> {p.memberCount}명
+          </span>
         </div>
       </Link>
     </Card>
@@ -77,7 +82,9 @@ export default function ProjectsPage() {
 
   const load = useCallback(async () => {
     try {
-      setResult(await projectApi.list({ status: status || undefined, q: q.trim() || undefined, page, size: PAGE_SIZE }));
+      setResult(
+        await projectApi.list({ status: status || undefined, q: q.trim() || undefined, page, size: PAGE_SIZE }),
+      );
       setError('');
     } catch (err) {
       setError(getErrorMessage(err));
@@ -97,13 +104,25 @@ export default function ProjectsPage() {
       <PageHeader
         title="프로젝트"
         description={SCOPE_NOTE[scope] || '볼 수 있는 프로젝트 목록입니다.'}
-        actions={canCreate && <Button icon={FolderPlus} onClick={() => setCreating(true)}>프로젝트 등록</Button>}
+        actions={
+          canCreate && (
+            <Button icon={FolderPlus} onClick={() => setCreating(true)}>
+              프로젝트 등록
+            </Button>
+          )
+        }
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <label className="w-full sm:w-64">
           <span className="sr-only">프로젝트 검색</span>
-          <Input icon={Search} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="이름 또는 키" />
+          <Input
+            icon={Search}
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="이름 또는 키"
+          />
         </label>
         <div role="group" aria-label="상태로 거르기" className="flex flex-wrap gap-1.5">
           {STATUS_FILTERS.map((f) => (
@@ -112,7 +131,12 @@ export default function ProjectsPage() {
               type="button"
               aria-pressed={status === f.value}
               onClick={() => setStatus(f.value)}
-              className={cn('h-8 rounded-full px-3 text-[13px] font-medium transition-colors', status === f.value ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50')}
+              className={cn(
+                'h-8 rounded-full px-3 text-[13px] font-medium transition-colors',
+                status === f.value
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50',
+              )}
             >
               {f.label}
             </button>
@@ -120,29 +144,64 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {error ? <EmptyState icon={FolderKanban} title="프로젝트를 불러오지 못했습니다" description={error} /> : !result ? <PageLoader /> : rows.length === 0 ? (
+      {error ? (
+        <EmptyState icon={FolderKanban} title="프로젝트를 불러오지 못했습니다" description={error} />
+      ) : !result ? (
+        <PageLoader />
+      ) : rows.length === 0 ? (
         <EmptyState
           icon={FolderKanban}
           title={q || status ? '조건에 맞는 프로젝트가 없습니다' : '아직 참여한 프로젝트가 없습니다'}
-          description={canCreate ? '프로젝트를 등록하고 멤버를 추가해 보세요.' : '프로젝트 담당 팀장이 멤버로 추가하면 여기에 보입니다.'}
+          description={
+            canCreate
+              ? '프로젝트를 등록하고 멤버를 추가해 보세요.'
+              : '프로젝트 담당 팀장이 멤버로 추가하면 여기에 보입니다.'
+          }
         />
       ) : (
         <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))]">
-          {rows.map((p) => <ProjectCard key={p.id} p={p} />)}
+          {rows.map((p) => (
+            <ProjectCard key={p.id} p={p} />
+          ))}
         </div>
       )}
 
       {info && info.totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between text-[13px] text-gray-500">
-          <span>총 <b className="font-semibold text-gray-900">{info.totalElements}</b>개 · {info.number + 1} / {info.totalPages} 쪽</span>
+          <span>
+            총 <b className="font-semibold text-gray-900">{info.totalElements}</b>개 · {info.number + 1} /{' '}
+            {info.totalPages} 쪽
+          </span>
           <div className="flex gap-1">
-            <Button variant="secondary" size="sm" icon={ChevronLeft} disabled={info.first} onClick={() => setPage((p) => p - 1)} aria-label="이전 쪽" />
-            <Button variant="secondary" size="sm" icon={ChevronRight} disabled={info.last} onClick={() => setPage((p) => p + 1)} aria-label="다음 쪽" />
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={ChevronLeft}
+              disabled={info.first}
+              onClick={() => setPage((p) => p - 1)}
+              aria-label="이전 쪽"
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={ChevronRight}
+              disabled={info.last}
+              onClick={() => setPage((p) => p + 1)}
+              aria-label="다음 쪽"
+            />
           </div>
         </div>
       )}
 
-      <ProjectFormModal open={creating} me={me} onClose={() => setCreating(false)} onSaved={(p) => { setCreating(false); navigate(`/projects/${p.id}/board`); }} />
+      <ProjectFormModal
+        open={creating}
+        me={me}
+        onClose={() => setCreating(false)}
+        onSaved={(p) => {
+          setCreating(false);
+          navigate(`/projects/${p.id}/board`);
+        }}
+      />
     </>
   );
 }

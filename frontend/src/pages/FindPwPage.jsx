@@ -23,7 +23,7 @@ const Stepper = ({ currentStep }) => (
           <span
             className={cn(
               'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
-              done || active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'
+              done || active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400',
             )}
           >
             {done ? <Check size={13} strokeWidth={3} /> : num}
@@ -50,13 +50,13 @@ export default function FindPwPage() {
     email: '',
     authCode: '',
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
 
   // 입력값 변경 핸들러
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   /**
@@ -97,7 +97,7 @@ export default function FindPwPage() {
    * STEP 2-1: 인증번호 재발송
    */
   const handleResendCode = () => {
-    setFormData(prev => ({ ...prev, authCode: '' })); // 입력창 초기화
+    setFormData((prev) => ({ ...prev, authCode: '' })); // 입력창 초기화
     toast.info('인증번호를 다시 발송했습니다.');
   };
 
@@ -118,7 +118,7 @@ export default function FindPwPage() {
     try {
       // 해당 유저 데이터만 부분 수정(PATCH)
       await axios.patch(`/users/${targetUser.id}`, {
-        password: formData.newPassword
+        password: formData.newPassword,
       });
 
       setStep(4); // 완료 화면으로 이동
@@ -162,7 +162,14 @@ export default function FindPwPage() {
       {step === 1 && (
         <form onSubmit={handleVerifyUser} className="space-y-4">
           <Field label="아이디" htmlFor="userId">
-            <Input id="userId" value={formData.userId} onChange={handleChange} placeholder="아이디" required className="h-11" />
+            <Input
+              id="userId"
+              value={formData.userId}
+              onChange={handleChange}
+              placeholder="아이디"
+              required
+              className="h-11"
+            />
           </Field>
           <Field label="이메일" htmlFor="email">
             <Input

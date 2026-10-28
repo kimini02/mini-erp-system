@@ -17,7 +17,17 @@ export const CELL_META = {
 };
 
 /** 범례에 보여 줄 순서 */
-export const LEGEND_CODES = ['ON_TIME', 'LATE', 'EARLY', 'MISSING', 'ABSENT', 'LEAVE', 'HALF_AM', 'HOLIDAY_WORK', 'HOLIDAY'];
+export const LEGEND_CODES = [
+  'ON_TIME',
+  'LATE',
+  'EARLY',
+  'MISSING',
+  'ABSENT',
+  'LEAVE',
+  'HALF_AM',
+  'HOLIDAY_WORK',
+  'HOLIDAY',
+];
 
 /** 정정 신청을 권할 만한 칸 */
 export const FIXABLE_CODES = new Set(['LATE', 'EARLY', 'MISSING', 'ABSENT']);

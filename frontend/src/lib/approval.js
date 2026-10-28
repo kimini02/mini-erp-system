@@ -79,10 +79,22 @@ export const APPROVER_TYPE_OPTIONS = [
 ];
 
 export const FORM_OPTION_META = [
-  { key: 'fallbackToUpper', label: '부서장 공석이면 위로', desc: '부서장이 비어 있으면 더 위 부서장이 결재합니다. 끝까지 없으면 상신할 수 없습니다.' },
+  {
+    key: 'fallbackToUpper',
+    label: '부서장 공석이면 위로',
+    desc: '부서장이 비어 있으면 더 위 부서장이 결재합니다. 끝까지 없으면 상신할 수 없습니다.',
+  },
   { key: 'skipSelf', label: '기안자 본인은 건너뛰기', desc: '결재자가 기안자 본인이면 그 단계를 건너뜁니다.' },
-  { key: 'dedupeApprover', label: '같은 사람은 한 번만', desc: '앞 단계와 같은 사람이 다시 나오면 한 번만 결재합니다.' },
-  { key: 'allowLineEdit', label: '기안자가 결재선 수정', desc: '기안할 때 결재자를 추가하거나 순서를 바꿀 수 있습니다.' },
+  {
+    key: 'dedupeApprover',
+    label: '같은 사람은 한 번만',
+    desc: '앞 단계와 같은 사람이 다시 나오면 한 번만 결재합니다.',
+  },
+  {
+    key: 'allowLineEdit',
+    label: '기안자가 결재선 수정',
+    desc: '기안할 때 결재자를 추가하거나 순서를 바꿀 수 있습니다.',
+  },
 ];
 
 const toDate = (value) => (value ? String(value).replace('T', ' ') : '');

@@ -29,8 +29,20 @@ const NAVIGATION = [
   {
     title: '전자결재',
     items: [
-      { label: '결재함', path: '/approvals', prefix: '/approvals/', icon: FileCheck2, badge: 'approvals', visible: (ctx) => ctx.can(MENU.APPROVAL_INBOX) },
-      { label: '기안하기', path: '/approvals/new', icon: FilePlus2, visible: (ctx) => ctx.can(MENU.APPROVAL_DRAFT, 'C') },
+      {
+        label: '결재함',
+        path: '/approvals',
+        prefix: '/approvals/',
+        icon: FileCheck2,
+        badge: 'approvals',
+        visible: (ctx) => ctx.can(MENU.APPROVAL_INBOX),
+      },
+      {
+        label: '기안하기',
+        path: '/approvals/new',
+        icon: FilePlus2,
+        visible: (ctx) => ctx.can(MENU.APPROVAL_DRAFT, 'C'),
+      },
       { label: '결재 양식', path: '/approval-forms', icon: FileCog, visible: (ctx) => ctx.can(MENU.APPROVAL_FORM) },
     ],
   },
@@ -39,7 +51,12 @@ const NAVIGATION = [
     items: [
       { label: '내 근태', path: '/attendance', icon: Clock3, visible: (ctx) => ctx.can(MENU.MY_ATTENDANCE) },
       { label: '내 연차', path: '/leaves', icon: NotebookText },
-      { label: '월간 근태표', path: '/attendance/monthly', icon: CalendarRange, visible: (ctx) => ctx.can(MENU.ATTENDANCE_MONTHLY) },
+      {
+        label: '월간 근태표',
+        path: '/attendance/monthly',
+        icon: CalendarRange,
+        visible: (ctx) => ctx.can(MENU.ATTENDANCE_MONTHLY),
+      },
       { label: '연차 관리', path: '/leave/admin', icon: Scale, visible: (ctx) => ctx.can(MENU.LEAVE_ADMIN) },
       { label: '캘린더', path: '/calendar', icon: CalendarDays },
       { label: '공휴일', path: '/holidays', icon: CalendarOff, visible: (ctx) => ctx.can(MENU.HOLIDAY) },
@@ -48,7 +65,13 @@ const NAVIGATION = [
   {
     title: '업무',
     items: [
-      { label: '프로젝트', path: '/projects', prefix: '/projects/', icon: FolderKanban, visible: (ctx) => ctx.can(MENU.PROJECT) },
+      {
+        label: '프로젝트',
+        path: '/projects',
+        prefix: '/projects/',
+        icon: FolderKanban,
+        visible: (ctx) => ctx.can(MENU.PROJECT),
+      },
     ],
   },
   {

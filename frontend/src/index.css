@@ -156,8 +156,28 @@
   font-weight: 500;
 }
 
-.wf-calendar .fc .evt-project  { background: theme('colors.blue.50');    border-left-color: theme('colors.blue.500');    color: theme('colors.blue.800'); }
-.wf-calendar .fc .evt-leave    { background: theme('colors.emerald.50'); border-left-color: theme('colors.emerald.500'); color: theme('colors.emerald.800'); }
-.wf-calendar .fc .evt-overtime { background: theme('colors.amber.50');   border-left-color: theme('colors.amber.500');   color: theme('colors.amber.800'); }
-.wf-calendar .fc .evt-holiday  { background: theme('colors.red.50');     border-left-color: theme('colors.red.500');     color: theme('colors.red.700'); }
-.wf-calendar .fc .evt-etc      { background: theme('colors.gray.100');   border-left-color: theme('colors.gray.400');    color: theme('colors.gray.700'); }
+.wf-calendar .fc .evt-project {
+  background: theme('colors.blue.50');
+  border-left-color: theme('colors.blue.500');
+  color: theme('colors.blue.800');
+}
+.wf-calendar .fc .evt-leave {
+  background: theme('colors.emerald.50');
+  border-left-color: theme('colors.emerald.500');
+  color: theme('colors.emerald.800');
+}
+.wf-calendar .fc .evt-overtime {
+  background: theme('colors.amber.50');
+  border-left-color: theme('colors.amber.500');
+  color: theme('colors.amber.800');
+}
+.wf-calendar .fc .evt-holiday {
+  background: theme('colors.red.50');
+  border-left-color: theme('colors.red.500');
+  color: theme('colors.red.700');
+}
+.wf-calendar .fc .evt-etc {
+  background: theme('colors.gray.100');
+  border-left-color: theme('colors.gray.400');
+  color: theme('colors.gray.700');
+}

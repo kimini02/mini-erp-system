@@ -57,28 +57,112 @@ function App() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/dashboard" element={<Navigate to="/home" replace />} />
 
-          <Route path="/approvals" element={<RequirePermission menu={MENU.APPROVAL_INBOX}><ApprovalInboxPage /></RequirePermission>} />
-          <Route path="/approvals/new" element={<RequirePermission menu={MENU.APPROVAL_DRAFT} action="C"><ApprovalDraftPage /></RequirePermission>} />
+          <Route
+            path="/approvals"
+            element={
+              <RequirePermission menu={MENU.APPROVAL_INBOX}>
+                <ApprovalInboxPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/approvals/new"
+            element={
+              <RequirePermission menu={MENU.APPROVAL_DRAFT} action="C">
+                <ApprovalDraftPage />
+              </RequirePermission>
+            }
+          />
           <Route path="/approvals/:id" element={<ApprovalDocumentPage />} />
-          <Route path="/approval-forms" element={<RequirePermission menu={MENU.APPROVAL_FORM}><ApprovalFormsPage /></RequirePermission>} />
+          <Route
+            path="/approval-forms"
+            element={
+              <RequirePermission menu={MENU.APPROVAL_FORM}>
+                <ApprovalFormsPage />
+              </RequirePermission>
+            }
+          />
           <Route path="/leaves" element={<MyLeavePage />} />
-          <Route path="/attendance" element={<RequirePermission menu={MENU.MY_ATTENDANCE}><MyAttendancePage /></RequirePermission>} />
-          <Route path="/attendance/monthly" element={<RequirePermission menu={MENU.ATTENDANCE_MONTHLY}><AttendanceMonthlyPage /></RequirePermission>} />
-          <Route path="/leave/admin" element={<RequirePermission menu={MENU.LEAVE_ADMIN}><LeaveAdminPage /></RequirePermission>} />
+          <Route
+            path="/attendance"
+            element={
+              <RequirePermission menu={MENU.MY_ATTENDANCE}>
+                <MyAttendancePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/attendance/monthly"
+            element={
+              <RequirePermission menu={MENU.ATTENDANCE_MONTHLY}>
+                <AttendanceMonthlyPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/leave/admin"
+            element={
+              <RequirePermission menu={MENU.LEAVE_ADMIN}>
+                <LeaveAdminPage />
+              </RequirePermission>
+            }
+          />
           <Route path="/leaves/new" element={<Navigate to="/approvals/new?form=LEAVE" replace />} />
           <Route path="/calendar" element={<CalendarPage />} />
 
-          <Route path="/projects" element={<RequirePermission menu={MENU.PROJECT}><ProjectsPage /></RequirePermission>} />
-          <Route path="/projects/:id/board" element={<RequirePermission menu={MENU.PROJECT}><ProjectBoardPage /></RequirePermission>} />
+          <Route
+            path="/projects"
+            element={
+              <RequirePermission menu={MENU.PROJECT}>
+                <ProjectsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/projects/:id/board"
+            element={
+              <RequirePermission menu={MENU.PROJECT}>
+                <ProjectBoardPage />
+              </RequirePermission>
+            }
+          />
           {/* 예전 프로젝트·업무 화면 경로 → 새 화면 */}
           {['/projects/new', '/tasks/assign', '/my-tasks', '/project-auth'].map((path) => (
             <Route key={path} path={path} element={<Navigate to="/projects" replace />} />
           ))}
 
-          <Route path="/holidays" element={<RequirePermission menu={MENU.HOLIDAY}><HolidaysPage /></RequirePermission>} />
-          <Route path="/org/departments" element={<RequirePermission menu={MENU.DEPARTMENT}><DepartmentsPage /></RequirePermission>} />
-          <Route path="/org/employees" element={<RequirePermission menu={MENU.EMPLOYEE}><EmployeesPage /></RequirePermission>} />
-          <Route path="/org/roles" element={<RequirePermission menu={MENU.ROLE}><RolesPage /></RequirePermission>} />
+          <Route
+            path="/holidays"
+            element={
+              <RequirePermission menu={MENU.HOLIDAY}>
+                <HolidaysPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/org/departments"
+            element={
+              <RequirePermission menu={MENU.DEPARTMENT}>
+                <DepartmentsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/org/employees"
+            element={
+              <RequirePermission menu={MENU.EMPLOYEE}>
+                <EmployeesPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/org/roles"
+            element={
+              <RequirePermission menu={MENU.ROLE}>
+                <RolesPage />
+              </RequirePermission>
+            }
+          />
         </Route>
 
         {/* 로그인 전 · 비밀번호 */}

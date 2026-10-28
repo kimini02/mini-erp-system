@@ -50,7 +50,9 @@ export const userApi = {
 const toMenu = (m) => ({
   ...m,
   group: m.group ?? m.menuGroup,
-  allowedActions: Array.isArray(m.allowedActions) ? m.allowedActions : String(m.allowedActions ?? '').match(/[VCUD]/g) ?? [],
+  allowedActions: Array.isArray(m.allowedActions)
+    ? m.allowedActions
+    : (String(m.allowedActions ?? '').match(/[VCUD]/g) ?? []),
 });
 // 역할 목록에는 locked가 없어서, 명세대로 관리소장(CHIEF)만 잠긴 역할로 봅니다.
 const toRole = (r) => ({ ...r, locked: r.locked ?? r.code === 'CHIEF' });
