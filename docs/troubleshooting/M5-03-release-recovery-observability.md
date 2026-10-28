@@ -98,3 +98,38 @@ invalid_lines=1
 ## 커밋
 
 로컬 배포·복구·probe·검증 도구·runbook과 함께 커밋. 해시는 `M5-04-phase-one-results.md`에 기록합니다.
+
+## 추가 재현 — 첫 배포 전 빈 DB 백업
+
+첫 V1 적용 전 사전 백업에는 flyway_schema_history가 없습니다. 이 덤프를 복구하면 기존 복구 도구가 그 테이블을 무조건 조회해 1146으로 실패했습니다. 별도 오프라인 MariaDB에서 수정 전 1/1 실패를 먼저 확인했습니다.
+
+빈 덤프를 복구 불가로 배제하는 대안은 첫 배포의 정상 사전 백업을 다룰 수 없어 버렸습니다. 이력 없음은 버전 0으로 통일하고, 로컬 복구는 복구된 테이블 목록 전체를 읽어 빈 목록 및 예상 밖 추가 테이블도 비교하도록 바꿨습니다. 데이터가 있는 버전 6 백업도 다시 확인했습니다.
+
+수정 전 원문:
+
+```text
+BACKUP file=20261028T050238.678198375Z.sql.gz bytes=520 elapsed_s=1
+20261028T050238.678198375Z.sql.gz: OK
+--------------
+SELECT version FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL ORDER BY installed_rank DESC LIMIT 1
+--------------
+
+ERROR 1146 (42S02) at line 1: Table 'mini_erp_restore.flyway_schema_history' doesn't exist
+EMPTY_RESTORE_BEFORE exit=1
+```
+
+수정 후 원문 (빈 서버·빈 로컬·버전 6 로컬·버전 6 서버 모두 성공):
+
+```text
+20261028T050238.678198375Z.sql.gz: OK
+RESTORE tables=0 flyway=0 counts=MATCH elapsed_s=1
+LOCAL_RESTORE tables=       0 flyway=0 counts=MATCH elapsed_s=3
+LOCAL_RESTORE tables=       2 flyway=6 counts=MATCH elapsed_s=3
+BACKUP file=20261028T050447.871703921Z.sql.gz bytes=894 elapsed_s=0
+20261028T050447.871703921Z.sql.gz: OK
+RESTORE tables=2 flyway=6 counts=MATCH elapsed_s=0
+flyway_schema_history	1
+recovery_fixture	2
+```
+
+한계는 동일합니다. 버전 0은 아직 성공한 migration 이력이 없다는 뜻이며, 실패한 DDL의 원상복구를 의미하지 않습니다. 이 보완은 별도 수정 커밋으로 남깁니다.

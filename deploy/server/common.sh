@@ -13,8 +13,10 @@ load_env() {
 lock_ops() { mkdir -p /run/lock; exec 9>/run/lock/workflow-maintenance.lock; flock -x 9; }
 db() { mariadb --protocol=socket --user=root --batch --skip-column-names "$@"; }
 schema_version() {
-  if [[ $(db -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='mini_erp' AND table_name='flyway_schema_history'") == 0 ]]; then printf '0\n';
-  else db mini_erp -e 'SELECT version FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL ORDER BY installed_rank DESC LIMIT 1'; fi
+  local database=${1:-mini_erp}
+  [[ $database =~ ^[A-Za-z0-9_]+$ ]] || return 1
+  if [[ $(db -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$database' AND table_name='flyway_schema_history'") == 0 ]]; then printf '0\n';
+  else db "$database" -e 'SELECT COALESCE((SELECT version FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL ORDER BY installed_rank DESC LIMIT 1),"0")'; fi
 }
 backup_now() (
   umask 077

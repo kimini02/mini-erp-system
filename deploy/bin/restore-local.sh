@@ -24,12 +24,17 @@ for ((n=0;n<60;n++));do if docker exec "$container" mariadb-admin --protocol=soc
 began=$SECONDS
 docker exec "$container" mariadb --protocol=socket --user=root -e 'CREATE DATABASE mini_erp_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
 gzip -dc "$file" | docker exec -i "$container" mariadb --protocol=socket --user=root mini_erp_restore
-while IFS=$'\t' read -r table expected;do
- [[ $table =~ ^[A-Za-z0-9_]+$ && $expected =~ ^[0-9]+$ ]] || exit 1
+: >"$work/counts.tsv"
+while IFS= read -r table;do
+ [[ $table =~ ^[A-Za-z0-9_]+$ ]] || exit 1
  count=$(docker exec "$container" mariadb --protocol=socket --user=root --batch --skip-column-names mini_erp_restore -e "SELECT COUNT(*) FROM \`$table\`")
  printf '%s\t%s\n' "$table" "$count" >>"$work/counts.tsv"
-done <"$file.counts.tsv"
+done < <(docker exec "$container" mariadb --protocol=socket --user=root --batch --skip-column-names -e "SELECT table_name FROM information_schema.tables WHERE table_schema='mini_erp_restore' AND table_type='BASE TABLE' ORDER BY table_name")
 diff -u "$file.counts.tsv" "$work/counts.tsv"
-version=$(docker exec "$container" mariadb --protocol=socket --user=root --batch --skip-column-names mini_erp_restore -e 'SELECT version FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL ORDER BY installed_rank DESC LIMIT 1')
+has_history=$(docker exec "$container" mariadb --protocol=socket --user=root --batch --skip-column-names -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='mini_erp_restore' AND table_name='flyway_schema_history'")
+version=0
+if [[ $has_history != 0 ]]; then
+ version=$(docker exec "$container" mariadb --protocol=socket --user=root --batch --skip-column-names mini_erp_restore -e 'SELECT COALESCE((SELECT version FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL ORDER BY installed_rank DESC LIMIT 1),"0")')
+fi
 [[ $version == "$(cat "$file.version")" ]]
 printf 'LOCAL_RESTORE tables=%s flyway=%s counts=MATCH elapsed_s=%s\n' "$(wc -l <"$work/counts.tsv")" "$version" "$((SECONDS-began))"

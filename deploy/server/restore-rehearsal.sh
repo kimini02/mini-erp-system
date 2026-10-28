@@ -24,7 +24,7 @@ for database in mini_erp mini_erp_restore; do
 done
 if ! diff -u "$work/mini_erp.tsv" "$work/mini_erp_restore.tsv"; then printf '%s\n' 'Counts differ. Run during a write-free window; no production tables were changed.' >&2; exit 1; fi
 original=$(schema_version)
-restored=$(db mini_erp_restore -e 'SELECT version FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL ORDER BY installed_rank DESC LIMIT 1')
+restored=$(schema_version mini_erp_restore)
 [[ $original == "$restored" ]] || { printf 'Flyway differs: source=%s restored=%s\n' "$original" "$restored" >&2; exit 1; }
 install -m 600 "$work/mini_erp_restore.tsv" "$file.counts.tsv"
 printf 'RESTORE tables=%s flyway=%s counts=MATCH elapsed_s=%s\n' "$(wc -l <"$file.counts.tsv")" "$restored" "$((SECONDS-began))"
