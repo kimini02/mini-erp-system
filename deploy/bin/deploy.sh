@@ -17,7 +17,7 @@ cleanup() {
 }
 trap cleanup EXIT
 began=$SECONDS
-(cd backend; ./mvnw -DskipTests package)
+(cd backend; ./mvnw -DskipTests clean package)
 printf 'BUILD backend_s=%s\n' "$((SECONDS-began))"
 began=$SECONDS
 (cd frontend; npm ci; npm run build)
