@@ -3,11 +3,12 @@ set +x
 set -euo pipefail
 # The header file (0600, outside the repository) may hold a bearer token. Never pass it as an argument value.
 python3 - "$@" <<'PY'
-import argparse,concurrent.futures,csv,datetime,math,os,stat,subprocess,time,urllib.parse
+import argparse,concurrent.futures,csv,datetime,math,os,re,stat,subprocess,time,urllib.parse
 p=argparse.ArgumentParser(description='Sample one GET API every 0.2 s; keep secrets in a 0600 header file.')
 p.add_argument('url');p.add_argument('output');p.add_argument('--seconds',type=float,default=60);p.add_argument('--header-file')
 a=p.parse_args();url=urllib.parse.urlsplit(a.url)
 if url.scheme not in ('http','https') or not url.hostname or url.username or url.password or url.query or url.fragment:p.error('Use an HTTP(S) URL without credentials, query or fragment.')
+if not re.fullmatch(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.duckdns\.org',url.hostname):p.error('Use the server DuckDNS hostname, not an IP address.')
 if not math.isfinite(a.seconds) or not 0<a.seconds<=3600:p.error('seconds must be in (0,3600].')
 if a.header_file and (not os.path.isfile(a.header_file) or stat.S_IMODE(os.stat(a.header_file).st_mode)!=0o600):p.error('header file must have mode 0600.')
 if os.path.exists(a.output):p.error('output already exists; choose a new CSV file.')

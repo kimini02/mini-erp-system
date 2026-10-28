@@ -36,9 +36,13 @@ if not path.exists():
         values['DISCORD_WEBHOOK_URL']=webhook
 duck=Path('/etc/workflow/duckdns')
 if duck.exists() or duck.is_symlink():
-    if duck.is_symlink() or duck.stat().st_uid!=0 or duck.stat().st_mode & 0o777!=0o600: raise SystemExit('Existing DuckDNS file must be root:root 600.')
+    if duck.is_symlink() or duck.stat().st_uid!=0 or duck.stat().st_gid!=0 or duck.stat().st_mode & 0o777!=0o600: raise SystemExit('Existing DuckDNS file must be root:root 600.')
     duck_token=duck.read_text().strip()
 else:
+    subdomain=getpass.getpass('DuckDNS subdomain without .duckdns.org (hidden): ')
+    if not re.fullmatch(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?',subdomain): raise SystemExit('Invalid DuckDNS subdomain; nothing saved.')
+    if Path('/etc/workflow/domain').read_text().strip()!=subdomain+'.duckdns.org':
+        raise SystemExit('Subdomain differs from bootstrap domain; nothing saved. Check bootstrap configuration first.')
     duck_token=getpass.getpass('DuckDNS token (hidden): ')
 if not re.fullmatch(r'[A-Za-z0-9-]+',duck_token):raise SystemExit('Invalid DuckDNS token; nothing saved.')
 # A common quoted subset accepted by Bash and systemd EnvironmentFile.
