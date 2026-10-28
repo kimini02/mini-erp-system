@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { TOKEN_KEY, USER_KEY } from '@/api/axios';
-import { authApi } from '@/api/m1';
+import { authApi } from '@/api/auth';
 import { getErrorMessage } from '@/lib/errors';
 import { hasPermission, toPermissionMap } from '@/lib/permissions';
 

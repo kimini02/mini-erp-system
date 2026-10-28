@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { approvalInboxApi, notificationApi } from '../api/m2';
+import { approvalInboxApi } from '@/api/approval';
+import { notificationApi } from '@/api/notification';
 import { MENU } from '../lib/permissions';
 import { useAuthStore } from './authStore';
 

@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarRange, ChevronLeft, ChevronRight, Download, RefreshCcw } from 'lucide-react';
-import { attendanceApi, saveBlob } from '@/api/m3';
-import { collectSubtreeIds, departmentApi, flattenTree } from '@/api/m1';
+import { attendanceApi } from '@/api/attendance';
+import { saveBlob } from '@/lib/download';
+import { collectSubtreeIds, flattenTree } from '@/lib/orgTree';
+import { departmentApi } from '@/api/org';
 import { useAuthStore } from '@/store/authStore';
 import { MENU } from '@/lib/permissions';
 import {

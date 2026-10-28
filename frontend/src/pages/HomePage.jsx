@@ -13,10 +13,10 @@ import {
   SquareKanban,
   Users,
 } from 'lucide-react';
-import { homeApi } from '@/api/m4';
-import { attendanceApi } from '@/api/m3';
-import { notificationApi } from '@/api/m2';
-import { holidayApi } from '@/api/m1';
+import { homeApi } from '@/api/home';
+import { attendanceApi } from '@/api/attendance';
+import { notificationApi } from '@/api/notification';
+import { holidayApi } from '@/api/org';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { NOTIFICATION_TYPE_META, formatDays } from '@/lib/approval';

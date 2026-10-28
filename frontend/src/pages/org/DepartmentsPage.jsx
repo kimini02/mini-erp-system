@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, ChevronRight, FolderTree, Move, Plus, Trash2, Users } from 'lucide-react';
-import { departmentApi, flattenTree, collectSubtreeIds, userApi, workScheduleApi } from '@/api/m1';
+import { departmentApi, workScheduleApi } from '@/api/org';
+import { flattenTree, collectSubtreeIds } from '@/lib/orgTree';
+import { userApi } from '@/api/users';
 import { useAuthStore } from '@/store/authStore';
 import { MENU, USER_STATUS_META } from '@/lib/permissions';
 import { getErrorCode, getErrorMessage } from '@/lib/errors';

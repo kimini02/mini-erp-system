@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, FolderKanban, FolderPlus, Search, Users } from 'lucide-react';
-import { projectApi } from '@/api/m4';
+import { projectApi } from '@/api/project';
 import { useAuthStore } from '@/store/authStore';
 import { MENU } from '@/lib/permissions';
 import { getErrorMessage } from '@/lib/errors';

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, History, NotebookText, Play, Scale, Search } from 'lucide-react';
-import { leaveAdminApi } from '@/api/m3';
-import { collectSubtreeIds, departmentApi, flattenTree } from '@/api/m1';
+import { leaveAdminApi } from '@/api/leave';
+import { collectSubtreeIds, flattenTree } from '@/lib/orgTree';
+import { departmentApi } from '@/api/org';
 import { useAuthStore } from '@/store/authStore';
 import { MENU } from '@/lib/permissions';
 import { LEDGER_TYPE_META, formatDate, formatDateTime, formatDays, formatSignedDays } from '@/lib/approval';

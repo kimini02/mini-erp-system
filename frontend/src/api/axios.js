@@ -66,4 +66,7 @@ instance.interceptors.response.use(
   },
 );
 
+/** 공통 응답에서 data만 꺼냅니다. 실패하면 axios 에러를 그대로 던집니다. */
+export const unwrap = (request) => request.then((res) => res.data.data);
+
 export default instance;

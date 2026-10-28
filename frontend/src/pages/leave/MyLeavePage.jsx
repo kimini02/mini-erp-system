@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CalendarCheck2, CalendarClock, CalendarPlus, CalendarRange, CornerUpLeft, NotebookText } from 'lucide-react';
-import { approvalDocumentApi, approvalInboxApi, leaveApi } from '@/api/m2';
+import { approvalDocumentApi, approvalInboxApi } from '@/api/approval';
+import { leaveApi } from '@/api/leave';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { MENU } from '@/lib/permissions';

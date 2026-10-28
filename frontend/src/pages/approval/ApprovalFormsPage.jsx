@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, FileCog, Plus, Save, Trash2, Undo2 } from 'lucide-react';
-import { approvalFormApi, userLookupApi } from '@/api/m2';
-import { roleApi } from '@/api/m1';
+import { approvalFormApi } from '@/api/approval';
+import { userLookupApi } from '@/api/users';
+import { roleApi } from '@/api/roles';
 import { useAuthStore } from '@/store/authStore';
 import { MENU } from '@/lib/permissions';
 import { APPROVER_TYPE_OPTIONS, FORM_OPTION_META } from '@/lib/approval';

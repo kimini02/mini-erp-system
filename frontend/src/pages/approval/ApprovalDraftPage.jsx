@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowDown, ArrowUp, FileText, Plus, RotateCcw, Save, Send, Trash2, X } from 'lucide-react';
-import { approvalDocumentApi, approvalFormApi, leaveApi, userLookupApi } from '@/api/m2';
-import { attendanceApi } from '@/api/m3';
+import { approvalDocumentApi, approvalFormApi } from '@/api/approval';
+import { leaveApi } from '@/api/leave';
+import { userLookupApi } from '@/api/users';
+import { attendanceApi } from '@/api/attendance';
 import { CELL_META, dayCode, shiftDate, timeOf, todayLocal } from '@/lib/attendance';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';

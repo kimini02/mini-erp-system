@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Clock3, FilePen, LogIn, LogOut } from 'lucide-react';
-import { attendanceApi } from '@/api/m3';
+import { attendanceApi } from '@/api/attendance';
 import { useAuthStore } from '@/store/authStore';
 import { MENU } from '@/lib/permissions';
 import {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CalendarOff, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import { holidayApi } from '@/api/m1';
+import { holidayApi } from '@/api/org';
 import { useAuthStore } from '@/store/authStore';
 import { MENU } from '@/lib/permissions';
 import { getErrorMessage } from '@/lib/errors';

@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { KeyRound, Lock, Pencil, Plus, Trash2, UserMinus, UserPlus } from 'lucide-react';
-import { roleApi, userApi } from '@/api/m1';
+import { roleApi } from '@/api/roles';
+import { userApi } from '@/api/users';
 import { useAuthStore } from '@/store/authStore';
 import { MENU, SCOPES, SCOPE_LABELS } from '@/lib/permissions';
 import { getErrorMessage } from '@/lib/errors';

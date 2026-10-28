@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Check, ChevronLeft, ChevronRight, Mail, Pencil, Search, UserPlus, Users } from 'lucide-react';
-import { collectSubtreeIds, departmentApi, flattenTree, positionApi, roleApi, userApi } from '@/api/m1';
+import { collectSubtreeIds, flattenTree } from '@/lib/orgTree';
+import { departmentApi, positionApi } from '@/api/org';
+import { roleApi } from '@/api/roles';
+import { userApi } from '@/api/users';
 import { useAuthStore } from '@/store/authStore';
 import { MENU, USER_STATUS_META } from '@/lib/permissions';
 import { getErrorMessage } from '@/lib/errors';

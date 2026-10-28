@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Search } from 'lucide-react';
-import { userLookupApi } from '@/api/m2';
-import { projectApi } from '@/api/m4';
+import { userLookupApi } from '@/api/users';
+import { projectApi } from '@/api/project';
 import { PRIORITIES, PRIORITY_META, PROJECT_STATUS_META, avatarColor, shortName } from '@/lib/project';
 import { getErrorMessage } from '@/lib/errors';
 import { toast } from '@/lib/toast';

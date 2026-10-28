@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, FileCheck2, FilePlus2, Search } from 'lucide-react';
-import { approvalFormApi, approvalInboxApi } from '@/api/m2';
+import { approvalFormApi, approvalInboxApi } from '@/api/approval';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { MENU } from '@/lib/permissions';

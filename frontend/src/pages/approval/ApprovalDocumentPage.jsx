@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, CornerUpLeft, FileX2, RotateCcw, X } from 'lucide-react';
-import { approvalDocumentApi } from '@/api/m2';
+import { approvalDocumentApi } from '@/api/approval';
 import { useApprovalStore } from '@/store/approvalStore';
 import {
   HISTORY_ACTION_LABELS,

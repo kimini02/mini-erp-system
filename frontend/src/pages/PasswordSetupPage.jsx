@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import AuthLayout from '@/components/layout/AuthLayout';
 import PasswordFields from '@/components/auth/PasswordFields';
 import { Button } from '@/components/ui';
-import { authApi } from '@/api/m1';
+import { authApi } from '@/api/auth';
 import { isValidPassword } from '@/lib/password';
 import { getErrorCode, getErrorMessage } from '@/lib/errors';
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Bell, CheckCheck, ChevronDown, ChevronRight, KeyRound, LogOut, Menu, UserRound, Inbox } from 'lucide-react';
-import { notificationApi } from '@/api/m2';
+import { notificationApi } from '@/api/notification';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { getRoleInfo, getDisplayName } from '@/lib/roles';

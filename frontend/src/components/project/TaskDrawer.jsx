@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Lock, Pencil, X } from 'lucide-react';
-import { boardApi } from '@/api/m4';
+import { boardApi } from '@/api/project';
 import { PRIORITIES, PRIORITY_META, TASK_STATUSES, TASK_STATUS_META, dueText, historySentence } from '@/lib/project';
 import { formatDateTime } from '@/lib/approval';
 import { getErrorMessage } from '@/lib/errors';

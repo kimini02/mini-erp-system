@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CalendarClock, FolderKanban, Lock, Plus, Search, Settings2, Users } from 'lucide-react';
-import { boardApi } from '@/api/m4';
+import { boardApi } from '@/api/project';
 import { useAuthStore } from '@/store/authStore';
 import { TASK_STATUS_META, dueText, formatPeriod, toParticle } from '@/lib/project';
 import { getErrorCode, getErrorMessage } from '@/lib/errors';

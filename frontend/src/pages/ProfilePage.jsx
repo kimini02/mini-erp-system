@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Eye, EyeOff, Mail } from 'lucide-react';
 import axios from '@/api/axios';
-import { leaveApi } from '@/api/m2';
+import { leaveApi } from '@/api/leave';
 import { formatDays } from '@/lib/approval';
 import { toast } from '@/lib/toast';
 import { Avatar, Badge, Button, Field, Input, InfoRow, Modal } from '@/components/ui';
