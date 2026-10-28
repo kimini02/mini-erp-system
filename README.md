@@ -152,3 +152,7 @@ cd backend
 Docker가 켜져 있어야 MariaDB 테스트가 실행됩니다. 테스트 메일·초대 토큰 저장소는 가짜를 사용하므로 외부 메일을 보내지 않습니다. API 명세 9장의 일곱 검증은 `M1AcceptanceTest`에 있으며, 조직도는 실제 MariaDB의 `Com_select` 증가량이 부서 수와 상관없이 2인지 확인합니다.
 
 신규 사원 등록의 `hireDate`는 필수입니다. 이관 사원의 입사일은 `PATCH /api/v1/users/{id}`에 `{"hireDate":"2020-03-02"}`처럼 보정할 수 있습니다(EMPLOYEE U와 기존 데이터 범위 적용). 아이디와 발급 시퀀스는 바뀌지 않으며, 필드를 생략하거나 null을 보내면 기존 날짜를 유지합니다. EMPLOYEE 이외 역할을 붙여 새 사원을 등록하려면 EMPLOYEE C 외에 ROLE U도 필요합니다.
+
+## 운영 배포
+
+M5 운영 배포는 EC2 한 대에서 Nginx·Java 17·MariaDB·Redis를 실행합니다. 처음 설치, DuckDNS·HTTPS, 배포·되돌리기, 백업·복구·종료 절차는 [운영 문서](deploy/README.md)를 따릅니다. 실제 서버 측정은 운영자가 별도로 수행합니다.
