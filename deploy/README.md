@@ -167,7 +167,7 @@ sudo /usr/local/lib/workflow/restore-rehearsal.sh
 
 복구는 **새 mini_erp_restore**로만 합니다. 이미 같은 이름의 DB가 있으면 거부합니다. 테이블별 COUNT와 Flyway 버전을 원본과 비교하고 counts 파일을 백업 옆에 저장한 뒤 임시 DB를 지웁니다. 쓰기가 진행되면 덤프 시점과 비교 시점이 달라 실패할 수 있습니다. 사용자 데이터가 있는 운영 DB를 삭제하지 않습니다.
 
-로컬에서 내려받고 실제 Docker 복구를 합니다.
+**자동·수동 백업만으로는 counts 파일이 생기지 않습니다. 내려받기 전에 서버에서 restore-rehearsal.sh를 성공시켜 해당 세트의 .counts.tsv를 먼저 만듭니다.** 없으면 restore-local.sh가 복구를 거부합니다. 리허설 뒤 새 백업이 생겼다면 새 세트도 다시 리허설합니다. 그 다음 로컬에서 내려받고 실제 Docker 복구를 합니다.
 
 ```bash
 bash deploy/bin/pull-backup.sh CHANGE_ME.duckdns.org
@@ -183,6 +183,8 @@ bash deploy/bin/restore-local.sh "$HOME/workflow-backups/CHANGE_ME.duckdns.org/C
 ## 9. 관측과 M5 서버 측정
 
 실험 전 체크리스트:
+
+로그인 경로에는 **IP당 분당 10건, burst 5** 제한이 있어 한 대에서 로그인 부하를 주면 429가 납니다. 부하 실험은 토큰을 미리 발급해 두고 로그인 외 API로 진행합니다. 토큰 만료·권한과 응답 성공을 먼저 확인하며 비밀값은 기존 0600 헤더 파일로만 전달합니다.
 
 1. 서버를 켠 뒤 **2~3시간** 지났는지 확인합니다. T3는 시작 크레딧이 없으며 중지 후 7일이 지나면 남은 크레딧이 사라지는 조건을 기준으로 준비합니다. 실제 `CPUCreditBalance`는 AWS 콘솔에서 읽어 기록합니다. 2~3시간이 지났다는 사실만으로 충분한 크레딧을 보장하지 않습니다.
 2. 놓친 백업 실행이 끝났는지 `systemctl status workflow-backup.service`와 아래 `backup_in_progress`를 함께 봅니다. `activating`(잠금 대기 포함)이거나 YES면 기다립니다.
@@ -243,6 +245,9 @@ bash deploy/bin/probe.sh https://CHANGE_ME.duckdns.org/api/v1/home /tmp/workflow
 
 ## 10. 운영상의 선택과 한계
 
+- Flyway가 같은 앱 프로세스에서 실행되므로 **프로세스 환경에는 migrator 비밀번호도 있습니다.** 계정 분리가 막는 범위는 앱의 DML 전용 DB 연결을 통한 DDL(SQL 주입 등)입니다. 서버/앱 프로세스를 장악당해 migrator 비밀값을 얻는 경우까지 막지는 못합니다.
+- prod에는 app.invitation.setup-url이 없어 기본값 http://localhost:5173/password/setup이 적용됩니다. 메일이 꺼져 있을 때는 발송에 사용되지 않습니다. **메일을 켤 때 app.invitation.setup-url도 실제 HTTPS 도메인의 /password/setup으로 함께 설정**합니다. 환경변수 APP_INVITATION_SETUP_URL로 설정할 수 있습니다. 예: https://CHANGE_ME.duckdns.org/password/setup. 설정 반영은 점검 시간의 앱 재시작이 필요합니다.
+
 - 실제 값 없는 prod는 조기 실패합니다. management는 loopback 8081의 health만 노출하고 SMTP health는 제외합니다(메일 비활성 운영에서 SMTP로 앱 상태가 DOWN이 되지 않게 함).
 - Redis는 loopback·protected-mode·64MB, 인증 없음입니다. 같은 서버의 다른 프로세스도 접속할 수 있다는 한계가 있습니다. 초대 링크/비밀번호 재설정 외 용도를 추가하지 않습니다.
 - 페이지에는 health 확인용 내부 subrequest를 사용합니다. 정적 index가 앱 장애 중 정상으로 보이지 않도록 한 선택이며, 페이지 방문마다 health 요청 한 번의 비용이 있습니다. assets는 이 확인을 하지 않습니다.
@@ -261,8 +266,10 @@ bash deploy/bin/probe.sh https://CHANGE_ME.duckdns.org/api/v1/home /tmp/workflow
 1. **DuckDNS 갱신**: 콘솔의 현재 공인 IPv4와 도메인 조회가 같은지 확인합니다. 도메인으로 SSH 접속한 뒤 `systemctl status duckdns-update`와 journal의 `result=SUCCESS`, `dns=MATCH`를 봅니다.
 2. **헬스**: `https://CHANGE_ME.duckdns.org/healthz`가 200/UP인지 확인합니다. 앱 기동 중 503이면 서비스 journal을 확인합니다. 서버 내부 health 진단만 loopback 주소를 씁니다.
 3. **인증서**: HTTPS 접속과 인증서 만료일, certbot.timer 상태를 확인합니다. 오래 꺼 두어 만료됐다면 80번/DNS를 확인하고 certbot 갱신 뒤 Nginx 설정 검사·reload를 합니다.
-4. **놓친 백업**: workflow-backup.timer의 LAST/NEXT와 service 상태를 확인합니다. Persistent=true로 재개 시 실행된 백업이 끝나고 `measure-context.sh`에 완료 백업 시각이 갱신됐는지 확인합니다. 데이터가 아직 없는 첫 설치는 첫 배포 후 백업을 확인합니다.
+4. **놓친 백업**: workflow-backup.timer의 LAST/NEXT와 service 상태를 확인합니다. Persistent=true로 재개 시 실행된 백업이 끝나고 `measure-context.sh`에 완료 백업 시각이 갱신됐는지 확인합니다. 데이터가 아직 없는 첫 설치는 첫 배포 후 백업을 확인합니다. 켠 직후 자동 백업에는 counts 파일이 없으므로 내려받기 전에 서버 restore-rehearsal.sh를 실행하고, 성공한 동일 세트를 pull-backup → restore-local 순서로 검증합니다.
 5. 아래 앱 배치 누락을 확인하고 필요한 수동 실행을 합니다. 이후 실험 전 체크리스트를 따릅니다.
+
+batch-check.timer도 Persistent=true입니다. 그날 09:10 이후 켜면 놓친 점검이 바로 실행되어 배치 누락 알림이 올 수 있습니다. 서버가 꺼져 있어 생긴 누락인지 batch_runs와 실제 실행 시각을 확인합니다. 앱 배치 자체가 자동 소급 실행됐다는 뜻은 아닙니다.
 
 ### 앱 배치 누락과 기존 수동 실행 경로
 
@@ -284,7 +291,7 @@ bash deploy/bin/probe.sh https://CHANGE_ME.duckdns.org/api/v1/home /tmp/workflow
 
 **Terminate는 다음을 마친 뒤에만** 실행합니다.
 
-1. 쓰기를 멈추고 최종 백업 → 서버 리허설 → 로컬 내려받기 → 로컬 Docker 복구 확인.
+1. 쓰기를 멈추고 최종 백업 → **서버 restore-rehearsal.sh로 .counts.tsv 생성·검증** → 같은 세트 로컬 내려받기 → restore-local.sh로 Docker 복구 확인. 켠 직후 자동 백업도 서버 리허설을 생략할 수 없습니다.
 2. 로컬에 덤프·검증값·버전·행 수와 필요한 시연/측정 기록이 있는지 확인. 원문 데이터·비밀값은 포트폴리오에 올리지 않음.
 3. 최종 종료할 때만 콘솔에서 Terminate. 남은 EBS 볼륨·스냅샷·기타 과금 리소스를 콘솔에서 확인. 단순 중지와 달리 루트 디스크가 삭제될 수 있음.
 4. DuckDNS의 불필요한 도메인과 Discord 웹후크를 사용자 계정에서 정리하고 로컬 키·비밀값·백업 보관 계획을 결정.
