@@ -81,6 +81,7 @@ health_wait() {
       printf 'HEALTH_WAIT limit_s=%s migration=%s result=UP elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 0
     fi
     local remaining=$((until-SECONDS)) request_limit=2
+    ((remaining>0)) || break # curl --max-time 0 would mean no timeout.
     ((remaining<request_limit)) && request_limit=$remaining
     if curl --silent --fail --max-time "$request_limit" --resolve "$domain:443:127.0.0.1" "https://$domain/healthz" | jq -e '.status == "UP"' >/dev/null 2>&1; then up=1; continue; fi
     sleep 1

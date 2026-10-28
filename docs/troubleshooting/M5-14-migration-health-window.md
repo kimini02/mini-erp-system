@@ -49,3 +49,17 @@ HEALTH_WAIT limit_s=6 migration=YES result=APP_FAILED elapsed_s=1
 
 ## 커밋
 common.sh·release.sh·offline 검증과 이 문서의 독립 커밋. 최종 보고서에 해시를 기록한다.
+
+## 대기 종료 경계 추가 확인
+상태 조회가 지연되어 남은 시간이 0 이하가 됐을 때 curl --max-time 0(무제한)을 실행하지 않도록 요청 직전에도 종료 조건을 확인했다. 가짜 systemctl의 두 번째 조회를 3초 지연한 일반 배포 시험(제한 2초)에서 **curl 호출 0회, TIMEOUT/exit 1**을 확인했다. systemctl 호출 자체의 지연 시간은 경과 시간에 포함되며 2초가 프로세스 강제 종료 시각이라는 뜻은 아니다.
+
+최종 가짜 서비스 재실행:
+
+| 시나리오 | 종료 코드 | 실제 경과(초) | 결과 |
+|---|---:|---:|---|
+| migration 지연 UP | 0 | 3.843 | UP (시험 한도 6초) |
+| 일반 배포 초과 | 1 | 2.646 | TIMEOUT (시험 한도 2초) |
+| NRestarts 증가 | 1 | 1.586 | APP_FAILED |
+| ActiveState=failed | 1 | 1.533 | APP_FAILED |
+| 상태 조회 중 한도 소진 | 1 | 3.321 | TIMEOUT, curl 호출 0 |
+

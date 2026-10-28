@@ -21,7 +21,8 @@ def health_checks(before=False):
     assert release.count('health_wait 90 NO') == 3, 'All rollback/recovery waits must remain 90 seconds'
     for scenario, version, expected, result_name in [
         ('LATE_UP', 7, 0, 'UP'), ('TIMEOUT', 6, 1, 'TIMEOUT'),
-        ('RESTART', 7, 1, 'APP_FAILED'), ('FAILED', 7, 1, 'APP_FAILED')
+        ('RESTART', 7, 1, 'APP_FAILED'), ('FAILED', 7, 1, 'APP_FAILED'),
+        ('STATUS_DELAY', 6, 1, 'TIMEOUT')
     ]:
         with tempfile.TemporaryDirectory(prefix='m5-health-') as folder:
             root = Path(folder)
@@ -36,6 +37,7 @@ def health_checks(before=False):
 n=0; test ! -f "$FIXTURE/sys-count" || n=$(cat "$FIXTURE/sys-count")
 n=$((n+1)); printf '%s' "$n" >"$FIXTURE/sys-count"
 r=0; state=active
+if test "$SCENARIO" = STATUS_DELAY && test "$n" -eq 2; then sleep 3; fi
 if test "$SCENARIO" = RESTART && test "$n" -ge 3; then r=1; fi
 if test "$SCENARIO" = FAILED && test "$n" -ge 3; then state=failed; fi
 printf 'NRestarts=%s\\nActiveState=%s\\n' "$r" "$state"
@@ -61,6 +63,7 @@ printf '{"status":"DOWN"}'; exit 22
             if scenario=='LATE_UP': assert elapsed>=3 and elapsed<6
             if scenario=='TIMEOUT': assert 1<=elapsed<4
             if scenario in ('RESTART','FAILED'): assert elapsed<3
+            if scenario=='STATUS_DELAY': assert elapsed<5 and not (root/'curl-count').exists()
             print(f'HEALTH_FIXTURE scenario={scenario} exit={run.returncode} elapsed_s={elapsed:.3f} external_calls=0')
             print(run.stdout.strip())
 
