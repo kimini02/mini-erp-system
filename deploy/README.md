@@ -156,7 +156,7 @@ bash deploy/bin/pull-backup.sh CHANGE_ME.duckdns.org
 bash deploy/bin/restore-local.sh "$HOME/workflow-backups/CHANGE_ME.duckdns.org/CHANGE_ME.sql.gz"
 ```
 
-저장소 밖 `~/workflow-backups/<서버주소>/`에 root 백업을 SSH로 스트리밍해서 보관합니다. 덤프·sha256·version·counts.tsv 네 파일을 함께 보존합니다. 로컬 복구 컨테이너는 `--network none`, 포트 공개 없음, 실행 뒤 제거됩니다. counts 파일은 서버 리허설 성공 시 생깁니다.
+저장소 밖 `~/workflow-backups/<서버주소>/`에 root 백업을 SSH로 스트리밍해서 보관합니다. 덤프·sha256·version·counts.tsv 네 파일을 함께 보존합니다. 로컬 복구 컨테이너는 `--network none`, 포트 공개 없음, 실행 뒤 컨테이너와 그 익명 데이터 볼륨을 함께 제거합니다. counts 파일은 서버 리허설 성공 시 생깁니다.
 
 서버를 잃었을 때 운영 복구는 운영자 승인 하에 새 서버에 bootstrap·비밀값·빈 mini_erp를 준비하고, 검증한 덤프를 root socket으로 가져온 뒤 그 스키마와 호환되는 릴리스를 배포합니다. 임의로 운영 DB를 덮어쓰는 자동 명령은 제공하지 않습니다. 마지막으로 DuckDNS가 새 서버 IP를 가리키는지 확인합니다.
 

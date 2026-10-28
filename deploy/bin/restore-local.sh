@@ -14,7 +14,7 @@ if digest.hexdigest()!=expected:raise SystemExit('Checksum mismatch.')
 PY
 work=$(mktemp -d)
 container=''
-cleanup() { [[ -z $container ]] || docker rm -f "$container" >/dev/null;rm -rf -- "$work"; }
+cleanup() { [[ -z $container ]] || docker rm --force --volumes "$container" >/dev/null;rm -rf -- "$work"; }
 trap cleanup EXIT
 # Disposable offline recovery only: no network, host port or password in logs/argv.
 container=$(docker run -d --network none -e MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=1 mariadb:10.11)

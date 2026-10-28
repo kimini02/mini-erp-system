@@ -133,3 +133,18 @@ recovery_fixture	2
 ```
 
 한계는 동일합니다. 버전 0은 아직 성공한 migration 이력이 없다는 뜻이며, 실패한 DDL의 원상복구를 의미하지 않습니다. 이 보완은 별도 수정 커밋으로 남깁니다.
+
+## 추가 재현 — 로컬 복구의 익명 데이터 볼륨
+
+MariaDB 이미지에는 `/var/lib/mysql` VOLUME 선언이 있습니다. `docker rm -f`만으로는 복구한 데이터의 익명 볼륨이 남았습니다. 복구 도구가 만든 컨테이너의 mount 이름만 기록해 제거 뒤 잔존을 확인했습니다.
+
+모든 dangling volume을 지우는 대안은 다른 작업의 데이터를 삭제할 수 있어 버렸습니다. 자신이 생성한 컨테이너를 `docker rm --force --volumes`로 제거하도록 한정했습니다. 수정 전 1개 잔존, 수정 후 0개입니다. 재현에서 발견한 그 실행의 볼륨만 지정해 정리했습니다.
+
+```text
+LOCAL_RESTORE tables=       2 flyway=6 counts=MATCH elapsed_s=1
+RESTORE_VOLUME_BEFORE retained=1
+LOCAL_RESTORE tables=       2 flyway=6 counts=MATCH elapsed_s=2
+RESTORE_VOLUME_AFTER retained=0
+```
+
+Docker daemon 중단이나 SIGKILL로 cleanup 자체가 실행되지 못하는 상황은 별도 운영 확인이 필요합니다. 임의의 다른 볼륨을 지우는 명령은 제공하지 않습니다.
