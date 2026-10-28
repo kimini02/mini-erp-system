@@ -11,11 +11,9 @@ if (import.meta.env.MODE === 'mock') {
         if (args.length === 0) super(fixedMs);
         else super(...args);
       }
-
-      static now() {
-        return fixedMs;
-      }
     }
+    // 클래스 정적 메서드 대신 대입: Tailwind가 소스의 단어를 클래스로 읽어 배포 CSS가 바뀌지 않게 합니다.
+    FixedDate.now = () => fixedMs;
     globalThis.Date = FixedDate;
   }
 }
