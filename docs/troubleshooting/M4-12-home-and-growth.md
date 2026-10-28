@@ -61,3 +61,9 @@ READ COMMITTED의 여러 SELECT라 동시에 상태가 바뀌면 위젯 사이�
 
 ## 커밋
 HomeController/HomeService/HomeQueries, 공통 근태 조회, M4HomeTest/M4HomeGrowthTest/LegacyHomeQueries와 이 문서를 추가한 독립 커밋(`git log -- docs/troubleshooting/M4-12-home-and-growth.md`).
+
+## M5 프로필 건수 추가 검증
+
+f9667c6의 `today.monthAbsentCount`, `myTasks.count`를 추가하면서 기존 집계와 윈도 함수를 사용했다. 수정 전/후 동일 SELF 홈 HTTP SQL은 **14 → 14**(인증·권한 포함). 결과는 **담당 미완료·보기 범위 안 7개 → count 7, items 5**이며, 다른 담당·완료·범위 밖 업무를 제외한다. 월간 근태도 지각/결근을 한 SELECT에 합쳤다. 새 회귀 테스트와 전후 결과는 [M5-06](M5-06-home-counters.md)에 남겼다. 윈도 집계의 실제 처리 행은 일치 업무 수에 비례한다.
+
+M5 전체 UTC 재실행의 1천/1만/10만 업무에서 각각 **14/14/14쿼리**를 확인했다. 중앙값은 16.326/33.087/77.018ms이며 이전 측정과 머신 부하가 달라 시간 개선/퇴보 판단에는 쓰지 않는다.

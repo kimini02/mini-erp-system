@@ -49,9 +49,11 @@ public class AttendanceStore {
             COALESCE(a.sched_source,IF(d.work_schedule_id IS NULL,'COMPANY','DEPARTMENT')) AS sched_source,
             COALESCE(a.sched_department_name,d.name) AS sched_department_name,h.name AS holiday_name,
             l.id AS leave_id,l.doc_no AS leave_no,l.leave_type,
-            (SELECT COUNT(*) FROM attendances WHERE user_id=:user AND work_date BETWEEN :begin AND :end AND in_result='LATE') AS late_count
+            monthly.late_count,monthly.absent_count
           FROM users u JOIN departments d ON d.id=u.department_id
           JOIN work_schedules w ON (w.id=d.work_schedule_id OR (d.work_schedule_id IS NULL AND w.is_default=1))
+          CROSS JOIN (SELECT COALESCE(SUM(in_result='LATE'),0) AS late_count,COALESCE(SUM(absent=1),0) AS absent_count
+            FROM attendances WHERE user_id=:user AND work_date BETWEEN :begin AND :end) monthly
           LEFT JOIN attendances a ON a.user_id=u.id AND a.work_date=:date
           LEFT JOIN holidays h ON h.holiday_date=:date
           LEFT JOIN (SELECT x.leave_type,doc.id,doc.doc_no FROM approval_documents doc JOIN leave_requests x ON x.document_id=doc.id

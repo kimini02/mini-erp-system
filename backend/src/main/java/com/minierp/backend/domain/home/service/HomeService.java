@@ -51,8 +51,9 @@ public class HomeService {
  private Map<String,Object> myTasks(Map<String,Object> args,String scope,LocalDate today){
   var summaries=db.rows(HomeQueries.mySummary(scope),args);Map<String,Object> project=null;
   if(!summaries.isEmpty()){var p=summaries.get(0);long total=number(p,"task_count"),done=number(p,"done_count");project=map("id",p.get("id"),"key",p.get("project_key"),"title",p.get("title"),"total",total,"done",done,"overdue",p.get("overdue_count"),"progressPct",total==0?0:done*100/total);}
-  var items=db.rows(HomeQueries.myItems(scope),args).stream().map(r->map("id",r.get("id"),"projectId",r.get("project_id"),"key",r.get("project_key")+"-"+r.get("task_no"),"title",r.get("task_title"),"status",r.get("task_status"),"endDate",r.get("end_date"),"overdueDays",Math.max(0,ChronoUnit.DAYS.between((LocalDate)r.get("end_date"),today)))).toList();
-  return map("project",project,"items",items);
+  var rows=db.rows(HomeQueries.myItems(scope),args);
+  var items=rows.stream().map(r->map("id",r.get("id"),"projectId",r.get("project_id"),"key",r.get("project_key")+"-"+r.get("task_no"),"title",r.get("task_title"),"status",r.get("task_status"),"endDate",r.get("end_date"),"overdueDays",Math.max(0,ChronoUnit.DAYS.between((LocalDate)r.get("end_date"),today)))).toList();
+  return map("project",project,"count",rows.isEmpty()?0:number(rows.get(0),"matching_count"),"items",items);
  }
  private Map<String,Object> notifications(Map<String,Object> args){
   var rows=db.rows(HomeQueries.NOTIFICATIONS,args);

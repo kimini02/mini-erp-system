@@ -7,7 +7,7 @@ public final class HomeQueries {
    LEFT JOIN users u ON u.id=p.leader_id
    WHERE a.user_id=:actor AND t.task_status<>'DONE' AND
    """;
- public static String myItems(String scope){return "SELECT t.id,t.project_id,t.task_title,t.task_status,t.end_date,t.task_no,p.project_key "+MY_FROM+scope+" ORDER BY t.end_date,t.id LIMIT 5";}
+ public static String myItems(String scope){return "SELECT t.id,t.project_id,t.task_title,t.task_status,t.end_date,t.task_no,p.project_key,COUNT(*) OVER() AS matching_count "+MY_FROM+scope+" ORDER BY t.end_date,t.id LIMIT 5";}
  public static String myProject(String scope){return "SELECT p.id "+MY_FROM+scope+" GROUP BY p.id ORDER BY COUNT(*) DESC,COALESCE(p.updated_at,p.created_at) DESC,p.id DESC LIMIT 1";}
  public static String mySummary(String scope){return """
    SELECT p.id,p.project_key,p.title,COUNT(t.id) AS task_count,COALESCE(SUM(t.task_status='DONE'),0) AS done_count,
