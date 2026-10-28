@@ -9,7 +9,7 @@ import { Avatar, Badge, Button, Field, Input, InfoRow, Modal } from '@/component
 /**
  * 내 프로필 모달 (상단 사용자 메뉴 → 내 프로필)
  */
-const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
+const ProfileModal = ({ isOpen, onClose, user: initialUser }) => {
   const [mode, setMode] = useState('profile');
   const [step, setStep] = useState(1);
   const [showPw, setShowPw] = useState(false);
@@ -253,4 +253,4 @@ const ProfilePage = ({ isOpen, onClose, user: initialUser }) => {
   );
 };
 
-export default ProfilePage;
+export default ProfileModal;

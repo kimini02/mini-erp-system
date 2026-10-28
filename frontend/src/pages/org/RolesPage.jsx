@@ -1,9 +1,8 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { KeyRound, Lock, Pencil, Plus, Trash2, UserMinus, UserPlus } from 'lucide-react';
 import { roleApi } from '@/api/roles';
-import { userApi } from '@/api/users';
 import { useAuthStore } from '@/store/authStore';
-import { MENU, SCOPES, SCOPE_LABELS } from '@/lib/permissions';
+import { MENU } from '@/lib/permissions';
 import { getErrorMessage } from '@/lib/errors';
 import { toast } from '@/lib/toast';
 import { confirm } from '@/lib/confirm';
@@ -15,301 +14,21 @@ import {
   Card,
   CardHeader,
   EmptyState,
-  Field,
-  Input,
-  Modal,
   PageHeader,
   PageLoader,
-  Select,
   Table,
   TableEmpty,
   Td,
-  Textarea,
   Th,
   Tr,
 } from '@/components/ui';
-
-const ACTION_COLUMNS = [
-  { key: 'view', action: 'V', label: '보기' },
-  { key: 'create', action: 'C', label: '등록' },
-  { key: 'update', action: 'U', label: '수정' },
-  { key: 'delete', action: 'D', label: '삭제' },
-];
+import PermissionMatrix from './roles/PermissionMatrix';
+import RoleFormModal from './roles/RoleFormModal';
+import RoleMembersModal from './roles/RoleMembersModal';
 
 const permKey = (list) => JSON.stringify(list.map((p) => [p.menu, p.view, p.create, p.update, p.delete, p.scope]));
 
 /* ───────── 권한표 ───────── */
-
-function PermissionMatrix({ menus, permissions, locked, editable, onChange }) {
-  const byMenu = useMemo(() => Object.fromEntries(permissions.map((p) => [p.menu, p])), [permissions]);
-  const groups = useMemo(() => {
-    const out = [];
-    menus.forEach((m) => {
-      const last = out[out.length - 1];
-      if (last && last.name === m.group) last.items.push(m);
-      else out.push({ name: m.group, items: [m] });
-    });
-    return out;
-  }, [menus]);
-
-  const update = (menu, patch) => {
-    onChange(
-      permissions.map((p) => {
-        if (p.menu !== menu.code) return p;
-        const next = { ...p, ...patch };
-        const anyOn = ACTION_COLUMNS.some((c) => next[c.key]);
-        // 범위가 있는 메뉴: 처음 켜면 '본인'으로 시작, 모두 끄면 범위도 비움 (서버 검증 규칙과 같음)
-        if (menu.scopeApplicable) next.scope = anyOn ? next.scope || 'SELF' : null;
-        return next;
-      }),
-    );
-  };
-
-  const disabled = locked || !editable;
-
-  return (
-    <Table>
-      <thead>
-        <tr>
-          <Th className="min-w-[200px]">메뉴</Th>
-          {ACTION_COLUMNS.map((c) => (
-            <Th key={c.key} align="center" className="w-16">
-              {c.label}
-            </Th>
-          ))}
-          <Th className="w-52">데이터 범위</Th>
-        </tr>
-      </thead>
-      <tbody>
-        {groups.map((g) => (
-          <Fragment key={g.name}>
-            <tr className="bg-gray-50/60">
-              <td colSpan={6} className="px-4 pb-1.5 pt-3 text-xs font-semibold text-gray-500">
-                {g.name}
-              </td>
-            </tr>
-            {g.items.map((m) => {
-              const p = byMenu[m.code];
-              const anyOn = ACTION_COLUMNS.some((c) => p[c.key]);
-              return (
-                <Tr key={m.code}>
-                  <Td className={cn('font-medium', anyOn ? 'text-gray-900' : 'text-gray-500')}>{m.name}</Td>
-                  {ACTION_COLUMNS.map((c) => (
-                    <Td key={c.key} align="center">
-                      {m.allowedActions.includes(c.action) ? (
-                        <input
-                          type="checkbox"
-                          checked={!!p[c.key]}
-                          disabled={disabled}
-                          onChange={(e) => update(m, { [c.key]: e.target.checked })}
-                          aria-label={`${m.name} ${c.label}`}
-                          className="h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
-                        />
-                      ) : (
-                        <span className="text-gray-300" aria-label="해당 없음">
-                          —
-                        </span>
-                      )}
-                    </Td>
-                  ))}
-                  <Td>
-                    {m.scopeApplicable ? (
-                      <Select
-                        value={p.scope || ''}
-                        disabled={disabled || !anyOn}
-                        onChange={(e) => update(m, { scope: e.target.value })}
-                        aria-label={`${m.name} 데이터 범위`}
-                        className="h-8 text-[13px]"
-                      >
-                        {!anyOn && <option value="">—</option>}
-                        {SCOPES.map((s) => (
-                          <option key={s} value={s}>
-                            {SCOPE_LABELS[s]}
-                          </option>
-                        ))}
-                      </Select>
-                    ) : (
-                      <span className="text-[13px] text-gray-300">—</span>
-                    )}
-                  </Td>
-                </Tr>
-              );
-            })}
-          </Fragment>
-        ))}
-      </tbody>
-    </Table>
-  );
-}
-
-/* ───────── 역할 만들기 · 이름 수정 ───────── */
-
-function RoleFormModal({ open, role, onClose, onSaved }) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (open) {
-      setName(role?.name || '');
-      setDescription(role?.description || '');
-      setError('');
-    }
-  }, [open, role]);
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setError('');
-    try {
-      const saved = role
-        ? await roleApi.update(role.id, { name: name.trim(), description: description.trim() })
-        : await roleApi.create({ name: name.trim(), description: description.trim() });
-      toast.success(role ? '역할 정보를 바꿨습니다.' : `'${name.trim()}' 역할을 만들었습니다. 권한을 정해 주세요.`);
-      onSaved(saved);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={role ? '역할 정보 수정' : '역할 만들기'}
-      size="md"
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            취소
-          </Button>
-          <Button type="submit" form="role-form" loading={saving} disabled={!name.trim()}>
-            {role ? '저장' : '만들기'}
-          </Button>
-        </>
-      }
-    >
-      <form id="role-form" onSubmit={submit} className="space-y-4">
-        <Field label="역할 이름" htmlFor="role-name" required>
-          <Input
-            id="role-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="예: 인사 담당"
-            autoFocus
-          />
-        </Field>
-        <Field label="설명" htmlFor="role-desc" hint="어떤 사람에게 주는 역할인지 적어 두면 나중에 헷갈리지 않습니다.">
-          <Textarea id="role-desc" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
-        </Field>
-        {error && (
-          <p role="alert" className="text-[13px] text-red-600">
-            {error}
-          </p>
-        )}
-      </form>
-    </Modal>
-  );
-}
-
-/* ───────── 사원 추가 ───────── */
-
-function AddMembersModal({ open, role, existingIds, onClose, onAdded }) {
-  const [q, setQ] = useState('');
-  const [results, setResults] = useState([]);
-  const [picked, setPicked] = useState([]);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    setPicked([]);
-    let alive = true;
-    const id = setTimeout(() => {
-      userApi
-        .list({ q: q.trim() || undefined, status: 'ACTIVE', size: 20 })
-        .then((r) => alive && setResults(r.content))
-        .catch(() => alive && setResults([]));
-    }, 250);
-    return () => {
-      alive = false;
-      clearTimeout(id);
-    };
-  }, [open, q]);
-
-  const toggle = (id) => setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-
-  const submit = async () => {
-    setSaving(true);
-    try {
-      await roleApi.addMembers(role.id, picked);
-      toast.success(`${picked.length}명에게 '${role.name}' 역할을 줬습니다.`);
-      onAdded();
-    } catch (err) {
-      toast.error(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={`'${role?.name}' 역할에 사원 추가`}
-      size="lg"
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            취소
-          </Button>
-          <Button onClick={submit} loading={saving} disabled={!picked.length}>
-            {picked.length}명 추가
-          </Button>
-        </>
-      }
-    >
-      <Input
-        type="search"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="이름 또는 아이디 앞부분"
-        aria-label="사원 검색"
-      />
-      <ul className="mt-3 divide-y divide-gray-100">
-        {results.length === 0 && <li className="py-8 text-center text-sm text-gray-500">검색 결과가 없습니다.</li>}
-        {results.map((u) => {
-          const already = existingIds.has(u.id);
-          return (
-            <li key={u.id}>
-              <label className={cn('flex items-center gap-3 py-2.5', already ? 'opacity-50' : 'cursor-pointer')}>
-                <input
-                  type="checkbox"
-                  disabled={already}
-                  checked={already || picked.includes(u.id)}
-                  onChange={() => toggle(u.id)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <Avatar name={u.name} size="sm" />
-                <span className="flex-1 text-sm">
-                  <span className="font-medium text-gray-900">{u.name}</span>{' '}
-                  <span className="text-gray-500">
-                    {u.position} · {u.department?.name}
-                  </span>
-                </span>
-                {already && <span className="text-xs text-gray-500">이미 있음</span>}
-              </label>
-            </li>
-          );
-        })}
-      </ul>
-    </Modal>
-  );
-}
-
-/* ───────── 화면 ───────── */
 
 export default function RolesPage() {
   const can = useAuthStore((s) => s.can);
@@ -642,7 +361,7 @@ export default function RolesPage() {
           if (saved?.id) setSelectedId(saved.id);
         }}
       />
-      <AddMembersModal
+      <RoleMembersModal
         open={modal === 'members'}
         role={role}
         existingIds={memberIds}

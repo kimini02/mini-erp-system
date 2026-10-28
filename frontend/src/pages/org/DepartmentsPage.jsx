@@ -1,30 +1,25 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, ChevronRight, FolderTree, Move, Plus, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, FolderTree, Move, Plus, Trash2, Users } from 'lucide-react';
 import { departmentApi, workScheduleApi } from '@/api/org';
-import { flattenTree, collectSubtreeIds } from '@/lib/orgTree';
 import { userApi } from '@/api/users';
 import { useAuthStore } from '@/store/authStore';
 import { MENU, USER_STATUS_META } from '@/lib/permissions';
 import { getErrorCode, getErrorMessage } from '@/lib/errors';
 import { toast } from '@/lib/toast';
 import { confirm } from '@/lib/confirm';
-import { cn } from '@/lib/cn';
 import {
   Avatar,
   Badge,
   Button,
   Card,
   CardBody,
-  CardFooter,
   CardHeader,
   EmptyState,
   Field,
   Input,
-  Modal,
   PageHeader,
   PageLoader,
-  Select,
   Spinner,
   Table,
   TableEmpty,
@@ -32,423 +27,11 @@ import {
   Th,
   Tr,
 } from '@/components/ui';
-
-const addMinutes = (time, minutes) => {
-  const [h, m] = time.split(':').map(Number);
-  const total = h * 60 + m + Number(minutes || 0);
-  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
-};
-
-/* ───────── 조직도 ───────── */
-
-function TreeNode({ node, depth, selectedId, collapsed, onSelect, onToggle }) {
-  const hasChildren = node.children.length > 0;
-  const open = !collapsed.has(node.id);
-  const selected = node.id === selectedId;
-
-  return (
-    <li role="treeitem" aria-expanded={hasChildren ? open : undefined} aria-selected={selected}>
-      <div
-        className={cn('flex items-center rounded-lg pr-2', selected ? 'bg-blue-50' : 'hover:bg-gray-50')}
-        style={{ paddingLeft: depth * 16 }}
-      >
-        {hasChildren ? (
-          <button
-            type="button"
-            onClick={() => onToggle(node.id)}
-            className="flex h-9 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:text-gray-700"
-            aria-label={`${node.name} ${open ? '접기' : '펼치기'}`}
-          >
-            <ChevronRight size={14} className={cn('transition-transform', open && 'rotate-90')} />
-          </button>
-        ) : (
-          <span className="w-7 shrink-0" />
-        )}
-        <button
-          type="button"
-          onClick={() => onSelect(node.id)}
-          className="flex h-9 min-w-0 flex-1 items-center gap-2 text-left text-sm"
-        >
-          <span className={cn('truncate', selected ? 'font-semibold text-blue-700' : 'font-medium text-gray-800')}>
-            {node.name}
-          </span>
-          {!node.head && (
-            <Badge tone="amber" className="!px-1.5 text-[11px]">
-              부서장 공석
-            </Badge>
-          )}
-          <span className="ml-auto text-xs tabular-nums text-gray-500">{node.totalMemberCount}</span>
-        </button>
-      </div>
-      {hasChildren && open && (
-        <ul role="group">
-          {node.children.map((child) => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              depth={depth + 1}
-              selectedId={selectedId}
-              collapsed={collapsed}
-              onSelect={onSelect}
-              onToggle={onToggle}
-            />
-          ))}
-        </ul>
-      )}
-    </li>
-  );
-}
-
-/* ───────── 근무시간 ───────── */
-
-function WorkScheduleCard({ department, defaultSchedule, canUpdate, onSaved }) {
-  const initial = department.workSchedule;
-  const [useDefault, setUseDefault] = useState(initial.useDefault);
-  const [form, setForm] = useState({
-    startTime: initial.useDefault ? '09:00' : initial.startTime,
-    endTime: initial.useDefault ? '18:00' : initial.endTime,
-    lateGraceMin: initial.useDefault ? 10 : initial.lateGraceMin,
-  });
-  const [saving, setSaving] = useState(false);
-
-  const effective = useDefault ? defaultSchedule : form;
-  const invalid = !useDefault && form.endTime <= form.startTime;
-  const dirty =
-    useDefault !== initial.useDefault ||
-    (!useDefault &&
-      (form.startTime !== initial.startTime ||
-        form.endTime !== initial.endTime ||
-        Number(form.lateGraceMin) !== initial.lateGraceMin));
-
-  const save = async () => {
-    setSaving(true);
-    try {
-      await departmentApi.setWorkSchedule(
-        department.id,
-        useDefault ? { useDefault: true } : { useDefault: false, ...form, lateGraceMin: Number(form.lateGraceMin) },
-      );
-      toast.success('근무시간을 저장했습니다.');
-      onSaved();
-    } catch (err) {
-      toast.error(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const option = (value, title, desc) => {
-    const active = useDefault === value;
-    return (
-      <button
-        type="button"
-        role="radio"
-        aria-checked={active}
-        disabled={!canUpdate}
-        onClick={() => setUseDefault(value)}
-        className={cn(
-          'flex-1 rounded-xl border px-4 py-3 text-left transition-colors disabled:cursor-default',
-          active ? 'border-blue-500 bg-blue-50/60 ring-1 ring-blue-500' : 'border-gray-200 hover:border-gray-300',
-        )}
-      >
-        <span className="block text-sm font-semibold text-gray-900">{title}</span>
-        <span className="mt-0.5 block text-[13px] text-gray-500">{desc}</span>
-      </button>
-    );
-  };
-
-  return (
-    <Card>
-      <CardHeader
-        title="근무시간"
-        description="지각·조퇴 판정에 씁니다. 바꿔도 이미 찍힌 출근 기록의 판정은 바뀌지 않습니다."
-      />
-      <CardBody className="space-y-4">
-        <div role="radiogroup" aria-label="근무시간 기준" className="flex flex-col gap-2 sm:flex-row">
-          {option(
-            true,
-            '회사 기본 따르기',
-            defaultSchedule
-              ? `${defaultSchedule.startTime} ~ ${defaultSchedule.endTime} · 유예 ${defaultSchedule.lateGraceMin}분`
-              : '불러오는 중',
-          )}
-          {option(false, '이 부서만 따로 정하기', '시차 출근, 교대 근무 부서')}
-        </div>
-
-        {!useDefault && (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Field label="출근" htmlFor="ws-start">
-              <Input
-                id="ws-start"
-                type="time"
-                value={form.startTime}
-                disabled={!canUpdate}
-                onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-              />
-            </Field>
-            <Field label="퇴근" htmlFor="ws-end" error={invalid ? '퇴근은 출근보다 늦어야 합니다.' : undefined}>
-              <Input
-                id="ws-end"
-                type="time"
-                value={form.endTime}
-                invalid={invalid}
-                disabled={!canUpdate}
-                onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
-              />
-            </Field>
-            <Field label="지각 유예" htmlFor="ws-grace">
-              <Select
-                id="ws-grace"
-                value={form.lateGraceMin}
-                disabled={!canUpdate}
-                onChange={(e) => setForm((f) => ({ ...f, lateGraceMin: Number(e.target.value) }))}
-              >
-                {[0, 5, 10, 15, 20, 30].map((m) => (
-                  <option key={m} value={m}>
-                    {m === 0 ? '없음' : `${m}분`}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
-        )}
-
-        {effective && (
-          <p className="rounded-lg bg-gray-50 px-3 py-2.5 text-[13px] text-gray-600">
-            판정 예시:{' '}
-            <b className="font-semibold text-gray-900">{addMinutes(effective.startTime, effective.lateGraceMin)}</b>{' '}
-            이후 출근하면 지각, <b className="font-semibold text-gray-900">{effective.endTime}</b> 전에 퇴근하면 조퇴
-          </p>
-        )}
-      </CardBody>
-      {canUpdate && (
-        <CardFooter>
-          <Button onClick={save} loading={saving} disabled={!dirty || invalid}>
-            근무시간 저장
-          </Button>
-        </CardFooter>
-      )}
-    </Card>
-  );
-}
-
-/* ───────── 모달 ───────── */
-
-function DepartmentFormModal({ open, onClose, tree, defaultParentId, onCreated }) {
-  const [name, setName] = useState('');
-  const [parentId, setParentId] = useState(defaultParentId);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const options = useMemo(() => flattenTree(tree), [tree]);
-
-  useEffect(() => {
-    if (open) {
-      setName('');
-      setParentId(defaultParentId);
-      setError('');
-    }
-  }, [open, defaultParentId]);
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setError('');
-    try {
-      const created = await departmentApi.create({ name: name.trim(), parentId: Number(parentId) });
-      toast.success(`'${name.trim()}' 부서를 만들었습니다.`);
-      onCreated(created.id);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="부서 추가"
-      size="md"
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            취소
-          </Button>
-          <Button type="submit" form="dept-form" loading={saving} disabled={!name.trim()}>
-            추가
-          </Button>
-        </>
-      }
-    >
-      <form id="dept-form" onSubmit={submit} className="space-y-4">
-        <Field label="상위 부서" htmlFor="dept-parent" required>
-          <Select id="dept-parent" value={parentId ?? ''} onChange={(e) => setParentId(Number(e.target.value))}>
-            {options.map((o) => (
-              <option key={o.id} value={o.id}>
-                {'　'.repeat(o.depth)}
-                {o.name}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        <Field label="부서명" htmlFor="dept-name" required hint="부서 코드는 저장할 때 자동으로 정해집니다.">
-          <Input
-            id="dept-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="예: QA2팀"
-            autoFocus
-          />
-        </Field>
-        {error && (
-          <p role="alert" className="text-[13px] text-red-600">
-            {error}
-          </p>
-        )}
-      </form>
-    </Modal>
-  );
-}
-
-function MoveModal({ open, onClose, tree, department, onMoved }) {
-  const blocked = useMemo(
-    () => (tree && department ? collectSubtreeIds(tree, department.id) : new Set()),
-    [tree, department],
-  );
-  const options = useMemo(() => flattenTree(tree).filter((o) => !blocked.has(o.id)), [tree, blocked]);
-  const [parentId, setParentId] = useState(department?.parentId);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (open) {
-      setParentId(department?.parentId);
-      setError('');
-    }
-  }, [open, department]);
-
-  const submit = async () => {
-    setSaving(true);
-    setError('');
-    try {
-      await departmentApi.move(department.id, Number(parentId));
-      toast.success('부서를 옮겼습니다.');
-      onMoved();
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={`'${department?.name}' 옮기기`}
-      description="자기 자신과 하위 부서 아래로는 옮길 수 없습니다."
-      size="md"
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            취소
-          </Button>
-          <Button onClick={submit} loading={saving} disabled={Number(parentId) === department?.parentId}>
-            옮기기
-          </Button>
-        </>
-      }
-    >
-      <Field label="새 상위 부서" htmlFor="move-parent">
-        <Select id="move-parent" value={parentId ?? ''} onChange={(e) => setParentId(Number(e.target.value))}>
-          {options.map((o) => (
-            <option key={o.id} value={o.id}>
-              {'　'.repeat(o.depth)}
-              {o.name}
-            </option>
-          ))}
-        </Select>
-      </Field>
-      {error && (
-        <p role="alert" className="mt-3 text-[13px] text-red-600">
-          {error}
-        </p>
-      )}
-    </Modal>
-  );
-}
-
-function HeadModal({ open, onClose, department, members, onSaved }) {
-  const candidates = members.filter((m) => m.status === 'ACTIVE');
-  const [userId, setUserId] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (open) {
-      setUserId(department?.head?.id ?? '');
-      setError('');
-    }
-  }, [open, department]);
-
-  const submit = async () => {
-    setSaving(true);
-    setError('');
-    try {
-      await departmentApi.setHead(department.id, Number(userId));
-      toast.success('부서장을 지정했습니다. 새로 상신하는 문서부터 결재자로 들어갑니다.');
-      onSaved();
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="부서장 지정"
-      description="그 부서에 소속된 재직 사원만 부서장이 될 수 있습니다."
-      size="md"
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            취소
-          </Button>
-          <Button onClick={submit} loading={saving} disabled={!userId || Number(userId) === department?.head?.id}>
-            지정
-          </Button>
-        </>
-      }
-    >
-      {candidates.length === 0 ? (
-        <p className="text-sm text-gray-600">
-          이 부서에 재직 중인 사원이 없습니다. 사원 관리에서 먼저 사원을 이 부서로 옮겨 주세요.
-        </p>
-      ) : (
-        <Field label="부서장" htmlFor="head-user">
-          <Select id="head-user" value={userId} onChange={(e) => setUserId(e.target.value)}>
-            <option value="">사원 선택</option>
-            {candidates.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name} {m.position} ({m.loginId})
-              </option>
-            ))}
-          </Select>
-        </Field>
-      )}
-      {error && (
-        <p role="alert" className="mt-3 text-[13px] text-red-600">
-          {error}
-        </p>
-      )}
-    </Modal>
-  );
-}
-
-/* ───────── 화면 ───────── */
+import WorkScheduleCard from './departments/WorkScheduleCard';
+import TreeNode from './departments/TreeNode';
+import DepartmentFormModal from './departments/DepartmentFormModal';
+import DepartmentMoveModal from './departments/DepartmentMoveModal';
+import DepartmentHeadModal from './departments/DepartmentHeadModal';
 
 export default function DepartmentsPage() {
   const navigate = useNavigate();
@@ -836,7 +419,7 @@ export default function DepartmentsPage() {
           await refresh(id);
         }}
       />
-      <MoveModal
+      <DepartmentMoveModal
         open={modal === 'move'}
         onClose={() => setModal(null)}
         tree={tree}
@@ -846,7 +429,7 @@ export default function DepartmentsPage() {
           await refresh();
         }}
       />
-      <HeadModal
+      <DepartmentHeadModal
         open={modal === 'head'}
         onClose={() => setModal(null)}
         department={detail}

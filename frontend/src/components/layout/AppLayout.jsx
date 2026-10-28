@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
-import ProfilePage from '@/pages/ProfilePage';
+import ProfileModal from './ProfileModal';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 
@@ -41,7 +41,7 @@ export default function AppLayout() {
         </main>
       </div>
 
-      <ProfilePage isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={user} />
+      <ProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={user} />
     </div>
   );
 }
