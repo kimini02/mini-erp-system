@@ -40,7 +40,7 @@ export default function LoginPage() {
       navigate('/me/password', { replace: true });
       return;
     }
-    navigate(location.state?.from || '/dashboard', { replace: true });
+    navigate(location.state?.from || '/home', { replace: true });
   };
 
   return (

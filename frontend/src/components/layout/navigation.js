@@ -1,6 +1,5 @@
 import {
-  LayoutDashboard,
-  ClipboardList,
+  Home,
   CalendarDays,
   CalendarOff,
   FilePlus2,
@@ -11,8 +10,6 @@ import {
   CalendarRange,
   Scale,
   FolderKanban,
-  ShieldCheck,
-  ListTodo,
   Network,
   Users,
   KeyRound,
@@ -22,15 +19,13 @@ import { MENU } from '@/lib/permissions';
 /**
  * 사이드바 메뉴 (경로는 역할과 상관없이 하나)
  * - visible(ctx): 이 메뉴를 보여 줄지. ctx = { can(menu, action), isChief, isTeamLeader }
- *   조직·권한·결재 메뉴는 메뉴 권한으로, 아직 다시 만들지 않은 기존 기능(프로젝트)은 기존 역할로 판단합니다.
+ *   모든 메뉴는 메뉴 권한으로 판단합니다 (M4에서 프로젝트도 옮김).
  * - aliases: 같은 메뉴로 보는 다른 경로 (활성 표시·상단 경로 표시용)
  * - prefix: 이 경로로 시작하는 하위 화면도 같은 메뉴로 봄 (예: 결재 문서 상세)
  * - badge: 'approvals' 이면 결재 대기 건수 표시
  */
-const isApprover = (ctx) => ctx.isChief || ctx.isTeamLeader;
-
 const NAVIGATION = [
-  { items: [{ label: '대시보드', path: '/dashboard', icon: LayoutDashboard }] },
+  { items: [{ label: '홈', path: '/home', icon: Home, aliases: ['/dashboard'] }] },
   {
     title: '전자결재',
     items: [
@@ -53,9 +48,7 @@ const NAVIGATION = [
   {
     title: '업무',
     items: [
-      { label: '프로젝트 관리', path: '/projects', icon: FolderKanban, aliases: ['/projects/new'], visible: isApprover },
-      { label: '업무 배정', path: '/tasks/assign', icon: ListTodo, visible: isApprover },
-      { label: '내 업무', path: '/my-tasks', icon: ClipboardList, visible: (ctx) => !isApprover(ctx) },
+      { label: '프로젝트', path: '/projects', prefix: '/projects/', icon: FolderKanban, visible: (ctx) => ctx.can(MENU.PROJECT) },
     ],
   },
   {
@@ -64,7 +57,6 @@ const NAVIGATION = [
       { label: '부서 관리', path: '/org/departments', icon: Network, visible: (ctx) => ctx.can(MENU.DEPARTMENT) },
       { label: '사원 관리', path: '/org/employees', icon: Users, visible: (ctx) => ctx.can(MENU.EMPLOYEE) },
       { label: '역할·권한', path: '/org/roles', icon: KeyRound, visible: (ctx) => ctx.can(MENU.ROLE) },
-      { label: '프로젝트 권한', path: '/project-auth', icon: ShieldCheck, visible: (ctx) => ctx.isChief },
     ],
   },
 ];

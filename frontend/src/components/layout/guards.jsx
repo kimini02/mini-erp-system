@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { Lock, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
-import { getRoleInfo } from '@/lib/roles';
 import { Button, EmptyState, PageLoader } from '@/components/ui';
 
 /**
@@ -59,30 +58,22 @@ export function RequirePermission({ menu, action = 'V', children }) {
   return can(menu, action) ? children : <NoAccess />;
 }
 
-/** 아직 다시 만들지 않은 기존 기능: 기존 역할로 판단 (M2·M4에서 메뉴 권한으로 바뀜) */
-export function RequireLegacyRole({ chiefOnly = false, children }) {
-  const user = useAuthStore((s) => s.user);
-  const { isChief, isTeamLeader } = getRoleInfo(user);
-  const allowed = chiefOnly ? isChief : isChief || isTeamLeader;
-  return allowed ? children : <NoAccess />;
-}
-
 /** 예전 역할별 경로(/admin/…, /manager/…, /user/…)를 새 경로로 */
 const LEGACY_PATHS = {
-  dashboard: '/dashboard',
+  dashboard: '/home',
   approvals: '/approvals',
   'leave-approval': '/approvals',
   leaves: '/leaves',
   'leaves/new': '/leaves/new',
   calendar: '/calendar',
-  'task-create': '/projects/new',
-  'task-edit': '/tasks/assign',
-  'project-auth': '/project-auth',
+  'task-create': '/projects',
+  'task-edit': '/projects',
+  'project-auth': '/projects',
 };
 
-export function LegacyRedirect({ area }) {
+export function LegacyRedirect() {
   const rest = useParams()['*'] || '';
-  let target = LEGACY_PATHS[rest] || '/dashboard';
-  if (rest === 'projects') target = area === 'user' ? '/my-tasks' : '/projects';
+  let target = LEGACY_PATHS[rest] || '/home';
+  if (rest === 'projects') target = '/projects';
   return <Navigate to={target} replace />;
 }

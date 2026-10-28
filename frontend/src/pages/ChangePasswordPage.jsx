@@ -37,7 +37,7 @@ export default function ChangePasswordPage() {
       const { accessToken } = await authApi.changePassword(current, password);
       applyNewToken(accessToken);
       toast.success('비밀번호를 바꿨습니다. 다른 기기의 로그인은 끊어졌습니다.');
-      navigate('/dashboard', { replace: true });
+      navigate('/home', { replace: true });
     } catch (err) {
       setError(getErrorMessage(err));
       setSubmitting(false);

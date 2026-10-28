@@ -29,7 +29,7 @@ export function getRoleInfo(user) {
     workspace: isChief ? '관리자' : isTeamLeader ? '팀장' : '임직원',
     // 경로는 역할과 상관없이 하나입니다 (예: /approvals)
     basePath: '',
-    homePath: '/dashboard',
+    homePath: '/home',
     roleLabel: ROLE_LABELS[role] || position || '사원',
   };
 }

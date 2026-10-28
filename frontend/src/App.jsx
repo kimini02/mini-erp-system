@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
-import { getRoleInfo } from './lib/roles';
 import { MENU } from './lib/permissions';
 
 // 레이아웃 및 공통 컴포넌트
 import AppLayout from './components/layout/AppLayout';
-import { LegacyRedirect, RequireAuth, RequireLegacyRole, RequirePermission } from './components/layout/guards';
+import { LegacyRedirect, RequireAuth, RequirePermission } from './components/layout/guards';
 import { Toaster, ConfirmDialog } from './components/ui';
 
 // 로그인 전
@@ -16,13 +15,6 @@ import PasswordSetupPage from './pages/PasswordSetupPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 
 // 기존 기능
-import AdminDashboard from './pages/AdminDashboard';
-import UserDashboard from './pages/UserDashboard';
-import TaskCreate from './pages/TaskCreate';
-import TaskEdit from './pages/TaskEdit';
-import ProjectManagement from './pages/ProjectManagement';
-import AdminProjectAuth from './pages/AdminProjectAuth';
-import ProjectPage from './pages/ProjectPage';
 import CalendarPage from './pages/CalendarPage';
 
 // 조직·권한 (M1)
@@ -43,11 +35,10 @@ import MyAttendancePage from './pages/attendance/MyAttendancePage';
 import AttendanceMonthlyPage from './pages/attendance/AttendanceMonthlyPage';
 import LeaveAdminPage from './pages/leave/LeaveAdminPage';
 
-function DashboardPage() {
-  const user = useAuthStore((s) => s.user);
-  const { isChief, isTeamLeader } = getRoleInfo(user);
-  return isChief || isTeamLeader ? <AdminDashboard /> : <UserDashboard />;
-}
+// 홈 · 프로젝트 보드 (M4)
+import HomePage from './pages/HomePage';
+import ProjectsPage from './pages/project/ProjectsPage';
+import ProjectBoardPage from './pages/project/ProjectBoardPage';
 
 function App() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -63,7 +54,8 @@ function App() {
             </RequireAuth>
           }
         >
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/dashboard" element={<Navigate to="/home" replace />} />
 
           <Route path="/approvals" element={<RequirePermission menu={MENU.APPROVAL_INBOX}><ApprovalInboxPage /></RequirePermission>} />
           <Route path="/approvals/new" element={<RequirePermission menu={MENU.APPROVAL_DRAFT} action="C"><ApprovalDraftPage /></RequirePermission>} />
@@ -76,11 +68,12 @@ function App() {
           <Route path="/leaves/new" element={<Navigate to="/approvals/new?form=LEAVE" replace />} />
           <Route path="/calendar" element={<CalendarPage />} />
 
-          <Route path="/projects" element={<RequireLegacyRole><ProjectManagement /></RequireLegacyRole>} />
-          <Route path="/projects/new" element={<RequireLegacyRole><TaskCreate /></RequireLegacyRole>} />
-          <Route path="/tasks/assign" element={<RequireLegacyRole><TaskEdit /></RequireLegacyRole>} />
-          <Route path="/my-tasks" element={<ProjectPage />} />
-          <Route path="/project-auth" element={<RequireLegacyRole chiefOnly><AdminProjectAuth /></RequireLegacyRole>} />
+          <Route path="/projects" element={<RequirePermission menu={MENU.PROJECT}><ProjectsPage /></RequirePermission>} />
+          <Route path="/projects/:id/board" element={<RequirePermission menu={MENU.PROJECT}><ProjectBoardPage /></RequirePermission>} />
+          {/* 예전 프로젝트·업무 화면 경로 → 새 화면 */}
+          {['/projects/new', '/tasks/assign', '/my-tasks', '/project-auth'].map((path) => (
+            <Route key={path} path={path} element={<Navigate to="/projects" replace />} />
+          ))}
 
           <Route path="/holidays" element={<RequirePermission menu={MENU.HOLIDAY}><HolidaysPage /></RequirePermission>} />
           <Route path="/org/departments" element={<RequirePermission menu={MENU.DEPARTMENT}><DepartmentsPage /></RequirePermission>} />
@@ -101,9 +94,9 @@ function App() {
         <Route path="/admin/*" element={<LegacyRedirect area="admin" />} />
         <Route path="/manager/*" element={<LegacyRedirect area="manager" />} />
         <Route path="/user/*" element={<LegacyRedirect area="user" />} />
-        <Route path="/project-page" element={<Navigate to="/my-tasks" replace />} />
+        <Route path="/project-page" element={<Navigate to="/projects" replace />} />
 
-        <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+        <Route path="/" element={<Navigate to={isAuthenticated ? '/home' : '/login'} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
