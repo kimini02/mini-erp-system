@@ -138,6 +138,8 @@ public interface ApprovalFormHandler {
 
 ## 8. 배포·운영 (M5)
 
+> 세부 결정과 완료 기준은 [16-deploy-ops-m5.md](16-deploy-ops-m5.md) (2026-10-28).
+
 | 항목 | 방법 |
 |---|---|
 | 앱 실행 | 전용 리눅스 사용자 + systemd 서비스. 비밀값은 `/etc/workflow/env` (권한 600) |
