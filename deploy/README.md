@@ -154,6 +154,37 @@ bash deploy/bin/rollback.sh CHANGE_ME.duckdns.org
 - **jar를 되돌려도 스키마는 돌아가지 않습니다.** 운영 V 파일은 수정하지 않고 V7부터 추가합니다. 구버전 코드와 호환되지 않는 변경은 별도 복구 계획이 필요합니다.
 - 배포·rollback·백업·서버 복구 리허설은 같은 flock을 사용합니다. 03:30~03:39(KST)에는 신규 배포를 거부합니다. 직접 실행한 Flyway·수동 DDL은 이 잠금을 우회하므로 수행하지 않습니다.
 
+### 배포 중 연결이 끊겼을 때
+
+활성화와 rollback은 root의 고정 transient 서비스 `workflow-release.service`가 실행합니다. SSH는 접수와 로그 조회만 합니다. 새 `release-job.sh`와 변경한 `common.sh`를 기존 bootstrap 파일 배치 절차로 **먼저 설치**해야 합니다(bootstrap 재실행은 점검 시간에). `release.sh`를 직접 호출하지 않습니다.
+
+서버는 업로드를 root 전용 작업 폴더로 복사한 뒤 서비스를 시작합니다. 접수 잠금과 고정 서비스 이름으로 동시에 접수된 배포·rollback을 종료 코드 75로 거절합니다. 작업은 백업 등이 잡은 maintenance 잠금이 풀리기를 기다리고, 자신이 잡은 뒤에는 링크 교체·자동 복구·결과 기록이 끝날 때까지 유지합니다. 로그와 결과는 `/var/lib/workflow-release/<JOB>/run.log`, `exit.code`에 남습니다(폴더 root 700, 파일 600). 업로드 복사본은 작업 종료 시 지웁니다. 완료 로그는 자동 삭제하지 않으므로 운영자가 보관량을 확인합니다.
+
+1. 연결이 끊겼다고 다시 배포하지 않습니다. 로컬의 `RELEASE_JOB id=…`를 기록합니다. 접수 응답을 받기 전에 끊겼다면 서버의 `latest`와 해당 릴리스 기록부터 확인합니다. 접수되지 않았거나 결과가 불명확할 수도 있습니다.
+2. 같은 DuckDNS 주소로 재접속한 뒤 다음을 실행합니다. `<JOB>` 대신 출력받은 식별자를 쓰고, 식별자를 받지 못했을 때만 `latest`를 사용합니다.
+
+```bash
+sudo /usr/local/lib/workflow/release-job.sh follow latest
+# 종료 코드는 배포/rollback 결과 그대로: 0 성공, 1 실패(자동 복구 성공이어도 배포는 실패)
+echo $?
+sudo systemctl status workflow-release.service --no-pager
+sudo journalctl -u workflow-release.service -n 50 --no-pager
+sudo readlink -f /opt/workflow/current
+sudo readlink -f /var/www/workflow/current
+sudo cat /etc/workflow/previous-release
+sudo cat /var/lib/workflow-release/latest/exit.code
+```
+
+3. `WAITING_FOR_MAINTENANCE`나 `RUNNING`이면 완료까지 기다립니다. `follow`는 로그를 따라 읽고 끝나면 서버의 종료 코드를 돌려줍니다. 성공 시 두 current는 같은 새 릴리스, previous-release는 이전 릴리스입니다. 배포 실패 시 `ROLLBACK_OK`와 이전 current를 확인합니다. 첫 배포는 이전 릴리스가 없을 수 있습니다.
+4. 서비스가 끝나면 transient 유닛은 사라질 수 있습니다. 그때는 root 전용 로그와 `exit.code`가 최종 기록입니다. 결과 파일 없이 유닛도 끝났다면 `follow`는 125/OUTCOME_UNKNOWN을 반환합니다. 호스트 재부팅·강제 종료 등을 조사하고 링크·스키마·health를 확인한 후에만 재시도합니다. SSH의 255는 서버 작업 실패를 뜻하지 않습니다.
+
+로컬 SSH에는 `ServerAliveInterval=30`, `ServerAliveCountMax=4`를 적용합니다. 연결 유지 옵션은 Mac 잠자기를 막지 않으므로 배포 중에는 다음처럼 실행하는 것을 권장합니다.
+
+```bash
+caffeinate -i bash deploy/bin/deploy.sh CHANGE_ME.duckdns.org
+# rollback도 동일하게 caffeinate -i bash deploy/bin/rollback.sh …
+```
+
 ## 8. 백업과 복구 리허설
 
 서버 03:30 KST 전체 덤프, `Persistent=true` 타이머, **최근 7세트 보관**. 파일 이름의 UTC 시각 순으로 덤프 7개와 짝 파일(.sha256/.version/.counts.tsv)을 유지하며 배포 전 백업도 같은 세트로 셉니다. 중지 기간이 길어도 경과 일수만으로 이전 세대를 지우지 않습니다. 03:30에 꺼져 있었다면 켜서 타이머가 활성화될 때 놓친 실행 한 번이 즉시 예약됩니다. 빠진 날짜마다 백업을 재현하는 것은 아닙니다. **이 백업이 끝난 뒤에 측정합니다.** 압축 임시 파일을 성공 시에만 공개하고 sha256과 Flyway 버전을 저장합니다. root socket 접속이며 비밀번호 인자가 없습니다.

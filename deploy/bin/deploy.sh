@@ -43,4 +43,5 @@ remote_work=$(ssh "${ssh_options[@]}" "$remote" 'mktemp -d /tmp/workflow-upload.
 began=$SECONDS
 scp "${ssh_options[@]}" "$work/release.tar.gz" "$remote:$remote_work/release.tar.gz"
 printf 'UPLOAD elapsed_s=%s release=%s\n' "$((SECONDS-began))" "$release"
-ssh "${ssh_options[@]}" "$remote" "sudo -n /usr/local/lib/workflow/release.sh activate '$release' '$remote_work/release.tar.gz' '$version'"
+job=$(ssh "${ssh_options[@]}" "$remote" "sudo -n /usr/local/lib/workflow/release-job.sh start activate '$release' '$remote_work/release.tar.gz' '$version'") || { result=$?; printf '%s\n' 'Submission not confirmed; inspect release-job.sh follow latest on the server before retrying.' >&2; exit "$result"; }
+follow_release "$job"

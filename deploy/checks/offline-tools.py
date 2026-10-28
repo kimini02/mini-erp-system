@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """No EC2/DuckDNS/SSH calls: local HTTP fixtures; fixture curl pins DNS to loopback."""
+import argparse
 import csv
 import json
 import os
@@ -22,7 +23,15 @@ def domain_checks():
         for host in ('127.0.0.1', 'example.com'):
             result = subprocess.run(['bash', str(DEPLOY/'bin/probe.sh'), 'http://'+host+'/healthz', folder+'/unused.csv'], capture_output=True, text=True)
             assert result.returncode == 2 and not Path(folder+'/unused.csv').exists()
-    print('DOMAIN_CHECK remote=4/4 probe_rejections=2/2 network_calls=0')
+    keepalive = subprocess.run(['bash','-c','source "$1"; remote_init m5-check.duckdns.org; printf "%s\\n" "${ssh_options[@]}"','check',str(DEPLOY/'bin/common.sh')],capture_output=True,text=True,check=True)
+    assert 'ServerAliveInterval=30' in keepalive.stdout and 'ServerAliveCountMax=4' in keepalive.stdout
+    for expected in (0, 1, 255):
+        script = 'source "$1"; remote_init m5-check.duckdns.org; ssh() { return "$MOCK_EXIT"; }; follow_release activate-20261028T120000Z-abcdefgh'
+        result = subprocess.run(['bash','-c',script,'check',str(DEPLOY/'bin/common.sh')],env=dict(os.environ,MOCK_EXIT=str(expected)),capture_output=True,text=True)
+        assert result.returncode == expected, (expected,result.stdout,result.stderr)
+        if expected == 255:
+            assert 'server job continues' in result.stderr
+    print('DOMAIN_CHECK remote=4/4 probe_rejections=2/2 keepalive=2/2 follow_exit=3/3 network_calls=0')
 
 
 def probe_and_log_checks():
@@ -72,7 +81,12 @@ def probe_and_log_checks():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--release-jobs', action='store_true', help='Also run real systemd tests; requires the marked disposable Ubuntu container')
+    args = parser.parse_args()
     runpy.run_path(str(DEPLOY / "checks/duckdns-local.py"))["duckdns_checks"]()
     runpy.run_path(str(DEPLOY / "checks/health-wait.py"))["health_checks"]()
     domain_checks()
     probe_and_log_checks()
+    if args.release_jobs:
+        runpy.run_path(str(DEPLOY / "checks/release-disconnect.py"))["release_checks"]()

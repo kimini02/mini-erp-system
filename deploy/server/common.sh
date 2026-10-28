@@ -10,7 +10,15 @@ load_env() {
   source /etc/workflow/env
   set +a
 }
-lock_ops() { mkdir -p /run/lock; exec 9>/run/lock/workflow-maintenance.lock; flock -x 9; }
+lock_ops() {
+  mkdir -p /run/lock
+  # A systemd job and release.sh share the same open file description/lock.
+  # Reopening it would deadlock the child against its supervising worker.
+  if [[ ! /proc/self/fd/9 -ef /run/lock/workflow-maintenance.lock ]]; then
+    exec 9>/run/lock/workflow-maintenance.lock
+  fi
+  flock -x 9
+}
 db() { mariadb --protocol=socket --user=root --batch --skip-column-names "$@"; }
 schema_version() {
   local database=${1:-mini_erp}
