@@ -123,6 +123,10 @@ Normalized form: *-*-* 09:10:00 Asia/Seoul
        From now: 19h left
 ```
 
+## 추가 확인
+
+위 최초 설치 검증 이후 실제 TCP 계정 조합에서 1045가 발견되어 @127.0.0.1로 보완했습니다. root socket으로만 확인했던 권한 검사와 구분한 전후 증거는 [M5-05](M5-05-loopback-db-accounts.md)에 있습니다.
+
 ## 부작용·남은 위험
 
 - 컨테이너 PID 1이 systemd가 아니므로 실제 서비스 의존성, 재시작, sandbox, timer 발화, journal 용량 제한, swap 활성화, sysctl 적용, SSH 정책 적용은 미검증입니다.

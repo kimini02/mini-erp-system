@@ -17,6 +17,8 @@
 | `2fe74e4` | 배포·rollback·로컬 복구·probe·runbook | [M5-03-release-recovery-observability.md](M5-03-release-recovery-observability.md) |
 | `4f176bd` | 첫 migration 전 빈 DB 복구 보완 | [M5-03-release-recovery-observability.md](M5-03-release-recovery-observability.md) |
 | `0be68a4` | 로컬 복구 익명 볼륨 정리 | [M5-03-release-recovery-observability.md](M5-03-release-recovery-observability.md) |
+| `be9838a` | 1차 검증 결과 문서 | 이 문서 초판 |
+| `f5ce4fa` | skip-name-resolve와 TCP 계정 호스트 보완 | [M5-05-loopback-db-accounts.md](M5-05-loopback-db-accounts.md) |
 
 이 최종 결과 문서는 별도 문서 커밋입니다. 아래 파일 목록은 각 구현 커밋에 실제 포함된 경로를 기록합니다.
 
@@ -41,7 +43,7 @@ JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Ho
 | 신규 M5ProdSecretsTest | 5 | 5 | 0 | 0 |
 | 신규 테스트 합계(전체에 포함) | 9 | 9 | 0 | 0 |
 
-신규 테스트만 따로 실행한 9/9도 통과했습니다. 운영 프로필·라이브러리 추가 뒤 기존 218개도 통과했습니다. 전체 실행 이후 변경은 복구 셸과 문서뿐이며, 해당 셸은 수정 전 재현 후 컨테이너로 다시 확인했습니다.
+신규 테스트만 따로 실행한 9/9도 통과했습니다. 운영 프로필·라이브러리 추가 뒤 기존 218개도 통과했습니다. 전체 실행 이후 변경은 운영 셸과 문서뿐이며, 복구·계정 셸은 수정 전 재현 후 컨테이너로 다시 확인했습니다. 백엔드 Java/설정/의존성은 전체 통과 이후 변경하지 않았습니다.
 
 - Flyway V1~V6 설치자 `workflow_migrator`, 업무 연결 `workflow_app` 확인.
 - 로그인·기안 상신·두 단계 승인·출근·카드 이동·마감 알림 배치 성공.
@@ -65,13 +67,14 @@ JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Ho
 | systemd 정적 검사 | 7개 통과 | verify + KST 03:30/09:10 calendar 해석; 실제 구동은 미검증 |
 | 비밀값 입력 | 통과 | 가상 터미널 입력 7개 노출 0, 특수문자 보존, 재실행 바이트 변경 0, 초기 비밀번호 제거 |
 | DuckDNS | 모킹 3가지 통과 | OK/KO/예외, 외부 요청 0, 토큰/URL 유출 0 |
-| 백업/복구 | 행 수·버전 일치 | 시험용 2테이블·3행. 덤프 940 bytes, 서버 복구 0초·로컬 2초(소규모 참고치) |
+| 백업/복구 | 행 수·버전 일치 | 시험용 2테이블·3행. 덤프 940 bytes, 서버 복구 elapsed_s=0·로컬 2초(정수 초, 0은 1초 미만인 참고치) |
+| 실제 서버용 계정 호스트 | 전 TCP 1045 → 후 성공 | 실제 provision 2회, app/migrator @127.0.0.1, DML 성공·DDL 3종 1142 |
 | 빈 DB 복구 | 전 실패 1/1 → 후 성공 | 이력 없음 1146 → 0테이블·버전 0으로 서버/로컬 성공. 버전 6 회귀도 성공 |
 | 복구 볼륨 정리 | 전 잔존 1 → 후 0 | 도구가 만든 컨테이너의 익명 볼륨만 삭제 |
 | probe | 10회 중 의도한 3실패 정확히 집계 | 0.2초, CSV 10행, 최장 실패 0.600초. 실제 배포 중단 시간이 아님 |
 | slow-endpoints | 예상값 일치 | 3표본 p50=20ms, p95/max=30ms, 잘못된 로그 1줄 제외 |
 
-수치·안전한 출력 원문은 M5-01~03에 있습니다. 컨테이너는 개발 머신의 arm64 환경이며 실제 t3.small/x86_64 성능 결과가 아닙니다.
+수치·안전한 출력 원문은 M5-01~03과 M5-05에 있습니다. 컨테이너는 개발 머신의 arm64 환경이며 실제 t3.small/x86_64 성능 결과가 아닙니다.
 
 ## 명세와 달라지거나 구체화한 곳
 
@@ -83,7 +86,9 @@ JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Ho
 6. bootstrap의 `--no-systemd`, 초기 비밀번호 제거 도구, 로컬 오프라인 복구 도구, 재실행 가능한 가짜 API/전송 검증 도구를 추가했습니다. 운영 정책을 바꾸는 기능은 아닙니다.
 7. 첫 배포 전 빈 DB는 복구 검사에서 버전 0으로 처리했습니다. 익명 복구 볼륨 정리는 자신이 만든 컨테이너로 제한했습니다.
 
-각 선택의 버린 대안과 이유는 M5-01~03의 표에 남겼습니다. 구현을 막는 추가 결정 질문은 없습니다.
+8. **계정 호스트는 @127.0.0.1로 명시**했습니다. 명세의 @localhost + skip-name-resolve + JDBC TCP 조합에서 실제 provision 실행 후 1045가 재현됐습니다. 이름 해석을 켜거나 @%로 넓히는 대신 loopback TCP로 한정했고 root socket은 유지했습니다. [M5-05](M5-05-loopback-db-accounts.md)에 전후 결과가 있습니다.
+
+각 선택의 버린 대안과 이유는 M5-01~03·05에 남겼습니다. 구현을 막는 추가 결정 질문은 없습니다.
 
 ## 확인하지 못한 것과 이유
 
@@ -186,6 +191,15 @@ deploy/bin/restore-local.sh
 docs/troubleshooting/M5-03-release-recovery-observability.md
 ```
 
+### f5ce4fa — TCP 계정 및 최종 서버 준비 확인
+
+```text
+deploy/README.md
+deploy/bin/restore-local.sh
+deploy/server/provision-db.sh
+docs/troubleshooting/M5-05-loopback-db-accounts.md
+```
+
 ## 다음 리뷰 요청
 
-클로드에게 이 브랜치와 M5-01~04, `deploy/README.md`, 기준 명세 `2027ebd`를 전달해 읽기 리뷰를 요청합니다. 실제 서버 실행·SSH·AWS CLI·DuckDNS 갱신·병합·푸시는 별도 사용자 지시 전까지 하지 않습니다. 특히 비밀값 처리, 부팅 순서, health 실패 시 rollback, 백업 잠금과 스키마 호환성, 공개 Nginx 경로를 검토하면 됩니다.
+클로드에게 이 브랜치와 M5-01~05, `deploy/README.md`, 기준 명세 `2027ebd`를 전달해 읽기 리뷰를 요청합니다. 실제 서버 실행·SSH·AWS CLI·DuckDNS 갱신·병합·푸시는 별도 사용자 지시 전까지 하지 않습니다. 특히 비밀값 처리, 부팅 순서, health 실패 시 rollback, 백업 잠금과 스키마 호환성, 공개 Nginx 경로를 검토하면 됩니다.
