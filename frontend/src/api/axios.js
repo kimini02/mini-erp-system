@@ -5,11 +5,11 @@ export const USER_KEY = 'user_info';
 
 /**
  * 모든 API 요청이 쓰는 axios 인스턴스.
- * - baseURL: VITE_API_BASE_URL (기본 http://localhost:8080/api/v1)
+ * - baseURL: VITE_API_BASE_URL (개발 기본 http://localhost:8080/api/v1, 운영 빌드 기본 /api/v1 — Nginx 같은 출처)
  * - VITE_USE_MOCK=true 이면 M1 API(조직·권한)는 명세와 같은 모양의 가짜 응답을 씁니다.
  */
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '/api/v1' : 'http://localhost:8080/api/v1'),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

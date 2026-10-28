@@ -3,6 +3,8 @@
 > **3명이 작성한 코드가 1명이 쓴 것처럼 보여야 한다.**
 > 이 문서는 모든 BE 개발자가 코드 작성 전에 반드시 숙지해야 하는 규칙이다.
 > 규칙을 변경할 때는 반드시 팀 합의 후 이 문서를 먼저 수정한다.
+>
+> **v2.0 (2026-10-28)**: 3인 팀 단계(v1.0) 이후 바뀐 구조에 맞춰 SQL·응답 규칙을 고쳤습니다(2·4·5·6·7·9·15장, 부록). 12·13장(브랜치·PR·파일 소유권)은 팀 단계 기록으로 남깁니다. 코드를 이 규칙에 맞추는 절차는 [17-refactoring.md](17-refactoring.md)에 있습니다.
 
 ---
 
@@ -30,12 +32,13 @@ com.minierp.backend/
 │   ├── entity/          ← BaseEntity
 │   ├── exception/       ← ErrorCode, BusinessException, GlobalExceptionHandler
 │   ├── response/        ← ApiResponse, ErrorResponse
+│   ├── persistence/     ← SqlStore (이름 붙은 파라미터로 SQL 실행, v2.0)
 │   └── security/        ← JwtTokenProvider, JwtAuthenticationFilter
 └── domain/
     └── {도메인명}/       ← user, project, task, approval, attendance, calendar, dashboard
         ├── controller/
         ├── service/
-        ├── repository/
+        ├── repository/  ← JPA Repository, SQL 쿼리 클래스({도메인}Queries·{도메인}Store, v2.0)
         ├── entity/
         └── dto/
 ```
@@ -172,12 +175,28 @@ public class TaskResponseDto {
 }
 ```
 
+### 4.2.1 응답 DTO는 record (v2.0)
+```java
+public record AttendanceTodayResponseDto(LocalDate workDate, String dayType, long monthAbsentCount) {
+    // SQL 결과 행은 SqlStore가 날짜 값을 정리한 뒤 넘겨준 그대로, 여기서 한 번만 변환한다.
+    public static AttendanceTodayResponseDto from(Map<String, Object> row) {
+        return new AttendanceTodayResponseDto(
+            (LocalDate) row.get("work_date"),
+            (String) row.get("day_type"),
+            SqlStore.number(row, "absent_count")
+        );
+    }
+}
+```
+- 필드 타입은 JSON에 나가는 모양 그대로 고른다: DECIMAL은 `BigDecimal`, null 가능 값은 박싱 타입.
+- 응답을 `Map<String, Object>`로 만들지 않는다. `SqlStore.map(...)`은 SQL 파라미터 전달에만 쓴다.
+
 ### 4.3 필수 준수 사항
 | 규칙 | 설명 |
 |------|------|
 | Request/Response 분리 | 하나의 DTO로 요청/응답 겸용 금지 |
 | Entity 직접 반환 금지 | Controller에서 Entity를 그대로 JSON 응답하지 않는다 |
-| `from()` 메서드 필수 | Response DTO는 반드시 `from(Entity)` 정적 메서드로 변환 |
+| `from()` 메서드 필수 | Response DTO는 반드시 `from(Entity)` 또는 `from(SQL 행)` 정적 메서드로 변환 (v2.0) |
 | Validation 어노테이션 | Request DTO 필드에 `@NotBlank`, `@NotNull`, `@Size` 등 명시 |
 | DTO 위치 | 반드시 해당 도메인의 `dto/` 패키지 안에 위치 |
 
@@ -209,7 +228,7 @@ public class TaskController {
 |------|------|
 | 비즈니스 로직 금지 | Controller에 if문, 계산, DB 호출 등 금지. Service에 위임만 한다 |
 | `@Valid` 필수 | Request DTO 앞에 반드시 `@Valid` 붙인다 |
-| 반환 타입 | `ResponseEntity<ApiResponse<T>>` 통일 |
+| 반환 타입 | `ApiResponse<구체 타입>` 통일, `ApiResponse<?>` 금지. 201 등은 `@ResponseStatus` (v2.0, 위 예시의 `ResponseEntity`는 v1.0 형태) |
 | URL 규칙 | 소문자, 하이픈, 복수형 명사 (예: `/api/v1/leave-requests`) |
 | HTTP 메서드 | 설계서(03-rest-api.md) 기준 엄수 |
 | 상태 코드 | 생성 201, 조회 200, 삭제/해제 204, 에러는 ErrorCode에서 관리 |
@@ -249,7 +268,7 @@ public class TaskService {
 |------|------|
 | 클래스 레벨 `@Transactional(readOnly = true)` | 기본은 읽기 전용, 쓰기 메서드만 `@Transactional` 추가 |
 | 조회 실패 시 | `orElseThrow(() -> new BusinessException(ErrorCode.XXX_NOT_FOUND))` 통일 |
-| 직접 SQL/JDBC 금지 | Repository 메서드만 사용 (필요 시 `@Query` JPQL) |
+| 서비스에 SQL 문자열 금지 | SQL은 `repository/`의 쿼리 클래스(`SqlStore` 사용) 또는 JPA Repository에만 둔다. 검증·업무 규칙·예외 던지기는 서비스에 남긴다 (v2.0) |
 | Service에 `@Autowired` 금지 | `@RequiredArgsConstructor` + `private final` 통일 |
 
 ---
@@ -274,7 +293,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 |------|------|
 | `JpaRepository` 상속 | `CrudRepository` 사용하지 않는다 |
 | 네이밍 쿼리 우선 | 단순 조건은 메서드명으로 해결, 복잡할 때만 `@Query` |
-| Native Query 금지 | 가급적 JPQL 사용. Native Query 필요 시 팀 합의 후 사용 |
+| SQL 쿼리 클래스 (v2.0) | 여러 테이블 조인, 데이터 범위 조건(AD-03), 쿼리 수가 정해진 화면(홈 등)은 `SqlStore`로 SQL을 직접 쓴다. 이름 붙은 파라미터(`:name`)만 쓰고 사용자 입력을 SQL 문자열에 이어 붙이지 않는다. JPA Repository는 기존 엔티티(사용자 등)에 유지한다 |
+| 쿼리 클래스 예외 | `@Repository` 빈은 예외 변환을 받으므로 그 안에서 `IllegalArgumentException` 등을 던지지 않는다(다른 예외로 바뀌어 오류 응답이 달라짐) |
 | 페이지네이션 | `Pageable` 파라미터 + `Page<Entity>` 반환 |
 
 ---
@@ -344,7 +364,7 @@ throw new BusinessException(ErrorCode.USER_NOT_FOUND);
 
 ### 9.3 규칙
 - 모든 API 응답은 `ApiResponse<T>` 또는 `ErrorResponse`를 사용한다
-- 직접 `Map`, `String`, `Entity`를 반환하지 않는다
+- 직접 `Map`, `String`, `Entity`를 반환하지 않는다 (v2.0: 17 리팩토링으로 기존 Map 응답을 record로 바꿈)
 - 페이지네이션 응답은 `ApiResponse<Page<ResponseDto>>` 형태
 
 ---
@@ -521,7 +541,7 @@ void approveLeave_deductsRemainingLeave() {
 | 4 | `@Data` Entity에 사용 | equals/hashCode/toString 예측 불가 |
 | 5 | `FetchType.EAGER` 사용 | N+1 문제, 성능 저하 |
 | 6 | `@Enumerated(EnumType.ORDINAL)` | 순서 변경 시 데이터 깨짐 |
-| 7 | Native Query 무단 사용 | DB 종속성, 팀 합의 필요 |
+| 7 | 서비스 안 SQL 문자열, 사용자 입력을 SQL에 이어 붙이기 | SQL 위치가 흩어짐, SQL 주입 위험 (v2.0) |
 | 8 | 다른 사람 담당 패키지 무단 수정 | Git 충돌, 책임 불명확 |
 | 9 | `try-catch`로 예외 삼키기 | 장애 원인 추적 불가 |
 | 10 | 커밋 메시지에 "수정", "변경" 단독 사용 | 무엇을 왜 바꿨는지 알 수 없음 |
@@ -536,7 +556,8 @@ void approveLeave_deductsRemainingLeave() {
 - [ ] DTO에 `from()` 정적 메서드가 있는가?
 - [ ] Controller에 비즈니스 로직이 없는가?
 - [ ] `@Valid`가 Request DTO 앞에 있는가?
-- [ ] 반환 타입이 `ApiResponse<T>`인가?
+- [ ] 반환 타입이 `ApiResponse<구체 타입>`인가? (`ApiResponse<?>` 아님)
+- [ ] 서비스에 SQL 문자열이 없는가? SQL 파라미터는 이름 붙은 파라미터인가?
 - [ ] 예외 처리가 `BusinessException` + `ErrorCode`인가?
 - [ ] 조회 메서드에 `@Transactional(readOnly = true)`가 있는가?
 - [ ] 연관관계가 `LAZY`인가?
@@ -545,6 +566,6 @@ void approveLeave_deductsRemainingLeave() {
 
 ---
 
-**문서 버전**: v1.0
+**문서 버전**: v2.0 (2026-10-28, 현재 구조 반영) · v1.0 (2026-03-31, 3인 팀 단계)
 **최초 작성**: 2026-03-31
 **다음 리뷰**: 구현 착수 1주 후
