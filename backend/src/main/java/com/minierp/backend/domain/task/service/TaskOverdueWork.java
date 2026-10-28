@@ -31,7 +31,6 @@ public class TaskOverdueWork {
       INSERT INTO task_due_alerts(task_id,user_id,due_date,created_at)
       SELECT :task,:user,:due,:now FROM DUAL
       WHERE NOT EXISTS (SELECT 1 FROM task_due_alerts WHERE task_id=:task AND user_id=:user AND due_date=:due)
-      ON DUPLICATE KEY UPDATE id=id
       """,args);
     if(inserted!=1){skipped++;continue;}
     long task=number(t,"id");String title=t.get("project_key")+"-"+t.get("task_no")+" "+t.get("task_title");
