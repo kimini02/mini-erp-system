@@ -18,6 +18,17 @@ schema_version() {
   if [[ $(db -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$database' AND table_name='flyway_schema_history'") == 0 ]]; then printf '0\n';
   else db "$database" -e 'SELECT COALESCE((SELECT version FROM flyway_schema_history WHERE success=1 AND version IS NOT NULL ORDER BY installed_rank DESC LIMIT 1),"0")'; fi
 }
+prune_backups() {
+  local directory=$1 file count=0 removed=0
+  while IFS= read -r file; do
+    count=$((count+1))
+    if ((count>7)); then
+      rm -f -- "$directory/$file" "$directory/$file.sha256" "$directory/$file.version" "$directory/$file.counts.tsv"
+      removed=$((removed+1))
+    fi
+  done < <(find "$directory" -maxdepth 1 -type f -name '*.sql.gz' -printf '%f\n' | LC_ALL=C sort -r)
+  printf 'BACKUP_RETAIN sets=%s removed_sets=%s\n' "$((count-removed))" "$removed"
+}
 backup_now() (
   umask 077
   # A distinct lock lets measurements detect any backup, including pre-deploy dumps.
@@ -35,7 +46,7 @@ backup_now() (
   mv -- "$partial" "$local_path/$name"
   (cd "$local_path"; sha256sum "$name" >"$name.sha256")
   schema_version >"$local_path/$name.version"
-  find "$local_path" -maxdepth 1 -type f -name '*.sql.gz*' -mmin +10080 -delete
+  prune_backups "$local_path"
   printf 'BACKUP file=%s bytes=%s elapsed_s=%s\n' "$name" "$(stat -c %s "$local_path/$name")" "$((SECONDS-began))"
 )
 latest_backup() { find /var/backups/workflow -maxdepth 1 -type f -name '*.sql.gz' -printf '%f\n' | LC_ALL=C sort | tail -1; }
