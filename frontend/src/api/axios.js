@@ -22,6 +22,9 @@ const instance = axios.create({
 if (import.meta.env.MODE === 'mock' || import.meta.env.VITE_USE_MOCK === 'true') {
   const realAdapter = axios.getAdapter(instance.defaults.adapter);
   instance.defaults.adapter = async (config) => {
+    // 리팩토링 전후 비교용: 목 모드에서 부른 API를 순서대로 남깁니다.
+    const query = config.params ? `?${new URLSearchParams(config.params)}` : '';
+    (window.__MOCK_CALLS__ ||= []).push(`${(config.method || 'get').toUpperCase()} ${config.url}${query}`);
     const { handleMock } = await import('./mock');
     return handleMock(config, realAdapter);
   };
