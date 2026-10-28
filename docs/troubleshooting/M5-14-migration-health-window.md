@@ -62,4 +62,3 @@ common.sh·release.sh·offline 검증과 이 문서의 독립 커밋. 최종 보
 | NRestarts 증가 | 1 | 1.586 | APP_FAILED |
 | ActiveState=failed | 1 | 1.533 | APP_FAILED |
 | 상태 조회 중 한도 소진 | 1 | 3.321 | TIMEOUT, curl 호출 0 |
-
