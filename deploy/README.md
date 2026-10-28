@@ -61,7 +61,7 @@ sudo bash ~/workflow-setup/bootstrap.sh --domain CHANGE_ME.duckdns.org
 - 첫 실행: Java 17·MariaDB 10.11·Redis·Nginx·certbot·sysstat 등 설치, workflow 시스템 사용자(nologin), 폴더·설정·유닛·UTC·2 GiB swap·swappiness 10 배치. 인증서가 없으므로 HTTP ACME 설정을 사용합니다.
 - 숨김 입력: 관리자 아이디·이름·이메일·비밀번호 및 확인, 선택 Discord 웹후크, DuckDNS 토큰. 비밀번호는 기존 정책(8~20자, 대문자·소문자·숫자·기호)을 만족해야 합니다. DB 비밀번호 두 개와 JWT 비밀값은 서버 `openssl rand`로 생성하며 화면에 출력하지 않습니다.
 - `/etc/workflow/env`, `/etc/workflow/duckdns`는 root:root 600, 부모 폴더는 700. 재실행 시 기존 DB/JWT 비밀값·DuckDNS 토큰을 유지합니다. 자동 회전 도구는 아닙니다.
-- 두 번째 bootstrap: root unix_socket으로 계정 권한을 맞추고 백업·배치 확인 타이머 및 DuckDNS 갱신 서비스를 시작합니다. migrator는 mini_erp.* 전체 권한(GRANT OPTION 없음), app은 SELECT/INSERT/UPDATE/DELETE만 보유합니다.
+- 두 번째 bootstrap: root unix_socket으로 계정 권한을 맞추고 백업·배치 확인 타이머 및 DuckDNS 갱신 서비스를 시작합니다. `workflow_migrator@127.0.0.1`은 mini_erp.* 전체 권한(GRANT OPTION 없음), `workflow_app@127.0.0.1`은 SELECT/INSERT/UPDATE/DELETE만 보유합니다. 명세의 @localhost는 skip-name-resolve + JDBC TCP 접속에서 1045가 재현되어 실제 접속 IP로 명시했습니다. root는 Unix socket을 유지합니다([재현 기록](../docs/troubleshooting/M5-05-loopback-db-accounts.md)).
 - bootstrap은 **업로드 원본 폴더**에서 재실행합니다. `/usr/local/lib/workflow/bootstrap.sh`만 따로 실행하면 옆의 설정 템플릿이 없으므로 안 됩니다.
 - `--no-systemd`는 컨테이너 설치 검증용입니다. 실제 서버에는 사용하지 않습니다.
 

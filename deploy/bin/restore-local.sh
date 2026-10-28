@@ -19,7 +19,11 @@ trap cleanup EXIT
 # Disposable offline recovery only: no network, host port or password in logs/argv.
 container=$(docker run -d --network none -e MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=1 mariadb:10.11)
 ready=0
-for ((n=0;n<60;n++));do if docker exec "$container" mariadb-admin --protocol=socket --user=root ping --silent >/dev/null 2>&1;then ready=1;break;fi;sleep 1;done
+# The image's temporary init server answers socket ping before the final server starts.
+for ((n=0;n<60;n++));do
+ if [[ $(docker exec "$container" mariadb --protocol=socket --user=root --batch --skip-column-names -e 'SELECT @@skip_networking' 2>/dev/null) == 0 ]];then ready=1;break;fi
+ sleep 1
+done
 ((ready)) || { printf '%s\n' 'Recovery container did not start.' >&2;exit 1; }
 began=$SECONDS
 docker exec "$container" mariadb --protocol=socket --user=root -e 'CREATE DATABASE mini_erp_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
