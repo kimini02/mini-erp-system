@@ -18,10 +18,10 @@ INSERT IGNORE의 오류 완화 범위가 넓다. 또한 그대로 ON DUPLICATE K
 - 별도 연결·트랜잭션으로 중복 방지 행 저장: 알림·이력과의 원자성이 깨진다.
 
 ## 선택한 방법
-사용자가 요청한 ON DUPLICATE KEY UPDATE id=id를 사용하되, 이미 잡은 프로젝트 행 잠금 안에서 INSERT SELECT의 WHERE NOT EXISTS로 같은 (task_id,user_id,due_date)를 제외한다. 별도 왕복 없이 기존 유니크 인덱스를 조회한다. 삽입 대상이 있으면 반환 행 수 1, 이미 있으면 삽입 대상 자체가 없어 0이다. 반환값이 정확히 1일 때만 알림과 이력을 쓴다. 외래키 등 다른 오류는 예외로 전파하여 같은 트랜잭션을 롤백하고 배치 기록은 FAILED로 남긴다.
+최종 구현(ef6196c)은 ON DUPLICATE KEY UPDATE를 제거했다. 이미 잡은 프로젝트 행 잠금 안에서 INSERT SELECT의 WHERE NOT EXISTS로 같은 (task_id,user_id,due_date)를 제외한다. 별도 왕복 없이 기존 유니크 인덱스를 조회한다. 삽입 대상이 있으면 반환 행 수 1, 이미 있으면 삽입 대상 자체가 없어 0이다. 반환값이 정확히 1일 때만 알림과 이력을 쓴다. 외래키 등 다른 오류는 예외로 전파하여 같은 트랜잭션을 롤백하고 배치 기록은 FAILED로 남긴다.
 
 ## 전후 수치와 결과
-| 실험 | 원래 INSERT IGNORE | 단순 no-op upsert | 최종 잠금+삽입 대상 제외+upsert |
+| 실험 | 원래 INSERT IGNORE | 단순 no-op upsert | 최종 잠금+삽입 대상 제외 |
 |---|---|---|---|
 | 첫 실행/재실행 반환 행 수 | 1 / 0 | 1 / 1 | 1 / 0 |
 | 같은 마감일 순차 2회 알림 | 1 | 2 | 1 |
@@ -35,7 +35,7 @@ INSERT IGNORE의 오류 완화 범위가 넓다. 또한 그대로 ON DUPLICATE K
 - 최종 Java 17 전체 검증: 기본 JVM 218/218, UTC JVM 218/218 성공. 두 환경 모두 실패·오류·건너뜀 0. 상세 실행 조건은 [M4-16](M4-16-home-task-project-id.md#전체-검증)에 기록했다.
 
 ## 부작용·남은 위험
-task_due_alerts를 쓰는 경로는 반드시 같은 프로젝트 행 잠금부터 잡아야 한다. 새 경로가 이를 우회하면 WHERE NOT EXISTS와 삽입 사이에 경쟁이 생길 수 있고 기본 found-row 모드의 no-op 결과는 삽입과 구분되지 않는다. 현재 운영 쓰기는 TaskOverdueWork 한 곳이며 실제 동시 실행 테스트를 유지한다. 프로젝트 잠금·전체 배치 트랜잭션·batch_runs 기록의 기존 특성은 M4-13과 같다. 마이그레이션과 연결 설정은 바꾸지 않았다.
+task_due_alerts를 쓰는 경로는 반드시 같은 프로젝트 행 잠금부터 잡아야 한다. 새 경로가 이를 우회하여 WHERE NOT EXISTS와 삽입 사이에 경쟁이 생기면 유니크 키 오류가 전파되어 롤백·FAILED 기록 후 재시도한다. 현재 운영 쓰기는 TaskOverdueWork 한 곳이며 실제 동시 실행 테스트를 유지한다. 프로젝트 잠금·전체 배치 트랜잭션·batch_runs 기록의 기존 특성은 M4-13과 같다. 마이그레이션과 연결 설정은 바꾸지 않았다.
 
 ## 변경 파일
 - backend/src/main/java/com/minierp/backend/domain/task/service/TaskOverdueWork.java

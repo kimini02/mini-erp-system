@@ -50,6 +50,18 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /** Permit routing to health on the management server and to 404 on disabled app routes. */
+    @Bean
+    @org.springframework.core.annotation.Order(0)
+    @org.springframework.context.annotation.Profile("prod")
+    public SecurityFilterChain operationalRoutes(HttpSecurity http) throws Exception {
+        return http.securityMatcher("/actuator", "/actuator/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**")
+                .csrf(csrf -> csrf.disable())
+                .httpBasic(basic -> basic.disable()).formLogin(form -> form.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()).build();
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
