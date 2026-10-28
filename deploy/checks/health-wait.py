@@ -68,4 +68,43 @@ printf '{"status":"DOWN"}'; exit 22
             print(run.stdout.strip())
 
 
-if __name__=='__main__': health_checks()
+
+
+def deadline_checks(before_source=None):
+    """A successful response crosses the deadline while its body is processed.
+    curl's 1.2s response is inside its 2s limit; fixture jq delays after reading it.
+    This forces the boundary without relying on the wall clock's fractional second.
+    """
+    import shutil
+    source = Path(before_source).read_text() if before_source else (DEPLOY/'server/common.sh').read_text()
+    real_jq = shutil.which('jq')
+    for scenario in ('UP', 'UP', 'UP', 'UP_THEN_RESTART'):
+        with tempfile.TemporaryDirectory(prefix='m5-deadline-') as folder:
+            root = Path(folder)
+            (root/'domain').write_text('m5-check.duckdns.org')
+            (root/'common.sh').write_text(source.replace('/etc/workflow/domain', str(root/'domain')))
+            (root/'systemctl').write_text('''#!/bin/sh
+r=0
+if test "$SCENARIO" = UP_THEN_RESTART && test -f "$FIXTURE/up"; then r=1; fi
+printf 'NRestarts=%s\\nActiveState=active\\n' "$r"
+''')
+            (root/'curl').write_text('''#!/bin/sh
+sleep 1.2
+touch "$FIXTURE/up"
+printf '{"status":"UP"}'
+''')
+            (root/'jq').write_text('#!/bin/sh\nbody=$(cat)\nsleep 1\nprintf "%s" "$body" | '+shlex.quote(real_jq)+' "$@"\n')
+            for name in ('systemctl','curl','jq'):
+                (root/name).chmod(0o700)
+            env = dict(os.environ, PATH=folder+os.pathsep+os.environ['PATH'], FIXTURE=folder, SCENARIO=scenario)
+            began = time.monotonic()
+            run = subprocess.run(['bash','-c','source "$1"; SECONDS=0; health_wait 2 NO','check',str(root/'common.sh')], env=env,capture_output=True,text=True,timeout=8)
+            expected = 'TIMEOUT' if before_source else ('APP_FAILED' if scenario == 'UP_THEN_RESTART' else 'UP')
+            assert run.returncode == (0 if expected == 'UP' else 1), (run.stdout,run.stderr)
+            assert 'result='+expected in run.stdout, run.stdout
+            print(f'DEADLINE_{"BEFORE" if before_source else "AFTER"} scenario={scenario} exit={run.returncode} elapsed_s={time.monotonic()-began:.3f} '+run.stdout.strip(), flush=True)
+
+
+if __name__ == '__main__':
+    health_checks()
+    deadline_checks()

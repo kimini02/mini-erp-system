@@ -85,7 +85,9 @@ if __name__ == '__main__':
     parser.add_argument('--release-jobs', action='store_true', help='Also run real systemd tests; requires the marked disposable Ubuntu container')
     args = parser.parse_args()
     runpy.run_path(str(DEPLOY / "checks/duckdns-local.py"))["duckdns_checks"]()
-    runpy.run_path(str(DEPLOY / "checks/health-wait.py"))["health_checks"]()
+    health = runpy.run_path(str(DEPLOY / "checks/health-wait.py"))
+    health["health_checks"]()
+    health["deadline_checks"]()
     domain_checks()
     probe_and_log_checks()
     if args.release_jobs:

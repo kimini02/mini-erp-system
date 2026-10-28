@@ -69,7 +69,7 @@ health_snapshot() {
   [[ $health_restarts =~ ^[0-9]+$ && $health_active =~ ^[a-z-]+$ ]]
 }
 health_wait() {
-  local limit=$1 migration=$2 began=$SECONDS domain initial until up=0
+  local limit=$1 migration=$2 began=$SECONDS domain initial until
   local health_restarts health_active
   [[ $limit =~ ^[1-9][0-9]*$ && $migration =~ ^(YES|NO)$ ]] || return 2
   until=$((SECONDS+limit)); domain=$(cat /etc/workflow/domain)
@@ -84,14 +84,20 @@ health_wait() {
     if [[ $health_active == failed ]] || ((health_restarts>initial)); then
       printf 'HEALTH_WAIT limit_s=%s migration=%s result=APP_FAILED elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 1
     fi
-    # Recheck systemd after UP too: a restarted process must not be accepted as the original start.
-    if ((up)); then
-      printf 'HEALTH_WAIT limit_s=%s migration=%s result=UP elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 0
-    fi
     local remaining=$((until-SECONDS)) request_limit=2
     ((remaining>0)) || break # curl --max-time 0 would mean no timeout.
     ((remaining<request_limit)) && request_limit=$remaining
-    if curl --silent --fail --max-time "$request_limit" --resolve "$domain:443:127.0.0.1" "https://$domain/healthz" | jq -e '.status == "UP"' >/dev/null 2>&1; then up=1; continue; fi
+    if curl --silent --fail --max-time "$request_limit" --resolve "$domain:443:127.0.0.1" "https://$domain/healthz" | jq -e '.status == "UP"' >/dev/null 2>&1; then
+      # A received UP must be decided now, even if processing crossed the deadline.
+      # Still reject a process that restarted/failed while the response was in flight.
+      if ! health_snapshot; then
+        printf 'HEALTH_WAIT limit_s=%s migration=%s result=STATUS_UNAVAILABLE elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 1
+      fi
+      if [[ $health_active == failed ]] || ((health_restarts>initial)); then
+        printf 'HEALTH_WAIT limit_s=%s migration=%s result=APP_FAILED elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 1
+      fi
+      printf 'HEALTH_WAIT limit_s=%s migration=%s result=UP elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"; return 0
+    fi
     sleep 1
   done
   printf 'HEALTH_WAIT limit_s=%s migration=%s result=TIMEOUT elapsed_s=%s\n' "$limit" "$migration" "$((SECONDS-began))"
