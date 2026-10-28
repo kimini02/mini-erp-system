@@ -61,6 +61,8 @@ case $command in
     [[ -d $directory && ! -e $directory/exit.code ]] || exit 2
     # Only the fixed system service executes jobs, never a caller's interactive session.
     [[ -n ${INVOCATION_ID:-} ]] || { printf '%s\n' 'Jobs must run through systemd.' >&2; exit 2; }
+    completed=NO
+    release_result=125
     interrupted=NO
     interrupt_job() {
       interrupted=YES
@@ -72,12 +74,30 @@ case $command in
       result=$?
       trap - EXIT
       trap '' TERM INT HUP
-      printf 'RELEASE_RESULT job=%s exit=%s interrupted=%s\n' "$job" "$result" "$interrupted"
-      rm -f -- "$directory/archive.tar.gz"
-      printf '%s\n' "$result" >"$directory/.exit.code"
-      mv -f "$directory/.exit.code" "$directory/exit.code"
-      # Descriptor 9 is still open here, so maintenance remains locked through result recording.
-      exit "$result"
+      if [[ $completed == YES && $interrupted == NO ]]; then
+        # Keep the collected child status, including a failure just before EXIT.
+        result=$release_result
+      elif [[ $completed != YES && $result == 0 ]]; then
+        # Unhandled terminating signals can run EXIT with a stale successful $?.
+        result=125
+        interrupted=UNKNOWN
+      fi
+      printf 'RELEASE_RESULT job=%s exit=%s interrupted=%s completed=%s\n' "$job" "$result" "$interrupted" "$completed"
+      # Replace this shell: a kill-whom=all request can also hit newly forked rm/mv.
+      # The same PID and inherited lock FD 9 survive through atomic result recording.
+      exec python3 - "$directory" "$result" <<'PY_RESULT'
+from pathlib import Path
+import sys
+folder=Path(sys.argv[1]); result=int(sys.argv[2])
+try:
+    (folder/'archive.tar.gz').unlink(missing_ok=True)
+except OSError:
+    print('RELEASE_CLEANUP_FAILED: archive retained; inspect the root-owned job directory.',file=sys.stderr)
+temporary=folder/'.exit.code'
+temporary.write_text(str(result)+'\n')
+temporary.replace(folder/'exit.code')
+raise SystemExit(result)
+PY_RESULT
     }
     # Install signal handlers before EXIT: an interrupted wait can otherwise report $?=0.
     trap 'interrupt_job 143' TERM
@@ -88,7 +108,14 @@ case $command in
     lock_ops
     printf 'RELEASE_JOB job=%s state=RUNNING\n' "$job"
     mapfile -t request <"$directory/request"
-    "$here/release.sh" "${request[@]}"
+    # This is an external script: its own set -e remains in effect.
+    if "$here/release.sh" "${request[@]}"; then
+      release_result=0
+    else
+      release_result=$?
+    fi
+    completed=YES
+    exit "$release_result"
     ;;
   follow)
     job=${1:?job or latest required}

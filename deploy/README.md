@@ -183,9 +183,11 @@ sudo cat /var/lib/workflow-release/latest/exit.code
 | 0 | 배포 또는 rollback 정상 완료 | 두 current와 previous-release가 해당 작업 결과와 일치하는지 확인 |
 | 1 | 일반 실패 | 배포 실패는 자동 복구에 성공해도 1. 로그의 ROLLBACK_OK/ROLLBACK_FAILED와 링크 확인 |
 | 75 | 접수 거절(RELEASE_BUSY) | 새 작업이 시작되지 않음. 기존 작업을 조회하고 완료까지 대기 |
-| 125 | OUTCOME_UNKNOWN | 최종 결과 파일 없이 서비스가 끝남. journal·링크·스키마·health 확인 후 판단 |
+| 125 | 완료 미확인(ABNORMAL_EXIT / OUTCOME_UNKNOWN) | 명시적인 완료 경로를 지나지 않았는데 EXIT 상태가 0이거나, 최종 결과 파일 없이 서비스가 끝남. journal·링크·스키마·health 확인 후 판단 |
 | 129 / 130 / 143 | 중단(HUP / INT / TERM) | interrupted=YES와 INTERRUPTED 안내 확인. 링크가 반쯤 바뀌었을 수 있으므로 두 current·previous-release·스키마·health를 확인한 뒤 재시도 판단 |
 | 기타 | 비정상 종료 또는 연결 오류 | 코드와 서버 로그 확인. SSH의 255는 서버 작업 실패를 뜻하지 않음 |
+
+`RELEASE_RESULT`의 `completed=YES`는 release.sh의 종료 상태를 직접 확인했다는 뜻이며, 성공 여부는 함께 기록한 exit 코드로 판단합니다. 명시적 완료 경로 없이 EXIT가 0으로 호출되면 `completed=NO interrupted=UNKNOWN exit=125`로 기록합니다. 이 경우에도 자동 복구나 재실행은 하지 않습니다.
 
 중단된 작업은 자동 복구하거나 재실행하지 않습니다. **배포 중에는 인스턴스를 Stop하거나 재부팅하지 않습니다. systemctl stop으로 취소할 수 있는 것은 아직 maintenance 잠금을 기다리는 작업뿐입니다.** 이미 RUNNING이면 완료까지 기다립니다. WAITING 로그는 과거 기록이므로, 상태 확인과 stop 사이에 실행으로 넘어갈 수 있습니다. 취소 후에도 중단 코드와 링크 상태를 반드시 확인합니다. 신호를 처리할 틈 없이 종료되거나 결과 기록에 실패하면 중단 코드 대신 125가 나올 수 있으며, 이 경우에도 성공으로 판단하지 않습니다.
 
