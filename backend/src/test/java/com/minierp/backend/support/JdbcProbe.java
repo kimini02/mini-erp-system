@@ -12,6 +12,12 @@ import org.springframework.context.annotation.Bean;
 public final class JdbcProbe {
     private static final ThreadLocal<Trace> CURRENT = new ThreadLocal<>();
     private static final ThreadLocal<Observer> OBSERVER = new ThreadLocal<>();
+    public static void recordSql(String sql, long count) {
+        com.minierp.backend.support.refactoring.SafetyNetRun.sql(sql, count);
+    }
+    public static String normalizeSql(String sql) {
+        return sql.replaceAll("\\s+", " ").trim().toLowerCase(Locale.ROOT);
+    }
     public interface Observer {
         default void before(Statement statement,String sql) throws Exception {}
         default void after(Statement statement,String sql) throws Exception {}
@@ -22,7 +28,7 @@ public final class JdbcProbe {
     public static final class Query {
         public final String sql;
         public long rows, updates;
-        Query(String sql) { this.sql = sql.replaceAll("\\s+", " ").trim().toLowerCase(Locale.ROOT); }
+        Query(String sql) { this.sql = normalizeSql(sql); }
     }
     public static final class Trace implements AutoCloseable {
         public final List<Query> queries = new ArrayList<>();

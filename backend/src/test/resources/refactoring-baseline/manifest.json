@@ -1,0 +1,21 @@
+{
+  "productionBaseCommit": "faf7972",
+  "recordingPolicy": "ordered-outcome-dependent-http-races-v1",
+  "java": 17,
+  "jvmTimezone": "UTC",
+  "tests": 231,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "sqlShapes": 801,
+  "httpResponses": 921,
+  "stableComparison": {
+    "differences": 0,
+    "sqlOrderChanges": 9
+  },
+  "files": {
+    "sql.json": "0ee48da6ef8d3470725ec1af4847a2068a65a22eeb73e0aa336a8a9137b71424",
+    "responses.json": "24373113a9c7cccd99c223b5d5591363cd24af2fce7a6e9f64f37e848e67a95d",
+    "masked-fields.txt": "7c4c8e12a7287aafc91ce4073f0ab047be4086f390cd26bc9901669acee5156e"
+  }
+}

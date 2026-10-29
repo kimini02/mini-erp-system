@@ -1,0 +1,252 @@
+com.minierp.backend.integration.CoreApiIntegrationTest#approveLeave_shouldReturnApprovedStatus() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#approveLeave_shouldReturnApprovedStatus() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#approveLeave_shouldReturnApprovedStatus() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#approveOvertime_shouldReturnApprovedStatus() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#approveOvertime_shouldReturnApprovedStatus() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#approveOvertime_shouldReturnApprovedStatus() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#attendance_checkInAndCheckOut_shouldSucceed() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#attendance_checkInAndCheckOut_shouldSucceed() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#attendance_checkInAndCheckOut_shouldSucceed() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#calendar_shouldContainLeaveAndOvertimeEvents() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#calendar_shouldContainLeaveAndOvertimeEvents() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#calendar_shouldContainLeaveAndOvertimeEvents() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#cancelLeave_shouldSucceedForOwnPendingRequest() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#cancelLeave_shouldSucceedForOwnPendingRequest() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#cancelLeave_shouldSucceedForOwnPendingRequest() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#createLeave_sameDateDuplicateShouldFail() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#createLeave_sameDateDuplicateShouldFail() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#createLeave_sameDateDuplicateShouldFail() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#getUsers_adminShouldSeeList() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#getUsers_adminShouldSeeList() $.data.content[].email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#getUsers_adminShouldSeeList() $.data.content[].loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#getUsers_adminShouldSeeList() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#getUsers_adminShouldSeeList() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#getUsers_adminShouldSeeList() $request.query.q : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#halfDayRequiresSameDateAndChargesHalfDay() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#halfDayRequiresSameDateAndChargesHalfDay() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#halfDayRequiresSameDateAndChargesHalfDay() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#login_shouldIssueAccessToken() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.CoreApiIntegrationTest#login_shouldIssueAccessToken() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.CoreApiIntegrationTest#login_shouldIssueAccessToken() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#concurrentReplacementLeavesExactlyOneUsableToken() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#concurrentReplacementLeavesExactlyOneUsableToken() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#concurrentReplacementLeavesExactlyOneUsableToken() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#delayedDeletionPreservesNewEmailToken() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#delayedDeletionPreservesNewEmailToken() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#delayedDeletionPreservesNewEmailToken() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#delayedDeletionPreservesNewEmailToken() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#delayedEventForOldEmailDoesNotIssueAnotherLink() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#delayedEventForOldEmailDoesNotIssueAnotherLink() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#delayedEventForOldEmailDoesNotIssueAnotherLink() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#delayedEventForOldEmailDoesNotIssueAnotherLink() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeAndResendInvalidateOriginalLink() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeAndResendInvalidateOriginalLink() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeAndResendInvalidateOriginalLink() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeAndResendInvalidateOriginalLink() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeInvalidatesLinkEvenWithoutResend() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeInvalidatesLinkEvenWithoutResend() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeInvalidatesLinkEvenWithoutResend() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeInvalidatesLinkEvenWithoutResend() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeRevokesOnlyAfterCommit() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeRevokesOnlyAfterCommit() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeRevokesOnlyAfterCommit() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#emailChangeRevokesOnlyAfterCommit() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#resendAloneInvalidatesPreviousLink() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#resendAloneInvalidatesPreviousLink() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#resendAloneInvalidatesPreviousLink() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#rolledBackEmailChangePreservesOriginalInvitation() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#rolledBackEmailChangePreservesOriginalInvitation() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#rolledBackEmailChangePreservesOriginalInvitation() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#rolledBackEmailChangePreservesOriginalInvitation() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#tokenBoundToOldEmailCannotSetPasswordEvenBeforeDeletion() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.InvitationLifecycleTest#tokenBoundToOldEmailCannotSetPasswordEvenBeforeDeletion() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#tokenBoundToOldEmailCannotSetPasswordEvenBeforeDeletion() $.data.user.email : random UUID in test fixture
+com.minierp.backend.integration.InvitationLifecycleTest#tokenBoundToOldEmailCannotSetPasswordEvenBeforeDeletion() $.data.user.loginId : random UUID in test fixture
+com.minierp.backend.integration.M1AcceptanceTest#chiefCanFillLegacyHireDateWithoutChangingLoginId() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#chiefCanFillLegacyHireDateWithoutChangingLoginId() $.data.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#chiefCanFillLegacyHireDateWithoutChangingLoginId() $.data.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#chiefCanFillLegacyHireDateWithoutChangingLoginId() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#chiefCanFillLegacyHireDateWithoutChangingLoginId() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#concurrentInvitationLinksCannotOverwriteFirstPassword() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#concurrentInvitationLinksCannotOverwriteFirstPassword() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#concurrentInvitationLinksCannotOverwriteFirstPassword() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#departmentCycleMoveIs422() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#departmentCycleMoveIs422() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#departmentCycleMoveIs422() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#disabledMailDoesNotCreateTokenOrSend() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#disabledMailDoesNotCreateTokenOrSend() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#disabledMailDoesNotCreateTokenOrSend() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCannotEditTheirHireDate() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeCannotEditTheirHireDate() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCannotEditTheirHireDate() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreateCannotResendPendingLeaderInvitation() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreateCannotResendPendingLeaderInvitation() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreateCannotResendPendingLeaderInvitation() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCanRegisterEmployeeWithoutRoleUpdate() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCanRegisterEmployeeWithoutRoleUpdate() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCanRegisterEmployeeWithoutRoleUpdate() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#1] $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#1] $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#1] $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#2] $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#2] $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#2] $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#3] $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#3] $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotAssignOtherRoles()[test-template-invocation:#3] $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotHidePrivilegedRoleAlongsideEmployee() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotHidePrivilegedRoleAlongsideEmployee() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorCannotHidePrivilegedRoleAlongsideEmployee() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorWithRoleUpdateCanAssignChief() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorWithRoleUpdateCanAssignChief() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeCreatorWithRoleUpdateCanAssignChief() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeRegistrationRequiresHireDate() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeRegistrationRequiresHireDate() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeRegistrationRequiresHireDate() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeRegistrationSearchTabsAndCompatibilityFields() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeRegistrationSearchTabsAndCompatibilityFields() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.M1AcceptanceTest#employeeRegistrationSearchTabsAndCompatibilityFields() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeRegistrationSearchTabsAndCompatibilityFields() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeUpdateCanChangeEmployeeOnlyEmail() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeUpdateCanChangeEmployeeOnlyEmail() $.data.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeUpdateCanChangeEmployeeOnlyEmail() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeUpdateCanChangeEmployeeOnlyEmail() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeUpdateCannotChangeChiefEmail() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#employeeUpdateCannotChangeChiefEmail() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#employeeUpdateCannotChangeChiefEmail() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#forcedPasswordChangeBlocksOtherRoutesAndRotatesToken() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#forcedPasswordChangeBlocksOtherRoutesAndRotatesToken() $.data.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#forcedPasswordChangeBlocksOtherRoutesAndRotatesToken() $.data.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#forcedPasswordChangeBlocksOtherRoutesAndRotatesToken() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#forcedPasswordChangeBlocksOtherRoutesAndRotatesToken() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#1] $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#1] $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#1] $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#2] $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#2] $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#2] $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#3] $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#3] $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#hireDatePatchRejectsMalformedOrImpossibleDates()[test-template-invocation:#3] $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#holidayAndRoleCrudAndMultipleRoleUnion() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#holidayAndRoleCrudAndMultipleRoleUnion() $.data.content[].email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#holidayAndRoleCrudAndMultipleRoleUnion() $.data.content[].loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#holidayAndRoleCrudAndMultipleRoleUnion() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#holidayAndRoleCrudAndMultipleRoleUnion() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#invitationIsSentAfterCommitAndSetupIsOneUse() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#invitationIsSentAfterCommitAndSetupIsOneUse() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#invitationIsSentAfterCommitAndSetupIsOneUse() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#lastChiefCannotRetireOrLoseRole() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#lastChiefCannotRetireOrLoseRole() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#lastChiefCannotRetireOrLoseRole() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#leaderSeesDepartmentTreeAndOutsideFilterIs403() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#leaderSeesDepartmentTreeAndOutsideFilterIs403() $.data.content[].email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#leaderSeesDepartmentTreeAndOutsideFilterIs403() $.data.content[].loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#leaderSeesDepartmentTreeAndOutsideFilterIs403() $.data.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#leaderSeesDepartmentTreeAndOutsideFilterIs403() $.data.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#leaderSeesDepartmentTreeAndOutsideFilterIs403() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#leaderSeesDepartmentTreeAndOutsideFilterIs403() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#loginIgnoresRevokedBearerToken() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#loginIgnoresRevokedBearerToken() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#loginIgnoresRevokedBearerToken() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#mailFailureKeepsRegisteredEmployee() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#mailFailureKeepsRegisteredEmployee() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#mailFailureKeepsRegisteredEmployee() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#organizationAndPermissionValidationProtectsReferences() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#organizationAndPermissionValidationProtectsReferences() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#organizationAndPermissionValidationProtectsReferences() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#organizationCrudAndDefaultScheduleAndPositionOrdering() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#organizationCrudAndDefaultScheduleAndPositionOrdering() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#organizationCrudAndDefaultScheduleAndPositionOrdering() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#organizationTreeAlwaysUsesTwoBusinessQueries() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#organizationTreeAlwaysUsesTwoBusinessQueries() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#organizationTreeAlwaysUsesTwoBusinessQueries() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#passwordSetupIgnoresMalformedBearerToken() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#passwordSetupIgnoresMalformedBearerToken() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#passwordSetupIgnoresMalformedBearerToken() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#permissionChangeAppliesToSameTokenOnNextRequest() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#permissionChangeAppliesToSameTokenOnNextRequest() $.data.content[].email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#permissionChangeAppliesToSameTokenOnNextRequest() $.data.content[].loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#permissionChangeAppliesToSameTokenOnNextRequest() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#permissionChangeAppliesToSameTokenOnNextRequest() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#permissionWithoutAnyActionDoesNotWidenAnotherRolesScope() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#permissionWithoutAnyActionDoesNotWidenAnotherRolesScope() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#permissionWithoutAnyActionDoesNotWidenAnotherRolesScope() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#privilegedResendRequiresRolePermissionBeforeAcceptedStateCheck() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#privilegedResendRequiresRolePermissionBeforeAcceptedStateCheck() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#privilegedResendRequiresRolePermissionBeforeAcceptedStateCheck() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#retirementRevokesExistingTokenImmediately() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#retirementRevokesExistingTokenImmediately() $.data.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#retirementRevokesExistingTokenImmediately() $.data.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#retirementRevokesExistingTokenImmediately() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#retirementRevokesExistingTokenImmediately() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#roleUpdateAllowsChiefEmailChange() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#roleUpdateAllowsChiefEmailChange() $.data.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#roleUpdateAllowsChiefEmailChange() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#roleUpdateAllowsChiefEmailChange() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#rollbackDoesNotSendInvitation() $.data.accessToken : signed access token; never persist bearer credentials
+com.minierp.backend.integration.M1AcceptanceTest#rollbackDoesNotSendInvitation() $.data.user.email : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M1AcceptanceTest#rollbackDoesNotSendInvitation() $.data.user.loginId : M1AcceptanceTest login fixture prefix + random UUID8
+com.minierp.backend.integration.M2LookupTest#ordinaryEmployeeCanSelectActivePeopleWithoutSensitiveFields() $.data[].name : random UUID in test fixture
+com.minierp.backend.integration.M2LookupTest#ordinaryEmployeeCanSelectActivePeopleWithoutSensitiveFields() $request.query.q : random UUID in test fixture
+com.minierp.backend.integration.M3MonthlyTest#retirementAndHireBoundariesAreVisibleInTableAndEmployeeList() $.data.content[].email : random UUID in test fixture
+com.minierp.backend.integration.M3MonthlyTest#retirementAndHireBoundariesAreVisibleInTableAndEmployeeList() $.data.content[].loginId : random UUID in test fixture
+com.minierp.backend.integration.M3RetirementTest#retirementRecordsKoreanDateAndReactivationClearsIt() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.M3RetirementTest#retirementRecordsKoreanDateAndReactivationClearsIt() $.data.loginId : random UUID in test fixture
+com.minierp.backend.integration.M3RetirementTest#retirementThroughLeaveToActiveClearsDateAndShowsAbsenceInMonthlyTable() $.data.email : random UUID in test fixture
+com.minierp.backend.integration.M3RetirementTest#retirementThroughLeaveToActiveClearsDateAndShowsAbsenceInMonthlyTable() $.data.loginId : random UUID in test fixture
+com.minierp.backend.integration.M4BoardApiTest#assigneeCanMoveOwnCardButCannotManageOrMoveOthers() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#assigneeCanMoveOwnCardButCannotManageOrMoveOthers() $.data.task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#departmentTreeAndAllScopesAreSqlPredicates() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#memberRemovalAndAssignmentsAreValidatedAtomically() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#notificationFailureRollsBackTaskSequenceHistoryAndAssignment() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#projectLifecycleKeepsKeyLeaderAndMemberContract() $.data.columns[].tasks[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#projectLifecycleKeepsKeyLeaderAndMemberContract() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#projectLifecycleKeepsKeyLeaderAndMemberContract() $.data.project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#projectListAndBoardQueryCountsStayConstant() $.data.columns[].tasks[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#projectListAndBoardQueryCountsStayConstant() $.data.content[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#projectListAndBoardQueryCountsStayConstant() $.data.project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#staleVersionAndInvalidAnchorsLeaveOrderAndHistoryUnchanged() $.data.task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#staleVersionAndInvalidAnchorsLeaveOrderAndHistoryUnchanged() $.error.details.currentTask.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#stateTransitionsHistoryLimitAndKoreanDateAreConsistent() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardApiTest#stateTransitionsHistoryLimitAndKoreanDateAreConsistent() $.data.task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted() $.data.task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions() $.data.task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4DeterministicLockTest#secondCompletionWaitsAtProjectLockUntilFirstCommit() $.data.task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4DeterministicLockTest#secondReorderWaitsAndReadsPositionsAfterFirstCommit() $.data.task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeGrowthTest#homeSqlCountStaysFixedAndAnalyzesScopedWorkAtOneTenAndHundredTimes() $.data.myTasks.items[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeGrowthTest#homeSqlCountStaysFixedAndAnalyzesScopedWorkAtOneTenAndHundredTimes() $.data.myTasks.project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeGrowthTest#homeSqlCountStaysFixedAndAnalyzesScopedWorkAtOneTenAndHundredTimes() $.data.teamWeek.days[].items[].project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeGrowthTest#homeSqlCountStaysFixedAndAnalyzesScopedWorkAtOneTenAndHundredTimes() $.data.teamWeek.days[].items[].task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#aggregatesBoundedWidgetsAndPreservesKoreanTimeAndScope() $.data.myTasks.items[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#aggregatesBoundedWidgetsAndPreservesKoreanTimeAndScope() $.data.myTasks.project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#aggregatesBoundedWidgetsAndPreservesKoreanTimeAndScope() $.data.teamWeek.days[].items[].project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#aggregatesBoundedWidgetsAndPreservesKoreanTimeAndScope() $.data.teamWeek.days[].items[].task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#myItemsIdentifyEachProjectAndExcludeVisibleTasksAssignedToSomeoneElse() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#myItemsIdentifyEachProjectAndExcludeVisibleTasksAssignedToSomeoneElse() $.data.myTasks.items[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#myItemsIdentifyEachProjectAndExcludeVisibleTasksAssignedToSomeoneElse() $.data.myTasks.project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#myItemsIdentifyEachProjectAndExcludeVisibleTasksAssignedToSomeoneElse() $.data.teamWeek.days[].items[].project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4HomeTest#myItemsIdentifyEachProjectAndExcludeVisibleTasksAssignedToSomeoneElse() $.data.teamWeek.days[].items[].task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4QueryGrowthTest#summaryCostWhenUnrelatedTasksGrowTenAndOneHundredTimes() $.data.columns[].tasks[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4QueryGrowthTest#summaryCostWhenUnrelatedTasksGrowTenAndOneHundredTimes() $.data.content[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4QueryGrowthTest#summaryCostWhenUnrelatedTasksGrowTenAndOneHundredTimes() $.data.project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4RemovedRoutesTest#retiredReadsAndWritesHaveNoRouteAndLeaveNoTrace() $.data.columns[].tasks[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4RemovedRoutesTest#retiredReadsAndWritesHaveNoRouteAndLeaveNoTrace() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4RemovedRoutesTest#retiredReadsAndWritesHaveNoRouteAndLeaveNoTrace() $.data.project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4ReviewRegressionTest#assignmentHistoryResolvesTargetEvenAfterMemberRemoval() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4ReviewRegressionTest#existingRetiredMemberCanBeRetainedOrRemovedButNotNewlyAdded() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4ReviewRegressionTest#movedHistoryHidesStoragePositions() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4ReviewRegressionTest#movedHistoryHidesStoragePositions() $.data.task.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4ReviewRegressionTest#overdueHistoryResolvesRecipientEvenAfterMemberRemoval() $.data.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4ReviewRegressionTest#projectSearchTreatsPercentUnderscoreAndEscapeLiterally() $.data.content[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M4ReviewRegressionTest#projectSearchTreatsPercentUnderscoreAndEscapeLiterally() $.data.content[].title : random UUID in test fixture
+com.minierp.backend.integration.M4ReviewRegressionTest#projectSearchTreatsPercentUnderscoreAndEscapeLiterally() $request.query.q : random UUID in test fixture
+com.minierp.backend.integration.M5HomeCountersTest#taskCountIncludesAllSevenVisibleAssignedOpenTasksWhileItemsStayAtFive() $.data.myTasks.items[].key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.M5HomeCountersTest#taskCountIncludesAllSevenVisibleAssignedOpenTasksWhileItemsStayAtFive() $.data.myTasks.project.key : BoardTestSupport/M4BoardApiTest UUID-derived project key
+com.minierp.backend.integration.SqlStoreDateTimeMariaDbTest#userListPreservesKoreanDatabaseDateTimeWithoutOffsetWithUtcJvm() $.data.content[].email : random UUID in test fixture
+com.minierp.backend.integration.SqlStoreDateTimeMariaDbTest#userListPreservesKoreanDatabaseDateTimeWithoutOffsetWithUtcJvm() $.data.content[].loginId : random UUID in test fixture
+com.minierp.backend.integration.SqlStoreDateTimeMariaDbTest#userListPreservesKoreanDatabaseDateTimeWithoutOffsetWithUtcJvm() $request.query.q : random UUID in test fixture
