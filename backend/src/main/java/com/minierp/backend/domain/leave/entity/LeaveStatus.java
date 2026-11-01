@@ -9,9 +9,7 @@ public enum LeaveStatus {
     APPROVED("승인"),
     REJECTED("반려"),
     CANCELLED("취소");
-
     private final String displayName;
-
     LeaveStatus(String displayName) {
         this.displayName = displayName;
     }

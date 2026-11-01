@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -16,36 +15,30 @@ import java.time.LocalTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class OvertimeRequest extends BaseEntity {
-
-    @Column(name="document_id",nullable=false,unique=true)
+    @Column(name = "document_id", nullable = false, unique = true)
     private Long documentId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @org.hibernate.annotations.JoinFormula("(select d.drafter_id from approval_documents d where d.id=document_id)")
     private User requester;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @org.hibernate.annotations.JoinFormula("(select l.approver_id from approval_lines l where l.document_id=document_id and l.line_kind='APPROVER' order by l.step_order desc limit 1)")
+    @org.hibernate.annotations.JoinFormula(
+            "(select l.approver_id from approval_lines l where l.document_id=document_id and l.line_kind='APPROVER' order by l.step_order desc limit 1)")
     private User approver;
-
     @Column(name = "overtime_date", nullable = false)
     private LocalDate overtimeDate;
-
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
-
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
-
     @Column(name = "reason", length = 500)
     private String reason;
-
     @Enumerated(EnumType.STRING)
-    @org.hibernate.annotations.Formula("(select case d.status when 'IN_PROGRESS' then 'PENDING' when 'WITHDRAWN' then 'CANCELLED' else d.status end from approval_documents d where d.id=document_id)")
+    @org.hibernate.annotations.Formula(
+            "(select case d.status when 'IN_PROGRESS' then 'PENDING' when 'WITHDRAWN' then 'CANCELLED' else d.status end from approval_documents d where d.id=document_id)")
     private OvertimeStatus status = OvertimeStatus.PENDING;
-
     @Builder
-    public OvertimeRequest(User requester, LocalDate overtimeDate, LocalTime startTime, LocalTime endTime, String reason) {
+    public OvertimeRequest(User requester, LocalDate overtimeDate, LocalTime startTime, LocalTime endTime,
+            String reason) {
         this.requester = requester;
         this.overtimeDate = overtimeDate;
         this.startTime = startTime;

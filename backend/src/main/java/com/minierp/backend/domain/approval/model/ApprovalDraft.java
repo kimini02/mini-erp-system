@@ -1,2 +1,4 @@
 package com.minierp.backend.domain.approval.model;
-public record ApprovalDraft(ApprovalDocument document) {}
+
+public record ApprovalDraft(ApprovalDocument document) {
+}
