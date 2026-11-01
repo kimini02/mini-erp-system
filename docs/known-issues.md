@@ -11,6 +11,8 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 | KI-05 | JPA 자동 기록 시각(created_at·updated_at)이 서버 기본 시간대를 따름 | M1 — 공통 설정 | 해결됨 — `cbf71e0` (M1-7) |
 | KI-06 | JDBC 날짜가 UTC 오프셋을 포함한 JSON으로 반환되어 화면 시각이 틀어짐 | M2 선행 수정 — 공통 조회 | 해결됨 — `6c39c97` SqlStore 날짜 타입 정규화 ([검증 기록](troubleshooting/M2-0-jdbc-local-date-time.md)) |
 | KI-07 | 기존 대시보드 관리자 요약의 전체 휴가 대기 노출 | M3 — 관리소장 전용 요약 | 해결됨 — `a2254af`, 관리소장 외 403 |
+| KI-08 | 캘린더 화면이 제거된 구 API를 호출해 대부분 동작하지 않음 | 프론트 리팩토링 안전망에서 발견(2026-10-28) | 미해결 — 리팩토링에서는 고치지 않음, 배포 전 결정 필요 |
+| KI-09 | 목 모드에서 "내 프로필"을 열면 앱 전체가 흰 화면 | 프론트 리팩토링 안전망에서 발견(2026-10-28) | 미해결 — 목 데이터 전용, 실제 서버 영향 없음 |
 
 ## KI-01 — 특근 신청 500 (M2, 해결됨)
 - 해결 커밋: `ef2244e` (하루 단위 처리기·기존 비활성 테스트 복구), `617b7ca` (구 API 제거).
@@ -113,3 +115,16 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 - 홈 teamWeek 전용 메뉴가 명세에 없다. 현재 휴가는 MY_ATTENDANCE V, 업무는 PROJECT V+보기 범위를 적용한다. 개인 leave/notifications는 기존 API처럼 로그인 기준이다. 사용자가 이 항목별 메뉴 권한을 확정했다.
 - 구 화면과 API는 호환되지 않는다. 사용자 결정대로 M4 새 화면과 함께 병합해야 하며 이번 작업에서는 프론트·병합·푸시를 수행하지 않았다.
 - 부서 상태·근무시간 이력, 캘린더의 별도 권한 재설계는 이번 범위 밖이다.
+
+## KI-08 — 캘린더 화면의 구 API 호출 (미해결)
+- 발견: 프론트 리팩토링 안전망(목 모드 화면 기록) 중 콘솔 오류 `pData.map is not a function`과 목에 없는 요청의 연결 거부.
+- 원인: `frontend/src/pages/CalendarPage.jsx`는 팀 단계 화면을 그대로 쓰고 있다. 다섯 경로가 현재 백엔드에 없다(KI-02에서 제거): `GET /leave/my`, `GET /attendance/summary`, `GET /overtime/list`, `POST /attendance/check-in`, `PATCH /attendance/check-out`. `GET /projects`는 M4에서 페이지 응답(`content`)으로 바뀌어 배열로 가공하다 실패한다. `GET /calendar/events`만 현재 계약과 맞다.
+- 영향: 실제 서버에서도 휴가·근태·특근·프로젝트 일정이 캘린더에 나오지 않고, 캘린더의 출퇴근 버튼은 실패한다. 사이드바 "캘린더" 메뉴로 누구나 들어갈 수 있다.
+- 처리: 리팩토링은 동작을 바꾸지 않으므로 고치지 않았다(명세 17 3장). 현재 API(연차 원장·근태 월간·결재 문서·프로젝트 목록)로 다시 만들지, 그전까지 메뉴를 숨길지 배포 전에 정한다.
+
+## KI-09 — 목 모드 "내 프로필" 흰 화면 (미해결, 개발 전용)
+- 발견: 같은 안전망에서 `Objects are not valid as a React child (found: object with keys {id, name})`.
+- 원인: `ProfileModal`(구 ProfilePage)은 부서 이름을 `departmentName || department || …` 순으로 고른다. 실제 `GET /users/{id}`는 `departmentName`을 주므로 문자열이 쓰이지만, 목 응답에는 `departmentName`이 없어 `{id, name}` 객체를 그대로 그리다 앱 전체가 멈춘다.
+- 영향: 목 모드(`npm run dev:mock`)에서만 생긴다. 실제 서버 응답에서는 재현되지 않는다(코드·명세 12 응답 확인, 실제 서버 화면 확인은 아직).
+- 처리: 리팩토링 중에는 고치지 않았다. 목 응답에 `departmentName`을 맞추고, 화면은 `department?.name`처럼 객체를 직접 그리지 않게 바꾸는 것이 방향이다. 안전망 모달 기록에서는 이 항목을 뺐다.
+

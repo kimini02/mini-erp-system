@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Suspense, useEffect, useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
-import ProfilePage from '@/pages/ProfilePage';
+import { PageLoader } from '@/components/ui';
+import PageErrorBoundary from './PageErrorBoundary';
+import ProfileModal from './ProfileModal';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 
@@ -16,6 +18,7 @@ export default function AppLayout() {
   const refresh = useApprovalStore((s) => s.refresh);
   const [navOpen, setNavOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const { pathname } = useLocation();
 
   // 결재 대기 건수·안 읽은 알림 (사이드바 배지, 상단 알림). 1분마다, 창으로 돌아올 때 다시 읽음
   useEffect(() => {
@@ -37,11 +40,15 @@ export default function AppLayout() {
       <div className="lg:pl-60">
         <Topbar onOpenNav={() => setNavOpen(true)} onOpenProfile={() => setProfileOpen(true)} />
         <main className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-          <Outlet />
+          <PageErrorBoundary resetKey={pathname}>
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
+          </PageErrorBoundary>
         </main>
       </div>
 
-      <ProfilePage isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={user} />
+      <ProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} user={user} />
     </div>
   );
 }

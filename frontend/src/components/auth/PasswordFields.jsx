@@ -21,11 +21,18 @@ export default function PasswordFields({ value, confirmValue, onChange, onConfir
           required
         />
       </Field>
-      <ul id={`${idPrefix}-rules`} className="grid grid-cols-2 gap-x-4 gap-y-1.5 sm:grid-cols-3" aria-label="비밀번호 조건">
+      <ul
+        id={`${idPrefix}-rules`}
+        className="grid grid-cols-2 gap-x-4 gap-y-1.5 sm:grid-cols-3"
+        aria-label="비밀번호 조건"
+      >
         {PASSWORD_RULES.map((rule) => {
           const ok = rule.test(value);
           return (
-            <li key={rule.id} className={cn('flex items-center gap-1.5 text-xs', ok ? 'text-emerald-700' : 'text-gray-500')}>
+            <li
+              key={rule.id}
+              className={cn('flex items-center gap-1.5 text-xs', ok ? 'text-emerald-700' : 'text-gray-500')}
+            >
               {ok ? <Check size={13} strokeWidth={2.5} /> : <Circle size={11} />}
               {rule.label}
               <span className="sr-only">{ok ? '충족' : '미충족'}</span>
@@ -33,7 +40,12 @@ export default function PasswordFields({ value, confirmValue, onChange, onConfir
           );
         })}
       </ul>
-      <Field label="새 비밀번호 확인" htmlFor={`${idPrefix}-confirm`} required error={mismatch ? '비밀번호가 서로 다릅니다.' : undefined}>
+      <Field
+        label="새 비밀번호 확인"
+        htmlFor={`${idPrefix}-confirm`}
+        required
+        error={mismatch ? '비밀번호가 서로 다릅니다.' : undefined}
+      >
         <Input
           id={`${idPrefix}-confirm`}
           type="password"

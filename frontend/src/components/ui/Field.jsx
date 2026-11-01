@@ -27,7 +27,7 @@ export const Input = forwardRef(function Input({ className, invalid, icon: Icon,
           Icon ? 'pl-9' : 'pl-3',
           trailing ? 'pr-10' : 'pr-3',
           props.readOnly ? 'bg-gray-50 text-gray-600' : 'bg-white',
-          className
+          className,
         )}
         {...props}
       />
@@ -44,7 +44,13 @@ export const Select = forwardRef(function Select({ className, invalid, icon: Ico
       )}
       <select
         ref={ref}
-        className={cn(controlBase, stateClass(invalid), 'h-10 appearance-none bg-white pr-9', Icon ? 'pl-9' : 'pl-3', className)}
+        className={cn(
+          controlBase,
+          stateClass(invalid),
+          'h-10 appearance-none bg-white pr-9',
+          Icon ? 'pl-9' : 'pl-3',
+          className,
+        )}
         {...props}
       >
         {children}
@@ -100,7 +106,7 @@ export function Segmented({ options, value, onChange, className }) {
             onClick={() => onChange(optValue)}
             className={cn(
               'h-8 flex-1 rounded-md text-[13px] font-medium transition-colors',
-              active ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              active ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
             )}
           >
             {optLabel}

@@ -39,7 +39,9 @@ export default function Modal({ open, onClose, title, description, size = 'md', 
           </div>
         )}
         <div className="max-h-[70vh] overflow-y-auto px-6 py-4">{children}</div>
-        {footer && <div className="flex justify-end gap-2 border-t border-gray-100 bg-gray-50/60 px-6 py-3">{footer}</div>}
+        {footer && (
+          <div className="flex justify-end gap-2 border-t border-gray-100 bg-gray-50/60 px-6 py-3">{footer}</div>
+        )}
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ export function Th({ align = 'left', className, children }) {
       className={cn(
         'h-10 whitespace-nowrap border-b border-gray-200 bg-gray-50 px-4 text-xs font-medium text-gray-500',
         alignClass[align],
-        className
+        className,
       )}
     >
       {children}

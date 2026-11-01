@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CalendarCheck2, CalendarClock, CalendarPlus, CalendarRange, CornerUpLeft, NotebookText } from 'lucide-react';
-import { approvalDocumentApi, approvalInboxApi, leaveApi } from '@/api/m2';
+import { approvalDocumentApi, approvalInboxApi } from '@/api/approval';
+import { leaveApi } from '@/api/leave';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { MENU } from '@/lib/permissions';
@@ -10,7 +11,22 @@ import { getErrorMessage } from '@/lib/errors';
 import { confirm } from '@/lib/confirm';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/cn';
-import { Badge, Button, Card, CardHeader, EmptyState, PageHeader, PageLoader, Select, StatCard, Table, TableEmpty, Td, Th, Tr } from '@/components/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  CardHeader,
+  EmptyState,
+  PageHeader,
+  PageLoader,
+  Select,
+  StatCard,
+  Table,
+  TableEmpty,
+  Td,
+  Th,
+  Tr,
+} from '@/components/ui';
 import { DocStatusBadge } from '@/components/approval/ApprovalBits';
 
 const TYPE_FILTERS = [
@@ -33,7 +49,12 @@ function BalanceBar({ balance }) {
   return (
     <div>
       <div className="flex h-2.5 overflow-hidden rounded-full bg-gray-100">
-        {parts.map((p) => p.value > 0 && <span key={p.label} className={p.className} style={{ width: `${(p.value / total) * 100}%` }} />)}
+        {parts.map(
+          (p) =>
+            p.value > 0 && (
+              <span key={p.label} className={p.className} style={{ width: `${(p.value / total) * 100}%` }} />
+            ),
+        )}
       </div>
       <ul className="mt-2 flex flex-wrap gap-4 text-xs text-gray-600">
         {parts.map((p) => (
@@ -73,7 +94,8 @@ export default function MyLeavePage() {
 
   const loadRequests = useCallback(() => {
     if (!canInbox) return;
-    approvalInboxApi.list({ box: 'mine', formCode: 'LEAVE', page: 0, size: 6 })
+    approvalInboxApi
+      .list({ box: 'mine', formCode: 'LEAVE', page: 0, size: 6 })
       .then((r) => setRequests(r.content || []))
       .catch(() => setRequests([]));
   }, [canInbox]);
@@ -95,7 +117,9 @@ export default function MyLeavePage() {
     if (!ok) return;
     try {
       await approvalDocumentApi.withdraw(doc.id);
-      toast.success(`${doc.docNo}를 회수했습니다. 예약했던 연차를 돌려받았고, ${doc.currentApprover ? `${doc.currentApprover.name} ${doc.currentApprover.title}의 결재함에서도 빠졌습니다.` : '결재함에서도 빠졌습니다.'}`);
+      toast.success(
+        `${doc.docNo}를 회수했습니다. 예약했던 연차를 돌려받았고, ${doc.currentApprover ? `${doc.currentApprover.name} ${doc.currentApprover.title}의 결재함에서도 빠졌습니다.` : '결재함에서도 빠졌습니다.'}`,
+      );
       load();
       loadRequests();
       refreshCounts();
@@ -121,19 +145,44 @@ export default function MyLeavePage() {
             <label>
               <span className="sr-only">연도</span>
               <Select value={year} onChange={(e) => setYear(Number(e.target.value))}>
-                {[thisYear, thisYear - 1, thisYear - 2].map((y) => <option key={y} value={y}>{y}년</option>)}
+                {[thisYear, thisYear - 1, thisYear - 2].map((y) => (
+                  <option key={y} value={y}>
+                    {y}년
+                  </option>
+                ))}
               </Select>
             </label>
-            {canDraft && <Button icon={CalendarPlus} onClick={() => navigate('/approvals/new?form=LEAVE')}>휴가 신청</Button>}
+            {canDraft && (
+              <Button icon={CalendarPlus} onClick={() => navigate('/approvals/new?form=LEAVE')}>
+                휴가 신청
+              </Button>
+            )}
           </div>
         }
       />
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="올해 부여" value={formatDays(balance.granted).replace('일', '')} unit="일" icon={CalendarRange} />
+        <StatCard
+          label="올해 부여"
+          value={formatDays(balance.granted).replace('일', '')}
+          unit="일"
+          icon={CalendarRange}
+        />
         <StatCard label="사용" value={formatDays(balance.used).replace('일', '')} unit="일" icon={CalendarCheck2} />
-        <StatCard label="결재 중 (예약)" value={formatDays(balance.reserved).replace('일', '')} unit="일" icon={CalendarClock} tone={balance.reserved > 0 ? 'amber' : 'gray'} />
-        <StatCard label="사용 가능" value={formatDays(balance.available).replace('일', '')} unit="일" icon={NotebookText} tone="blue" />
+        <StatCard
+          label="결재 중 (예약)"
+          value={formatDays(balance.reserved).replace('일', '')}
+          unit="일"
+          icon={CalendarClock}
+          tone={balance.reserved > 0 ? 'amber' : 'gray'}
+        />
+        <StatCard
+          label="사용 가능"
+          value={formatDays(balance.available).replace('일', '')}
+          unit="일"
+          icon={NotebookText}
+          tone="blue"
+        />
       </div>
 
       <Card className="mt-4 p-5">
@@ -142,7 +191,10 @@ export default function MyLeavePage() {
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
         <Card className="overflow-hidden lg:col-span-8">
-          <CardHeader title="연차 원장" description="기록은 고치지 않고 쌓기만 합니다. 취소도 반대 기록으로 남깁니다." />
+          <CardHeader
+            title="연차 원장"
+            description="기록은 고치지 않고 쌓기만 합니다. 취소도 반대 기록으로 남깁니다."
+          />
           <div className="flex flex-wrap gap-1.5 border-b border-gray-100 px-5 py-3">
             {TYPE_FILTERS.map((f) => (
               <button
@@ -151,7 +203,7 @@ export default function MyLeavePage() {
                 onClick={() => setType(f.value)}
                 className={cn(
                   'h-7 rounded-full px-3 text-xs font-medium transition-colors',
-                  type === f.value ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  type === f.value ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
                 )}
               >
                 {f.label}
@@ -171,24 +223,43 @@ export default function MyLeavePage() {
             </thead>
             <tbody>
               {ledger.length === 0 ? (
-                <TableEmpty colSpan={6}>{type ? '이 구분의 기록이 없습니다.' : `${year}년 기록이 없습니다.`}</TableEmpty>
+                <TableEmpty colSpan={6}>
+                  {type ? '이 구분의 기록이 없습니다.' : `${year}년 기록이 없습니다.`}
+                </TableEmpty>
               ) : (
                 ledger.map((l) => {
                   const meta = LEDGER_TYPE_META[l.type] || { label: l.type, tone: 'gray' };
                   return (
                     <Tr key={l.id ?? `${l.date}-${l.type}-${l.balance}`}>
                       <Td className="tabular-nums text-gray-500">{formatDate(l.date)}</Td>
-                      <Td><Badge tone={meta.tone}>{meta.label}</Badge></Td>
+                      <Td>
+                        <Badge tone={meta.tone}>{meta.label}</Badge>
+                      </Td>
                       <Td className="text-gray-900">{l.memo || '-'}</Td>
                       <Td>
-                        {l.document
-                          ? <Link to={`/approvals/${l.document.id}`} className="tabular-nums text-blue-700 hover:underline">{l.document.docNo}</Link>
-                          : <span className="text-xs text-gray-400">자동</span>}
+                        {l.document ? (
+                          <Link
+                            to={`/approvals/${l.document.id}`}
+                            className="tabular-nums text-blue-700 hover:underline"
+                          >
+                            {l.document.docNo}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-gray-400">자동</span>
+                        )}
                       </Td>
-                      <Td align="right" className={cn('font-medium tabular-nums', l.days > 0 ? 'text-emerald-700' : l.days < 0 ? 'text-red-600' : 'text-gray-500')}>
+                      <Td
+                        align="right"
+                        className={cn(
+                          'font-medium tabular-nums',
+                          l.days > 0 ? 'text-emerald-700' : l.days < 0 ? 'text-red-600' : 'text-gray-500',
+                        )}
+                      >
                         {formatSignedDays(l.days)}
                       </Td>
-                      <Td align="right" className="tabular-nums text-gray-900">{formatDays(l.balance).replace('일', '')}</Td>
+                      <Td align="right" className="tabular-nums text-gray-900">
+                        {formatDays(l.balance).replace('일', '')}
+                      </Td>
                     </Tr>
                   );
                 })
@@ -196,14 +267,21 @@ export default function MyLeavePage() {
             </tbody>
           </Table>
           <p className="border-t border-gray-100 px-5 py-3 text-[13px] text-gray-500">
-            원장 합계와 사용 가능 일수는 항상 같습니다. <b className="font-semibold text-gray-900">합계 {formatDays(balance.available)}</b>
+            원장 합계와 사용 가능 일수는 항상 같습니다.{' '}
+            <b className="font-semibold text-gray-900">합계 {formatDays(balance.available)}</b>
           </p>
         </Card>
 
         <Card className="h-fit lg:col-span-4">
           <CardHeader
             title="신청 내역"
-            action={canInbox && <Link to="/approvals?box=mine" className="text-[13px] text-blue-700 hover:underline">전체 보기</Link>}
+            action={
+              canInbox && (
+                <Link to="/approvals?box=mine" className="text-[13px] text-blue-700 hover:underline">
+                  전체 보기
+                </Link>
+              )
+            }
           />
           {requests.length === 0 ? (
             <p className="px-5 py-6 text-[13px] text-gray-500">올린 휴가 신청이 없습니다.</p>
@@ -212,7 +290,12 @@ export default function MyLeavePage() {
               {requests.map((r) => (
                 <li key={r.id} className="px-5 py-3">
                   <div className="flex items-start justify-between gap-2">
-                    <Link to={`/approvals/${r.id}`} className="min-w-0 text-[13px] font-medium text-gray-900 hover:text-blue-700 hover:underline">{r.title}</Link>
+                    <Link
+                      to={`/approvals/${r.id}`}
+                      className="min-w-0 text-[13px] font-medium text-gray-900 hover:text-blue-700 hover:underline"
+                    >
+                      {r.title}
+                    </Link>
                     <DocStatusBadge status={r.status} />
                   </div>
                   <p className="mt-0.5 text-xs text-gray-500">
@@ -220,13 +303,23 @@ export default function MyLeavePage() {
                     {r.currentApprover && ` · ${r.currentApprover.name} ${r.currentApprover.title} 결재 차례`}
                   </p>
                   {withdrawable(r) && (
-                    <Button variant="ghost" size="sm" icon={CornerUpLeft} className="-ml-2 mt-1" onClick={() => withdraw(r)}>회수하기</Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={CornerUpLeft}
+                      className="-ml-2 mt-1"
+                      onClick={() => withdraw(r)}
+                    >
+                      회수하기
+                    </Button>
                   )}
                 </li>
               ))}
             </ul>
           )}
-          <p className="border-t border-gray-100 px-5 py-3 text-xs text-gray-500">아무도 결재하지 않은 동안만 회수할 수 있습니다.</p>
+          <p className="border-t border-gray-100 px-5 py-3 text-xs text-gray-500">
+            아무도 결재하지 않은 동안만 회수할 수 있습니다.
+          </p>
         </Card>
       </div>
     </>

@@ -1,14 +1,28 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, FileCheck2, FilePlus2, Search } from 'lucide-react';
-import { approvalFormApi, approvalInboxApi } from '@/api/m2';
+import { approvalFormApi, approvalInboxApi } from '@/api/approval';
 import { useAuthStore } from '@/store/authStore';
 import { useApprovalStore } from '@/store/approvalStore';
 import { MENU } from '@/lib/permissions';
 import { INBOX_BOXES, formatDateTime } from '@/lib/approval';
 import { getErrorMessage } from '@/lib/errors';
 import { cn } from '@/lib/cn';
-import { Badge, Button, Card, EmptyState, Input, PageHeader, PageLoader, Select, Table, TableEmpty, Td, Th, Tr } from '@/components/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Input,
+  PageHeader,
+  PageLoader,
+  Select,
+  Table,
+  TableEmpty,
+  Td,
+  Th,
+  Tr,
+} from '@/components/ui';
 import { DocStatusBadge, StepDots } from '@/components/approval/ApprovalBits';
 
 const PAGE_SIZE = 15;
@@ -49,7 +63,10 @@ export default function ApprovalInboxPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    approvalFormApi.list().then(setForms).catch(() => {});
+    approvalFormApi
+      .list()
+      .then(setForms)
+      .catch(() => {});
     refreshCounts();
   }, [refreshCounts]);
 
@@ -58,7 +75,15 @@ export default function ApprovalInboxPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setResult(await approvalInboxApi.list({ box, formCode: formCode || undefined, q: debouncedQ || undefined, page, size: PAGE_SIZE }));
+      setResult(
+        await approvalInboxApi.list({
+          box,
+          formCode: formCode || undefined,
+          q: debouncedQ || undefined,
+          page,
+          size: PAGE_SIZE,
+        }),
+      );
       setError('');
     } catch (err) {
       setError(getErrorMessage(err));
@@ -83,11 +108,21 @@ export default function ApprovalInboxPage() {
       <PageHeader
         title="결재함"
         description="결재할 문서와 내가 올린 문서를 한곳에서 확인합니다."
-        actions={canDraft && <Button icon={FilePlus2} onClick={() => navigate('/approvals/new')}>기안하기</Button>}
+        actions={
+          canDraft && (
+            <Button icon={FilePlus2} onClick={() => navigate('/approvals/new')}>
+              기안하기
+            </Button>
+          )
+        }
       />
 
       <Card className="overflow-hidden">
-        <div role="tablist" aria-label="결재함" className="flex gap-1 overflow-x-auto border-b border-gray-100 px-3 pt-2">
+        <div
+          role="tablist"
+          aria-label="결재함"
+          className="flex gap-1 overflow-x-auto border-b border-gray-100 px-3 pt-2"
+        >
           {INBOX_BOXES.map((b) => {
             const active = b.key === box;
             const count = counts[b.key];
@@ -100,12 +135,17 @@ export default function ApprovalInboxPage() {
                 onClick={() => selectBox(b.key)}
                 className={cn(
                   '-mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-1.5 text-[13px] font-medium transition-colors',
-                  active ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-800'
+                  active ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-800',
                 )}
               >
                 {b.label}
                 {count > 0 && (
-                  <span className={cn('rounded-full px-1.5 text-[11px] tabular-nums', b.key === 'todo' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600')}>
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 text-[11px] tabular-nums',
+                      b.key === 'todo' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600',
+                    )}
+                  >
                     {count}
                   </span>
                 )}
@@ -117,13 +157,23 @@ export default function ApprovalInboxPage() {
         <div className="flex flex-col gap-2 border-b border-gray-100 p-4 sm:flex-row">
           <label className="sm:w-72">
             <span className="sr-only">문서 검색</span>
-            <Input icon={Search} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="제목 또는 문서번호" />
+            <Input
+              icon={Search}
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="제목 또는 문서번호"
+            />
           </label>
           <label className="sm:w-44">
             <span className="sr-only">양식</span>
             <Select value={formCode} onChange={(e) => setFormCode(e.target.value)}>
               <option value="">전체 양식</option>
-              {forms.map((f) => <option key={f.code} value={f.code}>{f.name}</option>)}
+              {forms.map((f) => (
+                <option key={f.code} value={f.code}>
+                  {f.name}
+                </option>
+              ))}
             </Select>
           </label>
         </div>
@@ -147,31 +197,52 @@ export default function ApprovalInboxPage() {
             </thead>
             <tbody>
               {rows.length === 0 ? (
-                <TableEmpty colSpan={isDrafts ? 6 : 7}>{q || formCode ? '조건에 맞는 문서가 없습니다.' : EMPTY_TEXT[box]}</TableEmpty>
+                <TableEmpty colSpan={isDrafts ? 6 : 7}>
+                  {q || formCode ? '조건에 맞는 문서가 없습니다.' : EMPTY_TEXT[box]}
+                </TableEmpty>
               ) : (
                 rows.map((r) => (
                   <Tr key={r.id} className="cursor-pointer" onClick={() => open(r)}>
                     <Td className="tabular-nums text-gray-500">{r.docNo || '-'}</Td>
-                    <Td><Badge tone="gray">{r.formName}</Badge></Td>
                     <Td>
-                      <button type="button" onClick={(e) => { e.stopPropagation(); open(r); }} className="text-left font-medium text-gray-900 hover:text-blue-700 hover:underline">
+                      <Badge tone="gray">{r.formName}</Badge>
+                    </Td>
+                    <Td>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          open(r);
+                        }}
+                        className="text-left font-medium text-gray-900 hover:text-blue-700 hover:underline"
+                      >
                         {r.title}
                       </button>
                     </Td>
                     <Td>
-                      <span className="block text-gray-900">{r.drafter.name} <span className="text-gray-500">{r.drafter.title}</span></span>
+                      <span className="block text-gray-900">
+                        {r.drafter.name} <span className="text-gray-500">{r.drafter.title}</span>
+                      </span>
                       <span className="block text-xs text-gray-500">{r.drafter.department}</span>
                     </Td>
-                    <Td className="tabular-nums text-gray-500">{formatDateTime(isDrafts ? r.updatedAt : r.submittedAt)}</Td>
+                    <Td className="tabular-nums text-gray-500">
+                      {formatDateTime(isDrafts ? r.updatedAt : r.submittedAt)}
+                    </Td>
                     {!isDrafts && (
                       <Td>
                         <span className="flex items-center gap-2">
                           <StepDots steps={r.steps} />
-                          {r.currentApprover && <span className="text-xs text-gray-500">{r.currentApprover.name} {r.currentApprover.title}</span>}
+                          {r.currentApprover && (
+                            <span className="text-xs text-gray-500">
+                              {r.currentApprover.name} {r.currentApprover.title}
+                            </span>
+                          )}
                         </span>
                       </Td>
                     )}
-                    <Td><DocStatusBadge status={r.status} /></Td>
+                    <Td>
+                      <DocStatusBadge status={r.status} />
+                    </Td>
                   </Tr>
                 ))
               )}
@@ -182,11 +253,26 @@ export default function ApprovalInboxPage() {
         {pageInfo && pageInfo.totalElements > 0 && (
           <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 text-[13px] text-gray-500">
             <span>
-              총 <b className="font-semibold text-gray-900">{pageInfo.totalElements}</b>건 · {pageInfo.number + 1} / {pageInfo.totalPages} 쪽
+              총 <b className="font-semibold text-gray-900">{pageInfo.totalElements}</b>건 · {pageInfo.number + 1} /{' '}
+              {pageInfo.totalPages} 쪽
             </span>
             <div className="flex gap-1">
-              <Button variant="secondary" size="sm" icon={ChevronLeft} disabled={pageInfo.first} onClick={() => setPage((p) => p - 1)} aria-label="이전 쪽" />
-              <Button variant="secondary" size="sm" icon={ChevronRight} disabled={pageInfo.last} onClick={() => setPage((p) => p + 1)} aria-label="다음 쪽" />
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={ChevronLeft}
+                disabled={pageInfo.first}
+                onClick={() => setPage((p) => p - 1)}
+                aria-label="이전 쪽"
+              />
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={ChevronRight}
+                disabled={pageInfo.last}
+                onClick={() => setPage((p) => p + 1)}
+                aria-label="다음 쪽"
+              />
             </div>
           </div>
         )}

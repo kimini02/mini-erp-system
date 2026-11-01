@@ -34,16 +34,27 @@ export function grantsDue(user, date) {
   const due = [];
   for (let k = 1; k <= 11; k += 1) {
     const d = addMonthsClamp(user.hireDate, k);
-    if (d <= date && d < anniversary && d.slice(0, 4) === year) due.push({ key: `M-${user.id}-${k}`, date: d, days: 1, memo: `입사 ${k}개월 부여` });
+    if (d <= date && d < anniversary && d.slice(0, 4) === year)
+      due.push({ key: `M-${user.id}-${k}`, date: d, days: 1, memo: `입사 ${k}개월 부여` });
   }
   if (anniversary <= date && anniversary.slice(0, 4) === year) {
     const left = daysBetween(anniversary, `${year}-12-31`) + 1;
     const total = daysBetween(jan1, `${year}-12-31`) + 1;
-    due.push({ key: `A-${user.id}`, date: anniversary, days: ceilHalf((15 * left) / total), memo: '입사 1주년 비례 부여' });
+    due.push({
+      key: `A-${user.id}`,
+      date: anniversary,
+      days: ceilHalf((15 * left) / total),
+      memo: '입사 1주년 비례 부여',
+    });
   }
   if (jan1 <= date && anniversary < jan1) {
     const years = completedYears(user.hireDate, jan1);
-    due.push({ key: `Y-${user.id}-${year}`, date: jan1, days: Math.min(25, 15 + Math.floor((years - 1) / 2)), memo: `${year}년 연차 부여 (근속 ${years}년)` });
+    due.push({
+      key: `Y-${user.id}-${year}`,
+      date: jan1,
+      days: Math.min(25, 15 + Math.floor((years - 1) / 2)),
+      memo: `${year}년 연차 부여 (근속 ${years}년)`,
+    });
   }
   return due.filter((g) => !user.retiredDate || g.date < user.retiredDate);
 }

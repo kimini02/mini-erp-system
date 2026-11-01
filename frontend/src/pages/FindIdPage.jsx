@@ -79,7 +79,14 @@ export default function FindIdPage() {
     <AuthLayout title="아이디 찾기" description="가입할 때 입력한 이름과 이메일을 입력하세요." footer={links}>
       <form onSubmit={handleFindId} className="space-y-4">
         <Field label="이름" htmlFor="userName">
-          <Input id="userName" required placeholder="홍길동" value={formData.userName} onChange={handleChange} className="h-11" />
+          <Input
+            id="userName"
+            required
+            placeholder="홍길동"
+            value={formData.userName}
+            onChange={handleChange}
+            className="h-11"
+          />
         </Field>
         <Field label="이메일" htmlFor="email">
           <Input
