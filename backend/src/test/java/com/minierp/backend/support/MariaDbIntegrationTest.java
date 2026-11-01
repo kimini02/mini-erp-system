@@ -10,28 +10,24 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 /**
- * Extend for real MariaDB tests. Each subclass starts with a new empty database.
- * Do not run subclasses in parallel: the inherited container is shared.
- * Closing each context prevents cached connections to a stopped container.
- */
+* Extend for real MariaDB tests. Each subclass starts with a new empty database.
+* Do not run subclasses in parallel: the inherited container is shared.
+* Closing each context prevents cached connections to a stopped container.
+*/
 @Import(FixedClockTestConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("mariadb")
 @TestPropertySource(properties = {
-        "app.batches.enabled=false", "INITIAL_ADMIN_LOGIN_ID=", "INITIAL_ADMIN_NAME=",
-        "INITIAL_ADMIN_EMAIL=", "INITIAL_ADMIN_PASSWORD="
+    "app.batches.enabled=false", "INITIAL_ADMIN_LOGIN_ID=", "INITIAL_ADMIN_NAME=", "INITIAL_ADMIN_EMAIL=",
+            "INITIAL_ADMIN_PASSWORD="
 })
 @Testcontainers(disabledWithoutDocker = true)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class MariaDbIntegrationTest {
-
     @Container
-    protected static final MariaDBContainer<?> DATABASE =
-            new MariaDBContainer<>("mariadb:10.11")
-                    .withDatabaseName("workflow_test");
-
+    protected static final MariaDBContainer<?> DATABASE = new MariaDBContainer<>("mariadb:10.11")
+            .withDatabaseName("workflow_test");
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", DATABASE::getJdbcUrl);

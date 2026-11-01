@@ -1,40 +1,23 @@
 package com.minierp.backend.domain.task.entity;
 
 import com.minierp.backend.support.TestClocks;
-
 import com.minierp.backend.domain.project.entity.Project;
 import com.minierp.backend.domain.user.entity.User;
 import com.minierp.backend.global.entity.Priority;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Constructor;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TaskAssignmentTest {
-
     @Test
     @DisplayName("담당자 배정 생성 시 Task와 User가 연결된다")
     void createTaskAssignment_success() throws Exception {
-        Task task = Task.create(
-                "내 업무 화면 구현",
-                "React 페이지 및 API 연동",
-                TestClocks.today().minusDays(4),
-                TaskStatus.TODO,
-                Priority.MEDIUM,
-                Project.create(
-                        "ERP 재구축",
-                        "사내 업무 시스템 고도화",
-                        TestClocks.today().minusDays(6),
-                        TestClocks.today().plusDays(24),
-                        Priority.MEDIUM
-                )
-        );
+        Task task = Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().minusDays(4), TaskStatus.TODO,
+                Priority.MEDIUM, Project.create("ERP 재구축", "사내 업무 시스템 고도화", TestClocks.today().minusDays(6), TestClocks
+                .today().plusDays(24), Priority.MEDIUM));
         User user = createUser();
-
         TaskAssignment taskAssignment = TaskAssignment.create(task, user);
-
         assertThat(taskAssignment.getTask()).isSameAs(task);
         assertThat(taskAssignment.getUser()).isSameAs(user);
         assertThat(task.getTaskAssignments()).contains(taskAssignment);

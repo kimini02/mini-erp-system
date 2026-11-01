@@ -1,34 +1,22 @@
 package com.minierp.backend.domain.task.entity;
 
 import com.minierp.backend.support.TestClocks;
-
 import com.minierp.backend.domain.project.entity.Project;
 import com.minierp.backend.global.entity.Priority;
 import com.minierp.backend.global.exception.BusinessException;
 import com.minierp.backend.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TaskTest {
-
     @Test
     @DisplayName("업무 생성 시 상태가 없으면 TODO로 저장된다")
     void createTask_success() {
         Project project = createProject();
-
-        Task task = Task.create(
-                "내 업무 화면 구현",
-                "React 페이지 및 API 연동",
-                TestClocks.today().minusDays(4),
-                null,
-                Priority.HIGH,
-                project
-        );
-
+        Task task = Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().minusDays(4), null, Priority
+                .HIGH, project);
         assertThat(task.getTaskTitle()).isEqualTo("내 업무 화면 구현");
         assertThat(task.getTaskContent()).isEqualTo("React 페이지 및 API 연동");
         assertThat(task.getEndDate()).isEqualTo(TestClocks.today().minusDays(4));
@@ -40,39 +28,18 @@ class TaskTest {
     @Test
     @DisplayName("업무 상태를 변경할 수 있다")
     void changeStatus_success() {
-        Task task = Task.create(
-                "내 업무 화면 구현",
-                "React 페이지 및 API 연동",
-                TestClocks.today().minusDays(4),
-                TaskStatus.TODO,
-                Priority.MEDIUM,
-                createProject()
-        );
-
+        Task task = Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().minusDays(4), TaskStatus.TODO,
+                Priority.MEDIUM, createProject());
         task.changeStatus(TaskStatus.DOING);
-
         assertThat(task.getTaskStatus()).isEqualTo(TaskStatus.DOING);
     }
 
     @Test
     @DisplayName("업무 수정 시 제목, 내용, 마감일, 우선순위가 변경된다")
     void updateTask_success() {
-        Task task = Task.create(
-                "기존 제목",
-                "기존 내용",
-                TestClocks.today().plusDays(24),
-                TaskStatus.TODO,
-                Priority.LOW,
-                createProject()
-        );
-
-        task.update(
-                "수정된 제목",
-                "수정된 내용",
-                TestClocks.today().plusDays(9),
-                Priority.HIGH
-        );
-
+        Task task = Task.create("기존 제목", "기존 내용", TestClocks.today().plusDays(24), TaskStatus.TODO, Priority.LOW,
+                createProject());
+        task.update("수정된 제목", "수정된 내용", TestClocks.today().plusDays(9), Priority.HIGH);
         assertThat(task.getTaskTitle()).isEqualTo("수정된 제목");
         assertThat(task.getTaskContent()).isEqualTo("수정된 내용");
         assertThat(task.getEndDate()).isEqualTo(TestClocks.today().plusDays(9));
@@ -82,65 +49,34 @@ class TaskTest {
     @Test
     @DisplayName("업무 생성 시 마감일이 프로젝트 종료일보다 늦으면 예외가 발생한다")
     void createTask_invalidPeriod_throwsException() {
-        assertThatThrownBy(() -> Task.create(
-                "내 업무 화면 구현",
-                "React 페이지 및 API 연동",
-                TestClocks.today().plusDays(25),
-                null,
-                Priority.HIGH,
-                createProject()
-        ))
-                .isInstanceOf(BusinessException.class)
+        assertThatThrownBy(() -> Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().plusDays(25), null,
+                Priority.HIGH, createProject())).isInstanceOf(BusinessException.class)
                 .satisfies(exception -> assertThat(((BusinessException) exception).getErrorCode())
-                        .isEqualTo(ErrorCode.INVALID_TASK_PERIOD));
+                .isEqualTo(ErrorCode.INVALID_TASK_PERIOD));
     }
 
     @Test
     @DisplayName("업무 수정 시 마감일이 프로젝트 종료일보다 늦으면 예외가 발생한다")
     void updateTask_invalidPeriod_throwsException() {
-        Task task = Task.create(
-                "기존 제목",
-                "기존 내용",
-                TestClocks.today().plusDays(24),
-                TaskStatus.TODO,
-                Priority.LOW,
-                createProject()
-        );
-
-        assertThatThrownBy(() -> task.update(
-                "수정된 제목",
-                "수정된 내용",
-                TestClocks.today().plusDays(39),
-                Priority.HIGH
-        ))
+        Task task = Task.create("기존 제목", "기존 내용", TestClocks.today().plusDays(24), TaskStatus.TODO, Priority.LOW,
+                createProject());
+        assertThatThrownBy(() -> task.update("수정된 제목", "수정된 내용", TestClocks.today().plusDays(39), Priority.HIGH))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> assertThat(((BusinessException) exception).getErrorCode())
-                        .isEqualTo(ErrorCode.INVALID_TASK_PERIOD));
+                .isEqualTo(ErrorCode.INVALID_TASK_PERIOD));
     }
 
     @Test
     @DisplayName("완료되지 않았고 마감일이 지난 업무는 지연 상태로 판단한다")
     void isOverdue_whenTaskIsPastDueAndNotDone_returnsTrue() {
-        Task task = Task.create(
-                "내 업무 화면 구현",
-                "React 페이지 및 API 연동",
-                TestClocks.today().minusDays(1),
-                TaskStatus.DOING,
-                Priority.LOW,
-                Project.create("지연 검증", "", TestClocks.today().minusDays(7),
-                        TestClocks.today().plusDays(7), Priority.MEDIUM)
-        );
-
+        Task task = Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().minusDays(1), TaskStatus.DOING,
+                Priority.LOW, Project.create("지연 검증", "", TestClocks.today().minusDays(7), TestClocks.today()
+                .plusDays(7), Priority.MEDIUM));
         assertThat(task.isOverdue(TestClocks.today())).isTrue();
     }
 
     private Project createProject() {
-        return Project.create(
-                "ERP 재구축",
-                "사내 업무 시스템 고도화",
-                TestClocks.today().minusDays(6),
-                TestClocks.today().plusDays(24),
-                Priority.MEDIUM
-        );
+        return Project.create("ERP 재구축", "사내 업무 시스템 고도화", TestClocks.today().minusDays(6), TestClocks.today()
+                .plusDays(24), Priority.MEDIUM);
     }
 }

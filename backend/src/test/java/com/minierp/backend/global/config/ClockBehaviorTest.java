@@ -7,13 +7,11 @@ import com.minierp.backend.global.entity.Priority;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ClockBehaviorTest {
@@ -22,12 +20,13 @@ class ClockBehaviorTest {
         Clock production = new ClockConfig().clock();
         assertThat(production.getZone()).isEqualTo(ZoneId.of("Asia/Seoul"));
         Clock midnight = Clock.fixed(Instant.parse("2026-12-31T15:00:00Z"), production.getZone());
-        assertThat(LocalDate.now(midnight))
-                .isEqualTo(LocalDate.now(midnight.withZone(ZoneOffset.UTC)).plusDays(1));
+        assertThat(LocalDate.now(midnight)).isEqualTo(LocalDate.now(midnight.withZone(ZoneOffset.UTC)).plusDays(1));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"2026-04-06T00:00:00Z", "2026-12-31T15:00:00Z"})
+    @ValueSource(strings = {
+        "2026-04-06T00:00:00Z", "2026-12-31T15:00:00Z"
+    })
     void changingFixedDatePreservesOverdueRules(String instant) {
         Clock clock = Clock.fixed(Instant.parse(instant), new ClockConfig().clock().getZone());
         LocalDate today = LocalDate.now(clock);
