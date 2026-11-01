@@ -1,3 +1,21 @@
 # 형식만 바꾼 커밋: git blame에서 건너뜁니다 (git config blame.ignoreRevsFile .git-blame-ignore-revs)
 # style(frontend): Prettier 적용
 e8fa6707114bb38d488e8423da663967987e7f67
+
+# style(backend): 형식 정리 — global + BackendApplication
+dec6fd85e1e18de6b67a3c2023bf0776734e0f08
+
+# style(backend): 형식 정리 — org · user · permission
+09e39aa80e0e86c96de6032369bd6ed942f18ad3
+
+# style(backend): 형식 정리 — approval · leave · overtime
+c1e62187a0b1eabb0c25657983379d632cbc51e0
+
+# style(backend): 형식 정리 — attendance · calendar · home · notification · project · task · dashboard
+a8379314e0856a55c813e0a6ddb4c93eb9b5d624
+
+# style(backend): 형식 정리 — 테스트 domain · global · support · BackendApplicationTests
+b4985233a721858aa7d85e45d4f5f83420e255a6
+
+# style(backend): 형식 정리 — 테스트 integration
+e6ff2a5c13c64ef0083bbfb5b59453bcd8fca4fd
