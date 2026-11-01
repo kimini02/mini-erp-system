@@ -4,7 +4,11 @@ import { Badge } from '@/components/ui';
 
 export function DocStatusBadge({ status }) {
   const meta = DOC_STATUS_META[status] || { label: status || '-', tone: 'gray' };
-  return <Badge tone={meta.tone} dot>{meta.label}</Badge>;
+  return (
+    <Badge tone={meta.tone} dot>
+      {meta.label}
+    </Badge>
+  );
 }
 
 const DOT = {
@@ -15,7 +19,14 @@ const DOT = {
   WITHDRAWN: 'bg-amber-400 ring-amber-400',
   SKIPPED: 'bg-gray-100 ring-gray-200',
 };
-const STEP_TEXT = { DONE: '완료', CURRENT: '진행 중', TODO: '대기', REJECTED: '반려', WITHDRAWN: '회수', SKIPPED: '건너뜀' };
+const STEP_TEXT = {
+  DONE: '완료',
+  CURRENT: '진행 중',
+  TODO: '대기',
+  REJECTED: '반려',
+  WITHDRAWN: '회수',
+  SKIPPED: '건너뜀',
+};
 
 /** 결재 진행 점 (●─●─○). 첫 점은 기안 */
 export function StepDots({ steps = [] }) {

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { TOKEN_KEY, USER_KEY } from '@/api/axios';
-import { authApi } from '@/api/m1';
+import { authApi } from '@/api/auth';
 import { getErrorMessage } from '@/lib/errors';
 import { hasPermission, toPermissionMap } from '@/lib/permissions';
 
@@ -33,7 +33,12 @@ export const useAuthStore = create((set, get) => ({
       localStorage.setItem(TOKEN_KEY, result.accessToken);
       localStorage.setItem(USER_KEY, JSON.stringify(result.user));
       localStorage.setItem(MUST_CHANGE_KEY, String(!!result.mustChangePassword));
-      set({ user: result.user, isAuthenticated: true, mustChangePassword: !!result.mustChangePassword, permissions: null });
+      set({
+        user: result.user,
+        isAuthenticated: true,
+        mustChangePassword: !!result.mustChangePassword,
+        permissions: null,
+      });
 
       if (!result.mustChangePassword) await get().loadSession();
       return { success: true, mustChangePassword: !!result.mustChangePassword };

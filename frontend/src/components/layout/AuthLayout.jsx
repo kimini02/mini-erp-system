@@ -1,7 +1,11 @@
 import { Check } from 'lucide-react';
 import Logo from './Logo';
 
-const FEATURES = ['연차·특근 신청과 결재를 한 화면에서', '프로젝트와 업무 진행 상황 공유', '출퇴근 기록과 팀 일정 캘린더'];
+const FEATURES = [
+  '연차·특근 신청과 결재를 한 화면에서',
+  '프로젝트와 업무 진행 상황 공유',
+  '출퇴근 기록과 팀 일정 캘린더',
+];
 
 /**
  * 로그인 전 화면 공통 레이아웃
@@ -42,7 +46,9 @@ export default function AuthLayout({ title, description, children, footer }) {
             </div>
           )}
           {children}
-          {footer && <div className="mt-8 border-t border-gray-100 pt-6 text-center text-[13px] text-gray-500">{footer}</div>}
+          {footer && (
+            <div className="mt-8 border-t border-gray-100 pt-6 text-center text-[13px] text-gray-500">{footer}</div>
+          )}
         </div>
       </main>
     </div>

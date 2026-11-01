@@ -28,7 +28,9 @@ export function RequireAuth({ children }) {
           description={sessionError}
           action={
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={logout}>로그아웃</Button>
+              <Button variant="secondary" onClick={logout}>
+                로그아웃
+              </Button>
               <Button onClick={() => useAuthStore.setState({ sessionError: null })}>다시 시도</Button>
             </div>
           }

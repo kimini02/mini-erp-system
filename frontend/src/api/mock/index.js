@@ -112,7 +112,15 @@ function page(items, params) {
   const content = items.slice(number * size, number * size + size);
   return {
     content,
-    page: { number, size, totalElements, totalPages, first: number === 0, last: number >= totalPages - 1, numberOfElements: content.length },
+    page: {
+      number,
+      size,
+      totalElements,
+      totalPages,
+      first: number === 0,
+      last: number >= totalPages - 1,
+      numberOfElements: content.length,
+    },
   };
 }
 
@@ -124,7 +132,9 @@ function mergedPermissions(user) {
     const perms = db.rolePermissions[code] || {};
     for (const [menu, p] of Object.entries(perms)) {
       const cur = merged[menu] || { view: false, create: false, update: false, delete: false, scope: null };
-      ['view', 'create', 'update', 'delete'].forEach((k) => { cur[k] = cur[k] || p[k]; });
+      ['view', 'create', 'update', 'delete'].forEach((k) => {
+        cur[k] = cur[k] || p[k];
+      });
       if (p.scope && (!cur.scope || SCOPE_RANK[p.scope] > SCOPE_RANK[cur.scope])) cur.scope = p.scope;
       merged[menu] = cur;
     }
@@ -157,9 +167,20 @@ const activeChiefs = () => db.users.filter((u) => u.roles.includes('CHIEF') && u
 const isHeadSomewhere = (userId) => db.departments.find((d) => d.headUserId === userId);
 
 function validatePassword(pw) {
-  const ok = pw && pw.length >= 8 && pw.length <= 20 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw)
-    && /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pw);
-  if (!ok) fail(400, 'PASSWORD_POLICY_VIOLATION', '비밀번호는 8~20자이고 대문자, 소문자, 숫자, 특수문자를 모두 포함해야 합니다.');
+  const ok =
+    pw &&
+    pw.length >= 8 &&
+    pw.length <= 20 &&
+    /[A-Z]/.test(pw) &&
+    /[a-z]/.test(pw) &&
+    /\d/.test(pw) &&
+    /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pw);
+  if (!ok)
+    fail(
+      400,
+      'PASSWORD_POLICY_VIOLATION',
+      '비밀번호는 8~20자이고 대문자, 소문자, 숫자, 특수문자를 모두 포함해야 합니다.',
+    );
 }
 
 const tokenOf = (u) => `mock.${u.id}.${u.tokenVersion}`;
@@ -178,40 +199,74 @@ const routes = [];
 const route = (method, pattern, handler, options = {}) => {
   const keys = [];
   // id 자리(:id, :userId)는 숫자만 — '/users/lookup'이 '/users/:id'에 걸리지 않게
-  const regex = new RegExp(`^${pattern.replace(/:(\w+)/g, (_, k) => { keys.push(k); return /id$/i.test(k) ? '(\\d+)' : '([^/]+)'; })}$`);
-  routes.push({ method, regex, keys, handler, auth: options.auth !== false, allowBeforePwChange: options.allowBeforePwChange });
+  const regex = new RegExp(
+    `^${pattern.replace(/:(\w+)/g, (_, k) => {
+      keys.push(k);
+      return /id$/i.test(k) ? '(\\d+)' : '([^/]+)';
+    })}$`,
+  );
+  routes.push({
+    method,
+    regex,
+    keys,
+    handler,
+    auth: options.auth !== false,
+    allowBeforePwChange: options.allowBeforePwChange,
+  });
 };
 
 // 인증 · 내 정보
-route('POST', '/auth/login', ({ body }) => {
-  const user = db.users.find((u) => u.loginId === body.id);
-  if (!user || user.invitationPending || user.password !== body.password) {
-    fail(401, 'INVALID_CREDENTIALS', '아이디 또는 비밀번호가 올바르지 않습니다.');
-  }
-  if (user.status !== 'ACTIVE') fail(403, 'ACCOUNT_INACTIVE', '재직 중인 계정이 아닙니다.');
-  return { accessToken: tokenOf(user), tokenType: 'Bearer', expiresIn: 3600, mustChangePassword: user.mustChangePw, user: userView(user) };
-}, { auth: false });
+route(
+  'POST',
+  '/auth/login',
+  ({ body }) => {
+    const user = db.users.find((u) => u.loginId === body.id);
+    if (!user || user.invitationPending || user.password !== body.password) {
+      fail(401, 'INVALID_CREDENTIALS', '아이디 또는 비밀번호가 올바르지 않습니다.');
+    }
+    if (user.status !== 'ACTIVE') fail(403, 'ACCOUNT_INACTIVE', '재직 중인 계정이 아닙니다.');
+    return {
+      accessToken: tokenOf(user),
+      tokenType: 'Bearer',
+      expiresIn: 3600,
+      mustChangePassword: user.mustChangePw,
+      user: userView(user),
+    };
+  },
+  { auth: false },
+);
 
-route('POST', '/auth/password/setup', ({ body }) => {
-  const userId = db.setupTokens[body.setupToken];
-  if (!userId) fail(401, 'SETUP_TOKEN_INVALID', '비밀번호 설정 링크가 만료되었거나 이미 사용되었습니다.');
-  validatePassword(body.newPassword);
-  const user = userById(userId);
-  user.password = body.newPassword;
-  user.invitationPending = false;
-  delete db.setupTokens[body.setupToken];
-  return null;
-}, { auth: false });
+route(
+  'POST',
+  '/auth/password/setup',
+  ({ body }) => {
+    const userId = db.setupTokens[body.setupToken];
+    if (!userId) fail(401, 'SETUP_TOKEN_INVALID', '비밀번호 설정 링크가 만료되었거나 이미 사용되었습니다.');
+    validatePassword(body.newPassword);
+    const user = userById(userId);
+    user.password = body.newPassword;
+    user.invitationPending = false;
+    delete db.setupTokens[body.setupToken];
+    return null;
+  },
+  { auth: false },
+);
 
-route('PATCH', '/me/password', ({ body, user }) => {
-  if (user.password !== body.currentPassword) fail(400, 'INVALID_INPUT_VALUE', '현재 비밀번호가 올바르지 않습니다.');
-  validatePassword(body.newPassword);
-  if (body.newPassword === user.password) fail(400, 'PASSWORD_POLICY_VIOLATION', '이전과 다른 비밀번호를 입력해주세요.');
-  user.password = body.newPassword;
-  user.mustChangePw = false;
-  user.tokenVersion += 1;
-  return { accessToken: tokenOf(user), tokenType: 'Bearer', expiresIn: 3600 };
-}, { allowBeforePwChange: true });
+route(
+  'PATCH',
+  '/me/password',
+  ({ body, user }) => {
+    if (user.password !== body.currentPassword) fail(400, 'INVALID_INPUT_VALUE', '현재 비밀번호가 올바르지 않습니다.');
+    validatePassword(body.newPassword);
+    if (body.newPassword === user.password)
+      fail(400, 'PASSWORD_POLICY_VIOLATION', '이전과 다른 비밀번호를 입력해주세요.');
+    user.password = body.newPassword;
+    user.mustChangePw = false;
+    user.tokenVersion += 1;
+    return { accessToken: tokenOf(user), tokenType: 'Bearer', expiresIn: 3600 };
+  },
+  { allowBeforePwChange: true },
+);
 
 route('GET', '/me', ({ user }) => userView(user), { allowBeforePwChange: true });
 
@@ -220,7 +275,9 @@ route('GET', '/me/permissions', ({ user }) => {
   return Object.entries(merged)
     .map(([menu, p]) => ({
       menu,
-      actions: Object.entries(ACTION_KEYS).filter(([, key]) => p[key]).map(([a]) => a),
+      actions: Object.entries(ACTION_KEYS)
+        .filter(([, key]) => p[key])
+        .map(([a]) => a),
       scope: p.scope,
     }))
     .filter((p) => p.actions.length);
@@ -268,7 +325,15 @@ route('POST', '/departments', (ctx) => {
   if (!name?.trim()) fail(400, 'INVALID_INPUT_VALUE', '부서명을 입력해 주세요.');
   if (!deptById(parentId)) fail(404, 'DEPARTMENT_NOT_FOUND', '부서를 찾을 수 없습니다.');
   const id = db.seq.department++;
-  const dept = { id, name: name.trim(), code: `D-${String(id).padStart(4, '0')}`, parentId: Number(parentId), headUserId: null, sortOrder: sortOrder ?? 99, schedule: null };
+  const dept = {
+    id,
+    name: name.trim(),
+    code: `D-${String(id).padStart(4, '0')}`,
+    parentId: Number(parentId),
+    headUserId: null,
+    sortOrder: sortOrder ?? 99,
+    schedule: null,
+  };
   db.departments.push(dept);
   return created({ id: dept.id, code: dept.code });
 });
@@ -300,7 +365,8 @@ route('PUT', '/departments/:id/head', (ctx) => {
   need(ctx, 'DEPARTMENT', 'U');
   const dept = deptById(ctx.path.id) || fail(404, 'DEPARTMENT_NOT_FOUND', '부서를 찾을 수 없습니다.');
   const user = userById(ctx.body.userId) || fail(404, 'USER_NOT_FOUND', '사용자를 찾을 수 없습니다.');
-  if (user.departmentId !== dept.id) fail(422, 'HEAD_NOT_IN_DEPARTMENT', '그 부서 소속 사원만 부서장이 될 수 있습니다.');
+  if (user.departmentId !== dept.id)
+    fail(422, 'HEAD_NOT_IN_DEPARTMENT', '그 부서 소속 사원만 부서장이 될 수 있습니다.');
   if (user.status !== 'ACTIVE') fail(422, 'ACCOUNT_INACTIVE', '재직 중인 계정이 아닙니다.');
   dept.headUserId = user.id;
   return null;
@@ -314,7 +380,8 @@ route('DELETE', '/departments/:id/head', (ctx) => {
 });
 
 function validateSchedule({ startTime, endTime, lateGraceMin }) {
-  if (!startTime || !endTime || endTime <= startTime) fail(400, 'INVALID_WORK_SCHEDULE', '퇴근 시각은 출근 시각보다 늦어야 합니다.');
+  if (!startTime || !endTime || endTime <= startTime)
+    fail(400, 'INVALID_WORK_SCHEDULE', '퇴근 시각은 출근 시각보다 늦어야 합니다.');
   if (lateGraceMin < 0 || lateGraceMin > 60) fail(400, 'INVALID_INPUT_VALUE', '지각 유예는 0~60분입니다.');
 }
 
@@ -324,7 +391,11 @@ route('PUT', '/departments/:id/work-schedule', (ctx) => {
   if (ctx.body.useDefault) {
     dept.schedule = null;
   } else {
-    const schedule = { startTime: ctx.body.startTime, endTime: ctx.body.endTime, lateGraceMin: Number(ctx.body.lateGraceMin) };
+    const schedule = {
+      startTime: ctx.body.startTime,
+      endTime: ctx.body.endTime,
+      lateGraceMin: Number(ctx.body.lateGraceMin),
+    };
     validateSchedule(schedule);
     dept.schedule = schedule;
   }
@@ -344,7 +415,11 @@ route('DELETE', '/departments/:id', (ctx) => {
 route('GET', '/work-schedules/default', () => ({ ...db.defaultSchedule }));
 route('PUT', '/work-schedules/default', (ctx) => {
   need(ctx, 'DEPARTMENT', 'U');
-  const schedule = { startTime: ctx.body.startTime, endTime: ctx.body.endTime, lateGraceMin: Number(ctx.body.lateGraceMin) };
+  const schedule = {
+    startTime: ctx.body.startTime,
+    endTime: ctx.body.endTime,
+    lateGraceMin: Number(ctx.body.lateGraceMin),
+  };
   validateSchedule(schedule);
   db.defaultSchedule = schedule;
   return null;
@@ -367,13 +442,17 @@ route('GET', '/users', (ctx) => {
   }
 
   const keyword = (q || '').trim();
-  const base = db.users.filter((u) =>
-    (visible === null || visible.has(u.departmentId) || u.id === ctx.user.id)
-    && (!deptFilter || deptFilter.has(u.departmentId))
-    && (!keyword || u.name.startsWith(keyword) || u.loginId.startsWith(keyword)));
+  const base = db.users.filter(
+    (u) =>
+      (visible === null || visible.has(u.departmentId) || u.id === ctx.user.id) &&
+      (!deptFilter || deptFilter.has(u.departmentId)) &&
+      (!keyword || u.name.startsWith(keyword) || u.loginId.startsWith(keyword)),
+  );
 
   const statusCounts = { ACTIVE: 0, ON_LEAVE: 0, RETIRED: 0 };
-  base.forEach((u) => { statusCounts[u.status] += 1; });
+  base.forEach((u) => {
+    statusCounts[u.status] += 1;
+  });
 
   const rows = base
     .filter((u) => !status || u.status === status)
@@ -432,8 +511,19 @@ route('POST', '/users', (ctx) => {
   const id = db.seq.user++;
   const loginId = nextLoginId(hireDate.slice(0, 4));
   const user = {
-    id, loginId, name: name.trim(), email, departmentId: Number(departmentId), positionId: Number(positionId),
-    roles: [...roleCodes], hireDate, status: 'ACTIVE', invitationPending: true, mustChangePw: false, tokenVersion: 0, password: null,
+    id,
+    loginId,
+    name: name.trim(),
+    email,
+    departmentId: Number(departmentId),
+    positionId: Number(positionId),
+    roles: [...roleCodes],
+    hireDate,
+    status: 'ACTIVE',
+    invitationPending: true,
+    mustChangePw: false,
+    tokenVersion: 0,
+    password: null,
   };
   db.users.push(user);
   issueInvitation(user);
@@ -481,7 +571,8 @@ route('PATCH', '/users/:id/status', (ctx) => {
   if (!['ACTIVE', 'ON_LEAVE', 'RETIRED'].includes(next)) fail(400, 'INVALID_INPUT_VALUE', '잘못된 요청 값입니다.');
   if (next !== 'ACTIVE' && target.status === 'ACTIVE') {
     if (isHeadSomewhere(target.id)) fail(422, 'HEAD_MUST_BE_REASSIGNED', '부서장을 먼저 다른 사람으로 바꿔 주세요.');
-    if (target.roles.includes('CHIEF') && activeChiefs().length <= 1) fail(409, 'LAST_CHIEF', '관리소장이 한 명 이상 있어야 합니다.');
+    if (target.roles.includes('CHIEF') && activeChiefs().length <= 1)
+      fail(409, 'LAST_CHIEF', '관리소장이 한 명 이상 있어야 합니다.');
     target.tokenVersion += 1; // 기존 토큰 즉시 무효
   }
   // 퇴사일: 퇴사 처리한 날 기록, 재직으로 되돌리면 지움 (M3 명세 6장)
@@ -531,7 +622,14 @@ route('POST', '/roles', (ctx) => {
   if (!name) fail(400, 'INVALID_INPUT_VALUE', '역할 이름을 입력해 주세요.');
   if (db.roles.some((r) => r.name === name)) fail(409, 'DUPLICATE_RESOURCE', '이미 같은 이름의 역할이 있습니다.');
   const id = db.seq.role++;
-  const role = { id, code: `CUSTOM_${id}`, name, description: ctx.body.description?.trim() || '', system: false, locked: false };
+  const role = {
+    id,
+    code: `CUSTOM_${id}`,
+    name,
+    description: ctx.body.description?.trim() || '',
+    system: false,
+    locked: false,
+  };
   db.roles.push(role);
   db.rolePermissions[role.code] = {};
   return created(roleView(role));
@@ -553,7 +651,8 @@ route('DELETE', '/roles/:id', (ctx) => {
   need(ctx, 'ROLE', 'D');
   const role = roleById(ctx.path.id) || fail(404, 'ROLE_NOT_FOUND', '역할을 찾을 수 없습니다.');
   if (role.system) fail(403, 'SYSTEM_ROLE_LOCKED', '기본 역할은 바꾸거나 지울 수 없습니다.');
-  if (db.users.some((u) => u.roles.includes(role.code))) fail(409, 'ROLE_IN_USE', '이 역할을 쓰는 사원이나 결재 규칙이 있습니다.');
+  if (db.users.some((u) => u.roles.includes(role.code)))
+    fail(409, 'ROLE_IN_USE', '이 역할을 쓰는 사원이나 결재 규칙이 있습니다.');
   db.roles = db.roles.filter((r) => r.id !== role.id);
   delete db.rolePermissions[role.code];
   return null;
@@ -567,7 +666,11 @@ route('GET', '/roles/:id/permissions', (ctx) => {
     role: { id: role.id, code: role.code, name: role.name, system: role.system, locked: role.locked },
     permissions: menus.map((m) => ({
       menu: m.code,
-      view: false, create: false, update: false, delete: false, scope: null,
+      view: false,
+      create: false,
+      update: false,
+      delete: false,
+      scope: null,
       ...(perms[m.code] || {}),
     })),
   };
@@ -579,12 +682,24 @@ route('PUT', '/roles/:id/permissions', (ctx) => {
   if (role.locked) fail(403, 'SYSTEM_ROLE_LOCKED', '기본 역할은 바꾸거나 지울 수 없습니다.');
   const next = {};
   for (const p of ctx.body || []) {
-    const menu = menus.find((m) => m.code === p.menu) || fail(400, 'INVALID_PERMISSION', '이 메뉴에서 쓸 수 없는 권한입니다.');
-    const on = Object.entries(ACTION_KEYS).filter(([, key]) => p[key]).map(([a]) => a);
-    if (on.some((a) => !menu.allowedActions.includes(a))) fail(400, 'INVALID_PERMISSION', '이 메뉴에서 쓸 수 없는 권한입니다.');
+    const menu =
+      menus.find((m) => m.code === p.menu) || fail(400, 'INVALID_PERMISSION', '이 메뉴에서 쓸 수 없는 권한입니다.');
+    const on = Object.entries(ACTION_KEYS)
+      .filter(([, key]) => p[key])
+      .map(([a]) => a);
+    if (on.some((a) => !menu.allowedActions.includes(a)))
+      fail(400, 'INVALID_PERMISSION', '이 메뉴에서 쓸 수 없는 권한입니다.');
     if (!menu.scopeApplicable && p.scope) fail(400, 'INVALID_PERMISSION', '이 메뉴에서 쓸 수 없는 권한입니다.');
-    if (menu.scopeApplicable && on.length && !p.scope) fail(400, 'INVALID_PERMISSION', '이 메뉴에서 쓸 수 없는 권한입니다.');
-    if (on.length) next[menu.code] = { view: !!p.view, create: !!p.create, update: !!p.update, delete: !!p.delete, scope: p.scope || null };
+    if (menu.scopeApplicable && on.length && !p.scope)
+      fail(400, 'INVALID_PERMISSION', '이 메뉴에서 쓸 수 없는 권한입니다.');
+    if (on.length)
+      next[menu.code] = {
+        view: !!p.view,
+        create: !!p.create,
+        update: !!p.update,
+        delete: !!p.delete,
+        scope: p.scope || null,
+      };
   }
   db.rolePermissions[role.code] = next;
   return null;
@@ -637,7 +752,9 @@ route('POST', '/holidays', (ctx) => {
 
 route('PATCH', '/holidays/:id', (ctx) => {
   need(ctx, 'HOLIDAY', 'U');
-  const holiday = db.holidays.find((h) => h.id === Number(ctx.path.id)) || fail(404, 'RESOURCE_NOT_FOUND', '요청한 리소스를 찾을 수 없습니다.');
+  const holiday =
+    db.holidays.find((h) => h.id === Number(ctx.path.id)) ||
+    fail(404, 'RESOURCE_NOT_FOUND', '요청한 리소스를 찾을 수 없습니다.');
   if (ctx.body.name !== undefined) holiday.name = ctx.body.name.trim();
   if (ctx.body.substitute !== undefined) holiday.substitute = !!ctx.body.substitute;
   return holiday;
@@ -653,7 +770,20 @@ route('DELETE', '/holidays/:id', (ctx) => {
 const m2 = installM2({ route, db, fail, created, need, userById, deptById, roleByCode, positionById, page });
 
 // M3 근태·휴가 (backend/md/14-rest-api-v2-m3.md)
-installM3({ route, db, fail, created, need, mergedPermissions, userById, deptById, positionById, subtreeIds, page, m2 });
+installM3({
+  route,
+  db,
+  fail,
+  created,
+  need,
+  mergedPermissions,
+  userById,
+  deptById,
+  positionById,
+  subtreeIds,
+  page,
+  m2,
+});
 
 /** 다른 라우트를 같은 사용자로 불러 결과만 받음 (홈처럼 여러 위젯을 모으는 응답용). 권한이 없으면 null */
 function callRoute(method, path, ctx, params = {}) {
@@ -662,7 +792,12 @@ function callRoute(method, path, ctx, params = {}) {
     const m = r.regex.exec(path);
     if (!m) continue;
     try {
-      const result = r.handler({ ...ctx, body: {}, params, path: Object.fromEntries(r.keys.map((k, i) => [k, m[i + 1]])) });
+      const result = r.handler({
+        ...ctx,
+        body: {},
+        params,
+        path: Object.fromEntries(r.keys.map((k, i) => [k, m[i + 1]])),
+      });
       return result?.__status ? result.data : result;
     } catch (err) {
       if (err instanceof ApiFail && err.status === 403) return null;
@@ -673,7 +808,21 @@ function callRoute(method, path, ctx, params = {}) {
 }
 
 // M4 홈 · 프로젝트 보드 (backend/md/15-rest-api-v2-m4.md)
-installM4({ route, db, fail, created, need, mergedPermissions, userById, deptById, positionById, subtreeIds, page, m2, callRoute });
+installM4({
+  route,
+  db,
+  fail,
+  created,
+  need,
+  mergedPermissions,
+  userById,
+  deptById,
+  positionById,
+  subtreeIds,
+  page,
+  m2,
+  callRoute,
+});
 
 /* ───────── 어댑터 ───────── */
 
@@ -725,14 +874,22 @@ export async function handleMock(config, realAdapter) {
         data: new Blob([result.__raw], { type: result.contentType }),
         status: 200,
         statusText: '200',
-        headers: { 'content-type': result.contentType, 'content-disposition': `attachment; filename="${result.filename}"` },
+        headers: {
+          'content-type': result.contentType,
+          'content-disposition': `attachment; filename="${result.filename}"`,
+        },
         config,
         request: {},
       };
     }
     const status = result?.__status || 200;
-    const data = result?.__status ? result.data : result ?? null;
-    return toResponse(config, status, { success: true, data, message: '요청이 성공적으로 처리되었습니다.', timestamp: timestamp() });
+    const data = result?.__status ? result.data : (result ?? null);
+    return toResponse(config, status, {
+      success: true,
+      data,
+      message: '요청이 성공적으로 처리되었습니다.',
+      timestamp: timestamp(),
+    });
   } catch (err) {
     if (!(err instanceof ApiFail)) throw err;
     const error = { code: err.code, message: err.message, ...(err.details ? { details: err.details } : {}) };

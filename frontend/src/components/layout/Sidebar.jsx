@@ -23,7 +23,7 @@ export default function Sidebar({ open, onClose }) {
       <aside
         className={cn(
           'fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:translate-x-0',
-          open ? 'translate-x-0' : '-translate-x-full'
+          open ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         <div className="flex h-14 shrink-0 items-center border-b border-gray-200 px-5">
@@ -53,10 +53,14 @@ export default function Sidebar({ open, onClose }) {
                           'flex h-9 items-center gap-2.5 rounded-md px-3 text-sm transition-colors',
                           isActive
                             ? 'bg-blue-50 font-medium text-blue-700'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
                         )}
                       >
-                        <Icon size={18} strokeWidth={isActive ? 2 : 1.75} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
+                        <Icon
+                          size={18}
+                          strokeWidth={isActive ? 2 : 1.75}
+                          className={isActive ? 'text-blue-600' : 'text-gray-400'}
+                        />
                         <span className="flex-1">{item.label}</span>
                         {count > 0 && (
                           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-medium tabular-nums text-white">

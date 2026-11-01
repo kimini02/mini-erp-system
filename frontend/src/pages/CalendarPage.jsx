@@ -1,422 +1,440 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import FullCalendar from '@fullcalendar/react';
-import daygridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import { LogIn, LogOut, Briefcase, Palmtree, FilePlus2, CalendarDays } from 'lucide-react';
-import axios from '../api/axios';
-import { LEAVE_TYPE_LABELS } from '@/lib/labels';
-import { toast } from '@/lib/toast';
-import { cn } from '@/lib/cn';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { attendanceApi } from '@/api/attendance';
+import { calendarApi } from '@/api/calendar';
+import { useAuthStore } from '@/store/authStore';
+import { MENU } from '@/lib/permissions';
 import {
-  Badge,
-  Button,
-  Card,
-  CardHeader,
-  CardBody,
-  EmptyState,
-  Input,
-  PageHeader,
-  PageLoader,
-  StatCard,
-  StatusBadge,
-  Table,
-  TableEmpty,
-  Td,
-  Th,
-  Tr,
-} from '@/components/ui';
+  CELL_META,
+  DAY_TYPE_LABELS,
+  FIXABLE_CODES,
+  IN_RESULT_LABELS,
+  OUT_RESULT_LABELS,
+  dayCode,
+  monthLabel,
+  shiftDate,
+  shiftMonth,
+  thisMonth,
+  timeOf,
+  todayLocal,
+} from '@/lib/attendance';
+import { getErrorMessage } from '@/lib/errors';
+import { cn } from '@/lib/cn';
+import { Button, Card, CardBody, CardHeader, EmptyState, PageHeader, PageLoader } from '@/components/ui';
 
-const HOLIDAYS_2026 = [
-  { title: '신정', start: '2026-01-01', type: 'HOLIDAY' },
-  { title: '설날', start: '2026-02-16', end: '2026-02-19', type: 'HOLIDAY' },
-  { title: '삼일절', start: '2026-03-01', type: 'HOLIDAY' },
-  { title: '대체공휴일', start: '2026-03-02', type: 'HOLIDAY' },
-  { title: '어린이날', start: '2026-05-05', type: 'HOLIDAY' },
-  { title: '부처님오신날', start: '2026-05-24', type: 'HOLIDAY' },
-  { title: '대체공휴일', start: '2026-05-25', type: 'HOLIDAY' },
-  { title: '현충일', start: '2026-06-06', type: 'HOLIDAY' },
-  { title: '광복절', start: '2026-08-15', type: 'HOLIDAY' },
-  { title: '대체공휴일', start: '2026-08-17', type: 'HOLIDAY' },
-  { title: '추석', start: '2026-09-24', end: '2026-09-27', type: 'HOLIDAY' },
-  { title: '개천절', start: '2026-10-03', type: 'HOLIDAY' },
-  { title: '한글날', start: '2026-10-09', type: 'HOLIDAY' },
-  { title: '성탄절', start: '2026-12-25', type: 'HOLIDAY' },
+/*
+ * 내 일정 캘린더: 한 달 동안의 내 휴가·특근·근태를 한 달력에 모읍니다.
+ * - 근태(휴가·공휴일·출퇴근 판정): GET /attendance/me — 내 근태 화면과 같은 칸 규칙(dayCode)
+ * - 승인된 휴가·특근 일정: GET /calendar/events — BR-C001(승인된 일정만)
+ * 출퇴근 버튼은 홈·내 근태에 있으므로 여기서는 보여 주기와 신청 바로가기만 합니다.
+ */
+
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+// 달력 칸에 이름표로 보여 줄 근태 코드 (정상 출근은 점으로만, 미래·기록 없음·휴일은 표시 안 함)
+const CHIP_CODES = new Set(['LATE', 'EARLY', 'MISSING', 'ABSENT', 'LEAVE', 'HALF_AM', 'HALF_PM', 'HOLIDAY_WORK']);
+
+const monthDates = (month) => {
+  const [year, mon] = month.split('-').map(Number);
+  const last = new Date(year, mon, 0).getDate();
+  return Array.from({ length: last }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`);
+};
+const weekdayOf = (date) => new Date(`${date}T00:00:00`).getDay();
+const dayLabel = (date) =>
+  `${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일 (${WEEKDAYS[weekdayOf(date)]})`;
+// 서버 일정 제목은 "연차 - {종류}", "특근 - {사유}"라서 뒷부분만 보여 줍니다.
+const titleDetail = (title) => title.split(' - ').slice(1).join(' - ') || title;
+
+/** 날짜 → 그날의 휴가·특근 일정 (여러 날 휴가는 날마다 넣음) */
+function eventsByDate(events, month) {
+  const byDate = new Map();
+  for (const event of events) {
+    const end = event.end.slice(0, 10);
+    for (let date = event.start.slice(0, 10); date <= end; date = shiftDate(date, 1)) {
+      if (!date.startsWith(month)) continue;
+      if (!byDate.has(date)) byDate.set(date, []);
+      byDate.get(date).push(event);
+    }
+  }
+  return byDate;
+}
+
+function DayCell({ date, day, events, isToday, selected, onSelect }) {
+  const code = day ? dayCode(day) : 'FUTURE';
+  const weekday = weekdayOf(date);
+  const red = weekday === 0 || Boolean(day?.holidayName);
+  const overtimes = events.filter((e) => e.type === 'OVERTIME');
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(date)}
+      aria-pressed={selected}
+      aria-label={dayLabel(date)}
+      className={cn(
+        'flex min-h-[92px] flex-col gap-1 border-b border-r border-gray-100 p-1.5 text-left transition-colors hover:bg-gray-50',
+        selected && 'bg-blue-50/60 hover:bg-blue-50',
+      )}
+    >
+      <span className="flex items-center justify-between">
+        <span
+          className={cn(
+            'flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium',
+            isToday
+              ? 'bg-blue-600 text-white'
+              : red
+                ? 'text-red-500'
+                : weekday === 6
+                  ? 'text-blue-500'
+                  : 'text-gray-700',
+          )}
+        >
+          {Number(date.slice(8, 10))}
+        </span>
+        {code === 'ON_TIME' && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" title="정상 출근" />}
+      </span>
+      {day?.holidayName && <span className="truncate text-[11px] text-red-500">{day.holidayName}</span>}
+      {CHIP_CODES.has(code) && (
+        <span className={cn('truncate rounded px-1.5 py-0.5 text-[11px] font-medium', CELL_META[code].className)}>
+          {CELL_META[code].label}
+          {day?.fixDocument && ' · 정정'}
+        </span>
+      )}
+      {overtimes.map((e) => (
+        <span
+          key={e.eventId}
+          className="truncate rounded bg-indigo-50 px-1.5 py-0.5 text-[11px] font-medium text-indigo-700"
+        >
+          특근 {timeOf(e.start)}~{timeOf(e.end)}
+        </span>
+      ))}
+    </button>
+  );
+}
+
+function AttendanceRows({ day }) {
+  if (day.absent) {
+    return (
+      <div className="flex justify-between">
+        <dt className="text-gray-500">근태</dt>
+        <dd className="font-medium text-red-600">결근</dd>
+      </div>
+    );
+  }
+  return (
+    <>
+      <div className="flex justify-between">
+        <dt className="text-gray-500">출근</dt>
+        <dd className="text-gray-800">
+          {timeOf(day.clockInAt) || '—'}
+          {day.inResult && <span className="ml-1.5 text-gray-500">{IN_RESULT_LABELS[day.inResult]}</span>}
+        </dd>
+      </div>
+      <div className="flex justify-between">
+        <dt className="text-gray-500">퇴근</dt>
+        <dd className="text-gray-800">
+          {timeOf(day.clockOutAt) || '—'}
+          {day.outResult && <span className="ml-1.5 text-gray-500">{OUT_RESULT_LABELS[day.outResult]}</span>}
+        </dd>
+      </div>
+    </>
+  );
+}
+
+/** 날짜를 고르면 오른쪽에 그날의 근태·일정과 신청 바로가기 */
+function DayPanel({ date, day, events, today, canDraft }) {
+  const code = day ? dayCode(day, today) : 'FUTURE';
+  const leaves = events.filter((e) => e.type === 'LEAVE');
+  const overtimes = events.filter((e) => e.type === 'OVERTIME');
+  const hasAttendance = Boolean(day && (day.clockInAt || day.absent || FIXABLE_CODES.has(code)));
+  const actions = [];
+  if (canDraft && date >= today && day?.dayType === 'WORKDAY') {
+    actions.push({ to: `/approvals/new?form=LEAVE&date=${date}`, label: '이 날 휴가 신청' });
+  }
+  if (canDraft && date >= today) {
+    actions.push({ to: `/approvals/new?form=OVERTIME&date=${date}`, label: '특근 신청' });
+  }
+  if (canDraft && date < today && FIXABLE_CODES.has(code) && !day?.fixDocument) {
+    actions.push({ to: `/approvals/new?form=ATTENDANCE_FIX&date=${date}`, label: '근태 정정 신청' });
+  }
+
+  return (
+    <Card>
+      <CardHeader
+        title={dayLabel(date)}
+        description={[day && DAY_TYPE_LABELS[day.dayType], day?.holidayName].filter(Boolean).join(' · ') || undefined}
+      />
+      <CardBody className="space-y-4 text-sm">
+        {hasAttendance && (
+          <dl className="space-y-1.5">
+            <AttendanceRows day={day} />
+            {day.fixDocument && (
+              <div className="flex justify-between">
+                <dt className="text-gray-500">정정</dt>
+                <dd>
+                  <Link to={`/approvals/${day.fixDocument.id}`} className="text-blue-600 hover:underline">
+                    {day.fixDocument.docNo}
+                  </Link>
+                </dd>
+              </div>
+            )}
+          </dl>
+        )}
+
+        {leaves.length + overtimes.length > 0 && (
+          <ul className="space-y-1.5">
+            {leaves.map((e) => (
+              <li key={`l${e.eventId}`} className="flex items-center gap-2 text-gray-800">
+                <span className="h-2 w-2 rounded-full bg-blue-500" />
+                휴가 · {titleDetail(e.title)}
+              </li>
+            ))}
+            {overtimes.map((e) => (
+              <li key={`o${e.eventId}`} className="flex items-center gap-2 text-gray-800">
+                <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                특근 {timeOf(e.start)}~{timeOf(e.end)} · {titleDetail(e.title)}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {!hasAttendance && leaves.length + overtimes.length === 0 && (
+          <p className="text-gray-500">기록된 일정이 없습니다.</p>
+        )}
+
+        {actions.length > 0 && (
+          <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+            {actions.map((a) => (
+              <Link key={a.to} to={a.to}>
+                <Button size="sm" variant="secondary">
+                  {a.label}
+                </Button>
+              </Link>
+            ))}
+          </div>
+        )}
+      </CardBody>
+    </Card>
+  );
+}
+
+function MonthSummary({ summary, overtimeCount }) {
+  const items = [
+    ['근무일', summary.workDays, '일'],
+    ['출근', summary.present, '일'],
+    ['지각', summary.late, '회'],
+    ['조퇴', summary.early, '회'],
+    ['결근', summary.absent, '일'],
+    ['휴가', summary.leaveDays, '일'],
+    ['특근', overtimeCount, '건'],
+  ];
+  return (
+    <dl className="grid grid-cols-4 gap-x-4 gap-y-2 sm:grid-cols-7">
+      {items.map(([label, value, unit]) => (
+        <div key={label}>
+          <dt className="text-xs text-gray-500">{label}</dt>
+          <dd className="text-sm font-semibold text-gray-900">
+            {value ?? 0}
+            <span className="ml-0.5 text-xs font-normal text-gray-500">{unit}</span>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+const LEGEND = [
+  ['LEAVE', '휴가'],
+  ['HALF_AM', '반차'],
+  ['LATE', '지각'],
+  ['EARLY', '조퇴'],
+  ['MISSING', '퇴근 누락'],
+  ['ABSENT', '결근'],
 ];
 
-// 일정 종류별 표시 (색상은 index.css .evt-* 참고)
-const EVENT_TYPES = {
-  PROJECT: { label: '프로젝트', className: 'evt-project', dot: 'bg-blue-500' },
-  LEAVE: { label: '연차', className: 'evt-leave', dot: 'bg-emerald-500' },
-  OVERTIME: { label: '특근', className: 'evt-overtime', dot: 'bg-amber-500' },
-  HOLIDAY: { label: '공휴일', className: 'evt-holiday', dot: 'bg-red-500' },
+function Legend() {
+  return (
+    <div className="flex flex-wrap gap-x-4 gap-y-2 px-5 py-3 text-xs text-gray-500">
+      <span className="flex items-center gap-1.5">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        정상 출근
+      </span>
+      {LEGEND.map(([code, label]) => (
+        <span key={code} className="flex items-center gap-1.5">
+          <span className={cn('h-3 w-3 rounded', CELL_META[code].className)} />
+          {label}
+        </span>
+      ))}
+      <span className="flex items-center gap-1.5">
+        <span className="h-3 w-3 rounded bg-indigo-50" />
+        특근
+      </span>
+    </div>
+  );
+}
+
+const loadMonth = async (month, canAttendance) => {
+  const [year, mon] = month.split('-').map(Number);
+  const [attendance, events] = await Promise.allSettled([
+    canAttendance ? attendanceApi.me(month) : Promise.resolve(null),
+    calendarApi.events(year, mon),
+  ]);
+  return {
+    attendance: attendance.status === 'fulfilled' ? attendance.value : null,
+    attendanceError: attendance.status === 'rejected' ? getErrorMessage(attendance.reason) : '',
+    events: events.status === 'fulfilled' ? events.value || [] : [],
+    eventsError: events.status === 'rejected' ? getErrorMessage(events.reason) : '',
+  };
 };
-const ETC_TYPE = { label: '일정', className: 'evt-etc', dot: 'bg-gray-400' };
-const typeOf = (type) => EVENT_TYPES[type] || ETC_TYPE;
 
-const CalendarPage = () => {
-  const navigate = useNavigate();
-  const [events, setEvents] = useState([]);
-  const [originalLeaveRequests, setOriginalLeaveRequests] = useState([]);
-  const [filteredLeaveRequests, setFilteredLeaveRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const [selectedDate, setSelectedDate] = useState(null); // null이면 이번 달 출근 기록 전체
-  const [displayRecords, setDisplayRecords] = useState([]); // 출근 기록 + 이벤트 통합 리스트
-
-  const [summary, setSummary] = useState({
-    workDaysCount: 0,
-    leaveUsedTotal: 0,
-    attendanceRecords: [],
-  });
-
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
-
-  const fetchCalendarData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonthInt = now.getMonth() + 1;
-      const formattedMonth = `${currentYear}-${String(currentMonthInt).padStart(2, '0')}`;
-
-      const results = await Promise.allSettled([
-        axios.get('/leave/my'),
-        axios.get('/calendar/events', { params: { year: currentYear, month: currentMonthInt } }),
-        axios.get('/attendance/summary', { params: { month: formattedMonth } }),
-        axios.get('/projects'),
-        axios.get('/overtime/list')
-      ]);
-
-      const getSafeData = (res) => (res.status === 'fulfilled' && res.value.data) ? (res.value.data.data || res.value.data || []) : [];
-
-      const lDataRaw = getSafeData(results[0]);
-      const cEventsRaw = getSafeData(results[1]);
-      const sData = (results[2].status === 'fulfilled' && results[2].value.data?.success) ? (results[2].value.data.data || {}) : {};
-      const pData = getSafeData(results[3]);
-      const oData = getSafeData(results[4]);
-
-      // 1. 연차 데이터 가공
-      const mappedLeaveData = lDataRaw.map(l => {
-        const type = l.app_type || l.appType;
-        let typePrefix = '[연차]';
-        if (type === 'HALF_MORNING') typePrefix = '[오전반차]';
-        if (type === 'HALF_AFTERNOON') typePrefix = '[오후반차]';
-
-        return {
-          ...l,
-          appId: l.id || l.appId,
-          appType: type,
-          appStatus: l.app_status || l.appStatus,
-          startDate: l.start_date || l.startDate,
-          endDate: l.end_date || l.endDate,
-          usedDays: Number(l.usedDays || l.used_days || 0),
-          displayTitle: `${typePrefix} ${l.request_reason || l.requestReason || '개인 사유'}`,
-          createdAt: l.created_at || l.createdAt
-        };
-      });
-
-      const myApprovedLeaveTotal = mappedLeaveData
-        .filter(l => l.appStatus === 'APPROVED')
-        .reduce((acc, cur) => acc + (cur.usedDays || 0), 0);
-
-      // 2. 출근 기록 가공
-      const attendanceRecords = (sData.attendanceRecords || []).map((record, index) => ({
-        id: `att-${index}`,
-        work_date: record.workDate,
-        clock_in_time: record.clockInTime || '--:--',
-        clock_out_time: record.clockOutTime || '--:--',
-        status: record.status || '정상',
-        recordType: 'ATTENDANCE' // 타입 구분자
-      }));
-
-      // 3. 이벤트 가공 (캘린더 표시용)
-      const leaveEvents = mappedLeaveData
-        .filter(l => l.appStatus === 'APPROVED')
-        .map(l => ({
-          id: `lv-${l.appId}`,
-          title: l.displayTitle,
-          start: l.startDate,
-          end: l.endDate,
-          type: 'LEAVE',
-        }));
-
-      const overtimeEvents = oData
-        .filter(o => (o.status || o.appStatus) === 'APPROVED')
-        .map(o => ({
-          id: `ot-${o.id}`,
-          title: `[특근] ${o.reason || '주말특근'}`,
-          start: o.overtime_date || o.overtimeDate,
-          end: o.overtime_date || o.overtimeDate,
-          type: 'OVERTIME'
-        }));
-
-      const projectEvents = pData.map((p, idx) => ({
-        id: `pj-${p.projectId || p.id || idx}`,
-        title: `[P] ${p.title || p.projectName || '무제 프로젝트'}`,
-        start: p.startDate || p.start_date,
-        end: p.endDate || p.end_date,
-        type: 'PROJECT'
-      }));
-
-      const rawEvents = [
-        ...HOLIDAYS_2026.map((h, idx) => ({ ...h, id: `hld-${idx}` })),
-        ...cEventsRaw.map((e, idx) => ({ ...e, id: e.eventId ? `srv-${e.eventId}` : `ce-${idx}` })),
-        ...leaveEvents,
-        ...projectEvents,
-        ...overtimeEvents
-      ];
-
-      const uniqueEventsMap = new Map();
-      rawEvents.forEach(evt => { if (evt.start) uniqueEventsMap.set(evt.id, evt); });
-
-      const finalEvents = Array.from(uniqueEventsMap.values()).map(event => ({
-        ...event,
-        classNames: [typeOf(event.type).className],
-        allDay: true,
-      }));
-
-      setEvents(finalEvents);
-      setOriginalLeaveRequests(mappedLeaveData);
-      setFilteredLeaveRequests(mappedLeaveData);
-      setDisplayRecords(attendanceRecords);
-
-      setSummary({
-        workDaysCount: sData.workDaysCount || 0,
-        leaveUsedTotal: sData.leaveUsedCount || myApprovedLeaveTotal,
-        attendanceRecords: attendanceRecords,
-      });
-
-    } catch (error) {
-      console.error('데이터 가공 에러:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+export default function CalendarPage() {
+  const canAttendance = useAuthStore((s) => s.can(MENU.MY_ATTENDANCE));
+  const canDraft = useAuthStore((s) => s.can(MENU.APPROVAL_DRAFT, 'C'));
+  const today = todayLocal();
+  const [month, setMonth] = useState(thisMonth());
+  const [selected, setSelected] = useState(today);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetchCalendarData();
-  }, [fetchCalendarData]);
+    let alive = true;
+    setData(null);
+    loadMonth(month, canAttendance).then((result) => alive && setData(result));
+    return () => {
+      alive = false;
+    };
+  }, [month, canAttendance]);
 
-  // 날짜 클릭: 해당 날짜의 출근 기록 + 일정
-  const handleDateClick = (arg) => {
-    const clickedDate = arg.dateStr;
+  const dates = useMemo(() => monthDates(month), [month]);
+  const dayMap = useMemo(() => new Map((data?.attendance?.days || []).map((d) => [d.date, d])), [data]);
+  const byDate = useMemo(() => eventsByDate(data?.events || [], month), [data, month]);
+  const overtimeCount = (data?.events || []).filter((e) => e.type === 'OVERTIME').length;
+  const selectedDate = selected.startsWith(month) ? selected : dates[0];
 
-    const attendanceOnDate = summary.attendanceRecords.filter(r => r.work_date === clickedDate);
-
-    const eventsOnDate = events.filter(evt => {
-      const start = evt.start;
-      const end = evt.end || evt.start; // 종료일이 없으면 시작일과 동일하게 처리
-      return clickedDate >= start && clickedDate <= end;
-    }).map(evt => ({
-      id: evt.id,
-      title: evt.title,
-      type: evt.type,
-      recordType: 'EVENT'
-    }));
-
-    setDisplayRecords([...attendanceOnDate, ...eventsOnDate]);
-    setSelectedDate(clickedDate);
+  const goMonth = (next) => {
+    setMonth(next);
+    setSelected(next === thisMonth() ? today : `${next}-01`);
   };
 
-  const handleAttendance = async (type) => {
-    try {
-      const now = new Date();
-      const workDate = now.toLocaleDateString('en-CA');
-      const currentTime = now.toTimeString().split(' ')[0];
+  const header = (
+    <PageHeader
+      title="캘린더"
+      description="내 휴가·특근과 근태를 한 달 단위로 봅니다. 날짜를 누르면 그날의 기록과 신청 바로가기가 나옵니다."
+    />
+  );
 
-      if (type === 'IN') {
-        await axios.post('/attendance/check-in', {
-          workDate: workDate,
-          clockInTime: currentTime
-        });
-        toast.success(`출근이 기록되었습니다. (${currentTime.slice(0, 5)})`);
-      } else {
-        await axios.patch('/attendance/check-out', {
-          clockOutTime: currentTime
-        }, {
-          params: { workDate: workDate }
-        });
-        toast.success(`퇴근이 기록되었습니다. (${currentTime.slice(0, 5)})`);
-      }
-
-      fetchCalendarData();
-    } catch (error) {
-      console.error('근태 에러 상세:', error.response?.data);
-      const serverMessage = error.response?.data?.error?.message || '데이터 형식이 올바르지 않습니다.';
-      toast.error(`근태 처리 실패: ${serverMessage}`);
-    }
-  };
-
-  const handleSearch = () => {
-    const { start, end } = dateRange;
-    if (!start || !end) {
-      toast.error('검색할 기간을 선택해주세요.');
-      return;
-    }
-    const filtered = originalLeaveRequests.filter(req =>
-      (req.startDate >= start && req.startDate <= end) || (req.endDate >= start && req.endDate <= end)
+  if (!data) {
+    return (
+      <>
+        {header}
+        <PageLoader />
+      </>
     );
-    setFilteredLeaveRequests(filtered);
-  };
+  }
+  if (data.attendanceError && data.eventsError) {
+    return (
+      <>
+        {header}
+        <EmptyState icon={CalendarDays} title="캘린더를 불러오지 못했습니다" description={data.attendanceError} />
+      </>
+    );
+  }
 
-  const handleReset = () => {
-    setFilteredLeaveRequests(originalLeaveRequests);
-    setDateRange({ start: '', end: '' });
-    setDisplayRecords(summary.attendanceRecords);
-    setSelectedDate(null);
-  };
-
-  if (loading) return <PageLoader />;
+  const notice = !canAttendance
+    ? '근태 메뉴 권한이 없어 휴가·특근 일정만 보입니다.'
+    : data.attendanceError
+      ? `근태 기록을 불러오지 못했습니다: ${data.attendanceError}`
+      : data.eventsError
+        ? `휴가·특근 일정을 불러오지 못했습니다: ${data.eventsError}`
+        : '';
 
   return (
     <>
-      <PageHeader
-        title="캘린더"
-        description="출퇴근 기록과 연차·특근·프로젝트 일정을 확인하세요."
-        actions={
-          <>
-            <Button variant="secondary" icon={LogOut} onClick={() => handleAttendance('OUT')}>퇴근</Button>
-            <Button icon={LogIn} onClick={() => handleAttendance('IN')}>출근</Button>
-          </>
-        }
-      />
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard label="이번 달 출근일" value={summary.workDaysCount} unit="일" icon={Briefcase} tone="blue" />
-        <StatCard label="사용 승인 연차" value={summary.leaveUsedTotal} unit="일" icon={Palmtree} tone="green" />
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12">
-        {/* 월간 캘린더 */}
-        <Card className="xl:col-span-8">
-          <CardHeader
-            title="월간 일정"
-            action={
-              <div className="hidden items-center gap-3 sm:flex">
-                {Object.values(EVENT_TYPES).map((t) => (
-                  <span key={t.label} className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <span className={cn('h-2 w-2 rounded-full', t.dot)} />
-                    {t.label}
-                  </span>
-                ))}
+      {header}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <Card>
+          <div className="flex flex-col gap-4 border-b border-gray-100 px-5 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={ChevronLeft}
+                  aria-label="이전 달"
+                  onClick={() => goMonth(shiftMonth(month, -1))}
+                />
+                <h2 className="min-w-[110px] text-center text-base font-semibold text-gray-900">{monthLabel(month)}</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={ChevronRight}
+                  aria-label="다음 달"
+                  onClick={() => goMonth(shiftMonth(month, 1))}
+                />
               </div>
-            }
-          />
-          <CardBody className="wf-calendar">
-            <FullCalendar
-              plugins={[daygridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              locale="ko"
-              height="auto"
-              events={events}
-              dateClick={handleDateClick}
-              headerToolbar={{ left: 'title', center: '', right: 'today prev,next' }}
-              buttonText={{ today: '오늘' }}
-              dayCellContent={(arg) => arg.dayNumberText.replace('일', '')}
-              dayMaxEvents={3}
-              moreLinkText={(n) => `+${n}개`}
-            />
-          </CardBody>
-        </Card>
-
-        {/* 선택한 날짜 상세 */}
-        <Card className="flex flex-col xl:col-span-4">
-          <CardHeader
-            title={selectedDate ? `${selectedDate} 상세` : '이번 달 출근 기록'}
-            description={selectedDate ? '선택한 날짜의 기록과 일정' : '날짜를 누르면 해당 일의 상세를 볼 수 있습니다'}
-            action={selectedDate && <Button variant="ghost" size="sm" onClick={handleReset}>전체</Button>}
-          />
-          <div className="max-h-[560px] flex-1 overflow-y-auto">
-            {displayRecords.length > 0 ? (
-              <ul className="divide-y divide-gray-100">
-                {displayRecords.map((item) =>
-                  item.recordType === 'ATTENDANCE' ? (
-                    <li key={item.id} className="px-5 py-3.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[13px] font-medium tabular-nums text-gray-900">{item.work_date}</span>
-                        <Badge tone={item.status === '정상' ? 'green' : 'amber'}>{item.status}</Badge>
-                      </div>
-                      <div className="mt-2 grid grid-cols-2 gap-2">
-                        <div className="rounded-lg bg-gray-50 px-3 py-2">
-                          <p className="text-xs text-gray-500">출근</p>
-                          <p className="text-[15px] font-semibold tabular-nums text-gray-900">{item.clock_in_time}</p>
-                        </div>
-                        <div className="rounded-lg bg-gray-50 px-3 py-2">
-                          <p className="text-xs text-gray-500">퇴근</p>
-                          <p className="text-[15px] font-semibold tabular-nums text-gray-900">{item.clock_out_time}</p>
-                        </div>
-                      </div>
-                    </li>
-                  ) : (
-                    <li key={item.id} className="flex items-center gap-3 px-5 py-3">
-                      <span className={cn('h-8 w-1 shrink-0 rounded-full', typeOf(item.type).dot)} />
-                      <div className="min-w-0">
-                        <p className="text-xs text-gray-500">{typeOf(item.type).label}</p>
-                        <p className="truncate text-sm font-medium text-gray-900">{item.title}</p>
-                      </div>
-                    </li>
-                  )
+              {month !== thisMonth() && (
+                <Button variant="secondary" size="sm" onClick={() => goMonth(thisMonth())}>
+                  이번 달
+                </Button>
+              )}
+            </div>
+            {data.attendance?.summary && (
+              <MonthSummary summary={data.attendance.summary} overtimeCount={overtimeCount} />
+            )}
+            {notice && <p className="text-xs text-amber-700">{notice}</p>}
+          </div>
+          <div className="grid grid-cols-7 border-l border-gray-100 text-center text-xs font-medium text-gray-500">
+            {WEEKDAYS.map((w, i) => (
+              <div
+                key={w}
+                className={cn(
+                  'border-b border-r border-gray-100 py-2',
+                  i === 0 && 'text-red-500',
+                  i === 6 && 'text-blue-500',
                 )}
-              </ul>
-            ) : (
-              <EmptyState icon={CalendarDays} title="기록이 없습니다" />
-            )}
+              >
+                {w}
+              </div>
+            ))}
           </div>
+          <div className="grid grid-cols-7 border-l border-gray-100">
+            {Array.from({ length: weekdayOf(dates[0]) }, (_, i) => (
+              <div key={`pad${i}`} className="min-h-[92px] border-b border-r border-gray-100 bg-gray-50/50" />
+            ))}
+            {dates.map((date) => (
+              <DayCell
+                key={date}
+                date={date}
+                day={dayMap.get(date)}
+                events={byDate.get(date) || []}
+                isToday={date === today}
+                selected={date === selectedDate}
+                onSelect={setSelected}
+              />
+            ))}
+          </div>
+          <Legend />
         </Card>
-      </div>
 
-      {/* 연차 신청 내역 */}
-      <Card className="mt-4 overflow-hidden">
-        <CardHeader
-          title="연차 신청 내역"
-          action={
-            <Button size="sm" icon={FilePlus2} onClick={() => navigate('/leaves/new')}>
-              연차 신청
-            </Button>
-          }
-        />
-        <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 px-5 py-3">
-          <span className="mr-1 text-[13px] text-gray-500">기간</span>
-          <div className="w-40">
-            <Input type="date" value={dateRange.start} className="h-8" onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} />
-          </div>
-          <span className="text-gray-400">~</span>
-          <div className="w-40">
-            <Input type="date" value={dateRange.end} min={dateRange.start} className="h-8" onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} />
-          </div>
-          <Button size="sm" variant="secondary" onClick={handleSearch}>조회</Button>
-          <Button size="sm" variant="ghost" onClick={handleReset}>초기화</Button>
+        <div className="space-y-4">
+          <DayPanel
+            date={selectedDate}
+            day={dayMap.get(selectedDate)}
+            events={byDate.get(selectedDate) || []}
+            today={today}
+            canDraft={canDraft}
+          />
+          <p className="px-1 text-xs text-gray-500">
+            출퇴근은{' '}
+            <Link to="/attendance" className="text-blue-600 hover:underline">
+              내 근태
+            </Link>
+            , 휴가 잔여·내역은{' '}
+            <Link to="/leaves" className="text-blue-600 hover:underline">
+              내 연차
+            </Link>
+            에서 볼 수 있습니다.
+          </p>
         </div>
-        <Table>
-          <thead>
-            <tr>
-              <Th>신청일</Th>
-              <Th>유형</Th>
-              <Th>기간</Th>
-              <Th align="right">일수</Th>
-              <Th align="center">상태</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLeaveRequests.length > 0 ? (
-              filteredLeaveRequests.map((req, index) => (
-                <Tr key={req.appId || index}>
-                  <Td className="tabular-nums text-gray-500">{req.createdAt?.split('T')[0] || '-'}</Td>
-                  <Td className="font-medium text-gray-900">{LEAVE_TYPE_LABELS[req.appType] || req.appType}</Td>
-                  <Td className="whitespace-nowrap tabular-nums">{req.startDate} ~ {req.endDate}</Td>
-                  <Td align="right" className="tabular-nums">{req.usedDays}일</Td>
-                  <Td align="center"><StatusBadge status={req.appStatus} /></Td>
-                </Tr>
-              ))
-            ) : (
-              <TableEmpty colSpan={5}>신청 내역이 없습니다.</TableEmpty>
-            )}
-          </tbody>
-        </Table>
-      </Card>
+      </div>
     </>
   );
-};
-
-export default CalendarPage;
+}

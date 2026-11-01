@@ -22,6 +22,9 @@ const instance = axios.create({
 if (import.meta.env.MODE === 'mock' || import.meta.env.VITE_USE_MOCK === 'true') {
   const realAdapter = axios.getAdapter(instance.defaults.adapter);
   instance.defaults.adapter = async (config) => {
+    // 리팩토링 전후 비교용: 목 모드에서 부른 API를 순서대로 남깁니다.
+    const query = config.params ? `?${new URLSearchParams(config.params)}` : '';
+    (window.__MOCK_CALLS__ ||= []).push(`${(config.method || 'get').toUpperCase()} ${config.url}${query}`);
     const { handleMock } = await import('./mock');
     return handleMock(config, realAdapter);
   };
@@ -60,7 +63,10 @@ instance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
+
+/** 공통 응답에서 data만 꺼냅니다. 실패하면 axios 에러를 그대로 던집니다. */
+export const unwrap = (request) => request.then((res) => res.data.data);
 
 export default instance;
