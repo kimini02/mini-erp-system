@@ -11,43 +11,63 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Import(JdbcProbe.Configuration.class)
 class M5HomeCountersTest extends BoardTestSupport {
-    @Autowired AttendanceStore attendance;
-
+    @Autowired
+    AttendanceStore attendance;
     private void assign(long task, long user) {
-        jdbc.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(?,?,?)", task, user, LocalDateTime.now(clock));
+        jdbc.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(?,?,?)", task, user, LocalDateTime
+                .now(clock));
     }
 
-    @Test void monthAbsentCountExcludesOtherMonthsAndUsersOnEveryTodayResponse() throws Exception {
+    @Test
+    void monthAbsentCountExcludesOtherMonthsAndUsersOnEveryTodayResponse() throws Exception {
         date = date.withDayOfMonth(15);
-        at(date, LocalTime.of(0,30)); // Still the previous UTC day.
-        for (LocalDate day : new LocalDate[]{date.minusDays(1), date.minusDays(2), date.withDayOfMonth(1).minusDays(1)}) {
-            attendance.insert(employee.getId(), day, attendance.schedule(employee.getId()), "WORKDAY", null, null, true, LocalDateTime.now(clock));
+        at(date, LocalTime.of(0, 30));
+        // Still the previous UTC day.
+        for (LocalDate day : new LocalDate[] {
+            date.minusDays(1), date.minusDays(2), date.withDayOfMonth(1).minusDays(1)
+        }) {
+            attendance.insert(employee.getId(), day, attendance.schedule(employee.getId()), "WORKDAY", null, null, true,
+                    LocalDateTime.now(clock));
         }
-        attendance.insert(outsider.getId(), date.minusDays(1), attendance.schedule(outsider.getId()), "WORKDAY", null, null, true, LocalDateTime.now(clock));
-        assertThat(data(getAs("/api/v1/attendance/today", employeeToken)).path("monthAbsentCount").asInt(-1)).isEqualTo(2);
-        assertThat(data(getAs("/api/v1/home", employeeToken)).path("today").path("monthAbsentCount").asInt(-1)).isEqualTo(2);
-        assertThat(data(postAs("/api/v1/attendance/clock-in", employeeToken, null)).path("monthAbsentCount").asInt(-1)).isEqualTo(2);
-        assertThat(data(postAs("/api/v1/attendance/clock-out", employeeToken, null)).path("monthAbsentCount").asInt(-1)).isEqualTo(2);
+        attendance.insert(outsider.getId(), date.minusDays(1), attendance.schedule(outsider.getId()), "WORKDAY", null,
+                null, true, LocalDateTime.now(clock));
+        assertThat(data(getAs("/api/v1/attendance/today", employeeToken)).path("monthAbsentCount").asInt(-1))
+                .isEqualTo(2);
+        assertThat(data(getAs("/api/v1/home", employeeToken)).path("today").path("monthAbsentCount").asInt(-1))
+                .isEqualTo(2);
+        assertThat(data(postAs("/api/v1/attendance/clock-in", employeeToken, null)).path("monthAbsentCount").asInt(-1))
+                .isEqualTo(2);
+        assertThat(data(postAs("/api/v1/attendance/clock-out", employeeToken, null)).path("monthAbsentCount").asInt(-1))
+                .isEqualTo(2);
     }
 
-    @Test void monthAbsentCountUsesSeoulMonthAtMidnightOnTheFirst() throws Exception {
+    @Test
+    void monthAbsentCountUsesSeoulMonthAtMidnightOnTheFirst() throws Exception {
         date = date.withDayOfMonth(1);
-        at(date, LocalTime.of(0,30));
+        at(date, LocalTime.of(0, 30));
         assertThat(clock.instant().atZone(ZoneOffset.UTC).toLocalDate()).isEqualTo(date.minusDays(1));
         // Two last-month absences versus one this month: counting the UTC month must fail.
-        for (LocalDate day : new LocalDate[]{date.minusDays(2), date.minusDays(1), date}) {
-            attendance.insert(employee.getId(), day, attendance.schedule(employee.getId()), "WORKDAY", null, null, true, LocalDateTime.now(clock));
+        for (LocalDate day : new LocalDate[] {
+            date.minusDays(2), date.minusDays(1), date
+        }) {
+            attendance.insert(employee.getId(), day, attendance.schedule(employee.getId()), "WORKDAY", null, null, true,
+                    LocalDateTime.now(clock));
         }
-        org.junit.jupiter.api.Assertions.assertAll(
-            () -> assertThat(data(getAs("/api/v1/attendance/today", employeeToken)).path("monthAbsentCount").asInt(-1)).as("attendance month").isEqualTo(1),
-            () -> assertThat(data(getAs("/api/v1/home", employeeToken)).path("today").path("monthAbsentCount").asInt(-1)).as("home month").isEqualTo(1)
-        );
+        org.junit.jupiter.api.Assertions
+                .assertAll(() -> assertThat(data(getAs("/api/v1/attendance/today", employeeToken))
+                .path("monthAbsentCount").asInt(-1)).as("attendance month").isEqualTo(1), ()
+                -> assertThat(data(getAs("/api/v1/home", employeeToken)).path("today").path("monthAbsentCount")
+                .asInt(-1)).as("home month").isEqualTo(1));
     }
 
-    @Test void taskCountIncludesAllSevenVisibleAssignedOpenTasksWhileItemsStayAtFive() throws Exception {
-        long visible = project(leader, 9), hidden = project(chief, 1);
+    @Test
+    void taskCountIncludesAllSevenVisibleAssignedOpenTasksWhileItemsStayAtFive() throws Exception {
+        long visible = project(leader, 9);
+        long hidden = project(chief, 1);
         var tasks = taskIds(visible);
-        for (int i=0;i<8;i++) assign(tasks.get(i), employee.getId());
+        for (int i = 0; i < 8; i++) {
+            assign(tasks.get(i), employee.getId());
+        }
         jdbc.update("UPDATE tasks SET task_status='DONE' WHERE id=?", tasks.get(7));
         assign(tasks.get(8), outsider.getId());
         assign(taskIds(hidden).get(0), employee.getId());
@@ -61,7 +81,8 @@ class M5HomeCountersTest extends BoardTestSupport {
         }
     }
 
-    @Test void emptyWidgetsReturnZeroCounts() throws Exception {
+    @Test
+    void emptyWidgetsReturnZeroCounts() throws Exception {
         var home = data(getAs("/api/v1/home", employeeToken));
         assertThat(home.path("today").path("monthAbsentCount").asInt(-1)).isZero();
         assertThat(home.path("myTasks").path("count").asInt(-1)).isZero();

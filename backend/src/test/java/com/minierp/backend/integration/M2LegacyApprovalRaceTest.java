@@ -9,16 +9,15 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.assertThat;
-
 /** Frozen M1 write pattern: both requests read PENDING before either unconditionally saves. */
 @Testcontainers(disabledWithoutDocker = true)
 class M2LegacyApprovalRaceTest {
-    @Container static final MariaDBContainer<?> DATABASE = new MariaDBContainer<>("mariadb:10.11");
-
-    @Test void unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces() throws Exception {
+    @Container
+    static final MariaDBContainer<?> DATABASE = new MariaDBContainer<>("mariadb:10.11");
+    @Test
+    void unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces() throws Exception {
         var source = new DriverManagerDataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
         Flyway.configure().dataSource(source).target("2").load().migrate();
         var jdbc = new JdbcTemplate(source);
@@ -38,21 +37,34 @@ class M2LegacyApprovalRaceTest {
                 jdbc.update("UPDATE leave_requests SET app_status='PENDING' WHERE id=1");
                 jdbc.update("UPDATE users SET used_annual_leave=0,remaining_annual_leave=10 WHERE id=1");
                 var readBarrier = new CyclicBarrier(2);
-                Callable<Boolean> approve = () -> new TransactionTemplate(new DataSourceTransactionManager(source)).execute(status -> {
-                    String state = jdbc.queryForObject("SELECT app_status FROM leave_requests WHERE id=1", String.class);
-                    var remaining = jdbc.queryForObject("SELECT remaining_annual_leave FROM users WHERE id=1", java.math.BigDecimal.class);
-                    try { readBarrier.await(10, TimeUnit.SECONDS); }
-                    catch (Exception ex) { throw new IllegalStateException(ex); }
-                    if (!"PENDING".equals(state)) return false;
+                Callable<Boolean> approve = () -> new TransactionTemplate(new DataSourceTransactionManager(source))
+                        .execute(status -> {
+                    String state = jdbc.queryForObject("SELECT app_status FROM leave_requests WHERE id=1", String
+                            .class);
+                    var remaining = jdbc.queryForObject("SELECT remaining_annual_leave FROM users WHERE id=1", java.math
+                            .BigDecimal.class);
+                    try {
+                        readBarrier.await(10, TimeUnit.SECONDS);
+                    } catch (Exception ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                    if (!"PENDING".equals(state)) {
+                        return false;
+                    }
                     jdbc.update("UPDATE leave_requests SET app_status='APPROVED' WHERE id=1");
-                    jdbc.update("UPDATE users SET used_annual_leave=1,remaining_annual_leave=? WHERE id=1", remaining.subtract(java.math.BigDecimal.ONE));
+                    jdbc.update("UPDATE users SET used_annual_leave=1,remaining_annual_leave=? WHERE id=1", remaining
+                            .subtract(java.math.BigDecimal.ONE));
                     return true;
                 });
                 var first = pool.submit(approve);
                 var second = pool.submit(approve);
-                if (first.get(15, TimeUnit.SECONDS) && second.get(15, TimeUnit.SECONDS)) violations++;
+                if (first.get(15, TimeUnit.SECONDS) && second.get(15, TimeUnit.SECONDS)) {
+                    violations++;
+                }
             }
-        } finally { pool.shutdownNow(); }
+        } finally {
+            pool.shutdownNow();
+        }
         System.out.println("M2_LEGACY_APPROVAL_RACE trials=10 double_success=" + violations);
         assertThat(violations).isEqualTo(10);
     }
