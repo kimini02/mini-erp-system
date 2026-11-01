@@ -1,4 +1,5 @@
 {
+  "recordingPolicy" : "ordered-outcome-dependent-http-races-v2",
   "tests" : {
     "com.minierp.backend.BackendApplicationTests#<after-all>" : [ ],
     "com.minierp.backend.BackendApplicationTests#<after-each>" : [ ],
@@ -3136,18 +3137,18 @@
       "method" : "POST",
       "path" : "/api/v1/approval-documents/7/approve",
       "query" : { },
-      "status" : 409,
+      "status" : 200,
       "kind" : "json",
-      "body" : "{\"error\":{\"code\":\"DOCUMENT_STATE_CONFLICT\",\"message\":\"이미 처리되었거나 지금 처리할 수 없는 문서입니다. 새로고침해 주세요.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:00:00\"}",
+      "body" : "{\"data\":{\"body\":{\"endDate\":\"2026-04-20\",\"handover\":null,\"leaveType\":\"ANNUAL\",\"reason\":\"fixture\",\"startDate\":\"2026-04-20\",\"usedDays\":1.0},\"completedAt\":\"2026-04-06T09:00:00\",\"docNo\":\"HR-2026-0005\",\"drafter\":{\"department\":\"개발팀\",\"id\":13,\"name\":\"employee\",\"title\":\"사원\"},\"form\":{\"code\":\"LEAVE\",\"name\":\"휴가 신청\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":13,\"name\":\"employee\"},\"at\":\"2026-04-06T09:00:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T09:00:00\",\"comment\":\"양식 결재선 스냅샷\"},{\"action\":\"APPROVE\",\"actor\":{\"id\":14,\"name\":\"leader\"},\"at\":\"2026-04-06T09:00:00\",\"comment\":null}],\"id\":7,\"line\":[{\"actedAt\":\"2026-04-06T09:00:00\",\"approver\":{\"department\":\"개발팀\",\"id\":14,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"APPROVED\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":false},\"references\":[],\"resubmittedFromId\":null,\"status\":\"APPROVED\",\"submittedAt\":\"2026-04-06T09:00:00\",\"title\":\"M2 fixture\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:00:00\"}",
       "concurrent" : true,
       "requestIndex" : null
     }, {
       "method" : "POST",
       "path" : "/api/v1/approval-documents/7/approve",
       "query" : { },
-      "status" : 200,
+      "status" : 409,
       "kind" : "json",
-      "body" : "{\"data\":{\"body\":{\"endDate\":\"2026-04-20\",\"handover\":null,\"leaveType\":\"ANNUAL\",\"reason\":\"fixture\",\"startDate\":\"2026-04-20\",\"usedDays\":1.0},\"completedAt\":\"2026-04-06T09:00:00\",\"docNo\":\"HR-2026-0005\",\"drafter\":{\"department\":\"개발팀\",\"id\":13,\"name\":\"employee\",\"title\":\"사원\"},\"form\":{\"code\":\"LEAVE\",\"name\":\"휴가 신청\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":13,\"name\":\"employee\"},\"at\":\"2026-04-06T09:00:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T09:00:00\",\"comment\":\"양식 결재선 스냅샷\"},{\"action\":\"APPROVE\",\"actor\":{\"id\":14,\"name\":\"leader\"},\"at\":\"2026-04-06T09:00:00\",\"comment\":null}],\"id\":7,\"line\":[{\"actedAt\":\"2026-04-06T09:00:00\",\"approver\":{\"department\":\"개발팀\",\"id\":14,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"APPROVED\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":false},\"references\":[],\"resubmittedFromId\":null,\"status\":\"APPROVED\",\"submittedAt\":\"2026-04-06T09:00:00\",\"title\":\"M2 fixture\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:00:00\"}",
+      "body" : "{\"error\":{\"code\":\"DOCUMENT_STATE_CONFLICT\",\"message\":\"이미 처리되었거나 지금 처리할 수 없는 문서입니다. 새로고침해 주세요.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:00:00\"}",
       "concurrent" : true,
       "requestIndex" : null
     }, {
@@ -5191,24 +5192,6 @@
       "method" : "POST",
       "path" : "/api/v1/attendance/clock-in",
       "query" : { },
-      "status" : 200,
-      "kind" : "json",
-      "body" : "{\"data\":{\"canClockIn\":false,\"canClockOut\":true,\"clockInAt\":\"2026-04-06T09:20:00\",\"clockOutAt\":null,\"dayType\":\"WORKDAY\",\"earlyIfNow\":true,\"holidayName\":null,\"inResult\":\"LATE\",\"leave\":null,\"monthAbsentCount\":0,\"monthLateCount\":1,\"outResult\":null,\"schedule\":{\"departmentName\":\"개발팀\",\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"source\":\"COMPANY\",\"startTime\":\"09:00\"},\"workDate\":\"2026-04-06\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
-      "concurrent" : true,
-      "requestIndex" : null
-    }, {
-      "method" : "POST",
-      "path" : "/api/v1/attendance/clock-in",
-      "query" : { },
-      "status" : 409,
-      "kind" : "json",
-      "body" : "{\"error\":{\"code\":\"ALREADY_CLOCKED_IN\",\"message\":\"오늘은 이미 출근했습니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
-      "concurrent" : true,
-      "requestIndex" : null
-    }, {
-      "method" : "POST",
-      "path" : "/api/v1/attendance/clock-in",
-      "query" : { },
       "status" : 409,
       "kind" : "json",
       "body" : "{\"error\":{\"code\":\"ALREADY_CLOCKED_IN\",\"message\":\"오늘은 이미 출근했습니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
@@ -5221,6 +5204,24 @@
       "status" : 200,
       "kind" : "json",
       "body" : "{\"data\":{\"canClockIn\":false,\"canClockOut\":true,\"clockInAt\":\"2026-04-06T09:20:00\",\"clockOutAt\":null,\"dayType\":\"WORKDAY\",\"earlyIfNow\":true,\"holidayName\":null,\"inResult\":\"LATE\",\"leave\":null,\"monthAbsentCount\":0,\"monthLateCount\":1,\"outResult\":null,\"schedule\":{\"departmentName\":\"개발팀\",\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"source\":\"COMPANY\",\"startTime\":\"09:00\"},\"workDate\":\"2026-04-06\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : true,
+      "requestIndex" : null
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/attendance/clock-in",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"canClockIn\":false,\"canClockOut\":true,\"clockInAt\":\"2026-04-06T09:20:00\",\"clockOutAt\":null,\"dayType\":\"WORKDAY\",\"earlyIfNow\":true,\"holidayName\":null,\"inResult\":\"LATE\",\"leave\":null,\"monthAbsentCount\":0,\"monthLateCount\":1,\"outResult\":null,\"schedule\":{\"departmentName\":\"개발팀\",\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"source\":\"COMPANY\",\"startTime\":\"09:00\"},\"workDate\":\"2026-04-06\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : true,
+      "requestIndex" : null
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/attendance/clock-in",
+      "query" : { },
+      "status" : 409,
+      "kind" : "json",
+      "body" : "{\"error\":{\"code\":\"ALREADY_CLOCKED_IN\",\"message\":\"오늘은 이미 출근했습니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
       "concurrent" : true,
       "requestIndex" : null
     }, {
@@ -5903,18 +5904,18 @@
       "method" : "POST",
       "path" : "/api/v1/leave/admin/adjustments",
       "query" : { },
-      "status" : 422,
+      "status" : 200,
       "kind" : "json",
-      "body" : "{\"error\":{\"code\":\"LEAVE_BALANCE_NEGATIVE\",\"message\":\"조정하면 사용 가능 연차가 0보다 작아집니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "body" : "{\"data\":{\"available\":4.0,\"id\":41,\"userId\":19,\"year\":2026},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
       "concurrent" : true,
       "requestIndex" : null
     }, {
       "method" : "POST",
       "path" : "/api/v1/leave/admin/adjustments",
       "query" : { },
-      "status" : 200,
+      "status" : 422,
       "kind" : "json",
-      "body" : "{\"data\":{\"available\":4.0,\"id\":41,\"userId\":19,\"year\":2026},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "body" : "{\"error\":{\"code\":\"LEAVE_BALANCE_NEGATIVE\",\"message\":\"조정하면 사용 가능 연차가 0보다 작아집니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
       "concurrent" : true,
       "requestIndex" : null
     }, {
@@ -5957,15 +5958,6 @@
       "method" : "POST",
       "path" : "/api/v1/leave/admin/adjustments",
       "query" : { },
-      "status" : 422,
-      "kind" : "json",
-      "body" : "{\"error\":{\"code\":\"LEAVE_BALANCE_NEGATIVE\",\"message\":\"조정하면 사용 가능 연차가 0보다 작아집니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
-      "concurrent" : true,
-      "requestIndex" : null
-    }, {
-      "method" : "POST",
-      "path" : "/api/v1/leave/admin/adjustments",
-      "query" : { },
       "status" : 200,
       "kind" : "json",
       "body" : "{\"data\":{\"available\":4.0,\"id\":47,\"userId\":22,\"year\":2026},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
@@ -5975,9 +5967,9 @@
       "method" : "POST",
       "path" : "/api/v1/leave/admin/adjustments",
       "query" : { },
-      "status" : 200,
+      "status" : 422,
       "kind" : "json",
-      "body" : "{\"data\":{\"available\":4.0,\"id\":49,\"userId\":23,\"year\":2026},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "body" : "{\"error\":{\"code\":\"LEAVE_BALANCE_NEGATIVE\",\"message\":\"조정하면 사용 가능 연차가 0보다 작아집니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
       "concurrent" : true,
       "requestIndex" : null
     }, {
@@ -5987,6 +5979,15 @@
       "status" : 422,
       "kind" : "json",
       "body" : "{\"error\":{\"code\":\"LEAVE_BALANCE_NEGATIVE\",\"message\":\"조정하면 사용 가능 연차가 0보다 작아집니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : true,
+      "requestIndex" : null
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/leave/admin/adjustments",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"available\":4.0,\"id\":49,\"userId\":23,\"year\":2026},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
       "concurrent" : true,
       "requestIndex" : null
     }, {
@@ -6018,20 +6019,20 @@
       "requestIndex" : 1
     }, {
       "method" : "POST",
-      "path" : "/api/v1/leave/admin/adjustments",
-      "query" : { },
-      "status" : 422,
-      "kind" : "json",
-      "body" : "{\"error\":{\"code\":\"LEAVE_BALANCE_NEGATIVE\",\"message\":\"조정하면 사용 가능 연차가 0보다 작아집니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
-      "concurrent" : true,
-      "requestIndex" : null
-    }, {
-      "method" : "POST",
       "path" : "/api/v1/approval-documents/1/submit",
       "query" : { },
       "status" : 200,
       "kind" : "json",
       "body" : "{\"data\":{\"body\":{\"endDate\":\"2026-04-20\",\"handover\":null,\"leaveType\":\"ANNUAL\",\"reason\":\"검증\",\"startDate\":\"2026-04-13\",\"usedDays\":6.0},\"completedAt\":null,\"docNo\":\"HR-2026-0001\",\"drafter\":{\"department\":\"개발팀\",\"id\":25,\"name\":\"동시 조정\",\"title\":\"사원\"},\"form\":{\"code\":\"LEAVE\",\"name\":\"휴가 신청\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":25,\"name\":\"동시 조정\"},\"at\":\"2026-04-06T09:20:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T09:20:00\",\"comment\":\"양식 결재선 스냅샷\"}],\"id\":1,\"line\":[{\"actedAt\":null,\"approver\":{\"department\":\"개발팀\",\"id\":2,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"PENDING\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":true},\"references\":[],\"resubmittedFromId\":null,\"status\":\"IN_PROGRESS\",\"submittedAt\":\"2026-04-06T09:20:00\",\"title\":\"동시 상신\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : true,
+      "requestIndex" : null
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/leave/admin/adjustments",
+      "query" : { },
+      "status" : 422,
+      "kind" : "json",
+      "body" : "{\"error\":{\"code\":\"LEAVE_BALANCE_NEGATIVE\",\"message\":\"조정하면 사용 가능 연차가 0보다 작아집니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
       "concurrent" : true,
       "requestIndex" : null
     } ],
@@ -8811,6 +8812,5 @@
       "concurrent" : false,
       "requestIndex" : 1
     } ]
-  },
-  "recordingPolicy" : "ordered-outcome-dependent-http-races-v1"
+  }
 }

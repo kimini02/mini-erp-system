@@ -28,6 +28,7 @@ public final class SafetyNetRun {
         long count;
         long monitor;
         int mainRequests;
+        boolean workerSql;
     }
     private SafetyNetRun() { }
     public static boolean enabled() { return System.getProperty("refactoring.record") != null; }
@@ -46,6 +47,7 @@ public final class SafetyNetRun {
         String normalized = SQL.computeIfAbsent(sql, JdbcProbe::normalizeSql);
         Entry entry = ENTRIES.computeIfAbsent(current, key -> new Entry());
         entry.count += count;
+        entry.workerSql |= Thread.currentThread().getId() != testThread;
         if (normalized.equals(MONITOR)) entry.monitor += count;
         SqlRun last = entry.sql.isEmpty() ? null : entry.sql.get(entry.sql.size() - 1);
         if (last != null && last.sql.equals(normalized)) last.count += count;
@@ -90,6 +92,13 @@ public final class SafetyNetRun {
 
     static synchronized Set<String> masks() { return Set.copyOf(MASKS); }
 
+    // LinkedHashMap preserves the declared schema order across JVMs (Map.of does not).
+    static Map<String, Object> orderedMap(Object... pairs) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (int i = 0; i < pairs.length; i += 2) map.put((String) pairs[i], pairs[i + 1]);
+        return map;
+    }
+
     static synchronized void write() throws Exception {
         Path directory = Path.of(System.getProperty("refactoring.record"));
         Files.createDirectories(directory);
@@ -101,17 +110,17 @@ public final class SafetyNetRun {
             List<Map<String, Object>> runs = new ArrayList<>();
             for (SqlRun run : entry.sql) {
                 distinct.add(run.sql);
-                runs.add(Map.of("sql", run.sql, "count", run.count));
+                runs.add(orderedMap("sql", run.sql, "count", run.count));
             }
-            sql.put(test.getKey(), Map.of("queryCount", entry.count, "comparedQueryCount", entry.count - entry.monitor,
-                    "diagnosticQueryCount", entry.monitor, "sql", runs));
+            sql.put(test.getKey(), orderedMap("queryCount", entry.count, "comparedQueryCount", entry.count - entry.monitor,
+                    "diagnosticQueryCount", entry.monitor, "workerSql", entry.workerSql, "sql", runs));
             responses.put(test.getKey(), entry.responses);
         }
         ObjectMapper mapper = new ObjectMapper();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(directory.resolve("sql.json").toFile(), Map.of(
+        mapper.writerWithDefaultPrettyPrinter().writeValue(directory.resolve("sql.json").toFile(), orderedMap(
                 "recordingPolicy", RecordingOrder.POLICY, "normalization", "whitespace collapse + lowercase", "diagnosticExclusion", MONITOR,
                 "distinctSql", distinct, "tests", sql));
-        mapper.writerWithDefaultPrettyPrinter().writeValue(directory.resolve("responses.json").toFile(), Map.of("recordingPolicy", RecordingOrder.POLICY, "tests", responses));
+        mapper.writerWithDefaultPrettyPrinter().writeValue(directory.resolve("responses.json").toFile(), orderedMap("recordingPolicy", RecordingOrder.POLICY, "tests", responses));
         Files.write(directory.resolve("masked-fields.txt"), MASKS, StandardCharsets.UTF_8);
         Files.writeString(directory.resolve("classpath.txt"),
                 System.getProperty("surefire.test.class.path", System.getProperty("java.class.path")));

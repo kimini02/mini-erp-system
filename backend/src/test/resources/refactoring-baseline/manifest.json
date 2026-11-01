@@ -1,6 +1,7 @@
 {
   "productionBaseCommit": "faf7972",
-  "recordingPolicy": "ordered-outcome-dependent-http-races-v1",
+  "reviewedSafetyNetCommit": "ba6dca0",
+  "recordingPolicy": "ordered-outcome-dependent-http-races-v2",
   "java": 17,
   "jvmTimezone": "UTC",
   "tests": 231,
@@ -9,13 +10,108 @@
   "skipped": 0,
   "sqlShapes": 801,
   "httpResponses": 921,
-  "stableComparison": {
-    "differences": 0,
-    "sqlOrderChanges": 9
-  },
+  "validationRuns": [
+    {
+      "run": "record-1",
+      "exit": 0,
+      "wallSeconds": 762.19,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=0"
+    },
+    {
+      "run": "record-2",
+      "exit": 0,
+      "wallSeconds": 482.02,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=11"
+    },
+    {
+      "run": "record-3",
+      "exit": 0,
+      "wallSeconds": 595.16,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=12"
+    },
+    {
+      "run": "record-4",
+      "exit": 0,
+      "wallSeconds": 447.58,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=9"
+    },
+    {
+      "run": "record-5",
+      "exit": 0,
+      "wallSeconds": 452.07,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=12"
+    },
+    {
+      "run": "off",
+      "exit": 0,
+      "wallSeconds": 653.0,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 0
+    }
+  ],
+  "orderWarningFrameUnion": [
+    "com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()",
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()",
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()",
+    "com.minierp.backend.integration.M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()",
+    "com.minierp.backend.integration.M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()",
+    "com.minierp.backend.integration.M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+    "com.minierp.backend.integration.M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()",
+    "com.minierp.backend.integration.M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()",
+    "com.minierp.backend.integration.M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()",
+    "com.minierp.backend.integration.M4LegacyExperimentTest#fullRenumberUpdatesOneHundredRowsAndUnlockedMovesDuplicateTwentyTimes()",
+    "com.minierp.backend.integration.M4OverdueTest#concurrentRunsSendOnlyOnce()",
+    "com.minierp.backend.integration.M5ProductionTest#<before-all>"
+  ],
   "files": {
-    "sql.json": "0ee48da6ef8d3470725ec1af4847a2068a65a22eeb73e0aa336a8a9137b71424",
-    "responses.json": "24373113a9c7cccd99c223b5d5591363cd24af2fce7a6e9f64f37e848e67a95d",
+    "sql.json": "8ca96939bfbd887a037156bc523f7e60fdd9961910ec950a25c986e73fca4930",
+    "responses.json": "2e2acc5d706ea90531d44a7f957938f5e9a67a0d3e049d8fde0fc8b41dddcebc",
     "masked-fields.txt": "7c4c8e12a7287aafc91ce4073f0ab047be4086f390cd26bc9901669acee5156e"
   }
 }

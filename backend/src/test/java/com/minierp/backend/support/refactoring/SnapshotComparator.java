@@ -7,6 +7,9 @@ import java.util.*;
 /** Standalone CLI; adds no JUnit tests and no build plugin. Exit 1 means a contract difference. */
 public final class SnapshotComparator {
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final Map<String, String> ORDER_ALLOWLIST = Map.of(
+            "com.minierp.backend.integration.M5ProductionTest#<before-all>",
+            "Map.of account iteration may swap CREATE USER statements across JVMs");
     private int differences;
     private int orderChanges;
     private final String selected;
@@ -35,6 +38,15 @@ public final class SnapshotComparator {
     private Set<String> fields(JsonNode node) {
         Set<String> names = new TreeSet<>(); node.fieldNames().forEachRemaining(names::add); return names;
     }
+    private Map<String, Long> sqlCounts(JsonNode frame) {
+        Map<String, Long> counts = new TreeMap<>();
+        frame.path("sql").forEach(run -> {
+            String sql = run.path("sql").asText();
+            if (!sql.equals(SafetyNetRun.MONITOR)) counts.merge(sql, run.path("count").asLong(), Long::sum);
+        });
+        return counts;
+    }
+
     private void sql(Path baseline, Path candidate) throws Exception {
         JsonNode before = read(baseline, "sql.json"), after = read(candidate, "sql.json");
         if (!before.path("recordingPolicy").equals(after.path("recordingPolicy")))
@@ -62,10 +74,23 @@ public final class SnapshotComparator {
             b.path("sql").forEach(sql -> actual.add(sql.path("sql").asText()));
             for (String sql : expected) if (!actual.contains(sql)) difference(test, "SQL", "sql.removed", sql, "MISSING");
             for (String sql : actual) if (!expected.contains(sql)) difference(test, "SQL", "sql.added", "MISSING", sql);
-            if (!a.path("sql").equals(b.path("sql"))) {
-                orderChanges++;
-                System.out.printf("SQL_ORDER_CHANGED test=%s rawCount=%s->%s diagnosticCount=%s->%s%n", test,
-                        a.path("queryCount"), b.path("queryCount"), a.path("diagnosticQueryCount"), b.path("diagnosticQueryCount"));
+            Map<String, Long> leftCounts = sqlCounts(a), rightCounts = sqlCounts(b);
+            Set<String> shapes = new TreeSet<>(leftCounts.keySet()); shapes.addAll(rightCounts.keySet());
+            for (String shape : shapes) {
+                long left = leftCounts.getOrDefault(shape, 0L), right = rightCounts.getOrDefault(shape, 0L);
+                if (left != right) difference(test, "SQL", "sqlCounts[" + shape + "]", left, right);
+            }
+            if (leftCounts.equals(rightCounts) && !a.path("sql").equals(b.path("sql"))) {
+                boolean worker = a.path("workerSql").asBoolean(false) || b.path("workerSql").asBoolean(false);
+                String allowed = ORDER_ALLOWLIST.get(test);
+                if (!worker && allowed == null) {
+                    difference(test, "SQL", "sql.order", "identical serial execution order", "changed");
+                } else {
+                    orderChanges++;
+                    System.out.printf("SQL_ORDER_CHANGED test=%s reason=%s rawCount=%s->%s diagnosticCount=%s->%s%n", test,
+                            allowed != null ? allowed : "worker-thread SQL (including connection-pool workers)",
+                            a.path("queryCount"), b.path("queryCount"), a.path("diagnosticQueryCount"), b.path("diagnosticQueryCount"));
+                }
             }
         }
     }

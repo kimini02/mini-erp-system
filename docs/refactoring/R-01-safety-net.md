@@ -1,5 +1,7 @@
 # R-01 안전망
 
+> 이 문서는 ba6dca0의 v1 기록이다. 리뷰 후 최신 규칙·기준선·5회 검증은 [R-01 리뷰 보완](R-01-review-hardening.md)을 따른다.
+
 기준 develop: `faf7972`. 별도 작업 트리의 `refactor/backend-readability`에서 작업하며 운영 코드의 영구 변경은 없다. 기준선은 테스트 리소스의 refactoring-baseline에 저장한다. 운영 코드 리팩토링은 수행하지 않았다.
 
 ## 무엇을 왜 만들었나
