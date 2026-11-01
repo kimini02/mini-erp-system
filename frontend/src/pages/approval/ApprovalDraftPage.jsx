@@ -28,7 +28,11 @@ const EMPTY_BODY = {
 
 const initialBody = (formCode, searchParams) => {
   if (!EMPTY_BODY[formCode]) return null;
-  if (formCode === 'ATTENDANCE_FIX') return { ...EMPTY_BODY.ATTENDANCE_FIX, workDate: searchParams.get('date') || '' };
+  // 캘린더·내 근태에서 날짜를 골라 들어오면 그 날짜로 채웁니다(?date=YYYY-MM-DD).
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.get('date') || '') ? searchParams.get('date') : '';
+  if (formCode === 'ATTENDANCE_FIX') return { ...EMPTY_BODY.ATTENDANCE_FIX, workDate: date };
+  if (formCode === 'LEAVE') return { ...EMPTY_BODY.LEAVE, startDate: date, endDate: date };
+  if (formCode === 'OVERTIME') return { ...EMPTY_BODY.OVERTIME, overtimeDate: date };
   return { ...EMPTY_BODY[formCode] };
 };
 
