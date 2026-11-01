@@ -9,46 +9,33 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TaskCreateRequestDto {
-
     @NotNull(message = "프로젝트 ID는 필수입니다.")
     private Long projectId;
-
     @NotBlank(message = "업무 제목은 필수입니다.")
-    @jakarta.validation.constraints.Size(max=100)
+    @jakarta.validation.constraints.Size(max = 100)
     private String taskTitle;
-
     @NotBlank(message = "업무 내용은 필수입니다.")
-    @jakarta.validation.constraints.Size(max=1000)
+    @jakarta.validation.constraints.Size(max = 1000)
     private String taskContent;
-
     @NotNull(message = "업무 종료일은 필수입니다.")
     private LocalDate endDate;
-
     @JsonProperty("taskState")
     private TaskStatus taskStatus;
-
     @NotNull(message = "우선순위는 필수입니다.")
     private Priority priority;
-
     @NotEmpty(message = "담당자 ID 목록은 비어 있을 수 없습니다.")
-    private List<@jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Positive Long> assigneeIds;
-
-    public static TaskCreateRequestDto of(
-            Long projectId,
-            String taskTitle,
-            String taskContent,
-            LocalDate endDate,
-            TaskStatus taskStatus,
-            Priority priority,
-            List<Long> assigneeIds
-    ) {
+    private List<
+    @jakarta.validation.constraints.NotNull
+    @jakarta.validation.constraints.Positive
+    Long> assigneeIds;
+    public static TaskCreateRequestDto of(Long projectId, String taskTitle, String taskContent, LocalDate endDate,
+            TaskStatus taskStatus, Priority priority, List<Long> assigneeIds) {
         TaskCreateRequestDto dto = new TaskCreateRequestDto();
         dto.projectId = projectId;
         dto.taskTitle = taskTitle;

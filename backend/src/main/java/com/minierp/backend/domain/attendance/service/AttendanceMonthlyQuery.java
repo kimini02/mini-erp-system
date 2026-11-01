@@ -1,9 +1,12 @@
 package com.minierp.backend.domain.attendance.service;
+
 import com.minierp.backend.global.persistence.SqlStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.util.*;
-@Repository @RequiredArgsConstructor
+
+@Repository
+@RequiredArgsConstructor
 public class AttendanceMonthlyQuery {
     private final SqlStore db;
     public String sql(String scope) {
@@ -14,7 +17,7 @@ public class AttendanceMonthlyQuery {
             SELECT u.* FROM users u WHERE
             (u.status<>'RETIRED' OR u.retired_date>:start OR (u.retired_date IS NULL AND EXISTS(
               SELECT 1 FROM attendances old WHERE old.user_id=u.id AND old.work_date BETWEEN :start AND :end))) AND
-          """+scope+"""
+          """ + scope + """
           )
           SELECT dates.work_date AS cell_date,u.id AS user_id,u.user_name,p.name AS title,d.name AS department,
             COALESCE(u.hire_date,DATE(u.created_at)) AS employed_from,u.retired_date,
@@ -32,5 +35,8 @@ public class AttendanceMonthlyQuery {
           ORDER BY u.user_name,u.id,dates.work_date
           """;
     }
-    public List<Map<String,Object>> fetch(String scope,Map<String,Object> args) {return db.rows(sql(scope),args);}
+
+    public List<Map<String, Object>> fetch(String scope, Map<String, Object> args) {
+        return db.rows(sql(scope), args);
+    }
 }

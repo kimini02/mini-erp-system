@@ -10,74 +10,50 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
- * 프로젝트 엔티티
- * - 프로젝트 생성 시 상태는 READY로 시작
- * - 담당 팀장(leader)은 선택 사항, TEAM_LEADER 역할의 User만 가능
- * - Task 상태 변경 시 프로젝트 상태가 자동으로 갱신됨 (READY → PROGRESS → DONE)
- */
+* 프로젝트 엔티티
+* - 프로젝트 생성 시 상태는 READY로 시작
+* - 담당 팀장(leader)은 선택 사항, TEAM_LEADER 역할의 User만 가능
+* - Task 상태 변경 시 프로젝트 상태가 자동으로 갱신됨 (READY → PROGRESS → DONE)
+*/
 @Entity
 @Table(name = "projects")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Project extends BaseEntity {
-
     @Column(nullable = false, length = 100)
     private String title;
-
     @Column(length = 1000)
     private String content;
-
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
-
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProjectStatus status;
-
     // 프로젝트와 업무(Task)가 공유하는 우선순위 (HIGH, MEDIUM, LOW)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
-
     // 담당 팀장 (TEAM_LEADER 역할만 배정 가능)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leader_id")
     private User leader;
-
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
-
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectMember> projectMembers = new ArrayList<>();
-
-    public static Project create(
-            String title,
-            String content,
-            LocalDate startDate,
-            LocalDate endDate,
-            Priority priority
-    ) {
+    public static Project create(String title, String content, LocalDate startDate, LocalDate endDate,
+            Priority priority) {
         return create(title, content, startDate, endDate, priority, null);
     }
 
-    public static Project create(
-            String title,
-            String content,
-            LocalDate startDate,
-            LocalDate endDate,
-            Priority priority,
-            User leader
-    ) {
+    public static Project create(String title, String content, LocalDate startDate, LocalDate endDate,
+            Priority priority, User leader) {
         Project project = new Project();
         project.title = title;
         project.content = content;

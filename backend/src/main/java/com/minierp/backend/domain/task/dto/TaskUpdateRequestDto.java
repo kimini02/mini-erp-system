@@ -6,33 +6,22 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TaskUpdateRequestDto {
-
     @NotBlank(message = "업무 제목은 필수입니다.")
-    @jakarta.validation.constraints.Size(max=100)
+    @jakarta.validation.constraints.Size(max = 100)
     private String taskTitle;
-
     @NotBlank(message = "업무 내용은 필수입니다.")
-    @jakarta.validation.constraints.Size(max=1000)
+    @jakarta.validation.constraints.Size(max = 1000)
     private String taskContent;
-
     @NotNull(message = "업무 종료일은 필수입니다.")
     private LocalDate endDate;
-
     @NotNull(message = "우선순위는 필수입니다.")
     private Priority priority;
-
-    public static TaskUpdateRequestDto of(
-            String taskTitle,
-            String taskContent,
-            LocalDate endDate,
-            Priority priority
-    ) {
+    public static TaskUpdateRequestDto of(String taskTitle, String taskContent, LocalDate endDate, Priority priority) {
         TaskUpdateRequestDto dto = new TaskUpdateRequestDto();
         dto.taskTitle = taskTitle;
         dto.taskContent = taskContent;

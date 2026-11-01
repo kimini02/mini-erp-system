@@ -7,19 +7,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ProjectMemberResponseDto {
-
     private Long id;
     private Long projectId;
     private Long userId;
     private String userName;
-
     public static ProjectMemberResponseDto from(ProjectMember projectMember) {
-        return new ProjectMemberResponseDto(
-                projectMember.getId(),
-                projectMember.getProject().getId(),
-                projectMember.getUser().getId(),
-                projectMember.getUser().getUserName()
-        );
+        return new ProjectMemberResponseDto(projectMember.getId(), projectMember.getProject().getId(), projectMember
+                .getUser().getId(), projectMember.getUser().getUserName());
     }
-
 }

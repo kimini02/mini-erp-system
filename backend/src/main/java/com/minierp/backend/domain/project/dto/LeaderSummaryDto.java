@@ -7,16 +7,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class LeaderSummaryDto {
-
     private Long userId;
     private String userName;
     private long assignedProjectCount;
-
     public static LeaderSummaryDto of(User user, long assignedProjectCount) {
-        return new LeaderSummaryDto(
-                user.getId(),
-                user.getUserName(),
-                assignedProjectCount
-        );
+        return new LeaderSummaryDto(user.getId(), user.getUserName(), assignedProjectCount);
     }
 }
