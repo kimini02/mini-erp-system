@@ -7,9 +7,26 @@ import java.util.*;
 /** Standalone CLI; adds no JUnit tests and no build plugin. Exit 1 means a contract difference. */
 public final class SnapshotComparator {
     private static final ObjectMapper JSON = new ObjectMapper();
-    private static final Map<String, String> ORDER_ALLOWLIST = Map.of(
-            "com.minierp.backend.integration.M5ProductionTest#<before-all>",
-            "Map.of account iteration may swap CREATE USER statements across JVMs");
+    private static final String M5_BOOT = "com.minierp.backend.integration.M5ProductionTest#<before-all>";
+    private static final Set<String> M5_ACCOUNT_CREATIONS = Set.of(
+            "create user 'workflow_app'@'%' identified by ?",
+            "create user 'workflow_migrator'@'%' identified by ?");
+    // Non-test threads do not imply concurrent SQL. See R-01-review-hardening.md, second review.
+    private static final Map<String, String> STRICT_ORDER = Map.of(
+            "com.minierp.backend.integration.M5ProductionTest#separatedAccountsMigrateAndPerformRepresentativeWritesButRejectDdl()",
+            "Blocking HttpClient.send completes each request before the next starts",
+            "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#1]",
+            "snapshot/assigned latches serialize worker SELECT, main assignment, worker MOVE",
+            "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#2]",
+            "snapshot/assigned latches serialize worker SELECT, main assignment, worker RETIRED",
+            "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#3]",
+            "snapshot/assigned latches serialize worker SELECT, main assignment, worker ON_LEAVE",
+            "com.minierp.backend.integration.M1AcceptanceTest#concurrentInvitationLinksCannotOverwriteFirstPassword()",
+            "Only the valid invitation reaches SQL; revoked token fails at the in-memory owner lookup",
+            "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentSubmissionsCannotSpendSameRemainingDays()",
+            "RecordingOrder v2 completes each submission before releasing the next",
+            "com.minierp.backend.integration.M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()",
+            "RecordingOrder v2 completes each move before releasing the next");
     private int differences;
     private int orderChanges;
     private final String selected;
@@ -47,6 +64,21 @@ public final class SnapshotComparator {
         return counts;
     }
 
+    private boolean onlyM5AccountCreationSwap(JsonNode before, JsonNode after) {
+        if (!before.isArray() || !after.isArray() || before.size() != after.size()) return false;
+        List<Integer> changed = new ArrayList<>();
+        for (int i = 0; i < before.size(); i++) {
+            if (!before.get(i).equals(after.get(i))) changed.add(i);
+        }
+        if (changed.size() != 2) return false;
+        int first = changed.get(0), second = changed.get(1);
+        JsonNode left = before.get(first), right = before.get(second);
+        Set<String> sql = new HashSet<>(List.of(left.path("sql").asText(), right.path("sql").asText()));
+        return sql.equals(M5_ACCOUNT_CREATIONS)
+                && left.path("count").asLong() == 1 && right.path("count").asLong() == 1
+                && left.equals(after.get(second)) && right.equals(after.get(first));
+    }
+
     private void sql(Path baseline, Path candidate) throws Exception {
         JsonNode before = read(baseline, "sql.json"), after = read(candidate, "sql.json");
         if (!before.path("recordingPolicy").equals(after.path("recordingPolicy")))
@@ -66,6 +98,9 @@ public final class SnapshotComparator {
             if (!included(test)) continue;
             JsonNode a = before.get(test), b = after.get(test);
             if (a == null || b == null) { difference(test, "SQL", "$test", a, b); continue; }
+            if (!a.path("workerSql").equals(b.path("workerSql"))) {
+                difference(test, "SQL", "workerSql", a.path("workerSql"), b.path("workerSql"));
+            }
             if (!a.path("comparedQueryCount").equals(b.path("comparedQueryCount"))) {
                 difference(test, "SQL", "queryCount", a.path("comparedQueryCount"), b.path("comparedQueryCount"));
             }
@@ -81,15 +116,23 @@ public final class SnapshotComparator {
                 if (left != right) difference(test, "SQL", "sqlCounts[" + shape + "]", left, right);
             }
             if (leftCounts.equals(rightCounts) && !a.path("sql").equals(b.path("sql"))) {
-                boolean worker = a.path("workerSql").asBoolean(false) || b.path("workerSql").asBoolean(false);
-                String allowed = ORDER_ALLOWLIST.get(test);
-                if (!worker && allowed == null) {
-                    difference(test, "SQL", "sql.order", "identical serial execution order", "changed");
+                String strict = STRICT_ORDER.get(test);
+                String allowed = null;
+                if (strict == null) {
+                    if (M5_BOOT.equals(test)) {
+                        if (onlyM5AccountCreationSwap(a.path("sql"), b.path("sql"))) {
+                            allowed = "Map.of swaps only workflow_app/workflow_migrator CREATE USER; all other runs identical";
+                        }
+                    } else if (a.path("workerSql").asBoolean(false)) {
+                        allowed = "baseline worker-thread SQL (including connection-pool workers)";
+                    }
+                }
+                if (allowed == null) {
+                    difference(test, "SQL", "sql.order", strict != null ? "strict order: " + strict : "identical serial execution order", "changed");
                 } else {
                     orderChanges++;
                     System.out.printf("SQL_ORDER_CHANGED test=%s reason=%s rawCount=%s->%s diagnosticCount=%s->%s%n", test,
-                            allowed != null ? allowed : "worker-thread SQL (including connection-pool workers)",
-                            a.path("queryCount"), b.path("queryCount"), a.path("diagnosticQueryCount"), b.path("diagnosticQueryCount"));
+                            allowed, a.path("queryCount"), b.path("queryCount"), a.path("diagnosticQueryCount"), b.path("diagnosticQueryCount"));
                 }
             }
         }
