@@ -4,10 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 @Entity
-@Table(name="departments")
+@Table(name = "departments")
 @Getter
 public class Department {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, length = 100)
     private String name;

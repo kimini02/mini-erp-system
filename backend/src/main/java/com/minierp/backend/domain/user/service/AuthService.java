@@ -23,38 +23,31 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.security.SecureRandom;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
     private final SecureRandom verificationCodeRandom = new SecureRandom();
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final MailService mailService;
     private final PasswordResetStoreService passwordResetStoreService;
-
     @Transactional(readOnly = true)
     public LoginResponseDto login(LoginRequestDto requestDto) {
         User user = userRepository.findByLoginId(requestDto.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
-
         if (user.getUserPw() == null || !passwordEncoder.matches(requestDto.getPassword(), user.getUserPw())) {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
-
-        if (!user.isActive()) throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
+        if (!user.isActive()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
+        }
         String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(user.getId()), user.getTokenVersion());
-        return LoginResponseDto.of(
-                accessToken,
-                jwtTokenProvider.getAccessTokenExpirationSeconds(),
-                UserResponseDto.from(user), user.isMustChangePassword()
-        );
+        return LoginResponseDto.of(accessToken, jwtTokenProvider.getAccessTokenExpirationSeconds(), UserResponseDto
+                .from(user), user.isMustChangePassword());
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +55,6 @@ public class AuthService {
         User user = userRepository.findByUserEmail(requestDto.getEmail())
                 .filter(u -> u.getUserName().equals(requestDto.getName()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "해당하는 사용자를 찾을 수 없습니다."));
-
         return FindIdResponseDto.of(user.getLoginId());
     }
 
@@ -72,13 +64,11 @@ public class AuthService {
         if (requestCount > passwordResetStoreService.getMaxRequestsPerMinute()) {
             throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS);
         }
-
         userRepository.findByUserEmail(requestDto.getEmail()).ifPresent(user -> {
             String verificationCode = generateVerificationCode();
             passwordResetStoreService.saveVerificationCode(user.getUserEmail(), verificationCode);
             mailService.sendVerificationCodeMail(user.getUserEmail(), verificationCode);
         });
-
         // 계정 존재 여부와 관계없이 동일 응답
         return PasswordResetRequestResponseDto.success();
     }
@@ -87,7 +77,6 @@ public class AuthService {
     public PasswordResetVerifyResponseDto verifyPasswordReset(PasswordResetVerifyDto requestDto) {
         User user = userRepository.findByUserEmail(requestDto.getEmail())
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_RESET_REQUEST));
-
         String savedCode = passwordResetStoreService.getVerificationCode(user.getUserEmail());
         if (savedCode == null) {
             throw new BusinessException(ErrorCode.OTP_EXPIRED);
@@ -95,12 +84,9 @@ public class AuthService {
         if (!savedCode.equals(requestDto.getVerificationCode())) {
             throw new BusinessException(ErrorCode.OTP_INVALID);
         }
-
         passwordResetStoreService.removeVerificationCode(user.getUserEmail());
-
         String resetProof = UUID.randomUUID().toString();
         passwordResetStoreService.saveResetProof(resetProof, user.getUserEmail());
-
         return PasswordResetVerifyResponseDto.of(resetProof);
     }
 
@@ -109,26 +95,20 @@ public class AuthService {
         if (!requestDto.getNewPassword().equals(requestDto.getNewPasswordConfirm())) {
             throw new BusinessException(ErrorCode.PASSWORD_POLICY_VIOLATION, "비밀번호 확인이 일치하지 않습니다.");
         }
-
         validatePasswordPolicy(requestDto.getNewPassword());
-
         String email = passwordResetStoreService.getEmailByResetProof(requestDto.getResetProof());
         if (email == null) {
             throw new BusinessException(ErrorCode.RESET_PROOF_INVALID);
         }
-
         User user = userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_RESET_REQUEST));
-
         // 기존 비밀번호와 동일한지 확인 (BCrypt)
         if (passwordEncoder.matches(requestDto.getNewPassword(), user.getUserPw())) {
             throw new BusinessException(ErrorCode.PASSWORD_POLICY_VIOLATION, "이전과 다른 비밀번호를 입력해주세요.");
         }
-
         String encodedPassword = passwordEncoder.encode(requestDto.getNewPassword());
         user.updatePassword(encodedPassword);
         passwordResetStoreService.removeResetProof(requestDto.getResetProof());
-
         return PasswordResetConfirmResponseDto.success();
     }
 
@@ -143,13 +123,19 @@ public class AuthService {
 
     @Transactional
     public LoginResponseDto changePassword(Long userId, String currentPassword, String newPassword) {
-        User user=userRepository.findByIdForUpdate(userId).orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
-        if(user.getUserPw()==null || !passwordEncoder.matches(currentPassword,user.getUserPw())) throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        if (user.getUserPw() == null || !passwordEncoder.matches(currentPassword, user.getUserPw())) {
+            throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        }
         validatePasswordPolicy(newPassword);
-        if(passwordEncoder.matches(newPassword,user.getUserPw())) throw new BusinessException(ErrorCode.PASSWORD_POLICY_VIOLATION);
+        if (passwordEncoder.matches(newPassword, user.getUserPw())) {
+            throw new BusinessException(ErrorCode.PASSWORD_POLICY_VIOLATION);
+        }
         user.updatePassword(passwordEncoder.encode(newPassword));
         userRepository.flush();
-        return LoginResponseDto.of(jwtTokenProvider.generateAccessToken(userId.toString(),user.getTokenVersion()),
-                jwtTokenProvider.getAccessTokenExpirationSeconds(),UserResponseDto.from(user),user.isMustChangePassword());
+        return LoginResponseDto.of(jwtTokenProvider.generateAccessToken(userId.toString(), user.getTokenVersion()),
+                jwtTokenProvider.getAccessTokenExpirationSeconds(), UserResponseDto.from(user), user
+                .isMustChangePassword());
     }
 }

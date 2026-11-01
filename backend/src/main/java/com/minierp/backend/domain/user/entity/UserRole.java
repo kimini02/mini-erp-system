@@ -9,9 +9,7 @@ public enum UserRole {
     USER("일반 사용자"),
     TEAM_LEADER("팀장"),
     ADMIN("관리 소장");
-
     private final String displayName;
-
     public boolean isTopManager() {
         return this == ADMIN;
     }
@@ -28,7 +26,6 @@ public enum UserRole {
         if (raw == null || raw.isBlank()) {
             throw new IllegalArgumentException("유효하지 않은 권한 값입니다.");
         }
-
         String normalized = raw.trim().toUpperCase();
         return switch (normalized) {
             case "USER", "일반사용자", "일반 사용자" -> USER;

@@ -4,28 +4,17 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
-
 import java.util.List;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserListResponseDto {
-
     private final List<UserResponseDto> content;
     private final PageMeta page;
-
     public static UserListResponseDto of(Page<UserResponseDto> pageResult) {
-        return new UserListResponseDto(
-                pageResult.getContent(),
-                new PageMeta(
-                        pageResult.getNumber(),
-                        pageResult.getSize(),
-                        pageResult.getTotalElements(),
-                        pageResult.getTotalPages(),
-                        pageResult.isFirst(),
-                        pageResult.isLast()
-                )
-        );
+        return new UserListResponseDto(pageResult.getContent(),
+                new PageMeta(pageResult.getNumber(), pageResult.getSize(), pageResult.getTotalElements(), pageResult
+                .getTotalPages(), pageResult.isFirst(), pageResult.isLast()));
     }
 
     @Getter
@@ -39,4 +28,3 @@ public class UserListResponseDto {
         private final boolean last;
     }
 }
-
