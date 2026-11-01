@@ -10,24 +10,18 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 import java.util.Collections;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
-
     private static final String VERSION_CLAIM_KEY = "ver";
-
     @Value("${jwt.secret}")
     private String secretKey;
-
     @Value("${jwt.access-token-expiration-ms:3600000}")
     private long accessTokenExpirationMs;
-
     private SecretKey key;
-
     @PostConstruct
     public void init() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -37,33 +31,25 @@ public class JwtTokenProvider {
     public String generateAccessToken(String subject, int tokenVersion) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpirationMs);
-
-        return Jwts.builder()
-                .subject(subject)
-                .claim(VERSION_CLAIM_KEY, tokenVersion)
-                .issuedAt(now)
-                .expiration(expiry)
-                .signWith(key)
-                .compact();
+        return Jwts.builder().subject(subject).claim(VERSION_CLAIM_KEY, tokenVersion).issuedAt(now).expiration(expiry)
+                .signWith(key).compact();
     }
 
     public Authentication getAuthentication(String token, String role) {
         Claims claims = getClaims(token);
-
         String normalizedRole = role == null ? "USER" : role;
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + normalizedRole);
-        return new UsernamePasswordAuthenticationToken(
-                claims.getSubject(),
-                token,
-                Collections.singletonList(authority)
-        );
+        return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, Collections
+                .singletonList(authority));
     }
 
     public long getAccessTokenExpirationSeconds() {
         return accessTokenExpirationMs / 1000;
     }
 
-    public Integer getTokenVersion(String token) { return getClaims(token).get(VERSION_CLAIM_KEY, Integer.class); }
+    public Integer getTokenVersion(String token) {
+        return getClaims(token).get(VERSION_CLAIM_KEY, Integer.class);
+    }
 
     public String getSubject(String token) {
         return getClaims(token).getSubject();
@@ -79,10 +65,6 @@ public class JwtTokenProvider {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 }

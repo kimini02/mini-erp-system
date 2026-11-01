@@ -4,11 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class BusinessException extends RuntimeException {
-
     private final ErrorCode errorCode;
-    private java.util.Map<String,Object> details;
+    private java.util.Map<String, Object> details;
     private final org.springframework.http.HttpStatus status;
-
     public BusinessException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
@@ -20,10 +18,15 @@ public class BusinessException extends RuntimeException {
         this.errorCode = errorCode;
         this.status = errorCode.getStatus();
     }
-    public BusinessException(ErrorCode errorCode,org.springframework.http.HttpStatus status) {
-        super(errorCode.getMessage()); this.errorCode=errorCode; this.status=status;
+
+    public BusinessException(ErrorCode errorCode, org.springframework.http.HttpStatus status) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
+        this.status = status;
     }
-    public BusinessException(ErrorCode errorCode,java.util.Map<String,Object> details) {
-        this(errorCode);this.details=details;
+
+    public BusinessException(ErrorCode errorCode, java.util.Map<String, Object> details) {
+        this(errorCode);
+        this.details = details;
     }
 }

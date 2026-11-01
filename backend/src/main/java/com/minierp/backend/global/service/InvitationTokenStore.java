@@ -6,12 +6,13 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-@Service @RequiredArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class InvitationTokenStore {
     private final StringRedisTemplate redis;
-    private static final String TOKEN_PREFIX="invitation:";
-    private static final String EMAIL_PREFIX="invitation-email:";
-    private static final String USER_PREFIX="invitation-user:";
+    private static final String TOKEN_PREFIX = "invitation:";
+    private static final String EMAIL_PREFIX = "invitation-email:";
+    private static final String USER_PREFIX = "invitation-user:";
     // Replacement and consumption must be atomic, including the per-user active pointer.
     private static final DefaultRedisScript<Long> SAVE = new DefaultRedisScript<>("""
         local old = redis.call('GET', KEYS[1])
@@ -41,26 +42,37 @@ public class InvitationTokenStore {
         end
         return redis.call('DEL', KEYS[1])
         """, Long.class);
-
-    public void save(String token,long userId) { save(token,userId,""); }
-    public void save(String token,long userId,String email) {
-        redis.execute(SAVE,List.of(USER_PREFIX+userId,TOKEN_PREFIX+token,EMAIL_PREFIX+token),token,Long.toString(userId),TOKEN_PREFIX,EMAIL_PREFIX,email);
+    public void save(String token, long userId) {
+        save(token, userId, "");
     }
+
+    public void save(String token, long userId, String email) {
+        redis.execute(SAVE, List.of(USER_PREFIX + userId, TOKEN_PREFIX + token, EMAIL_PREFIX + token), token, Long
+                .toString(userId), TOKEN_PREFIX, EMAIL_PREFIX, email);
+    }
+
     /** Only locates the user to lock; consume must still validate the active token afterward. */
     public Long owner(String token) {
-        String id=redis.opsForValue().get(TOKEN_PREFIX+token);
-        return id==null?null:Long.valueOf(id);
+        String id = redis.opsForValue().get(TOKEN_PREFIX + token);
+        return id == null ? null : Long.valueOf(id);
     }
-    public Long consume(String token) { return consume(token,""); }
-    public Long consume(String token,String email) {
-        String id=redis.execute(CONSUME,List.of(TOKEN_PREFIX+token,EMAIL_PREFIX+token),token,USER_PREFIX,email);
-        return id==null?null:Long.valueOf(id);
+
+    public Long consume(String token) {
+        return consume(token, "");
     }
+
+    public Long consume(String token, String email) {
+        String id = redis.execute(CONSUME, List.of(TOKEN_PREFIX + token, EMAIL_PREFIX + token), token, USER_PREFIX,
+                email);
+        return id == null ? null : Long.valueOf(id);
+    }
+
     // A late callback must not delete a new invitation issued for the new address.
-    public void revokeForEmail(long userId,String email) {
-        redis.execute(REVOKE,List.of(USER_PREFIX+userId),TOKEN_PREFIX,EMAIL_PREFIX,email);
+    public void revokeForEmail(long userId, String email) {
+        redis.execute(REVOKE, List.of(USER_PREFIX + userId), TOKEN_PREFIX, EMAIL_PREFIX, email);
     }
+
     public void revoke(long userId) {
-        redis.execute(REVOKE,List.of(USER_PREFIX+userId),TOKEN_PREFIX,EMAIL_PREFIX,"");
+        redis.execute(REVOKE, List.of(USER_PREFIX + userId), TOKEN_PREFIX, EMAIL_PREFIX, "");
     }
 }
