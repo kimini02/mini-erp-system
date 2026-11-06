@@ -50,8 +50,7 @@ public class RoleService {
         if (r.name() != null && r.name().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        db
-                .update(
+        db.update(
                 "UPDATE roles SET name=COALESCE(:name,name),description=COALESCE(:description,description) WHERE id=:id",
                 map("id", id, "name", r.name(), "description", r.description()));
         return role(id);
@@ -64,8 +63,8 @@ public class RoleService {
             throw new BusinessException(ErrorCode.SYSTEM_ROLE_LOCKED);
         }
         db.rows("SELECT id FROM roles WHERE id=:id FOR UPDATE", map("id", id));
-        if (db.count("SELECT COUNT(*) FROM user_roles WHERE role_id=:id", map("id", id)) > 0 || db
-                .count("SELECT COUNT(*) FROM approval_form_steps WHERE role_id=:id", map("id", id)) > 0) {
+        if (db.count("SELECT COUNT(*) FROM user_roles WHERE role_id=:id", map("id", id)) > 0 || db.count(
+                "SELECT COUNT(*) FROM approval_form_steps WHERE role_id=:id", map("id", id)) > 0) {
             throw new BusinessException(ErrorCode.ROLE_IN_USE);
         }
         db.update("DELETE FROM role_permissions WHERE role_id=:id", map("id", id));
@@ -78,10 +77,13 @@ public class RoleService {
         var rows = db.rows(
                 "SELECT m.code AS menu,COALESCE(p.can_view,0) AS can_view,COALESCE(p.can_create,0) AS can_create,COALESCE(p.can_update,0) AS can_update,COALESCE(p.can_delete,0) AS can_delete,p.data_scope FROM menus m LEFT JOIN role_permissions p ON p.menu_id=m.id AND p.role_id=:id ORDER BY m.sort_order,m.id",
                 map("id", id));
-        return map("role", role, "permissions", rows.stream()
-                .map(r -> map("menu", r.get("menu"), "view", bool(r, "can_view"), "create", bool(r, "can_create"),
-                "update", bool(r, "can_update"), "delete", bool(r, "can_delete"), "scope", r.get("data_scope")))
-                .toList());
+        return map("role", role,
+                "permissions", rows.stream()
+                        .map(
+                                r -> map("menu", r.get("menu"), "view", bool(r, "can_view"),
+                                        "create", bool(r, "can_create"), "update", bool(r, "can_update"),
+                                        "delete", bool(r, "can_delete"), "scope", r.get("data_scope")))
+                        .toList());
     }
 
     @Transactional
@@ -102,9 +104,10 @@ public class RoleService {
             }
             String allowed = (String) m.get("allowedActions");
             boolean any = p.view() || p.create() || p.update() || p.deleteAction();
-            if (p.view() && !allowed.contains("V") || p.create() && !allowed.contains("C") || p.update() && !allowed
-                    .contains("U") || p.deleteAction() && !allowed.contains("D") || !bool(m, "scopeApplicable") && p
-                    .scope() != null || bool(m, "scopeApplicable") && any && p.scope() == null) {
+            if (p.view() && !allowed.contains("V") || p.create() && !allowed.contains("C") || p.update()
+                    && !allowed.contains(
+                    "U") || p.deleteAction() && !allowed.contains("D") || !bool(m, "scopeApplicable")
+                            && p.scope() != null || bool(m, "scopeApplicable") && any && p.scope() == null) {
                 throw new BusinessException(ErrorCode.INVALID_PERMISSION);
             }
         }
@@ -112,8 +115,9 @@ public class RoleService {
         for (var p : permissions) {
             db.update(
                     "INSERT INTO role_permissions(role_id,menu_id,can_view,can_create,can_update,can_delete,data_scope) VALUES(:role,:menu,:v,:c,:u,:d,:scope)",
-                    map("role", id, "menu", menus.get(p.menu()).get("id"), "v", p.view(), "c", p.create(), "u", p
-                    .update(), "d", p.deleteAction(), "scope", p.scope() == null ? null : p.scope().name()));
+                    map("role", id, "menu", menus.get(p.menu()).get("id"), "v", p.view(), "c", p.create(),
+                            "u", p.update(), "d", p.deleteAction(),
+                            "scope", p.scope() == null ? null : p.scope().name()));
         }
         return permissions(id);
     }
@@ -123,11 +127,14 @@ public class RoleService {
         if (page < 0 || size < 1 || size > 200) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        var ids = db
-                .rows("SELECT user_id FROM user_roles WHERE role_id=:id ORDER BY user_id LIMIT :size OFFSET :offset",
-                map("id", id, "size", size, "offset", page * size)).stream().map(r -> number(r, "user_id")).toList();
-        return EmployeeService.page(employees.views(ids), page, size, db
-                .count("SELECT COUNT(*) FROM user_roles WHERE role_id=:id", map("id", id)));
+        var ids = db.rows(
+                "SELECT user_id FROM user_roles WHERE role_id=:id ORDER BY user_id LIMIT :size OFFSET :offset",
+                map("id", id, "size", size, "offset", page * size))
+                .stream()
+                .map(r -> number(r, "user_id"))
+                .toList();
+        return EmployeeService.page(employees.views(ids), page, size,
+                db.count("SELECT COUNT(*) FROM user_roles WHERE role_id=:id", map("id", id)));
     }
 
     @Transactional

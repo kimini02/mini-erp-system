@@ -11,33 +11,22 @@ public final class BoardTaskRequests {
     }
 
     public record Create(
-            @NotBlank
-            @Size(max = 100)
-            String title,
-            @Size(max = 1000)
-            String content, TaskStatus status, List<
-            @NotNull
-            @Positive
-            Long> assigneeIds, LocalDate endDate, Priority priority) {
+            @NotBlank @Size(max = 100) String title,
+            @Size(max = 1000) String content,
+            TaskStatus status,
+            List<@NotNull @Positive Long> assigneeIds,
+            LocalDate endDate,
+            Priority priority) {
     }
 
     public record Patch(
-            @Size(min = 1, max = 100)
-            String title,
-            @Size(max = 1000)
-            String content, LocalDate endDate, Priority priority, List<
-            @NotNull
-            @Positive
-            Long> assigneeIds) {
+            @Size(min = 1, max = 100) String title,
+            @Size(max = 1000) String content,
+            LocalDate endDate,
+            Priority priority,
+            List<@NotNull @Positive Long> assigneeIds) {
     }
 
-    public record Move(
-            @NotNull
-            TaskStatus status,
-            @Positive
-            Long afterTaskId,
-            @NotNull
-            @Min(0)
-            Integer version) {
+    public record Move(@NotNull TaskStatus status, @Positive Long afterTaskId, @NotNull @Min(0) Integer version) {
     }
 }

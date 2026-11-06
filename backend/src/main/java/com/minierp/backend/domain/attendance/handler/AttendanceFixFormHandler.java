@@ -62,8 +62,8 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
     }
 
     private Map<String, Object> raw(long id) {
-        return db.one("SELECT * FROM attendance_fix_requests WHERE document_id=:id", map("id", id), ErrorCode
-                .DOCUMENT_NOT_FOUND);
+        return db.one("SELECT * FROM attendance_fix_requests WHERE document_id=:id", map("id", id),
+                ErrorCode.DOCUMENT_NOT_FOUND);
     }
 
     private Object json(String text) {
@@ -121,15 +121,16 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         var day = records.day(d.drafterId(), date);
         var in = old == null ? null : (LocalDateTime) old.get("clock_in_at");
         var out = old == null ? null : (LocalDateTime) old.get("clock_out_at");
-        var verdict = old == null ? new AttendanceRules.Result(null, null, false) : new AttendanceRules
-                .Result((String) old.get("in_result"), (String) old.get("out_result"), bool(old, "absent"));
-        String code = AttendanceRules.code(date, LocalDate.now(clock), old == null ? day.type() : (String) old
-                .get("day_type"), verdict, in);
+        var verdict = old == null ? new AttendanceRules.Result(null, null, false) : new AttendanceRules.Result(
+                (String) old.get("in_result"), (String) old.get("out_result"), bool(old, "absent"));
+        String code = AttendanceRules.code(date, LocalDate.now(clock),
+                old == null ? day.type() : (String) old.get("day_type"), verdict, in);
         try {
             db.update("UPDATE attendance_fix_requests SET before_json=:json WHERE document_id=:id",
-                    map("id", d.id(), "json", mapper
-                    .writeValueAsString(map("clockIn", in == null ? null : hh(in.toLocalTime()), "clockOut", out == null
-                    ? null : hh(out.toLocalTime()), "code", code))));
+                    map("id", d.id(),
+                            "json", mapper.writeValueAsString(
+                                    map("clockIn", in == null ? null : hh(in.toLocalTime()),
+                                            "clockOut", out == null ? null : hh(out.toLocalTime()), "code", code))));
         } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
             throw new IllegalStateException(ex);
         }
@@ -139,12 +140,10 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
     }
 
     private Times mergedTimes(Map<String, Object> correction, Map<String, Object> old, LocalDate date) {
-        LocalDateTime in = correction.get("clock_in") == null
-                ? (old == null ? null : (LocalDateTime) old.get("clock_in_at")) : date
-                .atTime(AttendanceStore.time(correction.get("clock_in")));
-        LocalDateTime out = correction.get("clock_out") == null
-                ? (old == null ? null : (LocalDateTime) old.get("clock_out_at")) : date
-                .atTime(AttendanceStore.time(correction.get("clock_out")));
+        LocalDateTime in = correction.get("clock_in") == null ? (old == null ? null : (LocalDateTime) old.get(
+                "clock_in_at")) : date.atTime(AttendanceStore.time(correction.get("clock_in")));
+        LocalDateTime out = correction.get("clock_out") == null ? (old == null ? null : (LocalDateTime) old.get(
+                "clock_out_at")) : date.atTime(AttendanceStore.time(correction.get("clock_out")));
         if (in == null) {
             throw new BusinessException(ErrorCode.ATTENDANCE_FIX_CLOCK_IN_REQUIRED);
         }

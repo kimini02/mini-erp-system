@@ -14,8 +14,8 @@ public class ErrorResponse {
     private final ErrorBody error;
     private final LocalDateTime timestamp;
     public static ErrorResponse of(Clock clock, ErrorCode errorCode) {
-        return new ErrorResponse(false, new ErrorBody(errorCode.name(), errorCode.getMessage(), null), LocalDateTime
-                .now(clock));
+        return new ErrorResponse(false, new ErrorBody(errorCode.name(), errorCode.getMessage(), null),
+                LocalDateTime.now(clock));
     }
 
     public static ErrorResponse of(Clock clock, ErrorCode errorCode, String message) {

@@ -39,7 +39,8 @@ public class CalendarService {
         List<CalendarEventResponseDto> events = new ArrayList<>();
         events.addAll(getApprovedLeaveEvents(id, startDate, endDate));
         events.addAll(getApprovedOvertimeEvents(id, startDate, endDate));
-        return events.stream().sorted(Comparator.comparing(CalendarEventResponseDto::getStart))
+        return events.stream()
+                .sorted(Comparator.comparing(CalendarEventResponseDto::getStart))
                 .collect(Collectors.toList());
     }
 
@@ -53,40 +54,61 @@ public class CalendarService {
         List<CalendarEventResponseDto> events = new ArrayList<>();
         events.addAll(getAllApprovedLeaveEvents(startDate, endDate));
         events.addAll(getAllApprovedOvertimeEvents(startDate, endDate));
-        return events.stream().sorted(Comparator.comparing(CalendarEventResponseDto::getStart))
+        return events.stream()
+                .sorted(Comparator.comparing(CalendarEventResponseDto::getStart))
                 .collect(Collectors.toList());
     }
 
     private List<CalendarEventResponseDto> getApprovedLeaveEvents(Long userId, LocalDate start, LocalDate end) {
         return leaveRequestRepository.findOverlappingLeavesByRequester(userId, LeaveStatus.APPROVED, start, end)
-                .stream().map(leave -> CalendarEventResponseDto.builder().eventId(leave.getId())
-                .title("연차 - " + leave.getAppType().getDisplayName()).start(leave.getStartDate().atStartOfDay())
-                .end(leave.getEndDate().atTime(23, 59, 59)).type("LEAVE").build()).collect(Collectors.toList());
+                .stream()
+                .map(leave -> CalendarEventResponseDto.builder()
+                        .eventId(leave.getId())
+                        .title("연차 - " + leave.getAppType().getDisplayName())
+                        .start(leave.getStartDate().atStartOfDay())
+                        .end(leave.getEndDate().atTime(23, 59, 59))
+                        .type("LEAVE")
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private List<CalendarEventResponseDto> getApprovedOvertimeEvents(Long userId, LocalDate start, LocalDate end) {
-        return overtimeRequestRepository
-                .findByRequester_IdAndStatusAndOvertimeDateBetween(userId, OvertimeStatus.APPROVED, start, end).stream()
-                .map(overtime -> CalendarEventResponseDto.builder().eventId(overtime.getId())
-                .title("특근 - " + (overtime.getReason() != null ? overtime.getReason() : "특근 업무"))
-                .start(overtime.getOvertimeDate().atTime(overtime.getStartTime()))
-                .end(overtime.getOvertimeDate().atTime(overtime.getEndTime())).type("OVERTIME").build())
+        return overtimeRequestRepository.findByRequester_IdAndStatusAndOvertimeDateBetween(userId,
+                OvertimeStatus.APPROVED, start, end)
+                .stream()
+                .map(overtime -> CalendarEventResponseDto.builder()
+                        .eventId(overtime.getId())
+                        .title("특근 - " + (overtime.getReason() != null ? overtime.getReason() : "특근 업무"))
+                        .start(overtime.getOvertimeDate().atTime(overtime.getStartTime()))
+                        .end(overtime.getOvertimeDate().atTime(overtime.getEndTime()))
+                        .type("OVERTIME")
+                        .build())
                 .collect(Collectors.toList());
     }
 
     private List<CalendarEventResponseDto> getAllApprovedLeaveEvents(LocalDate start, LocalDate end) {
-        return leaveRequestRepository.findOverlappingLeaves(LeaveStatus.APPROVED, start, end).stream()
-                .map(leave -> CalendarEventResponseDto.builder().eventId(leave.getId())
-                .title("[" + leave.getRequester().getUserName() + "] 연차").start(leave.getStartDate().atStartOfDay())
-                .end(leave.getEndDate().atTime(23, 59, 59)).type("LEAVE").build()).collect(Collectors.toList());
+        return leaveRequestRepository.findOverlappingLeaves(LeaveStatus.APPROVED, start, end)
+                .stream()
+                .map(leave -> CalendarEventResponseDto.builder()
+                        .eventId(leave.getId())
+                        .title("[" + leave.getRequester().getUserName() + "] 연차")
+                        .start(leave.getStartDate().atStartOfDay())
+                        .end(leave.getEndDate().atTime(23, 59, 59))
+                        .type("LEAVE")
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private List<CalendarEventResponseDto> getAllApprovedOvertimeEvents(LocalDate start, LocalDate end) {
         return overtimeRequestRepository.findByStatusAndOvertimeDateBetween(OvertimeStatus.APPROVED, start, end)
-                .stream().map(overtime -> CalendarEventResponseDto.builder().eventId(overtime.getId())
-                .title("[" + overtime.getRequester().getUserName() + "] 특근")
-                .start(overtime.getOvertimeDate().atTime(overtime.getStartTime()))
-                .end(overtime.getOvertimeDate().atTime(overtime.getEndTime())).type("OVERTIME").build())
+                .stream()
+                .map(overtime -> CalendarEventResponseDto.builder()
+                        .eventId(overtime.getId())
+                        .title("[" + overtime.getRequester().getUserName() + "] 특근")
+                        .start(overtime.getOvertimeDate().atTime(overtime.getStartTime()))
+                        .end(overtime.getOvertimeDate().atTime(overtime.getEndTime()))
+                        .type("OVERTIME")
+                        .build())
                 .collect(Collectors.toList());
     }
 

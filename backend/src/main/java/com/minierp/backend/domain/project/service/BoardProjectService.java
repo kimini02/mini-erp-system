@@ -84,12 +84,14 @@ public class BoardProjectService {
         long total = number(p, "task_count");
         long done = number(p, "done_count");
         return map("id", p.get("id"), "key", p.get("project_key"), "title", p.get("title"), "content", p.get("content"),
-                "status", p.get("status"), "priority", p.get("priority"), "startDate", p.get("start_date"), "endDate", p
-                .get("end_date"), "leader", p.get("leader_id") == null ? null
-                : map("id", p.get("leader_id"), "name", p.get("leader_name"), "title", p.get("leader_title")),
-                "memberCount", p.get("member_count"), "taskCount", total, "doneCount", done, "overdueCount", p
-                .get("overdue_count"), "progressPct", total == 0 ? 0 : done * 100 / total, "myRole", p.get("leader_id")
-                != null && number(p, "leader_id") == actor() ? "LEADER" : number(p, "is_member") > 0 ? "MEMBER" : null);
+                "status", p.get("status"), "priority", p.get("priority"), "startDate", p.get("start_date"),
+                "endDate", p.get("end_date"),
+                "leader", p.get("leader_id") == null ? null : map("id", p.get("leader_id"),
+                        "name", p.get("leader_name"), "title", p.get("leader_title")),
+                "memberCount", p.get("member_count"), "taskCount", total, "doneCount", done,
+                "overdueCount", p.get("overdue_count"), "progressPct", total == 0 ? 0 : done * 100 / total,
+                "myRole", p.get("leader_id") != null && number(p, "leader_id") == actor() ? "LEADER" : number(p,
+                        "is_member") > 0 ? "MEMBER" : null);
     }
 
     public Map<String, Object> permissions(Map<String, Object> p) {
@@ -154,9 +156,9 @@ public class BoardProjectService {
         try {
             id = db.insert(
                     "INSERT INTO projects(project_key,title,content,start_date,end_date,priority,status,leader_id,created_at) VALUES(:key,:title,:content,:start,:end,:priority,'READY',:leader,:now)",
-                    map("key", r.key(), "title", r.title(), "content", r.content(), "start", r.startDate(), "end", r
-                    .endDate(), "priority", r.priority() == null ? "MEDIUM" : r.priority().name(), "leader", r
-                    .leaderId(), "now", LocalDateTime.now(clock)));
+                    map("key", r.key(), "title", r.title(), "content", r.content(), "start", r.startDate(),
+                            "end", r.endDate(), "priority", r.priority() == null ? "MEDIUM" : r.priority().name(),
+                            "leader", r.leaderId(), "now", LocalDateTime.now(clock)));
         } catch (org.springframework.dao.DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.PROJECT_KEY_DUPLICATE);
         }
@@ -188,9 +190,9 @@ public class BoardProjectService {
         }
         db.update(
                 "UPDATE projects SET title=COALESCE(:title,title),content=COALESCE(:content,content),start_date=:start,end_date=:end,priority=COALESCE(:priority,priority),leader_id=COALESCE(:leader,leader_id),updated_at=:now WHERE id=:id",
-                map("id", id, "title", r.title(), "content", r.content(), "start", start, "end", end, "priority", r
-                .priority() == null ? null : r.priority().name(), "leader", r.leaderId(), "now", LocalDateTime
-                .now(clock)));
+                map("id", id, "title", r.title(), "content", r.content(), "start", start, "end", end,
+                        "priority", r.priority() == null ? null : r.priority().name(), "leader", r.leaderId(),
+                        "now", LocalDateTime.now(clock)));
         // A manager can transfer ownership out of their scope. Return this completed mutation without a second scope
         // denial/rollback.
         var changed = db.one(ProjectSummaryQuery.sql("p.id=:id", false),
@@ -231,8 +233,10 @@ public class BoardProjectService {
     }
 
     private List<Long> memberIds(long id) {
-        return db.rows("SELECT user_id FROM project_members WHERE project_id=:id", map("id", id)).stream()
-                .map(r -> number(r, "user_id")).toList();
+        return db.rows("SELECT user_id FROM project_members WHERE project_id=:id", map("id", id))
+                .stream()
+                .map(r -> number(r, "user_id"))
+                .toList();
     }
 
     private void applyMembers(long id, Set<Long> selected) {

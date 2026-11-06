@@ -56,7 +56,11 @@ public class LeaveRequest extends BaseEntity {
     @Column(name = "reason", length = 500)
     private String requestReason;
     @Builder
-    public LeaveRequest(User requester, LeaveType appType, LocalDate startDate, LocalDate endDate,
+    public LeaveRequest(
+            User requester,
+            LeaveType appType,
+            LocalDate startDate,
+            LocalDate endDate,
             String requestReason) {
         this.requester = requester;
         this.appType = appType;
@@ -116,7 +120,8 @@ public class LeaveRequest extends BaseEntity {
         }
         long workingDays = startDate.datesUntil(endDate.plusDays(1))
                 .filter(date -> date.getDayOfWeek() != DayOfWeek.SATURDAY)
-                .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY).filter(date -> !holidayList.contains(date))
+                .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY)
+                .filter(date -> !holidayList.contains(date))
                 .count();
         if (workingDays == 0) {
             throw new IllegalArgumentException("신청 기간에 평일이 포함되어 있지 않습니다.");
@@ -130,8 +135,8 @@ public class LeaveRequest extends BaseEntity {
         if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
             throw new IllegalArgumentException("종료일은 시작일보다 빠를 수 없습니다.");
         }
-        if (appType != null && appType.isHalfDay()
-                && (startDate == null || endDate == null || !startDate.equals(endDate))) {
+        if (appType != null && appType.isHalfDay() && (startDate == null || endDate == null || !startDate.equals(
+                endDate))) {
             throw new IllegalArgumentException("반차는 시작일과 종료일이 같은 하루만 신청할 수 있습니다.");
         }
     }

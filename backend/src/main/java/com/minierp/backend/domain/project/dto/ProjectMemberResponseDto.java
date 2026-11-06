@@ -12,7 +12,7 @@ public class ProjectMemberResponseDto {
     private Long userId;
     private String userName;
     public static ProjectMemberResponseDto from(ProjectMember projectMember) {
-        return new ProjectMemberResponseDto(projectMember.getId(), projectMember.getProject().getId(), projectMember
-                .getUser().getId(), projectMember.getUser().getUserName());
+        return new ProjectMemberResponseDto(projectMember.getId(), projectMember.getProject().getId(),
+                projectMember.getUser().getId(), projectMember.getUser().getUserName());
     }
 }

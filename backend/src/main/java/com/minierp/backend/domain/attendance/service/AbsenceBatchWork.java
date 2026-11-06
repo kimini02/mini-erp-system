@@ -30,20 +30,20 @@ public class AbsenceBatchWork {
             var user = records.lockUser(id);
             var row = records.record(id, date, true);
             var day = records.day(id, date);
-            LocalDate eligible = user.get("hire_date") == null ? ((LocalDateTime) user.get("created_at")).toLocalDate()
-                    : (LocalDate) user.get("hire_date");
+            LocalDate eligible = user.get("hire_date") == null ? ((LocalDateTime) user.get("created_at"))
+                    .toLocalDate() : (LocalDate) user.get("hire_date");
             if (row == null) {
-                if ("ON_LEAVE".equals(user.get("status")) || eligible.isAfter(date)
-                        || ("RETIRED".equals(user.get("status"))
-                        && (user.get("retired_date") == null || !date.isBefore((LocalDate) user.get("retired_date"))))
-                        || !bool(user, "activated") || day.type().equals("HOLIDAY")) {
+                if ("ON_LEAVE".equals(user.get("status")) || eligible.isAfter(date) || ("RETIRED".equals(
+                        user.get("status")) && (user.get("retired_date") == null || !date.isBefore(
+                                (LocalDate) user.get("retired_date")))) || !bool(user, "activated")
+                                        || day.type().equals("HOLIDAY")) {
                     skipped++;
                     continue;
                 }
                 records.insert(id, date, records.schedule(id), day.type(), null, null, true, now);
             } else {
-                records.judge(row, day.type(), (LocalDateTime) row.get("clock_in_at"), (LocalDateTime) row
-                        .get("clock_out_at"), true, now);
+                records.judge(row, day.type(), (LocalDateTime) row.get("clock_in_at"),
+                        (LocalDateTime) row.get("clock_out_at"), true, now);
             }
             processed++;
         }

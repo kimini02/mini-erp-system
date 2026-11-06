@@ -15,26 +15,20 @@ public class LeaveQueryController {
     private final LeaveQueryService service;
     private final Clock clock;
     @GetMapping("/balance")
-    public ApiResponse<?> balance(
-            @RequestParam(required = false)
-            Integer year) {
+    public ApiResponse<?> balance(@RequestParam(required = false) Integer year) {
         return ApiResponse.success(clock, service.balance(year));
     }
 
     @GetMapping("/ledger")
     public ApiResponse<?> ledger(
-            @RequestParam(required = false)
-            Integer year,
-            @RequestParam(required = false)
-            String type) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String type) {
         return ApiResponse.success(clock, service.ledger(year, type));
     }
 
     @PostMapping("/days-preview")
     @RequirePermission(menu = "APPROVAL_DRAFT", action = Action.CREATE)
-    public ApiResponse<?> preview(
-            @RequestBody
-            JsonNode body) {
+    public ApiResponse<?> preview(@RequestBody JsonNode body) {
         return ApiResponse.success(clock, service.preview(body));
     }
 }

@@ -21,8 +21,13 @@ public class ProjectCreateRequestDto {
     private Priority priority;
     @NotNull(message = "담당 리더 선택은 필수입니다.")
     private Long leaderId;
-    public static ProjectCreateRequestDto of(String title, String content, LocalDate startDate, LocalDate endDate,
-            Priority priority, Long leaderId) {
+    public static ProjectCreateRequestDto of(
+            String title,
+            String content,
+            LocalDate startDate,
+            LocalDate endDate,
+            Priority priority,
+            Long leaderId) {
         ProjectCreateRequestDto dto = new ProjectCreateRequestDto();
         dto.title = title;
         dto.content = content;

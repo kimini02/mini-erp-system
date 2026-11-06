@@ -20,32 +20,25 @@ public class MeController {
     private final UserRepository users;
     private final PermissionAccess permissions;
     private final Clock clock;
-    public record PasswordChange(
-            @NotBlank
-            String currentPassword,
-            @NotBlank
-            String newPassword) {
+    public record PasswordChange(@NotBlank String currentPassword, @NotBlank String newPassword) {
     }
 
     @GetMapping
     public ApiResponse<?> me() {
-        return ApiResponse.success(clock, UserResponseDto
-                .from(users.findById(permissions.actor())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND))));
+        return ApiResponse.success(clock,
+                UserResponseDto.from(users.findById(permissions.actor())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND))));
     }
 
     @GetMapping("/permissions")
     public ApiResponse<?> permissions() {
-        return ApiResponse.success(clock, permissions.grants(permissions.actor()).values().stream()
-                .filter(g -> !g.actions().isEmpty()).toList());
+        return ApiResponse.success(clock,
+                permissions.grants(permissions.actor()).values().stream().filter(g -> !g.actions().isEmpty()).toList());
     }
 
     @PatchMapping("/password")
-    public ApiResponse<?> password(
-            @Valid
-            @RequestBody
-            PasswordChange r) {
-        return ApiResponse.success(clock, auth
-                .changePassword(permissions.actor(), r.currentPassword(), r.newPassword()));
+    public ApiResponse<?> password(@Valid @RequestBody PasswordChange r) {
+        return ApiResponse.success(clock,
+                auth.changePassword(permissions.actor(), r.currentPassword(), r.newPassword()));
     }
 }

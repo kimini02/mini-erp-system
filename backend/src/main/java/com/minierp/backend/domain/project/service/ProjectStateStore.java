@@ -34,7 +34,7 @@ public class ProjectStateStore {
         String status = total == 0 || todo == total ? "READY" : done == total ? "DONE" : "PROGRESS";
         db.update("UPDATE projects SET status=:status,updated_at=:now WHERE id=:id",
                 map("id", project, "status", status, "now", LocalDateTime.now(clock)));
-        return map("id", project, "status", status, "taskCount", total, "doneCount", done, "progressPct", total == 0 ? 0
-                : done * 100 / total);
+        return map("id", project, "status", status, "taskCount", total, "doneCount", done,
+                "progressPct", total == 0 ? 0 : done * 100 / total);
     }
 }

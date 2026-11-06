@@ -10,8 +10,15 @@ public final class AttendanceRules {
     public record Result(String inResult, String outResult, boolean absent) {
     }
 
-    public static Result judge(LocalDate date, String type, LocalTime start, LocalTime end, int grace, LocalDateTime in,
-            LocalDateTime out, boolean finalized) {
+    public static Result judge(
+            LocalDate date,
+            String type,
+            LocalTime start,
+            LocalTime end,
+            int grace,
+            LocalDateTime in,
+            LocalDateTime out,
+            boolean finalized) {
         if (type.equals("HOLIDAY") || type.equals("LEAVE")) {
             return new Result("NONE", "NONE", false);
         }

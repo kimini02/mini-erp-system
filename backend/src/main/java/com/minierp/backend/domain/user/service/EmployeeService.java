@@ -55,8 +55,7 @@ public class EmployeeService {
     }
 
     private void requireRoleUpdateForPrivilegedTarget(long id) {
-        if (db
-                .count(
+        if (db.count(
                 "SELECT COUNT(*) FROM user_roles ur JOIN roles r ON r.id=ur.role_id WHERE ur.user_id=:id AND r.code<>'EMPLOYEE'",
                 map("id", id)) > 0) {
             access.require("ROLE", Action.UPDATE);
@@ -83,8 +82,9 @@ public class EmployeeService {
         for (var row : rows) {
             long id = number(row, "id");
             var userRoles = roles.getOrDefault(id, List.of());
-            String legacy = userRoles.stream().anyMatch(r -> "CHIEF".equals(r.get("code"))) ? "ADMIN" : userRoles
-                    .stream().anyMatch(r -> "LEADER".equals(r.get("code"))) ? "TEAM_LEADER" : "USER";
+            String legacy = userRoles.stream()
+                    .anyMatch(r -> "CHIEF".equals(r.get("code"))) ? "ADMIN" : userRoles.stream()
+                    .anyMatch(r -> "LEADER".equals(r.get("code"))) ? "TEAM_LEADER" : "USER";
             String code = (String) row.get("department_code");
             code = switch (code) {
                 case "D-0002" -> "01";
@@ -93,26 +93,35 @@ public class EmployeeService {
                 default -> code;
             };
             // M1 프론트 작업 후 제거: departmentCode, departmentName, position, role aliases.
-            byId.put(id, map("id", id, "loginId", row.get("login_id"), "name", row.get("user_name"), "email", row
-                    .get("user_email"), "department",
-                    map("id", row.get("department_id"), "name", row.get("department_name")), "positionId", row
-                    .get("position_id"), "position", row.get("position_name"), "departmentCode", code, "departmentName",
-                    row.get("department_name"), "role", legacy, "roles", userRoles, "hireDate", row.get("hire_date"),
-                    "retiredDate", row.get("retired_date"), "status", row.get("status"), "invitationPending", row
-                    .get("user_pw") == null, "remainingAnnualLeave", row.get("remaining_annual_leave"), "createdAt", row
-                    .get("created_at"), "updatedAt", row.get("updated_at")));
+            byId.put(id,
+                    map("id", id, "loginId", row.get("login_id"), "name", row.get("user_name"),
+                            "email", row.get("user_email"),
+                            "department", map("id", row.get("department_id"), "name", row.get("department_name")),
+                            "positionId", row.get("position_id"), "position", row.get("position_name"),
+                            "departmentCode", code, "departmentName", row.get("department_name"), "role", legacy,
+                            "roles", userRoles, "hireDate", row.get("hire_date"),
+                            "retiredDate", row.get("retired_date"), "status", row.get("status"),
+                            "invitationPending", row.get("user_pw") == null,
+                            "remainingAnnualLeave", row.get("remaining_annual_leave"),
+                            "createdAt", row.get("created_at"), "updatedAt", row.get("updated_at")));
         }
         return ids.stream().map(byId::get).toList();
     }
 
     public static Map<String, Object> page(List<?> content, int page, int size, long total) {
         long pages = (total + size - 1) / size;
-        return map("content", content, "page",
-                map("number", page, "size", size, "totalElements", total, "totalPages", pages, "first", page == 0,
-                "last", page + 1 >= pages, "numberOfElements", content.size()));
+        return map("content", content,
+                "page", map("number", page, "size", size, "totalElements", total, "totalPages", pages,
+                        "first", page == 0, "last", page + 1 >= pages, "numberOfElements", content.size()));
     }
 
-    public Map<String, Object> list(String q, Long departmentId, boolean includeSub, String status, int page, int size,
+    public Map<String, Object> list(
+            String q,
+            Long departmentId,
+            boolean includeSub,
+            String status,
+            int page,
+            int size,
             String sort) {
         if (page < 0 || size < 1 || size > 200) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
@@ -134,10 +143,10 @@ public class EmployeeService {
             departments = includeSub ? access.descendants(departmentId) : List.of(departmentId);
         }
         String[] parts = sort.split(",");
-        var columns = Map.of("userName", "u.user_name", "loginId", "u.login_id", "hireDate", "u.hire_date", "status",
-                "u.status");
-        if (!columns.containsKey(parts[0]) || parts.length > 2 || parts.length == 2 && !Set.of("asc", "desc")
-                .contains(parts[1].toLowerCase())) {
+        var columns = Map.of("userName", "u.user_name", "loginId", "u.login_id", "hireDate", "u.hire_date",
+                "status", "u.status");
+        if (!columns.containsKey(parts[0]) || parts.length > 2 || parts.length == 2 && !Set.of("asc", "desc").contains(
+                parts[1].toLowerCase())) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         String order = columns.get(parts[0]) + (parts.length == 2 ? " " + parts[1] : " ASC");
@@ -183,8 +192,8 @@ public class EmployeeService {
         }
         var roles = roleIds(r.roleCodes());
         db.one("SELECT id FROM departments WHERE id=:id", map("id", r.departmentId()), ErrorCode.DEPARTMENT_NOT_FOUND);
-        var position = db.one("SELECT name FROM positions WHERE id=:id", map("id", r.positionId()), ErrorCode
-                .POSITION_NOT_FOUND);
+        var position = db.one("SELECT name FROM positions WHERE id=:id", map("id", r.positionId()),
+                ErrorCode.POSITION_NOT_FOUND);
         if (db.count("SELECT COUNT(*) FROM users WHERE user_email=:email", map("email", r.email())) > 0) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -192,8 +201,9 @@ public class EmployeeService {
         db.update(
                 "INSERT INTO login_id_sequences(hire_year,last_seq) VALUES(:year,0) ON DUPLICATE KEY UPDATE hire_year=VALUES(hire_year)",
                 map("year", year));
-        long next = number(db.one("SELECT last_seq FROM login_id_sequences WHERE hire_year=:year FOR UPDATE",
-                map("year", year), ErrorCode.RESOURCE_NOT_FOUND), "last_seq") + 1;
+        long next = number(
+                db.one("SELECT last_seq FROM login_id_sequences WHERE hire_year=:year FOR UPDATE", map("year", year),
+                        ErrorCode.RESOURCE_NOT_FOUND), "last_seq") + 1;
         db.update("UPDATE login_id_sequences SET last_seq=:next WHERE hire_year=:year",
                 map("year", year, "next", next));
         String loginId = String.format("%d%03d", year, next);
@@ -223,8 +233,8 @@ public class EmployeeService {
             treeLock.lock();
         }
         access.assertUserInScope("EMPLOYEE", id);
-        var old = r.email() == null && r.departmentId() == null ? raw(id) : db
-                .one("SELECT * FROM users WHERE id=:id FOR UPDATE", map("id", id), ErrorCode.USER_NOT_FOUND);
+        var old = r.email() == null && r.departmentId() == null ? raw(id) : db.one(
+                "SELECT * FROM users WHERE id=:id FOR UPDATE", map("id", id), ErrorCode.USER_NOT_FOUND);
         if (r.email() != null && !r.email().equals(old.get("user_email"))) {
             requireRoleUpdateForPrivilegedTarget(id);
         }
@@ -232,8 +242,8 @@ public class EmployeeService {
             if (number(old, "department_id") != r.departmentId()) {
                 notHead(id);
             }
-            db.one("SELECT id FROM departments WHERE id=:id", map("id", r.departmentId()), ErrorCode
-                    .DEPARTMENT_NOT_FOUND);
+            db.one("SELECT id FROM departments WHERE id=:id", map("id", r.departmentId()),
+                    ErrorCode.DEPARTMENT_NOT_FOUND);
         }
         if (r.positionId() != null) {
             db.one("SELECT id FROM positions WHERE id=:id", map("id", r.positionId()), ErrorCode.POSITION_NOT_FOUND);
@@ -244,8 +254,8 @@ public class EmployeeService {
         try {
             db.update(
                     "UPDATE users SET user_name=COALESCE(:name,user_name),user_email=COALESCE(:email,user_email),department_id=COALESCE(:dept,department_id),position_id=COALESCE(:position,position_id),hire_date=COALESCE(:hire,hire_date),updated_at=:now WHERE id=:id",
-                    map("id", id, "name", r.name(), "email", r.email(), "dept", r.departmentId(), "position", r
-                    .positionId(), "hire", r.hireDate(), "now", LocalDateTime.now(clock)));
+                    map("id", id, "name", r.name(), "email", r.email(), "dept", r.departmentId(),
+                            "position", r.positionId(), "hire", r.hireDate(), "now", LocalDateTime.now(clock)));
         } catch (org.springframework.dao.DuplicateKeyException ex) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -270,8 +280,9 @@ public class EmployeeService {
             }
             db.update(
                     "UPDATE users SET retired_date=CASE WHEN :status='RETIRED' THEN :date WHEN :status<>'RETIRED' AND status='RETIRED' THEN NULL ELSE retired_date END,status=:status,token_version=token_version+:increment,updated_at=:now WHERE id=:id",
-                    map("id", id, "status", status.name(), "date", LocalDate.now(clock), "increment", status == com
-                    .minierp.backend.domain.user.entity.UserStatus.ACTIVE ? 0 : 1, "now", LocalDateTime.now(clock)));
+                    map("id", id, "status", status.name(), "date", LocalDate.now(clock),
+                            "increment", status == com.minierp.backend.domain.user.entity.UserStatus.ACTIVE ? 0 : 1,
+                            "now", LocalDateTime.now(clock)));
         }
         return views(List.of(id)).get(0);
     }

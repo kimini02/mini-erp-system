@@ -29,7 +29,7 @@ public class ProjectResponseDto {
     public static ProjectResponseDto from(Project project, long memberCount, long taskCount, int progressRate) {
         return new ProjectResponseDto(project.getId(), project.getTitle(), project.getContent(), project.getStatus(),
                 project.getPriority(), project.getStartDate(), project.getEndDate(), memberCount, taskCount,
-                progressRate, project.getLeader() != null ? project.getLeader().getId() : null, project.getLeader()
-                != null ? project.getLeader().getUserName() : null);
+                progressRate, project.getLeader() != null ? project.getLeader().getId() : null,
+                project.getLeader() != null ? project.getLeader().getUserName() : null);
     }
 }

@@ -37,31 +37,38 @@ public class AttendanceService {
     public Map<String, Object> homeToday() {
         var date = LocalDate.now(clock);
         var r = records.homeSnapshot(access.actor(), date);
-        Map<String, Object> leave = r.get("leave_id") == null ? null
-                : map("type", r.get("leave_type"), "documentId", r.get("leave_id"), "docNo", r.get("leave_no"));
+        Map<String, Object> leave = r.get("leave_id") == null ? null : map("type", r.get("leave_type"),
+                "documentId", r.get("leave_id"), "docNo", r.get("leave_no"));
         String holiday = (String) r.get("holiday_name");
-        boolean off = holiday != null || date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek
-                .SUNDAY;
-        String type = off ? "HOLIDAY" : leave == null ? "WORKDAY" : leave.get("type").toString().startsWith("HALF_")
-                ? leave.get("type").toString() : "LEAVE";
-        return render(date, r.get("id") == null ? null : r, new AttendanceStore.Day(type, holiday, leave), records
-                .snapshot(r), number(r, "late_count"), number(r, "absent_count"));
+        boolean off = holiday != null || date.getDayOfWeek() == DayOfWeek.SATURDAY
+                || date.getDayOfWeek() == DayOfWeek.SUNDAY;
+        String type = off ? "HOLIDAY" : leave == null ? "WORKDAY" : leave.get("type")
+                .toString()
+                .startsWith("HALF_") ? leave.get("type")
+                .toString() : "LEAVE";
+        return render(date, r.get("id") == null ? null : r, new AttendanceStore.Day(type, holiday, leave),
+                records.snapshot(r), number(r, "late_count"), number(r, "absent_count"));
     }
 
-    private Map<String, Object> render(LocalDate date, Map<String, Object> row, AttendanceStore.Day context,
-            AttendanceStore.Schedule schedule, long late, long absent) {
+    private Map<String, Object> render(
+            LocalDate date,
+            Map<String, Object> row,
+            AttendanceStore.Day context,
+            AttendanceStore.Schedule schedule,
+            long late,
+            long absent) {
         var in = row == null ? null : (LocalDateTime) row.get("clock_in_at");
         var out = row == null ? null : (LocalDateTime) row.get("clock_out_at");
         String day = row == null ? context.type() : (String) row.get("day_type");
         var now = LocalDateTime.now(clock);
-        var hypothetical = AttendanceRules
-                .judge(date, day, schedule.start(), schedule.end(), schedule.grace(), in, now, false);
+        var hypothetical = AttendanceRules.judge(date, day, schedule.start(), schedule.end(), schedule.grace(), in, now,
+                false);
         return map("workDate", date, "dayType", day, "holidayName", context.holiday(), "schedule", schedule.view(),
-                "clockInAt", in, "clockOutAt", out, "inResult", row == null ? null : row.get("in_result"), "outResult",
-                row == null ? null : row.get("out_result"), "leave", context.leave(), "canClockIn", in == null
-                && !context.type().equals("LEAVE") && date.equals(now.toLocalDate()), "canClockOut", in != null,
-                "earlyIfNow", "EARLY".equals(hypothetical.outResult()), "monthLateCount", late, "monthAbsentCount",
-                absent);
+                "clockInAt", in, "clockOutAt", out, "inResult", row == null ? null : row.get("in_result"),
+                "outResult", row == null ? null : row.get("out_result"), "leave", context.leave(),
+                "canClockIn", in == null && !context.type().equals("LEAVE") && date.equals(now.toLocalDate()),
+                "canClockOut", in != null, "earlyIfNow", "EARLY".equals(hypothetical.outResult()),
+                "monthLateCount", late, "monthAbsentCount", absent);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -97,8 +104,8 @@ public class AttendanceService {
             date = date.minusDays(1);
             row = records.record(user, date, true);
             if (row == null || row.get("clock_in_at") == null
-                    || (row.get("clock_out_at") != null && !((LocalDateTime) row.get("clock_out_at")).toLocalDate()
-                    .equals(now.toLocalDate()))) {
+                    || (row.get("clock_out_at") != null && !((LocalDateTime) row.get(
+                    "clock_out_at")).toLocalDate().equals(now.toLocalDate()))) {
                 throw new BusinessException(ErrorCode.NOT_CLOCKED_IN);
             }
         }
@@ -165,13 +172,15 @@ public class AttendanceService {
             if ("MISSING".equals(row.get("out_result"))) {
                 missing++;
             }
-            days.add(map("date", date, "dayType", type, "clockInAt", row.get("clock_in_at"), "clockOutAt", row
-                    .get("clock_out_at"), "inResult", row.get("in_result"), "outResult", row.get("out_result"),
-                    "absent", bool(row, "absent"), "fixDocument", row.get("fix_document_id") == null ? null
-                    : map("id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no"))));
+            days.add(
+                    map("date", date, "dayType", type, "clockInAt", row.get("clock_in_at"),
+                            "clockOutAt", row.get("clock_out_at"), "inResult", row.get("in_result"),
+                            "outResult", row.get("out_result"), "absent", bool(row, "absent"),
+                            "fixDocument", row.get("fix_document_id") == null ? null : map(
+                                    "id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no"))));
         }
-        return map("month", month.toString(), "summary",
-                map("workDays", work, "present", present, "late", late, "early", early, "absent", absent, "missing",
-                missing, "leaveDays", leave), "days", days);
+        return map("month", month.toString(),
+                "summary", map("workDays", work, "present", present, "late", late, "early", early, "absent", absent,
+                        "missing", missing, "leaveDays", leave), "days", days);
     }
 }

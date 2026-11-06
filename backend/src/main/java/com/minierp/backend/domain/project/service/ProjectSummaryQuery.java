@@ -10,7 +10,7 @@ public final class ProjectSummaryQuery {
     public static String sql(String where, boolean page) {
         String selected = ROWS + " WHERE " + where
                 + (page ? " ORDER BY COALESCE(p.updated_at,p.created_at) DESC,p.id DESC LIMIT :size OFFSET :offset"
-                : "");
+                        : "");
         return "WITH selected AS (" + selected + "), " + """
    task_counts AS (
     SELECT t.project_id,COUNT(*) AS total,SUM(t.task_status='DONE') AS done,

@@ -30,12 +30,15 @@ public class TaskCreateRequestDto {
     @NotNull(message = "우선순위는 필수입니다.")
     private Priority priority;
     @NotEmpty(message = "담당자 ID 목록은 비어 있을 수 없습니다.")
-    private List<
-    @jakarta.validation.constraints.NotNull
-    @jakarta.validation.constraints.Positive
-    Long> assigneeIds;
-    public static TaskCreateRequestDto of(Long projectId, String taskTitle, String taskContent, LocalDate endDate,
-            TaskStatus taskStatus, Priority priority, List<Long> assigneeIds) {
+    private List<@jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Positive Long> assigneeIds;
+    public static TaskCreateRequestDto of(
+            Long projectId,
+            String taskTitle,
+            String taskContent,
+            LocalDate endDate,
+            TaskStatus taskStatus,
+            Priority priority,
+            List<Long> assigneeIds) {
         TaskCreateRequestDto dto = new TaskCreateRequestDto();
         dto.projectId = projectId;
         dto.taskTitle = taskTitle;

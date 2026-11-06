@@ -28,7 +28,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
             FilterChain chain) throws ServletException, IOException {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
@@ -39,8 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
                 long id = Long.parseLong(jwtTokenProvider.getSubject(token));
                 var user = users.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.TOKEN_REVOKED));
-                if (!Objects.equals(jwtTokenProvider.getTokenVersion(token), user.getTokenVersion()) || !user
-                        .isActive()) {
+                if (!Objects.equals(jwtTokenProvider.getTokenVersion(token), user.getTokenVersion())
+                        || !user.isActive()) {
                     throw new BusinessException(ErrorCode.TOKEN_REVOKED);
                 }
                 SecurityContextHolder.getContext()

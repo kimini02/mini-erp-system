@@ -16,8 +16,8 @@ public class AttendanceStore {
     public record Schedule(LocalTime start, LocalTime end, int grace, String source, String department) {
         public Map<String, Object> view() {
             var f = DateTimeFormatter.ofPattern("HH:mm");
-            return map("startTime", start.format(f), "endTime", end.format(f), "lateGraceMin", grace, "halfBoundary",
-                    start.plusHours(5).format(f), "source", source, "departmentName", department);
+            return map("startTime", start.format(f), "endTime", end.format(f), "lateGraceMin", grace,
+                    "halfBoundary", start.plusHours(5).format(f), "source", source, "departmentName", department);
         }
     }
 
@@ -25,8 +25,8 @@ public class AttendanceStore {
     }
 
     public static LocalTime time(Object value) {
-        return value instanceof java.sql.Time t ? t.toLocalTime() : value instanceof LocalTime t ? t : LocalTime
-                .parse(value.toString());
+        return value instanceof java.sql.Time t ? t.toLocalTime() : value instanceof LocalTime t ? t : LocalTime.parse(
+                value.toString());
     }
 
     public Map<String, Object> lockUser(long id) {
@@ -41,37 +41,38 @@ public class AttendanceStore {
           FROM users u JOIN departments d ON d.id=u.department_id JOIN work_schedules w ON
           (d.work_schedule_id=w.id OR (d.work_schedule_id IS NULL AND w.is_default=1)) WHERE u.id=:user
           """, map("user", user), ErrorCode.USER_NOT_FOUND);
-        return new Schedule(time(s.get("start_time")), time(s.get("end_time")), ((Number) s.get("late_grace_min"))
-                .intValue(), (String) s.get("source"), (String) s.get("name"));
+        return new Schedule(time(s.get("start_time")), time(s.get("end_time")),
+                ((Number) s.get("late_grace_min")).intValue(), (String) s.get("source"), (String) s.get("name"));
     }
 
     public Schedule snapshot(Map<String, Object> row) {
         return new Schedule(time(row.get("sched_start")), time(row.get("sched_end")),
-                ((Number) row.get("sched_grace_min")).intValue(), (String) row.get("sched_source"), (String) row
-                .get("sched_department_name"));
+                ((Number) row.get("sched_grace_min")).intValue(), (String) row.get("sched_source"),
+                (String) row.get("sched_department_name"));
     }
 
     public Day day(long user, LocalDate date) {
         var holidays = db.rows("SELECT name FROM holidays WHERE holiday_date=:date", map("date", date));
         String holiday = holidays.isEmpty() ? null : (String) holidays.get(0).get("name");
-        boolean off = holiday != null || date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek
-                .SUNDAY;
+        boolean off = holiday != null || date.getDayOfWeek() == DayOfWeek.SATURDAY
+                || date.getDayOfWeek() == DayOfWeek.SUNDAY;
         var leaves = db.rows("""
           SELECT l.leave_type,d.id,d.doc_no FROM leave_requests l JOIN approval_documents d ON d.id=l.document_id
           WHERE d.drafter_id=:user AND d.status='APPROVED' AND l.start_date<=:date AND l.end_date>=:date ORDER BY d.id LIMIT 1
           """, map("user", user, "date", date));
-        Map<String, Object> leave = leaves.isEmpty() ? null
-                : map("type", leaves.get(0).get("leave_type"), "documentId", leaves.get(0).get("id"), "docNo", leaves
-                .get(0).get("doc_no"));
-        String type = off ? "HOLIDAY" : leave == null ? "WORKDAY" : leave.get("type").toString().startsWith("HALF_")
-                ? leave.get("type").toString() : "LEAVE";
+        Map<String, Object> leave = leaves.isEmpty() ? null : map("type", leaves.get(0).get("leave_type"),
+                "documentId", leaves.get(0).get("id"), "docNo", leaves.get(0).get("doc_no"));
+        String type = off ? "HOLIDAY" : leave == null ? "WORKDAY" : leave.get("type")
+                .toString()
+                .startsWith("HALF_") ? leave.get("type")
+                .toString() : "LEAVE";
         return new Day(type, holiday, leave);
     }
 
     public Map<String, Object> record(long user, LocalDate date, boolean lock) {
         var rows = db.rows(
                 "SELECT a.*,d.doc_no AS fix_doc_no FROM attendances a LEFT JOIN approval_documents d ON d.id=a.fix_document_id WHERE a.user_id=:user AND a.work_date=:date"
-                + (lock ? " FOR UPDATE" : ""), map("user", user, "date", date));
+                        + (lock ? " FOR UPDATE" : ""), map("user", user, "date", date));
         return rows.isEmpty() ? null : rows.get(0);
     }
 
@@ -98,8 +99,15 @@ public class AttendanceStore {
                 .USER_NOT_FOUND);
     }
 
-    public void insert(long user, LocalDate date, Schedule schedule, String day, LocalDateTime in, LocalDateTime out,
-            boolean finalized, LocalDateTime now) {
+    public void insert(
+            long user,
+            LocalDate date,
+            Schedule schedule,
+            String day,
+            LocalDateTime in,
+            LocalDateTime out,
+            boolean finalized,
+            LocalDateTime now) {
         var judged = AttendanceRules.judge(date, day, schedule.start(), schedule.end(), schedule.grace(), in, out,
                 finalized);
         db.update("""
@@ -107,10 +115,16 @@ public class AttendanceStore {
           VALUES(:user,:date,:in,:out,:start,:end,:grace,:source,:dept,:day,:inResult,:outResult,:absent,:now,:now,:now)
           """, map("user", user, "date", date, "in", in, "out", out, "start", schedule.start(), "end", schedule.end(),
                 "grace", schedule.grace(), "source", schedule.source(), "dept", schedule.department(), "day", day,
-                "inResult", judged.inResult(), "outResult", judged.outResult(), "absent", judged.absent(), "now", now));
+                        "inResult", judged.inResult(), "outResult", judged.outResult(), "absent", judged.absent(),
+                                "now", now));
     }
 
-    public void judge(Map<String, Object> row, String day, LocalDateTime in, LocalDateTime out, boolean finalized,
+    public void judge(
+            Map<String, Object> row,
+            String day,
+            LocalDateTime in,
+            LocalDateTime out,
+            boolean finalized,
             LocalDateTime now) {
         var s = snapshot(row);
         var judged = AttendanceRules.judge((LocalDate) row.get("work_date"), day, s.start(), s.end(), s.grace(), in,
@@ -121,6 +135,6 @@ public class AttendanceStore {
           WHERE id=:id AND NOT(clock_in_at<=>:in AND clock_out_at<=>:out AND day_type<=>:day AND in_result<=>:inResult AND out_result<=>:outResult AND absent<=>:absent)
           """, map("id", row.get("id"), "in", in, "out", out, "day", day, "inResult", judged.inResult(), "outResult",
                 judged.outResult(), "absent", row.get("fix_document_id") != null && (in != null || out != null) ? false
-                : judged.absent(), "now", now));
+                        : judged.absent(), "now", now));
     }
 }

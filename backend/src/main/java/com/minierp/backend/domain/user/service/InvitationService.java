@@ -40,7 +40,10 @@ public class InvitationService {
             }
             String token = UUID.randomUUID().toString();
             tokens.save(token, event.userId(), user.getUserEmail());
-            String link = UriComponentsBuilder.fromUriString(setupUrl).queryParam("setupToken", token).build().encode()
+            String link = UriComponentsBuilder.fromUriString(setupUrl)
+                    .queryParam("setupToken", token)
+                    .build()
+                    .encode()
                     .toUriString();
             mail.sendInvitationMail(event.email(), link);
             event.result().invitationDelivered();

@@ -25,8 +25,8 @@ public class TaskResponseDto {
     private List<AssigneeSummaryDto> assignees;
     public static TaskResponseDto from(Task task) {
         return new TaskResponseDto(task.getId(), task.getProject().getId(), task.getTaskTitle(), task.getTaskContent(),
-                task.getTaskStatus(), task.getPriority(), task.getEndDate(), task.getTaskAssignments().stream()
-                .map(AssigneeSummaryDto::from).toList());
+                task.getTaskStatus(), task.getPriority(), task.getEndDate(),
+                task.getTaskAssignments().stream().map(AssigneeSummaryDto::from).toList());
     }
 
     @Getter

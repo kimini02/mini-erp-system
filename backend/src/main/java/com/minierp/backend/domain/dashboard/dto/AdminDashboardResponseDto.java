@@ -14,8 +14,13 @@ public class AdminDashboardResponseDto {
     private double taskCompletionRate;
     private long totalTaskCount;
     private List<LeaveRequestResponseDto> pendingApprovals;
-    public static AdminDashboardResponseDto of(long totalUsers, long activeProjectCount, long pendingApprovalCount,
-            double taskCompletionRate, long totalTaskCount, List<LeaveRequestResponseDto> pendingApprovals) {
+    public static AdminDashboardResponseDto of(
+            long totalUsers,
+            long activeProjectCount,
+            long pendingApprovalCount,
+            double taskCompletionRate,
+            long totalTaskCount,
+            List<LeaveRequestResponseDto> pendingApprovals) {
         return new AdminDashboardResponseDto(totalUsers, activeProjectCount, pendingApprovalCount, taskCompletionRate,
                 totalTaskCount, pendingApprovals);
     }

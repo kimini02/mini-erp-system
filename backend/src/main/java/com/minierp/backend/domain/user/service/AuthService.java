@@ -46,8 +46,8 @@ public class AuthService {
             throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE);
         }
         String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(user.getId()), user.getTokenVersion());
-        return LoginResponseDto.of(accessToken, jwtTokenProvider.getAccessTokenExpirationSeconds(), UserResponseDto
-                .from(user), user.isMustChangePassword());
+        return LoginResponseDto.of(accessToken, jwtTokenProvider.getAccessTokenExpirationSeconds(),
+                UserResponseDto.from(user), user.isMustChangePassword());
     }
 
     @Transactional(readOnly = true)
@@ -135,7 +135,7 @@ public class AuthService {
         user.updatePassword(passwordEncoder.encode(newPassword));
         userRepository.flush();
         return LoginResponseDto.of(jwtTokenProvider.generateAccessToken(userId.toString(), user.getTokenVersion()),
-                jwtTokenProvider.getAccessTokenExpirationSeconds(), UserResponseDto.from(user), user
-                .isMustChangePassword());
+                jwtTokenProvider.getAccessTokenExpirationSeconds(), UserResponseDto.from(user),
+                user.isMustChangePassword());
     }
 }

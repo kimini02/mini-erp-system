@@ -47,17 +47,18 @@ public class InboxRepository {
     public String pageSql(String box, String formCode, String q) {
         return
                 "SELECT d.id,d.doc_no,d.title,d.status,d.submitted_at,d.updated_at,f.code,u.user_name,p.name AS position_name,dep.name AS department_name"
-                + selectionSql(box, formCode, q) + " ORDER BY "
-                + (box.equals("drafts") ? "d.updated_at" : "d.submitted_at")
-                + " DESC,d.id DESC LIMIT :size OFFSET :offset";
+                + selectionSql(box, formCode,
+                q) + " ORDER BY " + (box.equals("drafts") ? "d.updated_at" : "d.submitted_at")
+                        + " DESC,d.id DESC LIMIT :size OFFSET :offset";
     }
 
     public Map<String, Object> search(long actor, String box, String formCode, String q, int page, int size) {
         if (page < 0 || size < 1 || size > 100) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        var args = map("actor", actor, "form", formCode, "q", q == null ? null : "%" + q.replace("!", "!!")
-                .replace("%", "!%").replace("_", "!_") + "%", "size", size, "offset", (long) page * size);
+        var args = map("actor", actor, "form", formCode,
+                "q", q == null ? null : "%" + q.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%",
+                "size", size, "offset", (long) page * size);
         long total = db.count("SELECT COUNT(*)" + selectionSql(box, formCode, q), args);
         var documents = db.rows(pageSql(box, formCode, q), args);
         if (documents.isEmpty()) {
@@ -66,7 +67,9 @@ public class InboxRepository {
         var ids = documents.stream().map(d -> number(d, "id")).toList();
         var lines = db.rows(
                 "SELECT document_id,approver_name,approver_title,status FROM approval_lines WHERE document_id IN (:ids) AND line_kind='APPROVER' ORDER BY document_id,step_order",
-                map("ids", ids)).stream().collect(Collectors.groupingBy(l -> number(l, "document_id")));
+                map("ids", ids))
+                .stream()
+                .collect(Collectors.groupingBy(l -> number(l, "document_id")));
         var content = documents.stream().map(d -> {
             var progress = new ArrayList<String>();
             String status = (String) d.get("status");
@@ -86,18 +89,19 @@ public class InboxRepository {
                     current = map("name", l.get("approver_name"), "title", l.get("approver_title"));
                 }
             }
-            return map("id", d.get("id"), "docNo", d.get("doc_no"), "formCode", d.get("code"), "formName", FormService
-                    .shortName((String) d.get("code")), "title", d.get("title"), "drafter",
-                    map("name", d.get("user_name"), "title", d.get("position_name"), "department", d
-                    .get("department_name")), "submittedAt", d.get("submitted_at"), "updatedAt", d.get("updated_at"),
-                    "status", status, "steps", progress, "currentApprover", current);
+            return map("id", d.get("id"), "docNo", d.get("doc_no"), "formCode", d.get("code"),
+                    "formName", FormService.shortName((String) d.get("code")), "title", d.get("title"),
+                    "drafter", map("name", d.get("user_name"), "title", d.get("position_name"),
+                            "department", d.get("department_name")), "submittedAt", d.get("submitted_at"),
+                    "updatedAt", d.get("updated_at"), "status", status, "steps", progress, "currentApprover", current);
         }).toList();
         return EmployeeService.page(content, page, size, total);
     }
 
     public Map<String, Object> counts(long actor) {
-        String query = BOXES.stream().map(box -> "(SELECT COUNT(*) FROM approval_documents d WHERE " + condition(box)
-                + ") AS `" + box + "`").collect(Collectors.joining(","));
+        String query = BOXES.stream()
+                .map(box -> "(SELECT COUNT(*) FROM approval_documents d WHERE " + condition(box) + ") AS `" + box + "`")
+                .collect(Collectors.joining(","));
         return db.one("SELECT " + query, map("actor", actor), ErrorCode.USER_NOT_FOUND);
     }
 }

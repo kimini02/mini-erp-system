@@ -14,7 +14,13 @@ public class EmployeeRepository {
     public record Selection(List<Long> ids, long total, Map<String, Long> counts) {
     }
 
-    public Selection search(ScopeFilter scope, String q, List<Long> departments, String status, int page, int size,
+    public Selection search(
+            ScopeFilter scope,
+            String q,
+            List<Long> departments,
+            String status,
+            int page,
+            int size,
             String sort) {
         Map<String, Object> args = new HashMap<>();
         String where = scope.predicate("u", args);
@@ -27,8 +33,8 @@ public class EmployeeRepository {
             where += departments.isEmpty() ? " AND 1=0" : " AND u.department_id IN (:departments)";
         }
         Map<String, Long> counts = new LinkedHashMap<>(Map.of("ACTIVE", 0L, "ON_LEAVE", 0L, "RETIRED", 0L));
-        for (var row : db.rows("SELECT u.status,COUNT(*) AS n FROM users u WHERE " + where + " GROUP BY u.status",
-                args)) {
+        for (var row
+                : db.rows("SELECT u.status,COUNT(*) AS n FROM users u WHERE " + where + " GROUP BY u.status", args)) {
             counts.put((String) row.get("status"), number(row, "n"));
         }
         if (status != null) {
@@ -38,8 +44,12 @@ public class EmployeeRepository {
         long total = db.count("SELECT COUNT(*) FROM users u WHERE " + where, args);
         args.put("size", size);
         args.put("offset", (long) page * size);
-        List<Long> ids = db.rows("SELECT u.id FROM users u WHERE " + where + " ORDER BY " + sort
-                + ",u.id LIMIT :size OFFSET :offset", args).stream().map(r -> number(r, "id")).toList();
+        List<Long> ids = db.rows(
+                "SELECT u.id FROM users u WHERE " + where + " ORDER BY " + sort + ",u.id LIMIT :size OFFSET :offset",
+                args)
+                .stream()
+                .map(r -> number(r, "id"))
+                .toList();
         return new Selection(ids, total, counts);
     }
 }

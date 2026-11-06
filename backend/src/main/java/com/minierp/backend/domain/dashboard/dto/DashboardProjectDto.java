@@ -15,7 +15,7 @@ public class DashboardProjectDto {
     private int progressRate;
     private LocalDate endDate;
     public static DashboardProjectDto from(Project project, int progressRate) {
-        return new DashboardProjectDto(project.getId(), project.getTitle(), project.getStatus(), progressRate, project
-                .getEndDate());
+        return new DashboardProjectDto(project.getId(), project.getTitle(), project.getStatus(), progressRate,
+                project.getEndDate());
     }
 }

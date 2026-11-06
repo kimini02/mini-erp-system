@@ -17,9 +17,7 @@ public class FormController {
     private final FormService service;
     private final ApprovalLineResolver resolver;
     private final Clock clock;
-    public record Preview(
-            @NotNull
-            Long drafterId) {
+    public record Preview(@NotNull Long drafterId) {
     }
 
     private ApiResponse<?> ok(Object value) {
@@ -33,40 +31,25 @@ public class FormController {
 
     @GetMapping("/{code}")
     @RequirePermission(menu = "APPROVAL_FORM", action = Action.VIEW)
-    public ApiResponse<?> detail(
-            @PathVariable
-            String code) {
+    public ApiResponse<?> detail(@PathVariable String code) {
         return ok(service.detail(code));
     }
 
     @PatchMapping("/{code}")
     @RequirePermission(menu = "APPROVAL_FORM", action = Action.UPDATE)
-    public ApiResponse<?> patch(
-            @PathVariable
-            String code,
-            @RequestBody
-            FormService.Options body) {
+    public ApiResponse<?> patch(@PathVariable String code, @RequestBody FormService.Options body) {
         return ok(service.patch(code, body));
     }
 
     @PutMapping("/{code}/steps")
     @RequirePermission(menu = "APPROVAL_FORM", action = Action.UPDATE)
-    public ApiResponse<?> steps(
-            @PathVariable
-            String code,
-            @RequestBody
-            List<FormService.Step> body) {
+    public ApiResponse<?> steps(@PathVariable String code, @RequestBody List<FormService.Step> body) {
         return ok(service.steps(code, body));
     }
 
     @PostMapping("/{code}/line-preview")
     @RequirePermission(menu = "APPROVAL_FORM", action = Action.VIEW)
-    public ApiResponse<?> preview(
-            @PathVariable
-            String code,
-            @Valid
-            @RequestBody
-            Preview body) {
+    public ApiResponse<?> preview(@PathVariable String code, @Valid @RequestBody Preview body) {
         return ok(resolver.preview(code, body.drafterId(), null));
     }
 }

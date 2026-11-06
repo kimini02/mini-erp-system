@@ -13,8 +13,8 @@ public class UserListResponseDto {
     private final PageMeta page;
     public static UserListResponseDto of(Page<UserResponseDto> pageResult) {
         return new UserListResponseDto(pageResult.getContent(),
-                new PageMeta(pageResult.getNumber(), pageResult.getSize(), pageResult.getTotalElements(), pageResult
-                .getTotalPages(), pageResult.isFirst(), pageResult.isLast()));
+                new PageMeta(pageResult.getNumber(), pageResult.getSize(), pageResult.getTotalElements(),
+                        pageResult.getTotalPages(), pageResult.isFirst(), pageResult.isLast()));
     }
 
     @Getter

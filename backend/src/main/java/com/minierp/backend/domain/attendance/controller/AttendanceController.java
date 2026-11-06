@@ -33,9 +33,7 @@ public class AttendanceController {
 
     @GetMapping("/me")
     @RequirePermission(menu = "MY_ATTENDANCE", action = Action.VIEW)
-    public ApiResponse<?> me(
-            @RequestParam
-            String month) {
+    public ApiResponse<?> me(@RequestParam String month) {
         return ApiResponse.success(clock, service.me(month));
     }
 }

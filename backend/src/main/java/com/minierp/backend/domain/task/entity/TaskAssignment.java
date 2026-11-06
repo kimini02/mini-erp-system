@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
     @UniqueConstraint(columnNames = {
         "task_id", "user_id"
     })
-        })
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class TaskAssignment extends BaseEntity {

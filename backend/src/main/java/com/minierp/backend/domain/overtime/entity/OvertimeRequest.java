@@ -37,7 +37,11 @@ public class OvertimeRequest extends BaseEntity {
             "(select case d.status when 'IN_PROGRESS' then 'PENDING' when 'WITHDRAWN' then 'CANCELLED' else d.status end from approval_documents d where d.id=document_id)")
     private OvertimeStatus status = OvertimeStatus.PENDING;
     @Builder
-    public OvertimeRequest(User requester, LocalDate overtimeDate, LocalTime startTime, LocalTime endTime,
+    public OvertimeRequest(
+            User requester,
+            LocalDate overtimeDate,
+            LocalTime startTime,
+            LocalTime endTime,
             String reason) {
         this.requester = requester;
         this.overtimeDate = overtimeDate;

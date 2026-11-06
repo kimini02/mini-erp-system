@@ -41,8 +41,13 @@ public class Task extends BaseEntity {
     // Task 삭제 시 배정 정보도 함께 삭제 (데이터 정합성)
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskAssignment> taskAssignments = new ArrayList<>();
-    public static Task create(String taskTitle, String taskContent, LocalDate endDate, TaskStatus taskStatus,
-            Priority priority, Project project) {
+    public static Task create(
+            String taskTitle,
+            String taskContent,
+            LocalDate endDate,
+            TaskStatus taskStatus,
+            Priority priority,
+            Project project) {
         Task task = new Task();
         task.taskTitle = taskTitle;
         task.taskContent = taskContent;
@@ -79,8 +84,8 @@ public class Task extends BaseEntity {
     @PrePersist
     @PreUpdate
     private void validatePeriod() {
-        if (project != null && project.getEndDate() != null && endDate != null && endDate
-                .isAfter(project.getEndDate())) {
+        if (project != null && project.getEndDate() != null && endDate != null
+                && endDate.isAfter(project.getEndDate())) {
             throw new BusinessException(ErrorCode.INVALID_TASK_PERIOD);
         }
     }

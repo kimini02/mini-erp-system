@@ -18,7 +18,7 @@ public class NotificationService {
         db.update(
                 "INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,:doc,:type,:title,:link,:now)",
                 map("user", user, "doc", document, "type", type, "title", title, "link", "/approvals/" + document,
-                "now", LocalDateTime.now(clock)));
+                        "now", LocalDateTime.now(clock)));
     }
 
     @Transactional(propagation = Propagation.MANDATORY)

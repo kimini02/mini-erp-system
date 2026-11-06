@@ -14,7 +14,5 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     // 멤버 수 일괄 집계 (프로젝트 목록 1+3N 최적화)
     @Query(
             "select pm.project.id, count(pm) from ProjectMember pm where pm.project.id in :projectIds group by pm.project.id")
-    List<Object[]> countMembersByProjectIds(
-            @Param("projectIds")
-            List<Long> projectIds);
+    List<Object[]> countMembersByProjectIds(@Param("projectIds") List<Long> projectIds);
 }

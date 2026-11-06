@@ -21,11 +21,7 @@ public class DocumentController {
     private final ApprovalLineResolver resolver;
     private final PermissionAccess access;
     private final Clock clock;
-    public record Preview(
-            @NotBlank
-            String formCode, List<
-            @Valid
-            ManualStep> line) {
+    public record Preview(@NotBlank String formCode, List<@Valid ManualStep> line) {
     }
 
     public record Comment(String comment) {
@@ -37,85 +33,56 @@ public class DocumentController {
 
     @PostMapping("/line-preview")
     @RequirePermission(menu = "APPROVAL_DRAFT", action = Action.CREATE)
-    public ApiResponse<?> preview(
-            @Valid
-            @RequestBody
-            Preview body) {
+    public ApiResponse<?> preview(@Valid @RequestBody Preview body) {
         return ok(resolver.preview(body.formCode(), access.actor(), body.line()));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission(menu = "APPROVAL_DRAFT", action = Action.CREATE)
-    public ApiResponse<?> create(
-            @Valid
-            @RequestBody
-            DocumentRequest body) {
+    public ApiResponse<?> create(@Valid @RequestBody DocumentRequest body) {
         return ok(service.create(body));
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<?> update(
-            @PathVariable
-            long id,
-            @Valid
-            @RequestBody
-            DocumentRequest body) {
+    public ApiResponse<?> update(@PathVariable long id, @Valid @RequestBody DocumentRequest body) {
         return ok(service.update(id, body));
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<?> delete(
-            @PathVariable
-            long id) {
+    public ApiResponse<?> delete(@PathVariable long id) {
         service.delete(id);
         return ok(null);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<?> detail(
-            @PathVariable
-            long id) {
+    public ApiResponse<?> detail(@PathVariable long id) {
         return ok(service.detail(id));
     }
 
     @PostMapping("/{id}/submit")
-    public ApiResponse<?> submit(
-            @PathVariable
-            long id) {
+    public ApiResponse<?> submit(@PathVariable long id) {
         return ok(service.submit(id));
     }
 
     @PostMapping("/{id}/approve")
-    public ApiResponse<?> approve(
-            @PathVariable
-            long id,
-            @RequestBody(required = false)
-            Comment body) {
+    public ApiResponse<?> approve(@PathVariable long id, @RequestBody(required = false) Comment body) {
         return ok(service.act(id, true, body == null ? null : body.comment()));
     }
 
     @PostMapping("/{id}/reject")
-    public ApiResponse<?> reject(
-            @PathVariable
-            long id,
-            @RequestBody(required = false)
-            Comment body) {
+    public ApiResponse<?> reject(@PathVariable long id, @RequestBody(required = false) Comment body) {
         return ok(service.act(id, false, body == null ? null : body.comment()));
     }
 
     @PostMapping("/{id}/withdraw")
-    public ApiResponse<?> withdraw(
-            @PathVariable
-            long id) {
+    public ApiResponse<?> withdraw(@PathVariable long id) {
         return ok(service.withdraw(id));
     }
 
     @PostMapping("/{id}/resubmit")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<?> resubmit(
-            @PathVariable
-            long id) {
+    public ApiResponse<?> resubmit(@PathVariable long id) {
         return ok(service.resubmit(id));
     }
 }

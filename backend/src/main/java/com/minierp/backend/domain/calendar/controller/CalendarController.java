@@ -23,13 +23,12 @@ public class CalendarController {
     * GET /api/v1/calendar/events?year=2026&month=3
     */
     @GetMapping("/events")
-    public ResponseEntity<ApiResponse<List<CalendarEventResponseDto>>> getCalendarEvents(Authentication authentication,
-            @RequestParam
-            int year,
-            @RequestParam
-            int month) {
-        List<CalendarEventResponseDto> events = calendarService
-                .getCalendarEvents(currentUserResolver.resolveUserId(authentication), year, month);
+    public ResponseEntity<ApiResponse<List<CalendarEventResponseDto>>> getCalendarEvents(
+            Authentication authentication,
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<CalendarEventResponseDto> events = calendarService.getCalendarEvents(
+                currentUserResolver.resolveUserId(authentication), year, month);
         return ResponseEntity.ok(ApiResponse.success(clock, events, "캘린더 이벤트 조회가 완료되었습니다."));
     }
 }

@@ -60,10 +60,13 @@ public class LeaveAdminService {
             FROM leave_ledger WHERE leave_year=:year GROUP BY user_id
           ) l ON l.user_id=u.id WHERE
           """ + where + " ORDER BY u.user_name,u.id LIMIT :size OFFSET :offset", args).stream()
-                .map(r -> map("user", map("id", r.get("id"), "name", r.get("user_name"), "title", r.get("title"),
-                "department", r.get("department")), "hireDate", r.get("hire_date"), "hireDateMissing", r
-                .get("hire_date") == null, "granted", r.get("granted"), "used", r.get("used"), "reserved", r
-                .get("reserved"), "adjusted", r.get("adjusted"), "available", r.get("available"))).toList();
+                .map(r -> map(
+                        "user", map("id", r.get("id"), "name", r.get("user_name"), "title", r.get("title"),
+                                "department", r.get("department")), "hireDate", r.get("hire_date"),
+                        "hireDateMissing", r.get("hire_date") == null, "granted", r.get("granted"),
+                        "used", r.get("used"), "reserved", r.get("reserved"), "adjusted", r.get("adjusted"),
+                        "available", r.get("available")))
+                        .toList();
         return EmployeeService.page(rows, page, size, total);
     }
 
@@ -77,22 +80,24 @@ public class LeaveAdminService {
     public Map<String, Object> adjust(long user, int year, BigDecimal days, String memo) {
         access.assertUserInScope(MENU, user);
         year(year);
-        if (days == null || days.signum() == 0 || days.remainder(new BigDecimal("0.5")).signum() != 0 || days.abs()
-                .compareTo(new BigDecimal("9999999.5")) > 0 || memo == null || memo.isBlank() || memo.length() > 500) {
+        if (days == null || days.signum() == 0 || days.remainder(new BigDecimal("0.5")).signum() != 0
+                || days.abs().compareTo(
+                new BigDecimal("9999999.5")) > 0 || memo == null || memo.isBlank() || memo.length() > 500) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         db.one("SELECT id FROM users WHERE id=:id FOR UPDATE", map("id", user), ErrorCode.USER_NOT_FOUND);
         var args = map("id", user, "year", year);
         var current = (BigDecimal) db.one(
                 "SELECT COALESCE(SUM(days),0) AS balance FROM leave_ledger WHERE user_id=:id AND leave_year=:year",
-                args, ErrorCode.USER_NOT_FOUND).get("balance");
+                args, ErrorCode.USER_NOT_FOUND)
+                .get("balance");
         if (current.add(days).signum() < 0) {
             throw new BusinessException(ErrorCode.LEAVE_BALANCE_NEGATIVE);
         }
         long id = db.insert(
                 "INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,memo,created_by,created_at) VALUES(:user,:year,'ADJUST',:days,:memo,:actor,:now)",
-                map("user", user, "year", year, "days", days, "memo", memo, "actor", access.actor(), "now",
-                LocalDateTime.now(clock)));
+                map("user", user, "year", year, "days", days, "memo", memo, "actor", access.actor(),
+                        "now", LocalDateTime.now(clock)));
         return map("id", id, "userId", user, "year", year, "available", current.add(days));
     }
 

@@ -27,13 +27,13 @@ public class GeneralFormHandler implements ApprovalFormHandler {
         checkFormat(b);
         db.update(
                 "INSERT INTO general_requests(document_id,content,amount) VALUES(:id,:content,:amount) ON DUPLICATE KEY UPDATE content=VALUES(content),amount=VALUES(amount)",
-                map("id", d.id(), "content", b.path("content").textValue(), "amount", BodyValues
-                .optionalLong(b, "amount")));
+                map("id", d.id(), "content", b.path("content").textValue(),
+                        "amount", BodyValues.optionalLong(b, "amount")));
     }
 
     public Map<String, Object> body(long id) {
-        return db.one("SELECT content,amount FROM general_requests WHERE document_id=:id", map("id", id), ErrorCode
-                .DOCUMENT_NOT_FOUND);
+        return db.one("SELECT content,amount FROM general_requests WHERE document_id=:id", map("id", id),
+                ErrorCode.DOCUMENT_NOT_FOUND);
     }
 
     public void copyBody(long source, ApprovalDocument target) {

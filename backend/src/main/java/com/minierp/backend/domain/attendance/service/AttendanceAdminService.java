@@ -22,9 +22,8 @@ public class AttendanceAdminService {
     private final AbsenceBatchService absence;
     private final Clock clock;
     private static final String MENU = "ATTENDANCE_MONTHLY";
-    public static final List<String> LEGEND = List
-            .of("ON_TIME", "LATE", "EARLY", "MISSING", "ABSENT", "LEAVE", "HALF_AM", "HALF_PM", "HOLIDAY",
-            "HOLIDAY_WORK", "NONE", "FUTURE");
+    public static final List<String> LEGEND = List.of("ON_TIME", "LATE", "EARLY", "MISSING", "ABSENT", "LEAVE",
+            "HALF_AM", "HALF_PM", "HOLIDAY", "HOLIDAY_WORK", "NONE", "FUTURE");
     private String scope(Long department, boolean sub, Map<String, Object> args) {
         var scope = access.scope(MENU);
         String where = scope.predicate("u", args);
@@ -53,22 +52,24 @@ public class AttendanceAdminService {
         Map<Long, Map<String, Object>> rows = new LinkedHashMap<>();
         for (var r : data) {
             var date = (LocalDate) r.get("cell_date");
-            days.putIfAbsent(date, map("date", date, "weekday", date.getDayOfWeek().toString().substring(0, 3),
-                    "dayType", r.get("calendar_type"), "holidayName", r.get("holiday_name")));
+            days.putIfAbsent(date,
+                    map("date", date, "weekday", date.getDayOfWeek().toString().substring(0, 3),
+                            "dayType", r.get("calendar_type"), "holidayName", r.get("holiday_name")));
             if (r.get("user_id") == null) {
                 continue;
             }
             long id = number(r, "user_id");
-            var row = rows.computeIfAbsent(id, k
-                    -> map("user", map("id", id, "name", r.get("user_name"), "title", r.get("title"), "department", r
-                    .get("department")), "cells", new ArrayList<Map<String, Object>>(), "totals",
-                    map("late", 0, "early", 0, "absent", 0, "missing", 0, "leaveDays", 0.0)));
+            var row = rows.computeIfAbsent(id,
+                    k -> map(
+                            "user", map("id", id, "name", r.get("user_name"), "title", r.get("title"),
+                                    "department", r.get("department")), "cells", new ArrayList<Map<String, Object>>(),
+                            "totals", map("late", 0, "early", 0, "absent", 0, "missing", 0, "leaveDays", 0.0)));
             boolean employed = employed(date, (LocalDate) r.get("employed_from"), (LocalDate) r.get("retired_date"));
             String type = (String) r.get("day_type");
-            var verdict = new AttendanceRules
-                    .Result((String) r.get("in_result"), (String) r.get("out_result"), bool(r, "absent"));
-            String code = employed ? AttendanceRules
-                    .code(date, today, type, verdict, (LocalDateTime) r.get("clock_in_at")) : "NONE";
+            var verdict = new AttendanceRules.Result((String) r.get("in_result"), (String) r.get("out_result"),
+                    bool(r, "absent"));
+            String code = employed ? AttendanceRules.code(date, today, type, verdict,
+                    (LocalDateTime) r.get("clock_in_at")) : "NONE";
             cells(row).add(map("date", date, "code", code));
             if (employed) {
                 var t = totals(row);
@@ -76,8 +77,9 @@ public class AttendanceAdminService {
                 add(t, "early", "EARLY".equals(verdict.outResult()));
                 add(t, "absent", verdict.absent());
                 add(t, "missing", "MISSING".equals(verdict.outResult()));
-                t.put("leaveDays", ((Number) t.get("leaveDays")).doubleValue()
-                        + (type.equals("LEAVE") ? 1 : type.startsWith("HALF_") ?.5 : 0));
+                t.put("leaveDays",
+                        ((Number) t.get("leaveDays"))
+                                .doubleValue() + (type.equals("LEAVE") ? 1 : type.startsWith("HALF_") ?.5 : 0));
             }
         }
         return map("month", month.toString(), "days", days.values(), "rows", rows.values(), "legend", LEGEND);
@@ -102,8 +104,7 @@ public class AttendanceAdminService {
     @Transactional(readOnly = true)
     public Map<String, Object> detail(long user, LocalDate date) {
         access.assertUserInScope(MENU, user);
-        var u = db
-                .one(
+        var u = db.one(
                 "SELECT id,user_name,COALESCE(hire_date,DATE(created_at)) AS employed_from,retired_date FROM users WHERE id=:id",
                 map("id", user), ErrorCode.USER_NOT_FOUND);
         var row = records.record(user, date, false);
@@ -112,8 +113,8 @@ public class AttendanceAdminService {
         var in = row == null ? null : (LocalDateTime) row.get("clock_in_at");
         var out = row == null ? null : (LocalDateTime) row.get("clock_out_at");
         String type = row == null ? day.type() : (String) row.get("day_type");
-        var verdict = row == null ? new AttendanceRules.Result(null, null, false) : new AttendanceRules
-                .Result((String) row.get("in_result"), (String) row.get("out_result"), bool(row, "absent"));
+        var verdict = row == null ? new AttendanceRules.Result(null, null, false) : new AttendanceRules.Result(
+                (String) row.get("in_result"), (String) row.get("out_result"), bool(row, "absent"));
         String code = employed(date, (LocalDate) u.get("employed_from"), (LocalDate) u.get("retired_date"))
                 ? AttendanceRules.code(date, LocalDate.now(clock), type, verdict, in) : "NONE";
         String reason = reason(code, in, out, s, type, "EARLY".equals(verdict.outResult()));
@@ -121,22 +122,29 @@ public class AttendanceAdminService {
         schedule.remove("source");
         schedule.remove("departmentName");
         return map("user", map("id", user, "name", u.get("user_name")), "date", date, "code", code, "clockInAt", in,
-                "clockOutAt", out, "schedule", schedule, "reason", reason, "leaveDocument", day.leave() == null ? null
-                : map("id", day.leave().get("documentId"), "docNo", day.leave().get("docNo")), "fixDocument", row
-                == null || row.get("fix_document_id") == null ? null
-                : map("id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no")), "judgedAt", row == null ? null
-                : row.get("judged_at"));
+                "clockOutAt", out, "schedule", schedule, "reason", reason,
+                "leaveDocument", day.leave() == null ? null : map("id", day.leave().get("documentId"),
+                        "docNo", day.leave().get("docNo")),
+                "fixDocument", row == null || row.get("fix_document_id") == null ? null : map(
+                        "id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no")),
+                "judgedAt", row == null ? null : row.get("judged_at"));
     }
 
-    private String reason(String code, LocalDateTime in, LocalDateTime out, AttendanceStore.Schedule s, String type,
+    private String reason(
+            String code,
+            LocalDateTime in,
+            LocalDateTime out,
+            AttendanceStore.Schedule s,
+            String type,
             boolean early) {
         var f = DateTimeFormatter.ofPattern("HH:mm");
         return switch (code) {
             case "LATE" -> "출근 " + in.format(f) + " > 기준 "
-                    + (type.equals("HALF_AM") ? s.start().plusHours(5) : s.start()).format(f) + " + 유예 " + s.grace()
-                    + "분" + (early ? " (조퇴도 기록됨)" : "");
+                    + (type.equals("HALF_AM") ? s.start().plusHours(5) : s.start())
+                    .format(f) + " + 유예 " + s.grace() + "분" + (early ? " (조퇴도 기록됨)" : "");
             case "EARLY" -> "퇴근 " + out.format(f) + " < 기준 "
-                    + (type.equals("HALF_PM") ? s.start().plusHours(5) : s.end()).format(f);
+                    + (type.equals("HALF_PM") ? s.start().plusHours(5) : s.end())
+                    .format(f);
             case "ABSENT" -> "근무일에 출근 기록과 승인된 종일 휴가가 없습니다.";
             case "MISSING" -> "출근 후 퇴근 기록이 없습니다.";
             case "LEAVE", "HALF_AM", "HALF_PM" -> "승인된 휴가를 반영한 판정입니다.";

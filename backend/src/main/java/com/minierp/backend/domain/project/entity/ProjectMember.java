@@ -11,11 +11,10 @@ import lombok.NoArgsConstructor;
 * - 이 테이블에 레코드가 있어야 해당 프로젝트의 Task에 배정 가능 (권한 = 멤버십)
 */
 @Entity
-@Table(name = "project_members", uniqueConstraints =
-        @UniqueConstraint(columnNames = {
+@Table(name = "project_members", uniqueConstraints = @UniqueConstraint(columnNames = {
     "project_id", "user_id"
 })
-        )
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ProjectMember extends BaseEntity {

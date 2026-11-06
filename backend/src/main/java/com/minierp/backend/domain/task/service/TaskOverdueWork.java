@@ -22,8 +22,7 @@ public class TaskOverdueWork {
         int processed = 0;
         int skipped = 0;
         // Same first lock as all board writes; id ordering prevents cross-project lock inversion.
-        var projects = db
-                .rows(
+        var projects = db.rows(
                 "SELECT DISTINCT project_id FROM tasks WHERE end_date<:today AND task_status<>'DONE' ORDER BY project_id",
                 map("today", today));
         for (var p : projects) {
@@ -38,8 +37,8 @@ public class TaskOverdueWork {
      WHERE t.project_id=:project AND t.end_date<:today AND t.task_status<>'DONE' ORDER BY t.id,a.user_id
      """, map("project", project, "today", today));
             for (var t : tasks) {
-                var args = map("task", t.get("id"), "user", t.get("user_id"), "due", t.get("end_date"), "now",
-                        LocalDateTime.now(clock));
+                var args = map("task", t.get("id"), "user", t.get("user_id"), "due", t.get("end_date"),
+                        "now", LocalDateTime.now(clock));
                 // All claim writers hold the project lock; NOT EXISTS excludes previously claimed keys.
                 // The unique key rejects any unexpected competing writer and rolls back the batch.
                 int inserted = db.update("""
@@ -53,8 +52,8 @@ public class TaskOverdueWork {
                 }
                 long task = number(t, "id");
                 String title = t.get("project_key") + "-" + t.get("task_no") + " " + t.get("task_title");
-                notifications.storeTaskOverdue(number(t, "user_id"), title, "/projects/" + project + "/board?taskId="
-                        + task);
+                notifications.storeTaskOverdue(number(t, "user_id"), title,
+                        "/projects/" + project + "/board?taskId=" + task);
                 db.update(
                         "INSERT INTO task_histories(task_id,actor_id,action,to_value,created_at) VALUES(:task,NULL,'OVERDUE_NOTIFIED',:user,:now)",
                         args);

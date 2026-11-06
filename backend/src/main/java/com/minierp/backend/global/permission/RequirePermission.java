@@ -6,8 +6,7 @@ import java.lang.annotation.*;
     ElementType.METHOD, ElementType.TYPE
 })
 @Retention(RetentionPolicy.RUNTIME)
-public
-@interface RequirePermission {
+public @interface RequirePermission {
     String menu();
     Action action();
 }

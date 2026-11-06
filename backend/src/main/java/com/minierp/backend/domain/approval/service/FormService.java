@@ -59,15 +59,14 @@ public class FormService {
     public Map<String, Object> detail(String code) {
         var f = resolver.form(code);
         var out = presentation(f);
-        out.put("options", map("dedupeApprover", bool(f, "dedupe_approver"), "fallbackToUpper",
-                bool(f, "fallback_to_upper"), "skipSelf", bool(f, "skip_self"), "allowLineEdit",
-                bool(f, "allow_line_edit")));
+        out.put("options",
+                map("dedupeApprover", bool(f, "dedupe_approver"), "fallbackToUpper", bool(f, "fallback_to_upper"),
+                        "skipSelf", bool(f, "skip_self"), "allowLineEdit", bool(f, "allow_line_edit")));
         out.put("steps", db.rows(
                 "SELECT s.*,r.code AS role_code,r.name AS role_name,u.user_name FROM approval_form_steps s LEFT JOIN roles r ON r.id=s.role_id LEFT JOIN users u ON u.id=s.user_id WHERE s.form_id=:id ORDER BY s.step_order",
-                map("id", f.get("id"))).stream()
-                .map(s -> map("order", s.get("step_order"), "lineKind", s.get("line_kind"), "approverType", s
-                .get("approver_type"), "roleCode", s.get("role_code"), "userId", s.get("user_id"), "label",
-                switch ((String) s.get("approver_type")) {
+                map("id", f.get("id"))).stream().map(s -> map("order", s.get("step_order"), "lineKind", s.get(
+                        "line_kind"), "approverType", s.get("approver_type"), "roleCode", s.get("role_code"), "userId",
+                                s.get("user_id"), "label", switch ((String) s.get("approver_type")) {
             case "DEPT_HEAD" -> "기안자의 부서장";
             case "UPPER_DEPT_HEAD" -> "기안자의 상위 부서장";
             case "ROLE" -> s.get("role_name");
@@ -81,19 +80,20 @@ public class FormService {
         var f = resolver.form(code);
         db.update(
                 "UPDATE approval_forms SET dedupe_approver=COALESCE(:dedupe,dedupe_approver),fallback_to_upper=COALESCE(:fallback,fallback_to_upper),skip_self=COALESCE(:self,skip_self),allow_line_edit=COALESCE(:edit,allow_line_edit) WHERE id=:id",
-                map("id", f.get("id"), "dedupe", o.dedupeApprover(), "fallback", o.fallbackToUpper(), "self", o
-                .skipSelf(), "edit", o.allowLineEdit()));
+                map("id", f.get("id"), "dedupe", o.dedupeApprover(), "fallback", o.fallbackToUpper(),
+                        "self", o.skipSelf(), "edit", o.allowLineEdit()));
         return detail(code);
     }
 
     @Transactional
     public Map<String, Object> steps(String code, List<Step> steps) {
         var f = resolver.form(code);
-        if (steps == null || steps.isEmpty() || steps.stream()
-                .anyMatch(s -> s == null || s.lineKind() == null || !Set.of("APPROVER", "REFERENCE")
-                .contains(s.lineKind()) || s.approverType() == null || !Set
-                .of("DEPT_HEAD", "UPPER_DEPT_HEAD", "ROLE", "USER").contains(s.approverType())) || steps.stream()
-                .noneMatch(s -> "APPROVER".equals(s.lineKind()))) {
+        if (steps == null || steps.isEmpty() || steps.stream().anyMatch(
+                s -> s == null || s.lineKind() == null || !Set.of("APPROVER", "REFERENCE")
+                        .contains(s.lineKind()) || s.approverType() == null || !Set.of("DEPT_HEAD", "UPPER_DEPT_HEAD",
+                                "ROLE", "USER")
+                        .contains(s.approverType()))
+                                || steps.stream().noneMatch(s -> "APPROVER".equals(s.lineKind()))) {
             throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
         }
         List<Map<String, Object>> resolved = new ArrayList<>();
@@ -104,21 +104,24 @@ public class FormService {
                 if (step.roleCode() == null || step.roleCode().isBlank()) {
                     throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
                 }
-                role = number(db.one("SELECT id FROM roles WHERE code=:code", map("code", step.roleCode()), ErrorCode
-                        .ROLE_NOT_FOUND), "id");
+                role = number(
+                        db.one("SELECT id FROM roles WHERE code=:code", map("code", step.roleCode()),
+                                ErrorCode.ROLE_NOT_FOUND), "id");
             }
             if (step.approverType().equals("USER")) {
                 if (step.userId() == null) {
                     throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
                 }
-                user = number(db.one("SELECT id FROM users WHERE id=:id", map("id", step.userId()), ErrorCode
-                        .USER_NOT_FOUND), "id");
+                user = number(
+                        db.one("SELECT id FROM users WHERE id=:id", map("id", step.userId()), ErrorCode.USER_NOT_FOUND),
+                        "id");
             }
-            resolved.add(map("form", f.get("id"), "kind", step.lineKind(), "type", step.approverType(), "role", role,
-                    "user", user, "order", resolved.size() + 1));
+            resolved.add(
+                    map("form", f.get("id"), "kind", step.lineKind(), "type", step.approverType(), "role", role,
+                            "user", user, "order", resolved.size() + 1));
         }
-        db.one("SELECT id FROM approval_forms WHERE id=:id FOR UPDATE", map("id", f.get("id")), ErrorCode
-                .FORM_NOT_FOUND);
+        db.one("SELECT id FROM approval_forms WHERE id=:id FOR UPDATE", map("id", f.get("id")),
+                ErrorCode.FORM_NOT_FOUND);
         db.update("DELETE FROM approval_form_steps WHERE form_id=:id", map("id", f.get("id")));
         for (var step : resolved) {
             db.update(

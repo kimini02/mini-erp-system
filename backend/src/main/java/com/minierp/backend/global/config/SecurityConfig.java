@@ -27,13 +27,17 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults()).httpBasic(httpBasic -> httpBasic.disable())
+        http.csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
+                .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers(PUBLIC_URLS).permitAll().anyRequest()
-                .authenticated()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .exceptionHandling(
+                        exception -> exception.authenticationEntryPoint(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .authorizeHttpRequests(
+                        authorize -> authorize.requestMatchers(PUBLIC_URLS).permitAll().anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -43,10 +47,13 @@ public class SecurityConfig {
     @org.springframework.context.annotation.Profile("prod")
     public SecurityFilterChain operationalRoutes(HttpSecurity http) throws Exception {
         return http.securityMatcher("/actuator", "/actuator/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs",
-                "/v3/api-docs/**").csrf(csrf -> csrf.disable()).httpBasic(basic -> basic.disable())
+                "/v3/api-docs/**")
+                .csrf(csrf -> csrf.disable())
+                .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()).build();
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .build();
     }
 
     @Bean

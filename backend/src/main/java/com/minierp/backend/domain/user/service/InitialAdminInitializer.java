@@ -32,10 +32,11 @@ public class InitialAdminInitializer implements ApplicationRunner {
         String name = environment.getProperty("INITIAL_ADMIN_NAME");
         String email = environment.getProperty("INITIAL_ADMIN_EMAIL");
         String password = environment.getProperty("INITIAL_ADMIN_PASSWORD");
-        if (!StringUtils.hasText(loginId) || !StringUtils.hasText(name) || !StringUtils.hasText(email) || !StringUtils
-                .hasText(password)) {
-            log.warn("최초 관리자 생성 생략: INITIAL_ADMIN_LOGIN_ID, INITIAL_ADMIN_NAME, "
-                    + "INITIAL_ADMIN_EMAIL, INITIAL_ADMIN_PASSWORD 환경변수를 모두 설정해야 합니다.");
+        if (!StringUtils.hasText(loginId) || !StringUtils.hasText(name) || !StringUtils.hasText(email)
+                || !StringUtils.hasText(password)) {
+            log.warn(
+                    "최초 관리자 생성 생략: INITIAL_ADMIN_LOGIN_ID, INITIAL_ADMIN_NAME, "
+                            + "INITIAL_ADMIN_EMAIL, INITIAL_ADMIN_PASSWORD 환경변수를 모두 설정해야 합니다.");
             return;
         }
         if (!com.minierp.backend.global.security.PasswordPolicy.accepts(password)) {

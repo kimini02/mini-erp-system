@@ -47,8 +47,8 @@ public class InvitationTokenStore {
     }
 
     public void save(String token, long userId, String email) {
-        redis.execute(SAVE, List.of(USER_PREFIX + userId, TOKEN_PREFIX + token, EMAIL_PREFIX + token), token, Long
-                .toString(userId), TOKEN_PREFIX, EMAIL_PREFIX, email);
+        redis.execute(SAVE, List.of(USER_PREFIX + userId, TOKEN_PREFIX + token, EMAIL_PREFIX + token), token,
+                Long.toString(userId), TOKEN_PREFIX, EMAIL_PREFIX, email);
     }
 
     /** Only locates the user to lock; consume must still validate the active token afterward. */

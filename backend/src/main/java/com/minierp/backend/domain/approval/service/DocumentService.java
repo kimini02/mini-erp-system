@@ -26,7 +26,9 @@ public class DocumentService {
     private final NotificationService notifications;
     private final Clock clock;
     private ApprovalFormHandler handler(String code) {
-        return handlers.stream().filter(h -> h.formCode().equals(code)).findFirst()
+        return handlers.stream()
+                .filter(h -> h.formCode().equals(code))
+                .findFirst()
                 .orElseThrow(() -> new BusinessException(ErrorCode.FORM_NOT_FOUND));
     }
 
@@ -37,8 +39,8 @@ public class DocumentService {
     }
 
     private ApprovalDocument model(Map<String, Object> d) {
-        return new ApprovalDocument(number(d, "id"), number(d, "drafter_id"), number(d, "drafter_dept_id"), (String) d
-                .get("form_code"));
+        return new ApprovalDocument(number(d, "id"), number(d, "drafter_id"), number(d, "drafter_dept_id"),
+                (String) d.get("form_code"));
     }
 
     private void own(Map<String, Object> d) {
@@ -66,8 +68,8 @@ public class DocumentService {
     }
 
     private Map<String, Object> lockDocument(long id) {
-        db.one("SELECT id FROM approval_documents WHERE id=:id FOR UPDATE", map("id", id), ErrorCode
-                .DOCUMENT_NOT_FOUND);
+        db.one("SELECT id FROM approval_documents WHERE id=:id FOR UPDATE", map("id", id),
+                ErrorCode.DOCUMENT_NOT_FOUND);
         return raw(id);
     }
 
@@ -76,7 +78,9 @@ public class DocumentService {
     }
 
     private List<ManualStep> manual(long id) {
-        return lines(id).stream().map(r -> new ManualStep(number(r, "approver_id"), (String) r.get("line_kind")))
+        return lines(id)
+                .stream()
+                .map(r -> new ManualStep(number(r, "approver_id"), (String) r.get("line_kind")))
                 .toList();
     }
 
@@ -103,11 +107,16 @@ public class DocumentService {
                 VALUES(:id,:order,:kind,:user,:name,:title,:dept,:source,:rule,:status,:skip)
                 """, map("id", id, "order", r.order(), "kind", r.kind(), "user", p.get("id"), "name", p.get("name"),
                     "title", p.get("title"), "dept", p.get("department"), "source", r.source(), "rule", r.rule(),
-                    "status", status, "skip", submitted ? r.skipReason() : null));
+                            "status", status, "skip", submitted ? r.skipReason() : null));
         }
     }
 
-    private long insertDraft(Map<String, Object> form, String title, long user, long dept, boolean manual,
+    private long insertDraft(
+            Map<String, Object> form,
+            String title,
+            long user,
+            long dept,
+            boolean manual,
             Long original) {
         return db.insert("""
             INSERT INTO approval_documents(form_id,drafter_id,drafter_dept_id,title,status,version,manual_line,resubmitted_from_id,created_at,updated_at)
@@ -116,8 +125,11 @@ public class DocumentService {
                 original, "now", LocalDateTime.now(clock)));
     }
 
-    private List<ApprovalLineResolver
-            .Resolved> checkDraftLine(Map<String, Object> form, long user, long dept, List<ManualStep> manual) {
+    private List<ApprovalLineResolver.Resolved> checkDraftLine(
+            Map<String, Object> form,
+            long user,
+            long dept,
+            List<ManualStep> manual) {
         // Rules are resolved only on submission. Explicit manual lines must name real active users.
         return manual == null ? List.of() : resolver.resolve(form, user, dept, manual);
     }
@@ -154,11 +166,10 @@ public class DocumentService {
         handler(request.formCode()).saveBody(model(d), request.body());
         db.update("DELETE FROM approval_lines WHERE document_id=:id", map("id", id));
         storeLines(id, resolved, false);
-        db
-                .update(
+        db.update(
                 "UPDATE approval_documents SET title=:title,manual_line=:manual,version=version+1,updated_at=:now WHERE id=:id",
-                map("id", id, "title", request.title(), "manual", request.line() != null, "now", LocalDateTime
-                .now(clock)));
+                map("id", id, "title", request.title(), "manual", request.line() != null,
+                        "now", LocalDateTime.now(clock)));
         return detail(id);
     }
 
@@ -178,10 +189,9 @@ public class DocumentService {
         db.update(
                 "INSERT INTO doc_no_sequences(prefix,doc_year,last_seq) VALUES(:prefix,:year,0) ON DUPLICATE KEY UPDATE last_seq=last_seq",
                 map("prefix", prefix, "year", year));
-        long seq
-                = number(db
-                .one("SELECT last_seq FROM doc_no_sequences WHERE prefix=:prefix AND doc_year=:year FOR UPDATE",
-                map("prefix", prefix, "year", year), ErrorCode.RESOURCE_NOT_FOUND), "last_seq") + 1;
+        long seq = number(
+                db.one("SELECT last_seq FROM doc_no_sequences WHERE prefix=:prefix AND doc_year=:year FOR UPDATE",
+                        map("prefix", prefix, "year", year), ErrorCode.RESOURCE_NOT_FOUND), "last_seq") + 1;
         db.update("UPDATE doc_no_sequences SET last_seq=:seq WHERE prefix=:prefix AND doc_year=:year",
                 map("prefix", prefix, "year", year, "seq", seq));
         return String.format("%s-%d-%04d", prefix, year, seq);
@@ -196,8 +206,9 @@ public class DocumentService {
     private void transition(Map<String, Object> d, String status, Integer step, boolean completed) {
         if (db.update(
                 "UPDATE approval_documents SET status=:status,current_step=:step,completed_at=:completed,version=version+1,updated_at=:now WHERE id=:id AND version=:version",
-                map("id", d.get("id"), "version", d.get("version"), "status", status, "step", step, "completed",
-                completed ? LocalDateTime.now(clock) : null, "now", LocalDateTime.now(clock))) != 1) {
+                map("id", d.get("id"), "version", d.get("version"), "status", status, "step", step,
+                        "completed", completed ? LocalDateTime.now(clock) : null,
+                        "now", LocalDateTime.now(clock))) != 1) {
             throw new BusinessException(ErrorCode.DOCUMENT_STATE_CONFLICT);
         }
     }
@@ -223,16 +234,16 @@ public class DocumentService {
         db.update("UPDATE approval_documents SET doc_no=:no,submitted_at=:now WHERE id=:id",
                 map("id", id, "no", no, "now", LocalDateTime.now(clock)));
         h.onSubmitted(model(d));
-        transition(d, pending.isPresent() ? "IN_PROGRESS" : "APPROVED", pending
-                .map(l -> ((Number) l.get("step_order")).intValue()).orElse(null), pending.isEmpty());
+        transition(d, pending.isPresent() ? "IN_PROGRESS" : "APPROVED",
+                pending.map(l -> ((Number) l.get("step_order")).intValue()).orElse(null), pending.isEmpty());
         if (pending.isEmpty()) {
             h.onApproved(model(d));
         }
         history(id, access.actor(), "SUBMIT", null);
         history(id, null, "LINE_GENERATED", "양식 결재선 스냅샷");
         if (pending.isPresent()) {
-            notifications.store(number(pending.get(), "approver_id"), id, "APPROVAL_REQUESTED", (String) d
-                    .get("title"));
+            notifications.store(number(pending.get(), "approver_id"), id, "APPROVAL_REQUESTED",
+                    (String) d.get("title"));
         } else {
             notifications.store(number(d, "drafter_id"), id, "APPROVED", (String) d.get("title"));
         }
@@ -248,8 +259,7 @@ public class DocumentService {
     public Map<String, Object> act(long id, boolean approve, String comment) {
         long actor = access.actor();
         var initial = raw(id);
-        if (db
-                .count(
+        if (db.count(
                 "SELECT COUNT(*) FROM approval_lines WHERE document_id=:id AND approver_id=:actor AND line_kind='APPROVER'",
                 map("id", id, "actor", actor)) == 0) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
@@ -263,18 +273,22 @@ public class DocumentService {
         lockUser(number(initial, "drafter_id"));
         var d = lockDocument(id);
         state(d, "IN_PROGRESS");
-        var line = lines(id).stream().filter(l -> "PENDING".equals(l.get("status")) && number(l, "approver_id")
-                == actor).findFirst().orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_STATE_CONFLICT));
-        if (db
-                .update(
+        var line = lines(id)
+                .stream()
+                .filter(l -> "PENDING".equals(l.get("status")) && number(l, "approver_id") == actor)
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.DOCUMENT_STATE_CONFLICT));
+        if (db.update(
                 "UPDATE approval_lines SET status=:status,acted_at=:now,comment=:comment WHERE id=:id AND status='PENDING'",
                 map("id", line.get("id"), "status", approve ? "APPROVED" : "REJECTED", "now", LocalDateTime.now(clock),
-                "comment", comment)) != 1) {
+                        "comment", comment)) != 1) {
             throw new BusinessException(ErrorCode.DOCUMENT_STATE_CONFLICT);
         }
         var h = handler((String) d.get("form_code"));
-        var next = approve ? lines(id).stream().filter(l -> "WAITING".equals(l.get("status"))).findFirst() : Optional.
-                < Map<String, Object>> empty();
+        var next = approve ? lines(id)
+                .stream()
+                .filter(l -> "WAITING".equals(l.get("status")))
+                .findFirst() : Optional.< Map<String, Object>> empty();
         if (next.isPresent()) {
             db.update("UPDATE approval_lines SET status='PENDING' WHERE id=:id AND status='WAITING'",
                     map("id", next.get().get("id")));
@@ -287,8 +301,8 @@ public class DocumentService {
             } else {
                 h.onRejected(model(d));
             }
-            notifications.store(number(d, "drafter_id"), id, approve ? "APPROVED" : "REJECTED", (String) d
-                    .get("title"));
+            notifications.store(number(d, "drafter_id"), id, approve ? "APPROVED" : "REJECTED",
+                    (String) d.get("title"));
         }
         history(id, actor, approve ? "APPROVE" : "REJECT", comment);
         return detail(id);
@@ -308,7 +322,8 @@ public class DocumentService {
         transition(d, "WITHDRAWN", null, true);
         handler((String) d.get("form_code")).onWithdrawn(model(d));
         history(id, access.actor(), "WITHDRAW", null);
-        line.stream().filter(l -> "PENDING".equals(l.get("status")))
+        line.stream()
+                .filter(l -> "PENDING".equals(l.get("status")))
                 .forEach(l -> notifications.store(number(l, "approver_id"), id, "WITHDRAWN", (String) d.get("title")));
         return detail(id);
     }
@@ -326,11 +341,12 @@ public class DocumentService {
         var user = resolver.person(access.actor());
         var manual = bool(d, "manual_line") ? manual(id) : null;
         var resolved = checkDraftLine(form, access.actor(), number(user, "department_id"), manual);
-        long newId = insertDraft(form, (String) d.get("title"), access.actor(), number(user, "department_id"), manual
-                != null, id);
+        long newId = insertDraft(form, (String) d.get("title"), access.actor(), number(user, "department_id"),
+                manual != null, id);
         handler((String) d.get("form_code"))
-                .copyBody(id, new ApprovalDocument(newId, access.actor(), number(user, "department_id"), (String) d
-                .get("form_code")));
+                .copyBody(id,
+                        new ApprovalDocument(newId, access.actor(), number(user, "department_id"),
+                                (String) d.get("form_code")));
         storeLines(newId, resolved, false);
         return map("id", newId, "status", "DRAFT");
     }
@@ -345,28 +361,38 @@ public class DocumentService {
         boolean pending = "IN_PROGRESS".equals(d.get("status"));
         boolean own = number(d, "drafter_id") == actor;
         var drafter = resolver.person(number(d, "drafter_id"));
-        var publicLine = line.stream().filter(l -> "APPROVER".equals(l.get("line_kind")))
+        var publicLine = line.stream()
+                .filter(l -> "APPROVER".equals(l.get("line_kind")))
                 .map(l -> map("order", l.get("step_order"), "kind", l.get("line_kind"), "approver", snapshot(l),
-                "source", l.get("source"), "rule", l.get("rule_label"), "status", l.get("status"), "skipReason", l
-                .get("skip_reason"), "actedAt", l.get("acted_at"), "comment", l.get("comment"))).toList();
+                        "source", l.get("source"), "rule", l.get("rule_label"), "status", l.get("status"),
+                        "skipReason", l.get("skip_reason"), "actedAt", l.get("acted_at"), "comment", l.get("comment")))
+                .toList();
         var history = db.rows(
                 "SELECT h.action,h.actor_id,u.user_name,h.comment,h.created_at FROM approval_histories h LEFT JOIN users u ON u.id=h.actor_id WHERE h.document_id=:id ORDER BY h.id",
-                map("id", id)).stream().map(h -> map("action", h.get("action"), "actor", h.get("actor_id") == null
-                ? null : map("id", h.get("actor_id"), "name", h.get("user_name")), "comment", h.get("comment"), "at", h
-                .get("created_at"))).toList();
+                map("id", id))
+                .stream()
+                .map(h -> map("action", h.get("action"),
+                        "actor", h.get("actor_id") == null ? null : map("id", h.get("actor_id"),
+                                "name", h.get("user_name")), "comment", h.get("comment"), "at", h.get("created_at")))
+                .toList();
         boolean canAct = pending && line.stream()
                 .anyMatch(l -> "PENDING".equals(l.get("status")) && number(l, "approver_id") == actor);
-        return map("id", id, "docNo", d.get("doc_no"), "form",
-                map("code", d.get("form_code"), "name", d.get("form_name")), "title", d.get("title"), "status", d
-                .get("status"), "drafter", map("id", drafter.get("id"), "name", drafter.get("name"), "title", drafter
-                .get("title"), "department", drafter.get("department")), "submittedAt", d.get("submitted_at"),
-                "completedAt", d.get("completed_at"), "body", handler((String) d.get("form_code")).body(id), "line",
-                publicLine, "references", line.stream().filter(l -> "REFERENCE".equals(l.get("line_kind")))
-                .map(DocumentService::snapshot).toList(), "history", history, "myActions",
-                map("canApprove", canAct, "canReject", canAct, "canWithdraw", own && pending && line.stream()
-                .noneMatch(l -> "APPROVED".equals(l.get("status"))), "canResubmit", own && Set
-                .of("REJECTED", "WITHDRAWN").contains(d.get("status"))), "resubmittedFromId", d
-                .get("resubmitted_from_id"));
+        return map("id", id, "docNo", d.get("doc_no"),
+                "form", map("code", d.get("form_code"), "name", d.get("form_name")), "title", d.get("title"),
+                "status", d.get("status"),
+                "drafter", map("id", drafter.get("id"), "name", drafter.get("name"), "title", drafter.get("title"),
+                        "department", drafter.get("department")), "submittedAt", d.get("submitted_at"),
+                "completedAt", d.get("completed_at"), "body", handler((String) d.get("form_code")).body(id),
+                "line", publicLine,
+                "references", line.stream()
+                        .filter(l -> "REFERENCE".equals(l.get("line_kind")))
+                        .map(DocumentService::snapshot)
+                        .toList(), "history", history,
+                "myActions", map("canApprove", canAct, "canReject", canAct,
+                        "canWithdraw", own && pending && line.stream()
+                                .noneMatch(l -> "APPROVED".equals(l.get("status"))),
+                        "canResubmit", own && Set.of("REJECTED", "WITHDRAWN").contains(d.get("status"))),
+                "resubmittedFromId", d.get("resubmitted_from_id"));
     }
 
     private static Map<String, Object> snapshot(Map<String, Object> l) {

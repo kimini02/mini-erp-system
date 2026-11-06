@@ -43,12 +43,12 @@ public class OrgService {
         Map<Long, Map<String, Object>> nodes = new LinkedHashMap<>();
         for (var row : departments) {
             long id = number(row, "id");
-            Object head = row.get("head_user_id") == null ? null
-                    : map("id", row.get("head_user_id"), "name", row.get("head_name"), "position", row
-                    .get("head_position"));
-            nodes.put(id, map("id", id, "name", row.get("name"), "code", row.get("code"), "head", head,
-                    "directMemberCount", members.getOrDefault(id, 0L), "totalMemberCount", 0L, "children",
-                    new ArrayList<Map<String, Object>>()));
+            Object head = row.get("head_user_id") == null ? null : map("id", row.get("head_user_id"),
+                    "name", row.get("head_name"), "position", row.get("head_position"));
+            nodes.put(id,
+                    map("id", id, "name", row.get("name"), "code", row.get("code"), "head", head,
+                            "directMemberCount", members.getOrDefault(id, 0L), "totalMemberCount", 0L,
+                            "children", new ArrayList<Map<String, Object>>()));
         }
         Map<String, Object> root = null;
         for (var row : departments) {
@@ -105,25 +105,24 @@ public class OrgService {
             }
             parent = ancestor.get("parent_id");
         }
-        var schedule = d.get("work_schedule_id") == null ? defaultSchedule()
-                : schedule(((Number) d.get("work_schedule_id")).longValue());
+        var schedule = d.get("work_schedule_id") == null ? defaultSchedule() : schedule(
+                ((Number) d.get("work_schedule_id")).longValue());
         schedule.put("useDefault", d.get("work_schedule_id") == null);
         return map("id", id, "name", d.get("name"), "code", d.get("code"), "parentId", d.get("parent_id"), "path", path,
-                "head", head(d.get("head_user_id"), false), "fallbackHead", d.get("head_user_id") == null ? fallback
-                : null, "workSchedule", schedule, "directMemberCount", db
-                .count("SELECT COUNT(*) FROM users WHERE department_id=:id", map("id", id)), "childCount", db
-                .count("SELECT COUNT(*) FROM departments WHERE parent_id=:id", map("id", id)));
+                "head", head(d.get("head_user_id"), false),
+                "fallbackHead", d.get("head_user_id") == null ? fallback : null, "workSchedule", schedule,
+                "directMemberCount", db.count("SELECT COUNT(*) FROM users WHERE department_id=:id", map("id", id)),
+                "childCount", db.count("SELECT COUNT(*) FROM departments WHERE parent_id=:id", map("id", id)));
     }
 
     @Transactional
     public Map<String, Object> createDepartment(DepartmentCreate r) {
         lockTree();
         department(r.parentId());
-        long id = db
-                .insert(
+        long id = db.insert(
                 "INSERT INTO departments(name,code,parent_id,sort_order,active) VALUES(:name,:code,:parent,:sort,1)",
-                map("name", r.name(), "code", UUID.randomUUID().toString(), "parent", r.parentId(), "sort", r
-                .sortOrder()));
+                map("name", r.name(), "code", UUID.randomUUID().toString(), "parent", r.parentId(),
+                        "sort", r.sortOrder()));
         db.update("UPDATE departments SET code=:code WHERE id=:id", map("id", id, "code", String.format("D-%04d", id)));
         return detail(id);
     }
@@ -163,8 +162,8 @@ public class OrgService {
                 throw new BusinessException(ErrorCode.HEAD_NOT_IN_DEPARTMENT);
             }
             if (!"ACTIVE".equals(user.get("status"))) {
-                throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE, org.springframework.http.HttpStatus
-                        .UNPROCESSABLE_ENTITY);
+                throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE,
+                        org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY);
             }
         }
         db.update("UPDATE departments SET head_user_id=:head WHERE id=:id", map("id", id, "head", userId));
@@ -175,8 +174,8 @@ public class OrgService {
     public void deleteDepartment(long id) {
         lockTree();
         department(id);
-        if (db.count("SELECT COUNT(*) FROM users WHERE department_id=:id", map("id", id)) > 0 || db
-                .count("SELECT COUNT(*) FROM departments WHERE parent_id=:id", map("id", id)) > 0) {
+        if (db.count("SELECT COUNT(*) FROM users WHERE department_id=:id", map("id", id)) > 0 || db.count(
+                "SELECT COUNT(*) FROM departments WHERE parent_id=:id", map("id", id)) > 0) {
             throw new BusinessException(ErrorCode.DEPARTMENT_NOT_EMPTY);
         }
         db.update("DELETE FROM departments WHERE id=:id", map("id", id));
@@ -189,13 +188,15 @@ public class OrgService {
     }
 
     public Map<String, Object> defaultSchedule() {
-        return schedule(number(db.one("SELECT id FROM work_schedules WHERE is_default=1", Map.of(), ErrorCode
-                .RESOURCE_NOT_FOUND), "id"));
+        return schedule(
+                number(
+                        db.one("SELECT id FROM work_schedules WHERE is_default=1", Map.of(),
+                                ErrorCode.RESOURCE_NOT_FOUND), "id"));
     }
 
     private void validateSchedule(Schedule r) {
-        if (r.startTime() == null || r.endTime() == null || !r.endTime().isAfter(r.startTime()) || r.lateGraceMin()
-                == null || r.lateGraceMin() < 0 || r.lateGraceMin() > 60) {
+        if (r.startTime() == null || r.endTime() == null || !r.endTime().isAfter(r.startTime())
+                || r.lateGraceMin() == null || r.lateGraceMin() < 0 || r.lateGraceMin() > 60) {
             throw new BusinessException(ErrorCode.INVALID_WORK_SCHEDULE);
         }
     }
@@ -225,8 +226,7 @@ public class OrgService {
                         params);
             } else {
                 params.put("id", scheduleId);
-                db
-                        .update(
+                db.update(
                         "UPDATE work_schedules SET start_time=:start,end_time=:end,late_grace_min=:grace WHERE id=:id",
                         params);
             }

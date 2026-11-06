@@ -55,13 +55,11 @@ public class User extends BaseEntity {
     @Formula("(select group_concat(r.code) from user_roles ur join roles r on r.id=ur.role_id where ur.user_id=id)")
     private String roleCodes;
     @ElementCollection
-    @CollectionTable(name = "user_roles", joinColumns =
-            @JoinColumn(name = "user_id")
-            , uniqueConstraints =
-            @UniqueConstraint(columnNames = {
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id")
+    , uniqueConstraints = @UniqueConstraint(columnNames = {
         "user_id", "role_id"
     })
-            )
+    )
     @Column(name = "role_id", nullable = false)
     private Set<Long> roleIds = new HashSet<>();
     @Formula(
@@ -74,8 +72,14 @@ public class User extends BaseEntity {
     private BigDecimal remainingAnnualLeave;
     @Column(name = "login_id", nullable = false, unique = true, length = 50)
     private String loginId;
-    private User(String userName, String loginId, String userEmail, String userPw, String departmentCode,
-            String positionName, UserRole userRole) {
+    private User(
+            String userName,
+            String loginId,
+            String userEmail,
+            String userPw,
+            String departmentCode,
+            String positionName,
+            UserRole userRole) {
         this.userName = userName;
         this.loginId = loginId;
         this.userEmail = userEmail;
@@ -105,8 +109,13 @@ public class User extends BaseEntity {
         this.remainingAnnualLeave = initialAnnualLeave;
     }
 
-    public static User create(String userName, String loginId, String userEmail, String encodedPassword,
-            String departmentCode, String positionName) {
+    public static User create(
+            String userName,
+            String loginId,
+            String userEmail,
+            String encodedPassword,
+            String departmentCode,
+            String positionName) {
         return new User(userName, loginId, userEmail, encodedPassword, departmentCode, positionName, UserRole.USER);
     }
 

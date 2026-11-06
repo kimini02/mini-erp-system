@@ -15,9 +15,7 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByProjectId(Long projectId);
     @Query("select distinct ta.task from TaskAssignment ta where ta.user.id = :userId")
-    List<Task> findByAssigneeUserId(
-            @Param("userId")
-            Long userId);
+    List<Task> findByAssigneeUserId(@Param("userId") Long userId);
     long countByTaskStatus(TaskStatus taskStatus);
     long countByProjectId(Long projectId);
     long countByProjectIdAndTaskStatus(Long projectId, TaskStatus taskStatus);
@@ -34,32 +32,22 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         "taskAssignments", "taskAssignments.user"
     })
     @Query("select distinct t from Task t where t.project.id in :projectIds")
-    List<Task> findByProjectIdInWithAssignees(
-            @Param("projectIds")
-            List<Long> projectIds);
+    List<Task> findByProjectIdInWithAssignees(@Param("projectIds") List<Long> projectIds);
     @EntityGraph(attributePaths = {
         "taskAssignments", "taskAssignments.user"
     })
     @Query("select distinct t from Task t join t.taskAssignments ta where ta.user.id = :userId")
-    List<Task> findByAssigneeUserIdWithAssignees(
-            @Param("userId")
-            Long userId);
+    List<Task> findByAssigneeUserIdWithAssignees(@Param("userId") Long userId);
     // 프로젝트 목록 1+3N → GROUP BY 1개 쿼리로 일괄 집계
     @Query(
             "select t.project.id, t.taskStatus, count(t) from Task t where t.project.id in :projectIds group by t.project.id, t.taskStatus")
-    List<Object[]> countTaskStatusByProjectIds(
-            @Param("projectIds")
-            List<Long> projectIds);
+    List<Object[]> countTaskStatusByProjectIds(@Param("projectIds") List<Long> projectIds);
     // 대시보드: findAll()+stream 대신 DB에서 상태별 개수만 반환
     @Query("select t.taskStatus, count(t) from Task t group by t.taskStatus")
     List<Object[]> countByTaskStatusGrouped();
     @Query("select t.taskStatus, count(t) from Task t where t.project.id in :projectIds group by t.taskStatus")
-    List<Object[]> countByTaskStatusGroupedForProjects(
-            @Param("projectIds")
-            List<Long> projectIds);
+    List<Object[]> countByTaskStatusGroupedForProjects(@Param("projectIds") List<Long> projectIds);
     @Query(
             "select t.taskStatus, count(t) from Task t join t.taskAssignments ta where ta.user.id = :userId group by t.taskStatus")
-    List<Object[]> countByTaskStatusGroupedForUser(
-            @Param("userId")
-            Long userId);
+    List<Object[]> countByTaskStatusGroupedForUser(@Param("userId") Long userId);
 }

@@ -26,98 +26,64 @@ public class UserController {
     @GetMapping
     @RequirePermission(menu = "EMPLOYEE", action = VIEW)
     public ApiResponse<?> list(
-            @RequestParam(required = false)
-            String q,
-            @RequestParam(required = false)
-            Long departmentId,
-            @RequestParam(defaultValue = "false")
-            boolean includeSubDepartments,
-            @RequestParam(required = false)
-            String status,
-            @RequestParam(defaultValue = "0")
-            int page,
-            @RequestParam(defaultValue = "20")
-            int size,
-            @RequestParam(defaultValue = "userName,asc")
-            String sort) {
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(defaultValue = "false") boolean includeSubDepartments,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "userName,asc") String sort) {
         return ok(service.list(q, departmentId, includeSubDepartments, status, page, size, sort));
     }
 
     @GetMapping("/lookup")
     public ApiResponse<?> lookup(
-            @RequestParam(required = false)
-            String q,
-            @RequestParam(required = false)
-            Long departmentId,
-            @RequestParam(defaultValue = "20")
-            int size) {
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(defaultValue = "20") int size) {
         return ok(lookup.lookup(q, departmentId, size));
     }
 
     @GetMapping("/login-id-preview")
     @RequirePermission(menu = "EMPLOYEE", action = CREATE)
-    public ApiResponse<?> preview(
-            @RequestParam
-            LocalDate hireDate) {
+    public ApiResponse<?> preview(@RequestParam LocalDate hireDate) {
         return ok(Map.of("loginId", service.preview(hireDate)));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<?> detail(
-            @PathVariable
-            long id) {
+    public ApiResponse<?> detail(@PathVariable long id) {
         return ok(service.detail(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission(menu = "EMPLOYEE", action = CREATE)
-    public ApiResponse<?> create(
-            @Valid
-            @RequestBody
-            Create r) {
+    public ApiResponse<?> create(@Valid @RequestBody Create r) {
         return ok(service.register(r));
     }
 
     @PatchMapping("/{id}")
     @RequirePermission(menu = "EMPLOYEE", action = UPDATE)
-    public ApiResponse<?> patch(
-            @PathVariable
-            long id,
-            @Valid
-            @RequestBody
-            Patch r) {
+    public ApiResponse<?> patch(@PathVariable long id, @Valid @RequestBody Patch r) {
         return ok(service.patch(id, r));
     }
 
     @PatchMapping("/{id}/status")
     @RequirePermission(menu = "EMPLOYEE", action = UPDATE)
-    public ApiResponse<?> status(
-            @PathVariable
-            long id,
-            @Valid
-            @RequestBody
-            Status r) {
+    public ApiResponse<?> status(@PathVariable long id, @Valid @RequestBody Status r) {
         return ok(service.status(id, r.status()));
     }
 
     @PutMapping("/{id}/roles")
     @RequirePermission(menu = "ROLE", action = UPDATE)
-    public ApiResponse<?> roles(
-            @PathVariable
-            long id,
-            @Valid
-            @RequestBody
-            Roles r) {
+    public ApiResponse<?> roles(@PathVariable long id, @Valid @RequestBody Roles r) {
         service.replaceRoles(id, r.roleCodes());
         return ok(null);
     }
 
     @PostMapping("/{id}/invitation")
     @RequirePermission(menu = "EMPLOYEE", action = CREATE)
-    public ApiResponse<?> invitation(
-            @PathVariable
-            long id) {
+    public ApiResponse<?> invitation(@PathVariable long id) {
         return ok(service.invitation(id));
     }
 }

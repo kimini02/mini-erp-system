@@ -25,8 +25,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-        MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class, org
-                .springframework.http.converter.HttpMessageNotReadableException.class, IllegalArgumentException.class
+        MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class,
+                org.springframework.http.converter.HttpMessageNotReadableException.class, IllegalArgumentException.class
     })
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception e) {
         ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
@@ -35,8 +35,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({
-        org.springframework.web.servlet.resource.NoResourceFoundException.class, org.springframework.web.servlet
-                .NoHandlerFoundException.class
+        org.springframework.web.servlet.resource.NoResourceFoundException.class,
+                org.springframework.web.servlet.NoHandlerFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFound(Exception e) {
         return ResponseEntity.status(ErrorCode.RESOURCE_NOT_FOUND.getStatus())
@@ -44,13 +44,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleRemovedBoardMethod(org.springframework.web
-            .HttpRequestMethodNotSupportedException e, jakarta.servlet.http.HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleRemovedBoardMethod(
+            org.springframework.web.HttpRequestMethodNotSupportedException e,
+            jakarta.servlet.http.HttpServletRequest request) {
         // These v1 methods were removed in M4; their URLs still serve different v2 methods.
         String path = request.getRequestURI().substring(request.getContextPath().length());
         boolean removed = (request.getMethod().equals("PUT") && path.matches("/api/v1/(projects|tasks)/[0-9]+"))
-                || ((request.getMethod().equals("GET") || request.getMethod().equals("POST")) && path
-                .matches("/api/v1/projects/[0-9]+/members"));
+                || ((request.getMethod().equals(
+                "GET") || request.getMethod().equals("POST")) && path.matches("/api/v1/projects/[0-9]+/members"));
         if (removed) {
             return handleNotFound(e);
         }

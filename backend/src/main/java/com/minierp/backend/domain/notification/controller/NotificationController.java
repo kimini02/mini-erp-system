@@ -14,12 +14,9 @@ public class NotificationController {
     private final Clock clock;
     @GetMapping
     public ApiResponse<?> list(
-            @RequestParam(defaultValue = "false")
-            boolean unreadOnly,
-            @RequestParam(defaultValue = "0")
-            int page,
-            @RequestParam(defaultValue = "20")
-            int size) {
+            @RequestParam(defaultValue = "false") boolean unreadOnly,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.success(clock, service.list(unreadOnly, page, size));
     }
 
@@ -29,9 +26,7 @@ public class NotificationController {
     }
 
     @PatchMapping("/{id}/read")
-    public ApiResponse<?> read(
-            @PathVariable
-            long id) {
+    public ApiResponse<?> read(@PathVariable long id) {
         service.read(id);
         return ApiResponse.success(clock, null);
     }

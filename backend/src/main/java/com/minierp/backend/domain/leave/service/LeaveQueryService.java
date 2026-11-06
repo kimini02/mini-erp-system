@@ -54,8 +54,8 @@ public class LeaveQueryService {
     }
 
     private List<Map<String, Object>> ledger(long user, Integer requestedYear, String type) {
-        if (type != null && !type.isBlank() && !Set.of("GRANT", "USE", "RESERVE", "RELEASE", "EXPIRE", "ADJUST")
-                .contains(type)) {
+        if (type != null && !type.isBlank()
+                && !Set.of("GRANT", "USE", "RESERVE", "RELEASE", "EXPIRE", "ADJUST").contains(type)) {
             throw BodyValues.invalid();
         }
         // Calculate balance before filtering: a USE-only view must still include earlier GRANTs in its balance.
@@ -72,9 +72,10 @@ public class LeaveQueryService {
             ) l LEFT JOIN approval_documents d ON d.id=l.document_id
             """ + filter + " ORDER BY l.created_at DESC,l.id DESC", args).stream()
                 .map(l -> map("date", ((LocalDateTime) l.get("created_at")).toLocalDate(), "type", l.get("entry_type"),
-                "days", l.get("days"), "balance", l.get("balance"), "memo", l.get("memo"), "document", l
-                .get("document_id") == null ? null
-                : map("id", l.get("document_id"), "docNo", l.get("doc_no"), "status", l.get("status")))).toList();
+                        "days", l.get("days"), "balance", l.get("balance"), "memo", l.get("memo"),
+                        "document", l.get("document_id") == null ? null : map("id", l.get("document_id"),
+                                "docNo", l.get("doc_no"), "status", l.get("status"))))
+                        .toList();
     }
 
     public Map<String, Object> preview(JsonNode body) {
@@ -103,7 +104,7 @@ public class LeaveQueryService {
                 offDays = ChronoUnit.DAYS.between(start, end) + 1;
             }
         }
-        return map("days", days, "offDays", offDays, "available", available, "after", available.subtract(days), "error",
-                error);
+        return map("days", days, "offDays", offDays, "available", available, "after", available.subtract(days),
+                "error", error);
     }
 }

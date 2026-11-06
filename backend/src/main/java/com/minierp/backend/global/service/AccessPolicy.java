@@ -43,7 +43,10 @@ public class AccessPolicy {
         return accessorRole.isTopManager() || ownerUserId.equals(accessorUserId);
     }
 
-    public void validateApprovalHierarchy(UserRole requesterRole, Long requesterId, UserRole approverRole,
+    public void validateApprovalHierarchy(
+            UserRole requesterRole,
+            Long requesterId,
+            UserRole approverRole,
             Long approverId) {
         if (requesterRole == null || approverRole == null || requesterId == null || approverId == null) {
             throw new BusinessException(ErrorCode.APPROVAL_ADMIN_ONLY, "권한 정책상 처리할 수 없는 결재 대상입니다.");

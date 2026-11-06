@@ -16,16 +16,11 @@ public class InboxController {
     @GetMapping
     @RequirePermission(menu = "APPROVAL_INBOX", action = Action.VIEW)
     public ApiResponse<?> list(
-            @RequestParam(defaultValue = "todo")
-            String box,
-            @RequestParam(required = false)
-            String formCode,
-            @RequestParam(required = false)
-            String q,
-            @RequestParam(defaultValue = "0")
-            int page,
-            @RequestParam(defaultValue = "20")
-            int size) {
+            @RequestParam(defaultValue = "todo") String box,
+            @RequestParam(required = false) String formCode,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.success(clock, service.list(box, formCode, q, page, size));
     }
 

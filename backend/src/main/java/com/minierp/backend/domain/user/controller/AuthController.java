@@ -32,62 +32,45 @@ public class AuthController {
     private final AuthService authService;
     private final com.minierp.backend.domain.user.service.InvitationService invitations;
     public record SetupRequest(
-            @jakarta.validation.constraints.NotBlank
-            String setupToken,
-            @jakarta.validation.constraints.NotBlank
-            String newPassword) {
+            @jakarta.validation.constraints.NotBlank String setupToken,
+            @jakarta.validation.constraints.NotBlank String newPassword) {
     }
 
     @PostMapping("/password/setup")
-    public ResponseEntity<ApiResponse<Void>> setup(
-            @Valid
-            @RequestBody
-            SetupRequest r) {
+    public ResponseEntity<ApiResponse<Void>> setup(@Valid @RequestBody SetupRequest r) {
         invitations.setup(r.setupToken(), r.newPassword());
         return ResponseEntity.ok(ApiResponse.successMessage(clock, "비밀번호 설정이 완료되었습니다."));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponseDto>> login(
-            @Valid
-            @RequestBody
-            LoginRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid @RequestBody LoginRequestDto requestDto) {
         LoginResponseDto response = authService.login(requestDto);
         return ResponseEntity.ok(ApiResponse.success(clock, response, "로그인이 성공하였습니다"));
     }
 
     @PostMapping("/find-id/request")
-    public ResponseEntity<ApiResponse<FindIdResponseDto>> findId(
-            @Valid
-            @RequestBody
-            FindIdRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<FindIdResponseDto>> findId(@Valid @RequestBody FindIdRequestDto requestDto) {
         FindIdResponseDto response = authService.findId(requestDto);
         return ResponseEntity.ok(ApiResponse.success(clock, response, "아이디를 찾았습니다"));
     }
 
     @PostMapping("/password/reset/request")
     public ResponseEntity<ApiResponse<PasswordResetRequestResponseDto>> requestPasswordReset(
-            @Valid
-            @RequestBody
-            PasswordResetRequestDto requestDto) {
+            @Valid @RequestBody PasswordResetRequestDto requestDto) {
         PasswordResetRequestResponseDto response = authService.requestPasswordReset(requestDto);
         return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 
     @PostMapping("/password/reset/verify")
     public ResponseEntity<ApiResponse<PasswordResetVerifyResponseDto>> verifyPasswordReset(
-            @Valid
-            @RequestBody
-            PasswordResetVerifyDto requestDto) {
+            @Valid @RequestBody PasswordResetVerifyDto requestDto) {
         PasswordResetVerifyResponseDto response = authService.verifyPasswordReset(requestDto);
         return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 
     @PostMapping("/password/reset/confirm")
     public ResponseEntity<ApiResponse<PasswordResetConfirmResponseDto>> confirmPasswordReset(
-            @Valid
-            @RequestBody
-            PasswordResetConfirmDto requestDto) {
+            @Valid @RequestBody PasswordResetConfirmDto requestDto) {
         PasswordResetConfirmResponseDto response = authService.confirmPasswordReset(requestDto);
         return ResponseEntity.ok(ApiResponse.success(clock, response));
     }

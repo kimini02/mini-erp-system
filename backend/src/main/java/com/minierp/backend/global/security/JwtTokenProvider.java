@@ -31,16 +31,21 @@ public class JwtTokenProvider {
     public String generateAccessToken(String subject, int tokenVersion) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpirationMs);
-        return Jwts.builder().subject(subject).claim(VERSION_CLAIM_KEY, tokenVersion).issuedAt(now).expiration(expiry)
-                .signWith(key).compact();
+        return Jwts.builder()
+                .subject(subject)
+                .claim(VERSION_CLAIM_KEY, tokenVersion)
+                .issuedAt(now)
+                .expiration(expiry)
+                .signWith(key)
+                .compact();
     }
 
     public Authentication getAuthentication(String token, String role) {
         Claims claims = getClaims(token);
         String normalizedRole = role == null ? "USER" : role;
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + normalizedRole);
-        return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, Collections
-                .singletonList(authority));
+        return new UsernamePasswordAuthenticationToken(claims.getSubject(), token,
+                Collections.singletonList(authority));
     }
 
     public long getAccessTokenExpirationSeconds() {

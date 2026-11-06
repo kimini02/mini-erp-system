@@ -52,23 +52,23 @@ public class PermissionAccess {
             FROM user_roles ur JOIN role_permissions p ON p.role_id=ur.role_id JOIN menus m ON m.id=p.menu_id
             WHERE ur.user_id=:id ORDER BY m.sort_order,m.id
             """, Map.of("id", userId), rs -> {
-            String menu = rs.getString(1);
-            Grant previous = result.get(menu);
-            Set<String> actions = new LinkedHashSet<>(previous == null ? Set.of() : previous.actions());
-            for (int i = 0; i < 4; i++) {
-                if (rs.getBoolean(i + 2)) {
-                    actions.add("VCUD".substring(i, i + 1));
+                String menu = rs.getString(1);
+                Grant previous = result.get(menu);
+                Set<String> actions = new LinkedHashSet<>(previous == null ? Set.of() : previous.actions());
+                for (int i = 0; i < 4; i++) {
+                    if (rs.getBoolean(i + 2)) {
+                        actions.add("VCUD".substring(i, i + 1));
+                    }
                 }
-            }
-            boolean enabled = rs.getBoolean(2) || rs.getBoolean(3) || rs.getBoolean(4) || rs.getBoolean(5);
-            String raw = rs.getString(6);
-            DataScope scope = !enabled || raw == null ? null : DataScope.valueOf(raw);
-            if (previous != null && previous.scope() != null
-                    && (scope == null || previous.scope().ordinal() > scope.ordinal())) {
-                scope = previous.scope();
-            }
-            result.put(menu, new Grant(menu, actions, scope));
-        });
+                boolean enabled = rs.getBoolean(2) || rs.getBoolean(3) || rs.getBoolean(4) || rs.getBoolean(5);
+                String raw = rs.getString(6);
+                DataScope scope = !enabled || raw == null ? null : DataScope.valueOf(raw);
+                if (previous != null && previous.scope() != null
+                        && (scope == null || previous.scope().ordinal() > scope.ordinal())) {
+                    scope = previous.scope();
+                }
+                result.put(menu, new Grant(menu, actions, scope));
+            });
         if (request != null) {
             request.setAttribute(key, result, RequestAttributes.SCOPE_REQUEST);
         }
@@ -93,8 +93,8 @@ public class PermissionAccess {
         if (grant == null || grant.actions().isEmpty() || grant.scope() == null) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
-        Long department = jdbc.queryForObject("SELECT department_id FROM users WHERE id=:id", Map.of("id", userId), Long
-                .class);
+        Long department = jdbc.queryForObject("SELECT department_id FROM users WHERE id=:id", Map.of("id", userId),
+                Long.class);
         List<Long> ids = grant.scope() == DataScope.DEPT_TREE ? descendants(department) : List.of(department);
         return new ScopeFilter(grant.scope(), userId, ids);
     }
@@ -107,8 +107,8 @@ public class PermissionAccess {
         Map<String, Object> args = new HashMap<>();
         args.put("target", userId);
         String where = scope(menu, actorId).predicate("u", args);
-        if (jdbc.queryForObject("SELECT COUNT(*) FROM users u WHERE u.id=:target AND " + where, args, Long.class)
-                == 0) {
+        if (jdbc.queryForObject("SELECT COUNT(*) FROM users u WHERE u.id=:target AND "
+                + where, args, Long.class) == 0) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
     }

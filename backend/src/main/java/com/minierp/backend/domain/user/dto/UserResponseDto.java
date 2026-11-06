@@ -33,18 +33,18 @@ public class UserResponseDto {
     }
 
     public static UserResponseDto summary(User user) {
-        return new UserResponseDto(user.getId(), user.getUserName(), user.getUserEmail(), user.getDepartmentCode(), user
-                .getDepartmentName(), user.getPositionName(), user.getUserRole().name(), null, null, null, user
-                .getLoginId(), new Department(user.getDepartmentId(), user.getDepartmentName()), user.roleCodeList(),
-                user.getHireDate(), user.getStatus().name(), user.getUserPw() == null);
+        return new UserResponseDto(user.getId(), user.getUserName(), user.getUserEmail(), user.getDepartmentCode(),
+                user.getDepartmentName(), user.getPositionName(), user.getUserRole().name(), null, null, null,
+                user.getLoginId(), new Department(user.getDepartmentId(), user.getDepartmentName()),
+                user.roleCodeList(), user.getHireDate(), user.getStatus().name(), user.getUserPw() == null);
     }
 
     public static UserResponseDto detail(User user) {
-        return new UserResponseDto(user.getId(), user.getUserName(), user.getUserEmail(), user.getDepartmentCode(), user
-                .getDepartmentName(), user.getPositionName(), user.getUserRole().name(), user.getRemainingAnnualLeave(),
-                user.getCreatedAt(), user.getUpdatedAt(), user.getLoginId(),
-                new Department(user.getDepartmentId(), user.getDepartmentName()), user.roleCodeList(), user
-                .getHireDate(), user.getStatus().name(), user.getUserPw() == null);
+        return new UserResponseDto(user.getId(), user.getUserName(), user.getUserEmail(), user.getDepartmentCode(),
+                user.getDepartmentName(), user.getPositionName(), user.getUserRole().name(),
+                user.getRemainingAnnualLeave(), user.getCreatedAt(), user.getUpdatedAt(), user.getLoginId(),
+                new Department(user.getDepartmentId(), user.getDepartmentName()), user.roleCodeList(),
+                user.getHireDate(), user.getStatus().name(), user.getUserPw() == null);
     }
 
     public static UserResponseDto from(User user) {

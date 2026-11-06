@@ -29,6 +29,6 @@ public class UserLookupService {
         }
         return db.rows(
                 "SELECT u.id,u.user_name AS name,p.name AS title,d.name AS department,d.id AS departmentId FROM users u JOIN positions p ON p.id=u.position_id JOIN departments d ON d.id=u.department_id WHERE "
-                + where + " ORDER BY u.user_name,u.id LIMIT :size", args);
+                        + where + " ORDER BY u.user_name,u.id LIMIT :size", args);
     }
 }

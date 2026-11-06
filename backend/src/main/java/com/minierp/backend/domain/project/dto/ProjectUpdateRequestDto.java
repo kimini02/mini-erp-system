@@ -22,7 +22,11 @@ public class ProjectUpdateRequestDto {
     private LocalDate endDate;
     @NotNull(message = "우선순위는 필수입니다.")
     private Priority priority;
-    public static ProjectUpdateRequestDto of(String title, String content, LocalDate startDate, LocalDate endDate,
+    public static ProjectUpdateRequestDto of(
+            String title,
+            String content,
+            LocalDate startDate,
+            LocalDate endDate,
             Priority priority) {
         ProjectUpdateRequestDto dto = new ProjectUpdateRequestDto();
         dto.title = title;

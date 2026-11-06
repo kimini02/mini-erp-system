@@ -41,15 +41,17 @@ public class BoardTaskService {
         return people.stream().anyMatch(u -> number(u, "id") == projects.actor());
     }
 
-    private Map<String, Object> card(Map<String, Object> task, Map<String, Object> project, List<Map<String,
-            Object>> people) {
+    private Map<String, Object> card(
+            Map<String, Object> task,
+            Map<String, Object> project,
+            List<Map<String, Object>> people) {
         var end = (LocalDate) task.get("end_date");
-        long overdue = "DONE".equals(task.get("task_status")) ? 0 : Math
-                .max(0, ChronoUnit.DAYS.between(end, LocalDate.now(clock)));
-        return map("id", task.get("id"), "key", project.get("project_key") + "-" + task.get("task_no"), "title", task
-                .get("task_title"), "status", task.get("task_status"), "priority", task.get("priority"), "endDate", end,
-                "overdueDays", overdue, "assignees", people, "position", task.get("position"), "version", task
-                .get("version"), "canMove", projects.canManage(project) || assigned(people));
+        long overdue = "DONE".equals(task.get("task_status")) ? 0 : Math.max(0,
+                ChronoUnit.DAYS.between(end, LocalDate.now(clock)));
+        return map("id", task.get("id"), "key", project.get("project_key") + "-" + task.get("task_no"),
+                "title", task.get("task_title"), "status", task.get("task_status"), "priority", task.get("priority"),
+                "endDate", end, "overdueDays", overdue, "assignees", people, "position", task.get("position"),
+                "version", task.get("version"), "canMove", projects.canManage(project) || assigned(people));
     }
 
     public Map<String, Object> board(long id) {
@@ -73,11 +75,14 @@ public class BoardTaskService {
         }
         List<Map<String, Object>> columns = new ArrayList<>();
         for (String status : List.of("TODO", "DOING", "DONE")) {
-            columns.add(map("status", status, "tasks", tasks.stream().filter(t -> status.equals(t.get("task_status")))
-                    .map(t -> card(t, p, assignments.getOrDefault(number(t, "id"), List.of()))).toList()));
+            columns.add(map("status", status,
+                    "tasks", tasks.stream()
+                            .filter(t -> status.equals(t.get("task_status")))
+                            .map(t -> card(t, p, assignments.getOrDefault(number(t, "id"), List.of())))
+                            .toList()));
         }
-        return map("project", projects.view(p), "members", members, "permissions", projects.permissions(p), "columns",
-                columns);
+        return map("project", projects.view(p), "members", members, "permissions", projects.permissions(p),
+                "columns", columns);
     }
 
     public Map<String, Object> detail(long id) {
@@ -99,8 +104,9 @@ public class BoardTaskService {
    WHERE task_id=:id ORDER BY h.id DESC LIMIT 50
    """, map("id", id));
         result.put("history", history.stream().map(h -> {
-            var event = map("action", h.get("action"), "actor", h.get("actor_id") == null ? null
-                    : map("id", h.get("actor_id"), "name", h.get("actor_name")), "at", h.get("created_at"));
+            var event = map("action", h.get("action"),
+                    "actor", h.get("actor_id") == null ? null : map("id", h.get("actor_id"),
+                            "name", h.get("actor_name")), "at", h.get("created_at"));
             if (!"MOVED".equals(h.get("action"))) {
                 event.put("from", h.get("from_value"));
                 event.put("to", h.get("to_value"));
@@ -116,8 +122,8 @@ public class BoardTaskService {
     private void history(long id, String action, String from, String to) {
         db.update(
                 "INSERT INTO task_histories(task_id,actor_id,action,from_value,to_value,created_at) VALUES(:id,:actor,:action,:from,:to,:now)",
-                map("id", id, "actor", projects.actor(), "action", action, "from", from, "to", to, "now", LocalDateTime
-                .now(clock)));
+                map("id", id, "actor", projects.actor(), "action", action, "from", from, "to", to,
+                        "now", LocalDateTime.now(clock)));
     }
 
     private Set<Long> validateAssignees(long project, List<Long> ids) {
@@ -131,8 +137,10 @@ public class BoardTaskService {
     }
 
     private void assign(long task, long project, String title, Set<Long> selected) {
-        var old = db.rows("SELECT user_id FROM task_assignments WHERE task_id=:id", map("id", task)).stream()
-                .map(r -> number(r, "user_id")).toList();
+        var old = db.rows("SELECT user_id FROM task_assignments WHERE task_id=:id", map("id", task))
+                .stream()
+                .map(r -> number(r, "user_id"))
+                .toList();
         for (long user : old) {
             if (!selected.contains(user)) {
                 db.update("DELETE FROM task_assignments WHERE task_id=:id AND user_id=:user",
@@ -164,9 +172,10 @@ public class BoardTaskService {
         long position = position(project, status, 0, null, true);
         long id = db.insert(
                 "INSERT INTO tasks(project_id,task_no,position,version,created_by,task_title,task_content,end_date,priority,task_status,created_at) VALUES(:p,:seq,:pos,0,:actor,:title,:content,:end,:priority,:status,:now)",
-                map("p", project, "seq", seq, "pos", position, "actor", projects.actor(), "title", r.title(), "content",
-                r.content() == null ? "" : r.content(), "end", end, "priority", r.priority() == null ? "MEDIUM" : r
-                .priority().name(), "status", status, "now", LocalDateTime.now(clock)));
+                map("p", project, "seq", seq, "pos", position, "actor", projects.actor(), "title", r.title(),
+                        "content", r.content() == null ? "" : r.content(), "end", end,
+                        "priority", r.priority() == null ? "MEDIUM" : r.priority().name(), "status", status,
+                        "now", LocalDateTime.now(clock)));
         db.update("UPDATE projects SET last_task_seq=:seq WHERE id=:id", map("seq", seq, "id", project));
         history(id, "CREATED", null, r.title());
         assign(id, project, p.get("project_key") + "-" + seq + " " + r.title(), assigned);
@@ -186,11 +195,13 @@ public class BoardTaskService {
         }
         db.update(
                 "UPDATE tasks SET task_title=COALESCE(:title,task_title),task_content=COALESCE(:content,task_content),end_date=COALESCE(:end,end_date),priority=COALESCE(:priority,priority),version=version+1,updated_at=:now WHERE id=:id",
-                map("id", id, "title", r.title(), "content", r.content(), "end", r.endDate(), "priority", r.priority()
-                == null ? null : r.priority().name(), "now", LocalDateTime.now(clock)));
+                map("id", id, "title", r.title(), "content", r.content(), "end", r.endDate(),
+                        "priority", r.priority() == null ? null : r.priority().name(),
+                        "now", LocalDateTime.now(clock)));
         if (selected != null) {
-            assign(id, project, p.get("project_key") + "-" + task.get("task_no") + " "
-                    + (r.title() == null ? task.get("task_title") : r.title()), selected);
+            assign(id, project,
+                    p.get("project_key") + "-" + task.get("task_no") + " "
+                            + (r.title() == null ? task.get("task_title") : r.title()), selected);
         }
         List<String> changed = new ArrayList<>();
         if (r.title() != null) {
@@ -229,8 +240,9 @@ public class BoardTaskService {
         db.update("UPDATE tasks SET task_status=:status,position=:pos,version=version+1,updated_at=:now WHERE id=:id",
                 map("id", id, "status", status, "pos", pos, "now", LocalDateTime.now(clock)));
         boolean changed = !status.equals(task.get("task_status"));
-        history(id, changed ? "STATUS" : "MOVED", changed ? (String) task.get("task_status") : task.get("position")
-                .toString(), changed ? status : Long.toString(pos));
+        history(id, changed ? "STATUS" : "MOVED",
+                changed ? (String) task.get("task_status") : task.get("position").toString(),
+                changed ? status : Long.toString(pos));
         var summary = states.recalculate(project);
         return map("task", card(raw(id), p, people), "project", summary);
     }
@@ -241,8 +253,8 @@ public class BoardTaskService {
         if (after != null) {
             args.put("after", after);
             if (after == moving || db.count(
-                    "SELECT COUNT(*) FROM tasks WHERE id=:after AND project_id=:p AND task_status=:status", args)
-                    == 0) {
+                    "SELECT COUNT(*) FROM tasks WHERE id=:after AND project_id=:p AND task_status=:status",
+                    args) == 0) {
                 throw new BusinessException(ErrorCode.INVALID_TASK_POSITION);
             }
         }
@@ -253,8 +265,9 @@ public class BoardTaskService {
                         "SELECT COALESCE(MAX(position),0) FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving",
                         args);
             } else if (after != null) {
-                lower = number(db.one("SELECT position FROM tasks WHERE id=:after", args, ErrorCode
-                        .INVALID_TASK_POSITION), "position");
+                lower = number(
+                        db.one("SELECT position FROM tasks WHERE id=:after", args, ErrorCode.INVALID_TASK_POSITION),
+                        "position");
             }
             args.put("lower", lower);
             var next = append ? List.< Map<String, Object>> of() : db.rows(
