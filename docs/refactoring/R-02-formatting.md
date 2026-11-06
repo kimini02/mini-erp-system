@@ -464,7 +464,7 @@ public ApiResponse<?> delete(@PathVariable long id) {
 | `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:101` | 체인 안 람다 본문 들여쓰기 |
 | `backend/src/test/java/com/minierp/backend/integration/M3LeaveAdjustmentConcurrencyTest.java:51` | 기존 호출 닫는 괄호 뒤 여는 중괄호 같은 줄 배치 |
 
-### 갱신한 문자열 리터럴 예외 (줄 바꿈 보완 최종 Java 기준)
+### 갱신한 문자열 리터럴 예외 (c742eea 기준)
 
 
 main: 88개
@@ -648,3 +648,379 @@ test: 78개
 - 수정한 것은 형식과 측정/문서뿐이며 이번 작업에서 별도의 제품 버그를 확정하거나 수정하지 않았습니다. 3·4단계는 시작하지 않았습니다.
 
 검증 원본: `backend/target/r02-wrap-validation/batch-{1,2,3}/`의 result.json, 컴파일 로그, 출력 diff 로그, ON/OFF 로그와 기록/비교 결과입니다. 중단하거나 교체된 후보는 `preliminary-batch-1/`, `superseded-batch-1/`, `preliminary-batch-2/`로 분리해 통과 증거에서 제외했습니다. 텍스트 블록 문장별 검사·전체 소스 비교·측정 결과와 구문 범위 검사도 같은 검증 폴더에 보존했습니다. 원본 로그는 커밋하지 않았습니다. 기존 `target/refactoring-v2-validation/record-{1..5}`는 보존했습니다. 임시 편집 도구도 저장소에 넣지 않았습니다.
+
+
+## 줄 바꿈 보완 2
+
+### 문제·원인·규칙
+
+c742eea에서는 120자를 맞출 때 바깥 연산식보다 안쪽 호출의 인자 목록을 먼저 나눴습니다. 그 결과 짧은 `value.matches(...)`, `old.get(...)`, `startDate.equals(endDate)`가 갈라졌고, 논리식의 같은 단계 연산자에도 서로 다른 들여쓰기가 생겼습니다. SQL·응답·동작 문제는 아니며 이번 변경은 공백과 줄바꿈으로만 한정했습니다.
+
+이번에는 **넘치는 식의 가장 바깥 구조**를 먼저 봅니다. 연산식은 `||` → `&&` → `? :` → `+` 순으로 연산자 앞에서 나누고, 같은 단계 조각은 120자 안에서 채웁니다. 괄호로 묶은 조각과 한 줄에 들어가는 호출은 붙입니다. 나눈 조각도 넘칠 때만 그 조각의 시작 줄보다 8칸 더 들여써 다시 나눕니다. 인자 목록은 쉼표 뒤, 긴 호출 체인은 점 앞에서 나눕니다. 키/값 쌍은 함께 옮기며 한 쌍 자체가 넘칠 때만 값을 8칸 더 들여씁니다. 비교 연산자 앞은 나누지 않았습니다.
+
+외부 포매터를 쓰지 않고, 저장소 밖 c742eea 아카이브의 23개 파일(main 16, test 7), 24개 범위를 직접 정리했습니다. 첫 임시 후보에서는 FormService의 치환 끝 범위를 한 줄 크게 지정하여 `return out;`이 빠졌습니다. 적용 전 전체 검사에서 공백 제거·토큰 비교가 이를 막았고, 치환 범위를 고친 뒤 259개 모두 다시 통과했습니다. 이 실패 후보를 저장소에 적용하거나 완료 검증에 사용하지 않았습니다. 임시 편집/검사 도구는 저장소에 넣지 않았습니다.
+
+### 커밋과 검증
+
+| 커밋 | 내용 | 파일 수 | BASE 대비 전체 출력 |
+|---|---|---:|---|
+| `77bc39a2865a593df766abad56993ddbb2da8000` | style(backend): 줄 바꿈 보완 2 — 연산식·키값 | Java 23 | 클래스 330개 포함 356개 파일, diff 0 |
+| 이 절을 추가한 `docs(refactor): R-02 줄 바꿈 보완 2 기록` | 보고서·측정 스크립트·blame | 3 | 클래스 330개 포함 356개 파일, diff 0 |
+
+| 적용 전 검사(c742eea 대비, 변경 없는 파일 포함) | 결과 |
+|---|---|
+| Java 259개 공백 제거·토큰 순서 | 불일치 0 |
+| 일반 문자열/문자 리터럴 | 6,821개, 원문·순서 불일치 0 |
+| 텍스트 블록 | 58개, 원문·순서 불일치 0 |
+| 텍스트 블록 닫는 물리적 줄 전체 | 58개, 들여쓰기·뒤 코드·줄 끝 공백 불일치 0 |
+| 주석과 import | 원문·순서 불일치 0 |
+| 새 측정 fixture | 12/12 통과 |
+
+두 커밋 각각 BASE `a1df7297dfd52736472c3897d57cd5b275711e29`와 비교 대상을 작업 트리 밖 새 폴더에 `git archive`하여 컴파일했습니다. `target/classes`는 236개 클래스/245개 전체 파일, `target/test-classes`는 94개 클래스/111개 전체 파일입니다. 둘 다 디렉터리 전체 `diff -r` 종료 코드 0입니다. staged tree를 검증하고 실제 커밋 tree가 같은지도 확인했습니다. 작업 트리에서 `mvn clean`은 실행하지 않았습니다.
+
+```bash
+./mvnw -q -Duser.timezone=UTC -Dmaven.compiler.debuglevel=none test-compile
+diff -r BASE/backend/target/classes CANDIDATE/backend/target/classes
+diff -r BASE/backend/target/test-classes CANDIDATE/backend/target/test-classes
+```
+
+아래는 이번 최종 Java 후보의 **새 실행** 결과입니다. 이전 보완의 결과를 재사용하지 않았습니다. 문서 커밋은 Java·테스트 리소스 변경이 없어 지시대로 전체 테스트를 반복하지 않고 출력 비교만 했습니다.
+
+| 모드 | 전체 | 실패 | 오류 | 건너뜀 | 벽시계 시간(s) | 기록/비교 |
+|---|---:|---:|---:|---:|---:|---|
+| UTC 기록 ON | 231 | 0 | 0 | 0 | 519.4 | REFACTORING_COMPARE differences=0 sqlOrderChanges=10 |
+| UTC 기록 OFF | 231 | 0 | 0 | 0 | 549.27 | REFACTORING_RECORDED 0건 |
+
+시간은 Testcontainers 기동을 포함한 검증 소요 시간이며 성능 개선 근거가 아닙니다.
+
+| 이번 ON 순서 경고 프레임 | 기존 사유 |
+|---|---|
+| `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()` | 병렬 사원 등록의 부서·사용자 조회 진입 순서 |
+| `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()` | 같은 문서 승인 2회의 인증·권한·잠금 조회가 교차함 |
+| `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()` | HTTP 순서는 고정, Hikari 연결 초기화 SELECT @@session.tx_isolation의 실행 위치 |
+| `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()` | 수정 전 직접 JDBC 재현의 두 승인 트랜잭션이 문서 상태·잔액을 읽는 순서 |
+| `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()` | 대칭 출근 경합의 사용자·근태 조회가 교차함 |
+| `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()` | 직접 JDBC 재현 및 앞 10회 대칭 조정의 SQL이 교차함. 마지막 비대칭 HTTP는 고정 |
+| `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()` | 두 부여 배치의 사용자/기부여 키 조회 순서 |
+| `M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()` | HTTP 이동 순서는 고정, Hikari 연결 초기화 SELECT @@session.tx_isolation의 실행 위치 |
+| `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()` | 같은 업무 등록 10개의 인증·권한 조회가 교차함 |
+| `M4OverdueTest#concurrentRunsSendOnlyOnce()` | 마감 알림 두 배치의 대상 프로젝트 조회·잠금 순서 |
+
+경고 10개가 모두 기존 13개 목록 안입니다. SQL별 횟수·workerSql·응답 차이는 0이며 엄격 목록, M5의 두 CREATE USER 교환 예외, 기록 정책, 비교 규칙은 그대로입니다.
+
+### 측정 전후와 목표 수치의 차이
+
+`docs/refactoring/R-02-format-measure.py`에 JDK 구문 트리 기반 두 항목을 추가했습니다. 전체 메서드 호출 및 `new` 범위의 공백을 압축하여 60자 이하이고 인자 목록에 줄바꿈이 있으면 짧은 호출 분리로 셉니다. 첫 인자가 형변환·괄호 식이어도 검사합니다. 텍스트 블록·람다·주석이 든 호출은 제외합니다. 키/값 분리는 `map(...)`·`SqlStore.map(...)`·`Map.of(...)` 인자 쌍에서 키의 끝과 값의 시작 사이 줄바꿈을 셉니다. JDK의 UTF-16 위치를 Python 문자열 위치로 변환하므로 보조 평면 문자 뒤에서도 같은 범위를 봅니다.
+
+fixture 12개는 일반 호출, 괄호로 시작하는 형변환, new, 텍스트 블록 제외, 람다 제외, 주석 제외, 60자 초과 제외, Map.of 분리, SqlStore.map 쌍 경계, 정적 map 분리, 문자열 안 주석 모양, 보조 평면 문자입니다. 측정은 읽기 전용이고 설치된 JDK 파서와 Python 표준 라이브러리만 사용합니다.
+
+| 항목 | main: c742eea → 최종 | test: c742eea → 최종 |
+|---|---:|---:|
+| 짧은 호출 분리 | 19 → 0 | 5 → 0 |
+| 키·값 분리 | 5 → 4 | 10 → 8 |
+| 120자 초과(리터럴 예외/블록 제외) | 0 → 0 | 0 → 0 |
+| 한 줄 여러 문장 | 0 → 0 | 0 → 0 |
+| 여러 선언자 | 0 → 0 | 0 → 0 |
+| `<`로 끝나는 줄 | 0 → 0 | 0 → 0 |
+| 이름·멤버 끊김 | 1 → 1 | 0 → 0 |
+| 그중 비체인 | 1 → 1 | 0 → 0 |
+| 떨어진 매개변수 어노테이션 | 0 → 0 | 0 → 0 |
+| 떨어진 record 어노테이션 | 0 → 0 | 0 → 0 |
+| 떨어진 타입 인자 어노테이션 | 0 → 0 | 0 → 0 |
+| 문자열 리터럴 예외 | 88 → 88 | 78 → 78 |
+
+**키·값 분리의 실제 결과는 15 → 12이며, 지시의 표에 적힌 11과 1개 차이가 있습니다.** SnapshotComparator 7개와 보호된 닫는 줄 4개 외에 RecordingOrder 1개가 남습니다. 해당 M3 테스트 이름 키는 12칸 들여쓰기와 쉼표까지 118자이며 같은 줄에 ` 2,`를 붙이면 **121자**입니다. 따라서 120자 규칙과 지시의 RecordingOrder 예시대로 값을 다음 줄에 8칸 더 들여쓰고, 다음 쌍은 새 줄에서 시작했습니다. 수치를 11로 맞추기 위해 들여쓰기·리터럴·측정 정의를 바꾸지 않았습니다. 이 1개는 텍스트 블록 보호 예외가 아니라 긴 키/값 쌍의 일반 예외입니다.
+
+문자열 리터럴 예외는 166개(main 88, test 78)로 동일합니다. 예외에 해당하는 리터럴 집합도 같습니다. 일부 파일의 줄 번호가 바뀌었으므로 이전 목록은 **c742eea 기준**으로 보존하고 아래에 최종 위치 166개를 다시 적었습니다.
+
+```bash
+JAVA_HOME=/path/to/jdk17 python3 docs/refactoring/R-02-format-measure.py \
+  --root /path/to/c742eea-archive --output /tmp/r02-wrap2-before.json
+JAVA_HOME=/path/to/jdk17 python3 docs/refactoring/R-02-format-measure.py \
+  --root /path/to/current-worktree --output /tmp/r02-wrap2-after.json
+```
+
+### 전후 예시
+
+PasswordPolicy — c742eea:
+
+```java
+        return value != null && value.length() >= 8 && value.length() <= 20 && value.matches(".*[A-Z].*")
+                && value.matches(
+                ".*[a-z].*") && value.matches(".*[0-9].*") && value.matches(
+                        ".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
+```
+
+보완 후:
+
+```java
+        return value != null && value.length() >= 8 && value.length() <= 20 && value.matches(".*[A-Z].*")
+                && value.matches(".*[a-z].*") && value.matches(".*[0-9].*")
+                && value.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
+```
+
+AbsenceBatchWork — c742eea:
+
+```java
+                if ("ON_LEAVE".equals(user.get("status")) || eligible.isAfter(date) || ("RETIRED".equals(
+                        user.get("status")) && (user.get("retired_date") == null || !date.isBefore(
+                                (LocalDate) user.get("retired_date")))) || !bool(user, "activated")
+                                        || day.type().equals("HOLIDAY")) {
+```
+
+보완 후:
+
+```java
+                if ("ON_LEAVE".equals(user.get("status")) || eligible.isAfter(date)
+                        || ("RETIRED".equals(user.get("status"))
+                                && (user.get("retired_date") == null
+                                        || !date.isBefore((LocalDate) user.get("retired_date"))))
+                        || !bool(user, "activated") || day.type().equals("HOLIDAY")) {
+```
+
+RecordingOrder — c742eea:
+
+```java
+            "M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()", 8,
+            "M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+                    2, "M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()", 2,
+            "M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()", 2);
+```
+
+보완 후:
+
+```java
+            "M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()", 8,
+            "M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+                    2,
+            "M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()", 2,
+            "M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()", 2);
+```
+
+### 닫는 줄 보호 예외 7곳
+
+58개 닫는 줄은 모두 보존했습니다. 다음 7곳은 그 보호 규칙 때문에 일반 줄 바꿈 규칙을 완전히 적용할 수 없습니다. 마지막 열은 이번 최종 Java의 줄 번호입니다.
+
+| 파일 | 예외 | c742eea → 최종 줄 |
+|---|---|---|
+| `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java` | 닫는 줄이 ErrorCode로 끝나고 다음 줄 .USER_NOT_FOUND | 98 → 99 |
+| `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java` | 닫는 줄 끝 original 키와 다음 줄 값 분리 | 124 → 124 |
+| `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java` | 닫는 줄 끝 out 키와 다음 줄 값 분리 | 60 → 60 |
+| `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java` | 닫는 줄 끝 outResult 키와 다음 줄 값 분리 | 136 → 137 |
+| `backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java` | 닫는 줄 끝 position 키와 다음 줄 값 분리 | 216 → 216 |
+| `backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java` | 닫는 줄의 .stream() 호출 유지 | 62 → 62 |
+| `backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java` | 닫는 줄의 .stream() 호출 유지 | 73 → 73 |
+
+### 직접 고친 파일:줄
+
+아래는 최종 파일 기준 변경 블록의 시작 줄입니다. 하나의 블록 안에서 이어지는 줄도 함께 정리했습니다. 모든 변경은 같은 259개 전체 보존 검사를 통과했습니다.
+
+| 파일 | 최종 변경 블록 시작 줄 |
+|---|---|
+| `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java` | 50 |
+| `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java` | 375 |
+| `backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java` | 65, 95 |
+| `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java` | 143 |
+| `backend/src/main/java/com/minierp/backend/domain/attendance/service/AbsenceBatchWork.java` | 36 |
+| `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java` | 107 |
+| `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java` | 28 |
+| `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java` | 138 |
+| `backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java` | 84 |
+| `backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java` | 108 |
+| `backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java` | 107 |
+| `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java` | 93 |
+| `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java` | 108 |
+| `backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java` | 148 |
+| `backend/src/main/java/com/minierp/backend/global/exception/GlobalExceptionHandler.java` | 53 |
+| `backend/src/main/java/com/minierp/backend/global/security/PasswordPolicy.java` | 11 |
+| `backend/src/test/java/com/minierp/backend/integration/CoreApiIntegrationTest.java` | 92 |
+| `backend/src/test/java/com/minierp/backend/integration/M1AcceptanceTest.java` | 584 |
+| `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java` | 259 |
+| `backend/src/test/java/com/minierp/backend/support/JdbcProbe.java` | 57 |
+| `backend/src/test/java/com/minierp/backend/support/refactoring/RecordingOrder.java` | 18 |
+| `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java` | 214 |
+| `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotNormalizer.java` | 28 |
+
+### 문자열 리터럴 예외 — 보완 2 최종 기준
+
+main: 88개
+
+- `backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java:29`
+- `backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java:41`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:21`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:23`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:29`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:43`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:49`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:69`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java:80`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:170`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:190`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:202`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:208`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:263`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:282`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:371`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java:67`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java:86`
+- `backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java:132`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java:89`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java:111`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java:173`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java:108`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java:31`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java:133`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java:35`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java:75`
+- `backend/src/main/java/com/minierp/backend/domain/home/service/HomeQueries.java:15`
+- `backend/src/main/java/com/minierp/backend/domain/home/service/HomeQueries.java:52`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:41`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:51`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:54`
+- `backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java:68`
+- `backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java:124`
+- `backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java:140`
+- `backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java:98`
+- `backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java:122`
+- `backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantWork.java:39`
+- `backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantWork.java:55`
+- `backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationService.java:19`
+- `backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationService.java:27`
+- `backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationService.java:34`
+- `backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java:87`
+- `backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java:187`
+- `backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java:226`
+- `backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java:283`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java:42`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java:48`
+- `backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java:26`
+- `backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java:32`
+- `backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java:54`
+- `backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java:78`
+- `backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java:117`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectMemberRepository.java:16`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:31`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:126`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:159`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:193`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:229`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/ProjectSummaryQuery.java:9`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskRepository.java:43`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskRepository.java:51`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:36`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:126`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:176`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:199`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:267`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:276`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/TaskOverdueWork.java:26`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/TaskOverdueWork.java:58`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:45`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:53`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:66`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:69`
+- `backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java:44`
+- `backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java:59`
+- `backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java:76`
+- `backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java:202`
+- `backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java:256`
+- `backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java:282`
+- `backend/src/main/java/com/minierp/backend/domain/user/service/UserLookupService.java:31`
+- `backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java:27`
+- `backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java:31`
+
+test: 78개
+
+- `backend/src/test/java/com/minierp/backend/integration/CoreApiIntegrationTest.java:57`
+- `backend/src/test/java/com/minierp/backend/integration/CoreApiIntegrationTest.java:61`
+- `backend/src/test/java/com/minierp/backend/integration/DepartmentHeadConcurrencyTest.java:65`
+- `backend/src/test/java/com/minierp/backend/integration/M1AcceptanceTest.java:336`
+- `backend/src/test/java/com/minierp/backend/integration/M1AcceptanceTest.java:344`
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:48`
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:73`
+- `backend/src/test/java/com/minierp/backend/integration/M2DataMigrationTest.java:83`
+- `backend/src/test/java/com/minierp/backend/integration/M2DataMigrationTest.java:89`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:63`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:65`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:293`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:399`
+- `backend/src/test/java/com/minierp/backend/integration/M2FormApiTest.java:103`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxPerformanceTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxPerformanceTest.java:94`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxTest.java:16`
+- `backend/src/test/java/com/minierp/backend/integration/M2ReviewTest.java:14`
+- `backend/src/test/java/com/minierp/backend/integration/M2ReviewTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceFixTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceTest.java:117`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceTest.java:126`
+- `backend/src/test/java/com/minierp/backend/integration/M3BatchResponseTest.java:28`
+- `backend/src/test/java/com/minierp/backend/integration/M3CsvLabelsTest.java:36`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:25`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:29`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:40`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:46`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:57`
+- `backend/src/test/java/com/minierp/backend/integration/M3LeaveAdjustmentConcurrencyTest.java:51`
+- `backend/src/test/java/com/minierp/backend/integration/M3LeaveGrantTest.java:181`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:43`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:77`
+- `backend/src/test/java/com/minierp/backend/integration/M3MonthlyTest.java:174`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardApiTest.java:200`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardApiTest.java:281`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardConcurrencyTest.java:159`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardConcurrencyTest.java:231`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:24`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:28`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:33`
+- `backend/src/test/java/com/minierp/backend/integration/M4DeterministicLockTest.java:114`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:26`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:46`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:50`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:65`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:68`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:71`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:21`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:24`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:48`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:150`
+- `backend/src/test/java/com/minierp/backend/integration/M4LegacyExperimentTest.java:88`
+- `backend/src/test/java/com/minierp/backend/integration/M4OverdueTest.java:47`
+- `backend/src/test/java/com/minierp/backend/integration/M4OverdueTest.java:90`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:34`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:52`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:107`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:157`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:207`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:231`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:55`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:58`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:65`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:69`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:72`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:83`
+- `backend/src/test/java/com/minierp/backend/support/BoardTestSupport.java:11`
+- `backend/src/test/java/com/minierp/backend/support/BoardTestSupport.java:26`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:14`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:16`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:18`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:20`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:24`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:26`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:189`
+
+### 확인하지 못한 것·남은 한계
+
+- 실제 서버, 개발 DB/Redis는 호출하지 않았습니다. UTC 전체 테스트는 기존 Testcontainers 구성으로만 실행했습니다.
+- 키/값 11개라는 목표는 120자 제한 및 제시된 RecordingOrder 예시와 동시에 충족할 수 없어 12개로 보고했습니다. 그 외 측정 목표를 충족했습니다.
+- 닫는 줄 보호 예외 7곳과 긴 리터럴 166개는 의도적으로 남깁니다. 보호 예외를 줄이기 위해 닫는 줄을 바꾸지 않았습니다.
+- 별도의 제품 버그를 확정하거나 고치지 않았습니다. 3·4단계를 시작하지 않았고 병합·푸시하지 않았습니다.
+- 기준선 3개 파일, 기록 정책·비교 규칙, frontend, backend/md, 마이그레이션, .claude는 변경하지 않았습니다. 기록기·비교기 Java의 수정도 공백만입니다.
+
+이번 검증 원본은 `backend/target/r02-wrap2-validation/`의 `style/`·`docs/`에 보존했습니다. result.json, BASE/후보 컴파일 로그, 두 출력 폴더 diff, 기록 ON/OFF 로그, 기록과 compare.log를 포함합니다. 전체 안전 검사·측정 전후·fixture 결과도 같은 폴더에 보존했습니다. 이전 검증 폴더와 `target/refactoring-v2-validation/record-{1..5}`를 지우지 않았습니다. 원본 로그와 임시 편집 도구는 커밋하지 않았습니다.

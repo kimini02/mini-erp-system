@@ -226,6 +226,37 @@ class AnnotationMeasure {
                                     + unit.getLineMap().getLineNumber(end - 1) + "\t" + line(parameter.getType()));
                         }
                     }
+                    void invocation(Tree call, Tree selector, List<? extends ExpressionTree> arguments) {
+                        long first = start(call);
+                        long end = positions.getEndPosition(unit, call);
+                        long selectorEnd = positions.getEndPosition(unit, selector);
+                        boolean[] lambda = {false};
+                        new TreeScanner<Void, Void>() {
+                            @Override public Void visitLambdaExpression(LambdaExpressionTree tree, Void unused) {
+                                lambda[0] = true;
+                                return null;
+                            }
+                        }.scan(call, null);
+                        if (!lambda[0]) {
+                            System.out.println("C\t" + file + "\t" + first + "\t" + end + "\t" + selectorEnd);
+                        }
+                        String name = selector.toString();
+                        if (name.equals("map") || name.equals("SqlStore.map") || name.equals("Map.of")) {
+                            for (int i = 0; i + 1 < arguments.size(); i += 2) {
+                                long keyEnd = positions.getEndPosition(unit, arguments.get(i));
+                                long valueStart = start(arguments.get(i + 1));
+                                System.out.println("K\t" + file + "\t" + keyEnd + "\t" + valueStart);
+                            }
+                        }
+                    }
+                    @Override public Void visitMethodInvocation(MethodInvocationTree call, Void ignored) {
+                        invocation(call, call.getMethodSelect(), call.getArguments());
+                        return super.visitMethodInvocation(call, ignored);
+                    }
+                    @Override public Void visitNewClass(NewClassTree call, Void ignored) {
+                        invocation(call, call.getIdentifier(), call.getArguments());
+                        return super.visitNewClass(call, ignored);
+                    }
                     @Override public Void visitMethod(MethodTree method, Void ignored) {
                         method.getParameters().forEach(parameter -> parameter(parameter, "P"));
                         return super.visitMethod(method, ignored);
@@ -265,6 +296,11 @@ def annotation_measurements(root):
     on a different line from the parameter type / underlying type. This distinguishes
     wrapping long annotation arguments from separating an annotation from its target.
     Multiple annotations on one parameter count once.
+    C examines full method/new invocation spans (including a parenthesized first argument).
+    Short calls are <= 60 characters after whitespace compression and have a multiline
+    argument list; text blocks, lambdas, and comments are excluded.
+    K compares each key end with its paired value start for map/SqlStore.map/Map.of.
+    javac UTF-16 offsets are converted before indexing the Python source string.
     """
     java_home = os.environ.get('JAVA_HOME')
     java = str(Path(java_home) / 'bin/java') if java_home else shutil.which('java')
@@ -276,10 +312,41 @@ def annotation_measurements(root):
         run = subprocess.run([java, str(source), str(root)], capture_output=True, text=True, check=True)
     result = {part: {'annotated_parameters': [], 'detached_parameter_annotations': [],
                      'annotated_records': [], 'detached_record_annotations': [],
-                     'annotated_types': [], 'detached_type_annotations': []} for part in ('main', 'test')}
+                     'annotated_types': [], 'detached_type_annotations': [],
+                     'short_call_splits': [], 'key_value_splits': []} for part in ('main', 'test')}
+    sources = {}
     for line in run.stdout.splitlines():
-        kind, file, first, target = line.split('\t')
+        kind, file, *values = line.split('\t')
         part = 'main' if '/main/' in file else 'test'
+        if kind in ('C', 'K'):
+            if file not in sources:
+                sources[file] = (root / file).read_text(encoding='utf-8')
+            source = sources[file]
+            # javac positions count UTF-16 code units, Python indexes Unicode code points.
+            def offset(value):
+                return len(source.encode('utf-16-le')[:int(value) * 2].decode('utf-16-le'))
+            positions = list(map(offset, values))
+            if kind == 'C':
+                first, end, selector_end = positions
+                call = source[first:end]
+                tokens = tokenize(call)
+                # The JDK visitor excludes lambdas; lexical checks exclude text blocks and comments.
+                if any(token[0] == 'text' for token in tokens):
+                    continue
+                residual = list(call)
+                for token in tokens:
+                    if token[0] == 'string':
+                        residual[token[2]:token[3]] = ' ' * (token[3] - token[2])
+                if re.search(r'//|/\*', ''.join(residual)):
+                    continue
+                if len(re.sub(r'\s+', ' ', call).strip()) <= 60 and '\n' in source[selector_end:end]:
+                    result[part]['short_call_splits'].append(f'{file}:{source.count(chr(10), 0, first) + 1}')
+            else:
+                key_end, value_start = positions
+                if '\n' in source[key_end:value_start]:
+                    result[part]['key_value_splits'].append(f'{file}:{source.count(chr(10), 0, key_end - 1) + 1}')
+            continue
+        first, target = values
         all_key, detached_key = ({'P': ('annotated_parameters', 'detached_parameter_annotations'),
                                   'R': ('annotated_records', 'detached_record_annotations'),
                                   'T': ('annotated_types', 'detached_type_annotations')}[kind])
