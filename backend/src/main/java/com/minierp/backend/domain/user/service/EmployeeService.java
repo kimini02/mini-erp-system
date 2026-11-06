@@ -3,9 +3,10 @@ package com.minierp.backend.domain.user.service;
 import com.minierp.backend.domain.user.dto.EmployeeRequests.*;
 import com.minierp.backend.domain.user.dto.RegistrationResult;
 import com.minierp.backend.domain.user.repository.EmployeeRepository;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.user.repository.EmployeeQueries;
 import com.minierp.backend.global.permission.*;
 import com.minierp.backend.global.exception.*;
+import com.minierp.backend.domain.user.repository.EmployeeStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,8 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @Transactional(readOnly = true)
 public class EmployeeService {
     private final com.minierp.backend.domain.org.repository.DepartmentTreeLock treeLock;
-    private final SqlStore db;
+    private final EmployeeQueries queries;
+    private final EmployeeStore store;
     private final EmployeeRepository repository;
     private final PermissionAccess access;
     private final ApplicationEventPublisher events;
@@ -32,32 +34,28 @@ public class EmployeeService {
     }
 
     public Map<String, Object> raw(long id) {
-        return db.one("SELECT * FROM users WHERE id=:id", map("id", id), ErrorCode.USER_NOT_FOUND);
+        return queries.findUser(id);
     }
 
     public void lockChief() {
-        db.rows("SELECT id FROM roles WHERE code='CHIEF' FOR UPDATE", Map.of());
+        store.lockChief();
     }
 
     public void protectLastChief(long id) {
-        var chiefs = db.rows(
-                "SELECT u.id FROM users u JOIN user_roles ur ON ur.user_id=u.id JOIN roles r ON r.id=ur.role_id WHERE u.status='ACTIVE' AND r.code='CHIEF' FOR UPDATE",
-                Map.of());
+        var chiefs = store.lockActiveChiefs();
         if (chiefs.size() <= 1 && chiefs.stream().anyMatch(r -> number(r, "id") == id)) {
             throw new BusinessException(ErrorCode.LAST_CHIEF);
         }
     }
 
     private void notHead(long id) {
-        if (!db.rows("SELECT id FROM departments WHERE head_user_id=:id FOR UPDATE", map("id", id)).isEmpty()) {
+        if (!store.lockHeadDepartments(id).isEmpty()) {
             throw new BusinessException(ErrorCode.HEAD_MUST_BE_REASSIGNED);
         }
     }
 
     private void requireRoleUpdateForPrivilegedTarget(long id) {
-        if (db.count(
-                "SELECT COUNT(*) FROM user_roles ur JOIN roles r ON r.id=ur.role_id WHERE ur.user_id=:id AND r.code<>'EMPLOYEE'",
-                map("id", id)) > 0) {
+        if (queries.countPrivilegedRoles(id) > 0) {
             access.require("ROLE", Action.UPDATE);
         }
     }
@@ -66,15 +64,9 @@ public class EmployeeService {
         if (ids.isEmpty()) {
             return List.of();
         }
-        var rows = db.rows("""
-            SELECT u.id,u.login_id,u.user_name,u.user_email,u.department_id,u.position_id,u.hire_date,u.retired_date,u.status,u.user_pw,
-              (SELECT COALESCE(SUM(l.days),0) FROM leave_ledger l WHERE l.user_id=u.id) AS remaining_annual_leave,u.created_at,u.updated_at,d.name AS department_name,d.code AS department_code,p.name AS position_name
-            FROM users u JOIN departments d ON d.id=u.department_id JOIN positions p ON p.id=u.position_id WHERE u.id IN (:ids)
-            """, map("ids", ids));
+        var rows = queries.findEmployeeViews(ids);
         Map<Long, List<Map<String, Object>>> roles = new HashMap<>();
-        for (var row : db.rows(
-                "SELECT ur.user_id,r.code,r.name FROM user_roles ur JOIN roles r ON r.id=ur.role_id WHERE ur.user_id IN (:ids) ORDER BY r.id",
-                map("ids", ids))) {
+        for (var row : queries.findEmployeeRoles(ids)) {
             roles.computeIfAbsent(number(row, "user_id"), k -> new ArrayList<>())
                     .add(map("code", row.get("code"), "name", row.get("name")));
         }
@@ -139,17 +131,16 @@ public class EmployeeService {
             if (!scope.includesDepartment(departmentId)) {
                 throw new BusinessException(ErrorCode.ACCESS_DENIED);
             }
-            db.one("SELECT id FROM departments WHERE id=:id", map("id", departmentId), ErrorCode.DEPARTMENT_NOT_FOUND);
+            queries.findDepartment(departmentId);
             departments = includeSub ? access.descendants(departmentId) : List.of(departmentId);
         }
         String[] parts = sort.split(",");
-        var columns = Map.of("userName", "u.user_name", "loginId", "u.login_id", "hireDate", "u.hire_date",
-                "status", "u.status");
+        var columns = queries.findSortColumns();
         if (!columns.containsKey(parts[0]) || parts.length > 2
                 || parts.length == 2 && !Set.of("asc", "desc").contains(parts[1].toLowerCase())) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        String order = columns.get(parts[0]) + (parts.length == 2 ? " " + parts[1] : " ASC");
+        String order = queries.findSortOrder(columns, parts);
         var selected = repository.search(scope, q, departments, status, page, size, order);
         var result = page(views(selected.ids()), page, size, selected.total());
         result.put("statusCounts", selected.counts());
@@ -166,8 +157,7 @@ public class EmployeeService {
     }
 
     public String preview(LocalDate hireDate) {
-        var rows = db.rows("SELECT last_seq FROM login_id_sequences WHERE hire_year=:year",
-                map("year", hireDate.getYear()));
+        var rows = queries.findLoginSequence(hireDate.getYear());
         long next = rows.isEmpty() ? 1 : number(rows.get(0), "last_seq") + 1;
         return String.format("%d%03d", hireDate.getYear(), next);
     }
@@ -177,7 +167,7 @@ public class EmployeeService {
             throw new BusinessException(ErrorCode.ROLE_REQUIRED);
         }
         Set<String> unique = new HashSet<>(codes);
-        var rows = db.rows("SELECT id,code FROM roles WHERE code IN (:codes)", map("codes", unique));
+        var rows = queries.findRolesByCodes(unique);
         if (rows.size() != unique.size()) {
             throw new BusinessException(ErrorCode.ROLE_NOT_FOUND);
         }
@@ -191,35 +181,25 @@ public class EmployeeService {
             access.require("ROLE", Action.UPDATE);
         }
         var roles = roleIds(r.roleCodes());
-        db.one("SELECT id FROM departments WHERE id=:id", map("id", r.departmentId()), ErrorCode.DEPARTMENT_NOT_FOUND);
-        var position = db.one("SELECT name FROM positions WHERE id=:id", map("id", r.positionId()),
-                ErrorCode.POSITION_NOT_FOUND);
-        if (db.count("SELECT COUNT(*) FROM users WHERE user_email=:email", map("email", r.email())) > 0) {
+        queries.findDepartment(r.departmentId());
+        var position = queries.findPositionName(r.positionId());
+        if (queries.countEmail(r.email()) > 0) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         int year = r.hireDate().getYear();
-        db.update(
-                "INSERT INTO login_id_sequences(hire_year,last_seq) VALUES(:year,0) ON DUPLICATE KEY UPDATE hire_year=VALUES(hire_year)",
-                map("year", year));
-        long next = number(
-                db.one("SELECT last_seq FROM login_id_sequences WHERE hire_year=:year FOR UPDATE", map("year", year),
-                        ErrorCode.RESOURCE_NOT_FOUND), "last_seq") + 1;
-        db.update("UPDATE login_id_sequences SET last_seq=:next WHERE hire_year=:year",
-                map("year", year, "next", next));
+        store.insertLoginSequence(year);
+        long next = number(store.lockLoginSequence(year), "last_seq") + 1;
+        store.updateLoginSequence(year, next);
         String loginId = String.format("%d%03d", year, next);
         long id;
         try {
-            id = db.insert("""
-            INSERT INTO users(login_id,user_name,user_email,user_pw,department_id,position_id,hire_date,status,must_change_pw,token_version,
-              created_at,updated_at)
-            VALUES(:login,:name,:email,NULL,:department,:position,:hire,'ACTIVE',0,0,:now,:now)
-            """, map("login", loginId, "name", r.name(), "email", r.email(), "department", r.departmentId(), "position",
-                    r.positionId(), "hire", r.hireDate(), "now", LocalDateTime.now(clock)));
+            id = store.insertEmployee(loginId, r.name(), r.email(), r.departmentId(), r.positionId(),
+                    r.hireDate(), LocalDateTime.now(clock));
         } catch (org.springframework.dao.DuplicateKeyException ex) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         for (long role : roles) {
-            db.update("INSERT INTO user_roles(user_id,role_id) VALUES(:user,:role)", map("user", id, "role", role));
+            store.insertUserRole(id, role);
         }
         var result = new RegistrationResult(id, loginId);
         events.publishEvent(new InvitationRequested(id, r.email(), result));
@@ -235,7 +215,7 @@ public class EmployeeService {
         access.assertUserInScope("EMPLOYEE", id);
         var old = r.email() == null && r.departmentId() == null
                 ? raw(id)
-                : db.one("SELECT * FROM users WHERE id=:id FOR UPDATE", map("id", id), ErrorCode.USER_NOT_FOUND);
+                : store.lockUser(id);
         if (r.email() != null && !r.email().equals(old.get("user_email"))) {
             requireRoleUpdateForPrivilegedTarget(id);
         }
@@ -243,20 +223,17 @@ public class EmployeeService {
             if (number(old, "department_id") != r.departmentId()) {
                 notHead(id);
             }
-            db.one("SELECT id FROM departments WHERE id=:id", map("id", r.departmentId()),
-                    ErrorCode.DEPARTMENT_NOT_FOUND);
+            queries.findDepartment(r.departmentId());
         }
         if (r.positionId() != null) {
-            db.one("SELECT id FROM positions WHERE id=:id", map("id", r.positionId()), ErrorCode.POSITION_NOT_FOUND);
+            queries.findPosition(r.positionId());
         }
         if (r.name() != null && r.name().isBlank() || r.email() != null && r.email().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         try {
-            db.update(
-                    "UPDATE users SET user_name=COALESCE(:name,user_name),user_email=COALESCE(:email,user_email),department_id=COALESCE(:dept,department_id),position_id=COALESCE(:position,position_id),hire_date=COALESCE(:hire,hire_date),updated_at=:now WHERE id=:id",
-                    map("id", id, "name", r.name(), "email", r.email(), "dept", r.departmentId(),
-                            "position", r.positionId(), "hire", r.hireDate(), "now", LocalDateTime.now(clock)));
+            store.updateEmployee(id, r.name(), r.email(), r.departmentId(), r.positionId(), r.hireDate(),
+                    LocalDateTime.now(clock));
         } catch (org.springframework.dao.DuplicateKeyException ex) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -273,17 +250,15 @@ public class EmployeeService {
         }
         access.assertUserInScope("EMPLOYEE", id);
         lockChief();
-        var user = db.one("SELECT * FROM users WHERE id=:id FOR UPDATE", map("id", id), ErrorCode.USER_NOT_FOUND);
+        var user = store.lockUser(id);
         if (!status.name().equals(user.get("status"))) {
             if (status != com.minierp.backend.domain.user.entity.UserStatus.ACTIVE) {
                 notHead(id);
                 protectLastChief(id);
             }
-            db.update(
-                    "UPDATE users SET retired_date=CASE WHEN :status='RETIRED' THEN :date WHEN :status<>'RETIRED' AND status='RETIRED' THEN NULL ELSE retired_date END,status=:status,token_version=token_version+:increment,updated_at=:now WHERE id=:id",
-                    map("id", id, "status", status.name(), "date", LocalDate.now(clock),
-                            "increment", status == com.minierp.backend.domain.user.entity.UserStatus.ACTIVE ? 0 : 1,
-                            "now", LocalDateTime.now(clock)));
+            store.updateStatus(id, status.name(), LocalDate.now(clock),
+                    status == com.minierp.backend.domain.user.entity.UserStatus.ACTIVE ? 0 : 1,
+                    LocalDateTime.now(clock));
         }
         return views(List.of(id)).get(0);
     }
@@ -296,15 +271,15 @@ public class EmployeeService {
         if (!codes.contains("CHIEF")) {
             protectLastChief(id);
         }
-        db.update("DELETE FROM user_roles WHERE user_id=:id", map("id", id));
+        store.deleteUserRoles(id);
         for (long role : ids) {
-            db.update("INSERT INTO user_roles(user_id,role_id) VALUES(:id,:role)", map("id", id, "role", role));
+            store.insertAssignedRole(id, role);
         }
     }
 
     @Transactional
     public RegistrationResult invitation(long id) {
-        var user = db.one("SELECT * FROM users WHERE id=:id FOR UPDATE", map("id", id), ErrorCode.USER_NOT_FOUND);
+        var user = store.lockUser(id);
         requireRoleUpdateForPrivilegedTarget(id);
         if (user.get("user_pw") != null) {
             throw new BusinessException(ErrorCode.INVITATION_ALREADY_ACCEPTED);
