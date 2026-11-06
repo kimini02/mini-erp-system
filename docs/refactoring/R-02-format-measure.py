@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only Java format measurements. Python standard library; no compiler or formatter.
+"""Read-only Java format measurements. Python standard library + JDK parser; no external formatter.
 
 Counts Unicode characters, not bytes. Strings/comments do not contribute semicolons.
 Text-block content and its closing-delimiter line are excluded from line-length counts.
@@ -10,6 +10,10 @@ import collections
 import json
 from pathlib import Path
 import re
+import os
+import shutil
+import subprocess
+import tempfile
 
 TOKEN = re.compile(
     r'(?P<ws>\s+)'
@@ -27,8 +31,27 @@ KEYWORDS = set(('return throw new class interface enum record package import ext
 
 
 def tokenize(source):
-    return [(m.lastgroup, m.group(), m.start(), m.end())
-            for m in TOKEN.finditer(source) if m.lastgroup not in ('ws', 'comment')]
+    result = []
+    offset = 0
+    while offset < len(source):
+        if source.startswith('"""', offset):
+            end = offset + 3
+            while end < len(source):
+                if source[end] == '\\':
+                    end += 2
+                elif source.startswith('"""', end):
+                    end += 3
+                    break
+                else:
+                    end += 1
+            result.append(('text', source[offset:end], offset, end))
+            offset = end
+        else:
+            match = TOKEN.match(source, offset)
+            if match.lastgroup not in ('ws', 'comment'):
+                result.append((match.lastgroup, match.group(), match.start(), match.end()))
+            offset = match.end()
+    return result
 
 
 def angle_end(tokens, start):
@@ -160,8 +183,136 @@ def measure_file(path, root):
             semicolons[line_of(token[2])] += 1
     output['multiple_statements'] = [f'{location}:{line}' for line, count in semicolons.items() if count > 1]
     output['multiple_declarators'] = [f'{location}:{line_of(offset)}' for offset in declarations(tokens, context)]
+    output.update(wrap_measurements(source, location))
     output['comparison'] = comparison
     return output
+
+
+ANNOTATION_SCANNER = r'''
+import com.sun.source.tree.*;
+import com.sun.source.util.*;
+import javax.tools.*;
+import javax.lang.model.element.Modifier;
+import java.nio.file.*;
+import java.util.*;
+
+class AnnotationMeasure {
+    public static void main(String[] args) throws Exception {
+        Path root = Path.of(args[0]);
+        var compiler = ToolProvider.getSystemJavaCompiler();
+        if (compiler == null) throw new IllegalStateException("A JDK is required");
+        try (var files = compiler.getStandardFileManager(null, null, null)) {
+            List<Path> paths;
+            try (var stream = Files.walk(root.resolve("backend/src"))) {
+                paths = stream.filter(p -> p.toString().endsWith(".java")).sorted().toList();
+            }
+            var task = (JavacTask) compiler.getTask(null, files, diagnostic -> {
+                if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                    throw new IllegalStateException(diagnostic.toString());
+                }
+            }, List.of("-proc:none"), null, files.getJavaFileObjectsFromPaths(paths));
+            for (var unit : task.parse()) {
+                var positions = Trees.instance(task).getSourcePositions();
+                String source = unit.getSourceFile().getCharContent(true).toString();
+                String file = root.relativize(Path.of(unit.getSourceFile().toUri())).toString();
+                new TreeScanner<Void, Void>() {
+                    long start(Tree tree) { return positions.getStartPosition(unit, tree); }
+                    long line(Tree tree) { return unit.getLineMap().getLineNumber(start(tree)); }
+                    void parameter(VariableTree parameter, String kind) {
+                        var annotations = parameter.getModifiers().getAnnotations();
+                        if (!annotations.isEmpty()) {
+                            long end = positions.getEndPosition(unit, annotations.get(annotations.size() - 1));
+                            System.out.println(kind + "\t" + file + "\t"
+                                    + unit.getLineMap().getLineNumber(end - 1) + "\t" + line(parameter.getType()));
+                        }
+                    }
+                    @Override public Void visitMethod(MethodTree method, Void ignored) {
+                        method.getParameters().forEach(parameter -> parameter(parameter, "P"));
+                        return super.visitMethod(method, ignored);
+                    }
+                    @Override public Void visitClass(ClassTree type, Void ignored) {
+                        if (type.getKind() == Tree.Kind.RECORD) {
+                            for (Tree member : type.getMembers()) {
+                                if (member instanceof VariableTree variable
+                                        && !variable.getModifiers().getFlags().contains(Modifier.STATIC)) {
+                                    parameter(variable, "R");
+                                }
+                            }
+                        }
+                        return super.visitClass(type, ignored);
+                    }
+                    @Override public Void visitAnnotatedType(AnnotatedTypeTree type, Void ignored) {
+                        if (!type.getAnnotations().isEmpty()) {
+                            System.out.println("T\t" + file + "\t" + unit.getLineMap().getLineNumber(positions.getEndPosition(unit,
+                                    type.getAnnotations().get(type.getAnnotations().size() - 1)) - 1)
+                                    + "\t" + line(type.getUnderlyingType()));
+                        }
+                        return super.visitAnnotatedType(type, ignored);
+                    }
+                }.scan(unit, null);
+            }
+        }
+    }
+}
+'''
+
+
+def annotation_measurements(root):
+    """Use only the JDK parser: no classpath, annotation processing, or external library.
+
+    P counts method/constructor parameters; R counts record components separately.
+    T counts annotated type nodes. A target is detached when the last annotation ends
+    on a different line from the parameter type / underlying type. This distinguishes
+    wrapping long annotation arguments from separating an annotation from its target.
+    Multiple annotations on one parameter count once.
+    """
+    java_home = os.environ.get('JAVA_HOME')
+    java = str(Path(java_home) / 'bin/java') if java_home else shutil.which('java')
+    if not java:
+        raise SystemExit('JDK 17+ is required for annotation measurements; set JAVA_HOME')
+    with tempfile.TemporaryDirectory(prefix='r02-annotation-measure-') as temporary:
+        source = Path(temporary) / 'AnnotationMeasure.java'
+        source.write_text(ANNOTATION_SCANNER, encoding='utf-8')
+        run = subprocess.run([java, str(source), str(root)], capture_output=True, text=True, check=True)
+    result = {part: {'annotated_parameters': [], 'detached_parameter_annotations': [],
+                     'annotated_records': [], 'detached_record_annotations': [],
+                     'annotated_types': [], 'detached_type_annotations': []} for part in ('main', 'test')}
+    for line in run.stdout.splitlines():
+        kind, file, first, target = line.split('\t')
+        part = 'main' if '/main/' in file else 'test'
+        all_key, detached_key = ({'P': ('annotated_parameters', 'detached_parameter_annotations'),
+                                  'R': ('annotated_records', 'detached_record_annotations'),
+                                  'T': ('annotated_types', 'detached_type_annotations')}[kind])
+        location = f'{file}:{first}'
+        result[part][all_key].append(location)
+        if first != target:
+            result[part][detached_key].append(location)
+    return result
+
+
+def wrap_measurements(source, location):
+    """Exclude comment/literal contents; keep a text block's trailing Java code visible.
+
+    Name/member: the last token of a physical line is an identifier and the first token
+    of the next physical line is a dot. Non-chain is the requested physical-line heuristic:
+    the immediately following (third) line does not start with a dot.
+    """
+    grouped = collections.defaultdict(list)
+    for token in tokenize(source):
+        if token[0] == 'text':
+            continue
+        grouped[source.count('\n', 0, token[2]) + 1].append(token)
+    result = {'name_member_breaks': [], 'non_chain_breaks': [], 'angle_line_ends': []}
+    for line, tokens in grouped.items():
+        if tokens[-1][1] == '<':
+            result['angle_line_ends'].append(f'{location}:{line}')
+        following = grouped.get(line + 1, [])
+        if tokens[-1][0] == 'id' and following and following[0][1] == '.':
+            result['name_member_breaks'].append(f'{location}:{line}')
+            third = grouped.get(line + 2, [])
+            if not third or third[0][1] != '.':
+                result['non_chain_breaks'].append(f'{location}:{line}')
+    return result
 
 
 def main():
@@ -174,8 +325,10 @@ def main():
         if not (root / 'backend/src' / part / 'java').is_dir():
             parser.error(f'Java source directory not found: {root / "backend/src" / part / "java"}')
     result = {}
+    annotations = annotation_measurements(root)
     for part in ('main', 'test'):
-        entries = {name: [] for name in ('long_lines', 'literal_exceptions', 'multiple_statements', 'multiple_declarators')}
+        entries = {name: [] for name in ('long_lines', 'literal_exceptions', 'multiple_statements', 'multiple_declarators',
+                                       'name_member_breaks', 'non_chain_breaks', 'angle_line_ends')}
         comparison = collections.Counter()
         files = sorted((root / 'backend/src' / part / 'java').rglob('*.java'))
         for path in files:
@@ -183,6 +336,7 @@ def main():
             comparison.update(measured.pop('comparison'))
             for name, values in measured.items():
                 entries[name].extend(values)
+        entries.update(annotations[part])
         result[part] = {'files': len(files), 'counts': {k: len(v) for k, v in entries.items()},
                         'comparison': dict(comparison), 'locations': entries}
     text = json.dumps(result, ensure_ascii=False, indent=2) + '\n'
