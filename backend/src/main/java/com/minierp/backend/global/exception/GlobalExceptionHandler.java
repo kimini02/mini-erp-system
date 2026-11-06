@@ -24,20 +24,16 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(clock, errorCode, e.getMessage(), e.getDetails()));
     }
 
-    @ExceptionHandler({
-        MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class,
-                org.springframework.http.converter.HttpMessageNotReadableException.class, IllegalArgumentException.class
-    })
+    @ExceptionHandler({ MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class,
+            org.springframework.http.converter.HttpMessageNotReadableException.class, IllegalArgumentException.class })
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception e) {
         ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ErrorResponse.of(clock, errorCode, extractValidationMessage(e)));
     }
 
-    @ExceptionHandler({
-        org.springframework.web.servlet.resource.NoResourceFoundException.class,
-                org.springframework.web.servlet.NoHandlerFoundException.class
-    })
+    @ExceptionHandler({ org.springframework.web.servlet.resource.NoResourceFoundException.class,
+            org.springframework.web.servlet.NoHandlerFoundException.class })
     public ResponseEntity<ErrorResponse> handleNotFound(Exception e) {
         return ResponseEntity.status(ErrorCode.RESOURCE_NOT_FOUND.getStatus())
                 .body(ErrorResponse.of(clock, ErrorCode.RESOURCE_NOT_FOUND));

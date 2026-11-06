@@ -82,9 +82,7 @@ public final class JdbcProbe {
 
     @SuppressWarnings("unchecked")
     private static<T> T proxy(Class<T> type, Object target, InvocationHandler handler) {
-        return (T) Proxy.newProxyInstance(JdbcProbe.class.getClassLoader(), new Class<?>[] {
-            type
-        }, handler);
+        return (T) Proxy.newProxyInstance(JdbcProbe.class.getClassLoader(), new Class<?>[] { type }, handler);
     }
 
     private static ResultSet result(ResultSet rs, Query query) {
@@ -98,20 +96,18 @@ public final class JdbcProbe {
     }
 
     private static Statement statement(Statement statement, String sql) {
-        final Query[] current = {
-            null
-        };
-        Class<? extends Statement> type = statement instanceof PreparedStatement ? PreparedStatement.class
+        final Query[] current = { null };
+        Class<? extends Statement> type = statement instanceof PreparedStatement
+                ? PreparedStatement.class
                 : Statement.class;
         return proxy(type, statement, (p, m, a) -> {
             String name = m.getName();
             boolean executing = name.equals("execute") || name.equals("executeQuery") || name.equals("executeUpdate")
                     || name.equals("executeLargeUpdate");
             Observer observer = OBSERVER.get();
-            String observed = executing ? (sql != null ? sql : (String) a[0])
-                    .replaceAll("\\s+", " ")
-                    .trim()
-                    .toLowerCase(Locale.ROOT) : null;
+            String observed = executing
+                    ? (sql != null ? sql : (String) a[0]).replaceAll("\\s+", " ").trim().toLowerCase(Locale.ROOT)
+                    : null;
             if (executing && observer != null) {
                 observer.before(statement, observed);
             }
@@ -159,9 +155,8 @@ public final class JdbcProbe {
                     if (!(bean instanceof DataSource ds)) {
                         return bean;
                     }
-                    return Proxy.newProxyInstance(JdbcProbe.class.getClassLoader(), new Class<?>[] {
-                        DataSource.class, AutoCloseable.class
-                    }, (p, m, a) -> {
+                    return Proxy.newProxyInstance(JdbcProbe.class.getClassLoader(),
+                            new Class<?>[] { DataSource.class, AutoCloseable.class }, (p, m, a) -> {
                         if (m.getName().equals("close")) {
                             if (ds instanceof AutoCloseable c) {
                                 c.close();

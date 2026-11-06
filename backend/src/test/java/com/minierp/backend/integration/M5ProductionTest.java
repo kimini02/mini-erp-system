@@ -51,8 +51,8 @@ class M5ProductionTest {
         // Real accounts, scoped to the disposable database. Passwords are bound, never logged.
         try (var admin = DriverManager.getConnection(maria.getJdbcUrl(), "root", maria.getPassword())) {
             for (var pair : Map.of("workflow_app", appPassword, "workflow_migrator", migratorPassword).entrySet()) {
-                try (var statement = admin.prepareStatement("CREATE USER '" + pair.getKey()
-                        + "'@'%' IDENTIFIED BY ?")) {
+                try (var statement = admin.prepareStatement(
+                        "CREATE USER '" + pair.getKey() + "'@'%' IDENTIFIED BY ?")) {
                     statement.setString(1, pair.getValue());
                     statement.execute();
                 }

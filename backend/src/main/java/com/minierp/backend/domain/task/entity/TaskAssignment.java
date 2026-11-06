@@ -12,11 +12,7 @@ import lombok.NoArgsConstructor;
 * - UniqueConstraint로 DB 레벨 중복 배정 방지
 */
 @Entity
-@Table(name = "task_assignments", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {
-        "task_id", "user_id"
-    })
-})
+@Table(name = "task_assignments", uniqueConstraints = { @UniqueConstraint(columnNames = { "task_id", "user_id" }) })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class TaskAssignment extends BaseEntity {

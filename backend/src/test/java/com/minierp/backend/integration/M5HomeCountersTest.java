@@ -23,9 +23,8 @@ class M5HomeCountersTest extends BoardTestSupport {
         date = date.withDayOfMonth(15);
         at(date, LocalTime.of(0, 30));
         // Still the previous UTC day.
-        for (LocalDate day : new LocalDate[] {
-            date.minusDays(1), date.minusDays(2), date.withDayOfMonth(1).minusDays(1)
-        }) {
+        for (LocalDate day : new LocalDate[] { date.minusDays(1), date.minusDays(2),
+                date.withDayOfMonth(1).minusDays(1) }) {
             attendance.insert(employee.getId(), day, attendance.schedule(employee.getId()), "WORKDAY", null, null, true,
                     LocalDateTime.now(clock));
         }
@@ -47,9 +46,7 @@ class M5HomeCountersTest extends BoardTestSupport {
         at(date, LocalTime.of(0, 30));
         assertThat(clock.instant().atZone(ZoneOffset.UTC).toLocalDate()).isEqualTo(date.minusDays(1));
         // Two last-month absences versus one this month: counting the UTC month must fail.
-        for (LocalDate day : new LocalDate[] {
-            date.minusDays(2), date.minusDays(1), date
-        }) {
+        for (LocalDate day : new LocalDate[] { date.minusDays(2), date.minusDays(1), date }) {
             attendance.insert(employee.getId(), day, attendance.schedule(employee.getId()), "WORKDAY", null, null, true,
                     LocalDateTime.now(clock));
         }

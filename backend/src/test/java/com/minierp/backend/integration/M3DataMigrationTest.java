@@ -29,12 +29,8 @@ class M3DataMigrationTest {
                 "INSERT INTO work_schedules(name,start_time,end_time,late_grace_min,is_default) VALUES('부서 기준','10:00','19:00',0,0)");
         db.update(
                 "UPDATE departments SET work_schedule_id=(SELECT id FROM work_schedules WHERE name='부서 기준') WHERE id=2");
-        String[] statuses = {
-            "LATE", "NORMAL", "ABSENT", "LEAVE"
-        };
-        String[] ins = {
-            "09:10:59", "09:11:00", null, null
-        };
+        String[] statuses = { "LATE", "NORMAL", "ABSENT", "LEAVE" };
+        String[] ins = { "09:10:59", "09:11:00", null, null };
         for (int n = 0; n < 4; n++) {
             db.update(
                     "INSERT INTO attendances(created_at,user_id,work_date,clock_in_time,clock_out_time,att_status) VALUES(?,1,?,?,'17:59:00',?)",

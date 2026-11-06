@@ -18,10 +18,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import(FixedClockTestConfiguration.class)
 @SpringBootTest
 @ActiveProfiles("mariadb")
-@TestPropertySource(properties = {
-    "app.batches.enabled=false", "INITIAL_ADMIN_LOGIN_ID=", "INITIAL_ADMIN_NAME=", "INITIAL_ADMIN_EMAIL=",
-            "INITIAL_ADMIN_PASSWORD="
-})
+@TestPropertySource(properties = { "app.batches.enabled=false", "INITIAL_ADMIN_LOGIN_ID=", "INITIAL_ADMIN_NAME=",
+        "INITIAL_ADMIN_EMAIL=", "INITIAL_ADMIN_PASSWORD=" })
 @Testcontainers(disabledWithoutDocker = true)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class MariaDbIntegrationTest {

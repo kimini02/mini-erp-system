@@ -9,9 +9,7 @@ import static org.assertj.core.api.Assertions.*;
 class M3LegacyRoutesTest extends AttendanceTestSupport {
     @Test
     void oldAttendanceRoutesAreGoneAndCannotWrite() throws Exception {
-        for (String suffix : new String[] {
-            "/check-in", "/check-out"
-        }) {
+        for (String suffix : new String[] { "/check-in", "/check-out" }) {
             postAs("/api/v1/attendance" + suffix, employeeToken,
                     java.util.Map.of("workDate", date.toString(), "clockInTime", "08:50", "clockOutTime", "18:00"))
                     .andExpect(status().isNotFound());

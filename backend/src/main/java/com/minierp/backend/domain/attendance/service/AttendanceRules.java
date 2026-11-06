@@ -24,10 +24,14 @@ public final class AttendanceRules {
         }
         LocalDateTime begin = date.atTime(type.equals("HALF_AM") ? start.plusHours(5) : start).plusMinutes(grace);
         LocalDateTime finish = date.atTime(type.equals("HALF_PM") ? start.plusHours(5) : end);
-        String inResult = in == null ? "NONE" : in.truncatedTo(ChronoUnit.MINUTES)
-                .isAfter(begin.truncatedTo(ChronoUnit.MINUTES)) ? "LATE" : "ON_TIME";
-        String outResult = in == null ? "NONE" : out == null ? (finalized ? "MISSING" : null) : out.isBefore(finish)
-                ? "EARLY" : "ON_TIME";
+        String inResult = in == null
+                ? "NONE"
+                : in.truncatedTo(ChronoUnit.MINUTES).isAfter(begin.truncatedTo(ChronoUnit.MINUTES))
+                        ? "LATE"
+                        : "ON_TIME";
+        String outResult = in == null
+                ? "NONE"
+                : out == null ? (finalized ? "MISSING" : null) : out.isBefore(finish) ? "EARLY" : "ON_TIME";
         return new Result(inResult, outResult, finalized && in == null);
     }
 

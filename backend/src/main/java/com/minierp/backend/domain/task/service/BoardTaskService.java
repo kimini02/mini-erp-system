@@ -46,8 +46,9 @@ public class BoardTaskService {
             Map<String, Object> project,
             List<Map<String, Object>> people) {
         var end = (LocalDate) task.get("end_date");
-        long overdue = "DONE".equals(task.get("task_status")) ? 0 : Math.max(0,
-                ChronoUnit.DAYS.between(end, LocalDate.now(clock)));
+        long overdue = "DONE".equals(task.get("task_status"))
+                ? 0
+                : Math.max(0, ChronoUnit.DAYS.between(end, LocalDate.now(clock)));
         return map("id", task.get("id"), "key", project.get("project_key") + "-" + task.get("task_no"),
                 "title", task.get("task_title"), "status", task.get("task_status"), "priority", task.get("priority"),
                 "endDate", end, "overdueDays", overdue, "assignees", people, "position", task.get("position"),
@@ -130,9 +131,9 @@ public class BoardTaskService {
 
     private Set<Long> validateAssignees(long project, List<Long> ids) {
         Set<Long> unique = new LinkedHashSet<>(ids == null ? List.of() : ids);
-        if (!unique.isEmpty() && db.count(
-                "SELECT COUNT(*) FROM project_members WHERE project_id=:p AND user_id IN (:ids)",
-                map("p", project, "ids", unique)) != unique.size()) {
+        if (!unique.isEmpty()
+                && db.count("SELECT COUNT(*) FROM project_members WHERE project_id=:p AND user_id IN (:ids)",
+                        map("p", project, "ids", unique)) != unique.size()) {
             throw new BusinessException(ErrorCode.TASK_ASSIGNEE_NOT_MEMBER);
         }
         return unique;
@@ -254,9 +255,9 @@ public class BoardTaskService {
         var args = map("p", project, "status", status, "moving", moving);
         if (after != null) {
             args.put("after", after);
-            if (after == moving || db.count(
-                    "SELECT COUNT(*) FROM tasks WHERE id=:after AND project_id=:p AND task_status=:status",
-                    args) == 0) {
+            if (after == moving
+                    || db.count("SELECT COUNT(*) FROM tasks WHERE id=:after AND project_id=:p AND task_status=:status",
+                            args) == 0) {
                 throw new BusinessException(ErrorCode.INVALID_TASK_POSITION);
             }
         }
@@ -272,9 +273,11 @@ public class BoardTaskService {
                         "position");
             }
             args.put("lower", lower);
-            var next = append ? List.< Map<String, Object>> of() : db.rows(
-                    "SELECT position FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving AND position>:lower ORDER BY position,id LIMIT 1",
-                    args);
+            var next = append
+                    ? List.< Map<String, Object>> of()
+                    : db.rows(
+                            "SELECT position FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving AND position>:lower ORDER BY position,id LIMIT 1",
+                            args);
             if (next.isEmpty() && lower <= Long.MAX_VALUE - 1024) {
                 return lower + 1024;
             }

@@ -26,9 +26,7 @@ class M2DataMigrationTest {
             VALUES(?,'2025-01-01',?, ?, ?,2,1,'ACTIVE',0,0,15,2,13)
             """, id, "migration-" + id, "이관" + id, "migration-" + id + "@example.test");
         }
-        String[] states = {
-            "PENDING", "APPROVED", "REJECTED", "CANCELLED"
-        };
+        String[] states = { "PENDING", "APPROVED", "REJECTED", "CANCELLED" };
         for (int i = 0; i < states.length; i++) {
             db.update("""
                 INSERT INTO leave_requests(created_at,requester_id,approver_id,app_type,start_date,end_date,used_days,app_status,reject_reason,request_reason)

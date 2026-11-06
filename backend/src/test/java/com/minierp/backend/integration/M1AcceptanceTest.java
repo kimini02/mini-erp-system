@@ -36,10 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static com.minierp.backend.global.persistence.SqlStore.*;
 
 @AutoConfigureMockMvc
-@TestPropertySource(properties = {
-    "app.mail.enabled=true", "app.mail.from=no-reply@example.test",
-            "app.invitation.setup-url=https://workflow.example.test/password/setup"
-})
+@TestPropertySource(properties = { "app.mail.enabled=true", "app.mail.from=no-reply@example.test",
+        "app.invitation.setup-url=https://workflow.example.test/password/setup" })
 class M1AcceptanceTest extends MariaDbIntegrationTest {
     @Autowired
     MockMvc mvc;
@@ -201,9 +199,7 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
     }
 
     @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(strings = {
-        "2024/02/01", "2024-2-01", "2024-02-30"
-    })
+    @org.junit.jupiter.params.provider.ValueSource(strings = { "2024/02/01", "2024-2-01", "2024-02-30" })
     void hireDatePatchRejectsMalformedOrImpossibleDates(String date) throws Exception {
         mvc.perform(
                 patch("/api/v1/users/" + employee.getId())
@@ -254,9 +250,7 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
     }
 
     @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(strings = {
-        "CHIEF", "LEADER", "HR_RECRUITER"
-    })
+    @org.junit.jupiter.params.provider.ValueSource(strings = { "CHIEF", "LEADER", "HR_RECRUITER" })
     void employeeCreatorCannotAssignOtherRoles(String role) throws Exception {
         grantEmployeeCreateOnly();
         long before = users.count();
@@ -719,9 +713,8 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
                                 .content(
                                         json(
                                                 map("currentPassword", password,
-                                                        "newPassword", "Aa2!" + UUID.randomUUID()
-                                                                .toString()
-                                                                .substring(0, 12))))));
+                                                        "newPassword", "Aa2!"
+                                                                + UUID.randomUUID().toString().substring(0, 12))))));
         mvc.perform(get("/api/v1/me").header("Authorization", auth(chiefToken))).andExpect(status().isUnauthorized());
         mvc.perform(
                 get("/api/v1/me/permissions")

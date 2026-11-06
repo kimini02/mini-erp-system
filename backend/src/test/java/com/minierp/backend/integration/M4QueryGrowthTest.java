@@ -37,16 +37,12 @@ class M4QueryGrowthTest extends BoardTestSupport {
         String board = LegacyProjectSummary.SELECT + " WHERE p.id=:id AND " + where;
         var args = map("actor", employee.getId(), "today", date, "id", visible.get(0), "size", 2, "offset", 0);
         int previous = 0;
-        for (int scale : new int[] {
-            1, 10, 100
-        }) {
+        for (int scale : new int[] { 1, 10, 100 }) {
             int count = (1000 * scale - 100) / 9;
             for (long p : noise) {
                 List<Object[]> rows = new ArrayList<>();
                 for (int n = previous + 1; n <= count; n++) {
-                    rows.add(new Object[] {
-                        p, n, n * 1024L, date.plusDays(1), LocalDateTime.now(clock)
-                    });
+                    rows.add(new Object[] { p, n, n * 1024L, date.plusDays(1), LocalDateTime.now(clock) });
                 }
                 jdbc.batchUpdate(
                         "INSERT INTO tasks(project_id,task_no,position,end_date,created_at,task_title,task_content,task_status,priority) VALUES(?,?,?,?,?,'부하','','DOING','MEDIUM')",

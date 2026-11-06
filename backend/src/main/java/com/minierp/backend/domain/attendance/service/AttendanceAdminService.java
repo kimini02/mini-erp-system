@@ -68,8 +68,9 @@ public class AttendanceAdminService {
             String type = (String) r.get("day_type");
             var verdict = new AttendanceRules.Result((String) r.get("in_result"), (String) r.get("out_result"),
                     bool(r, "absent"));
-            String code = employed ? AttendanceRules.code(date, today, type, verdict,
-                    (LocalDateTime) r.get("clock_in_at")) : "NONE";
+            String code = employed
+                    ? AttendanceRules.code(date, today, type, verdict, (LocalDateTime) r.get("clock_in_at"))
+                    : "NONE";
             cells(row).add(map("date", date, "code", code));
             if (employed) {
                 var t = totals(row);
@@ -78,8 +79,8 @@ public class AttendanceAdminService {
                 add(t, "absent", verdict.absent());
                 add(t, "missing", "MISSING".equals(verdict.outResult()));
                 t.put("leaveDays",
-                        ((Number) t.get("leaveDays"))
-                                .doubleValue() + (type.equals("LEAVE") ? 1 : type.startsWith("HALF_") ?.5 : 0));
+                        ((Number) t.get("leaveDays")).doubleValue()
+                                + (type.equals("LEAVE") ? 1 : type.startsWith("HALF_") ?.5 : 0));
             }
         }
         return map("month", month.toString(), "days", days.values(), "rows", rows.values(), "legend", LEGEND);
@@ -113,20 +114,25 @@ public class AttendanceAdminService {
         var in = row == null ? null : (LocalDateTime) row.get("clock_in_at");
         var out = row == null ? null : (LocalDateTime) row.get("clock_out_at");
         String type = row == null ? day.type() : (String) row.get("day_type");
-        var verdict = row == null ? new AttendanceRules.Result(null, null, false) : new AttendanceRules.Result(
-                (String) row.get("in_result"), (String) row.get("out_result"), bool(row, "absent"));
+        var verdict = row == null
+                ? new AttendanceRules.Result(null, null, false)
+                : new AttendanceRules.Result((String) row.get("in_result"), (String) row.get("out_result"),
+                        bool(row, "absent"));
         String code = employed(date, (LocalDate) u.get("employed_from"), (LocalDate) u.get("retired_date"))
-                ? AttendanceRules.code(date, LocalDate.now(clock), type, verdict, in) : "NONE";
+                ? AttendanceRules.code(date, LocalDate.now(clock), type, verdict, in)
+                : "NONE";
         String reason = reason(code, in, out, s, type, "EARLY".equals(verdict.outResult()));
         var schedule = s.view();
         schedule.remove("source");
         schedule.remove("departmentName");
         return map("user", map("id", user, "name", u.get("user_name")), "date", date, "code", code, "clockInAt", in,
                 "clockOutAt", out, "schedule", schedule, "reason", reason,
-                "leaveDocument", day.leave() == null ? null : map("id", day.leave().get("documentId"),
-                        "docNo", day.leave().get("docNo")),
-                "fixDocument", row == null || row.get("fix_document_id") == null ? null : map(
-                        "id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no")),
+                "leaveDocument", day.leave() == null
+                        ? null
+                        : map("id", day.leave().get("documentId"), "docNo", day.leave().get("docNo")),
+                "fixDocument", row == null || row.get("fix_document_id") == null
+                        ? null
+                        : map("id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no")),
                 "judgedAt", row == null ? null : row.get("judged_at"));
     }
 
@@ -140,11 +146,10 @@ public class AttendanceAdminService {
         var f = DateTimeFormatter.ofPattern("HH:mm");
         return switch (code) {
             case "LATE" -> "출근 " + in.format(f) + " > 기준 "
-                    + (type.equals("HALF_AM") ? s.start().plusHours(5) : s.start())
-                    .format(f) + " + 유예 " + s.grace() + "분" + (early ? " (조퇴도 기록됨)" : "");
+                    + (type.equals("HALF_AM") ? s.start().plusHours(5) : s.start()).format(f)
+                    + " + 유예 " + s.grace() + "분" + (early ? " (조퇴도 기록됨)" : "");
             case "EARLY" -> "퇴근 " + out.format(f) + " < 기준 "
-                    + (type.equals("HALF_PM") ? s.start().plusHours(5) : s.end())
-                    .format(f);
+                    + (type.equals("HALF_PM") ? s.start().plusHours(5) : s.end()).format(f);
             case "ABSENT" -> "근무일에 출근 기록과 승인된 종일 휴가가 없습니다.";
             case "MISSING" -> "출근 후 퇴근 기록이 없습니다.";
             case "LEAVE", "HALF_AM", "HALF_PM" -> "승인된 휴가를 반영한 판정입니다.";

@@ -121,8 +121,10 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         var day = records.day(d.drafterId(), date);
         var in = old == null ? null : (LocalDateTime) old.get("clock_in_at");
         var out = old == null ? null : (LocalDateTime) old.get("clock_out_at");
-        var verdict = old == null ? new AttendanceRules.Result(null, null, false) : new AttendanceRules.Result(
-                (String) old.get("in_result"), (String) old.get("out_result"), bool(old, "absent"));
+        var verdict = old == null
+                ? new AttendanceRules.Result(null, null, false)
+                : new AttendanceRules.Result((String) old.get("in_result"), (String) old.get("out_result"),
+                        bool(old, "absent"));
         String code = AttendanceRules.code(date, LocalDate.now(clock),
                 old == null ? day.type() : (String) old.get("day_type"), verdict, in);
         try {

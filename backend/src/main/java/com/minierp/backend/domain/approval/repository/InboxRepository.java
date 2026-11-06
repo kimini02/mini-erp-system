@@ -79,8 +79,9 @@ public class InboxRepository {
                 String state = (String) l.get("status");
                 progress.add(switch (state) {
                     case "APPROVED" -> "DONE";
-                    case "PENDING" -> status.equals("IN_PROGRESS") ? "CURRENT" : status.equals("WITHDRAWN")
-                            ? "WITHDRAWN" : "TODO";
+                    case "PENDING" -> status.equals("IN_PROGRESS")
+                            ? "CURRENT"
+                            : status.equals("WITHDRAWN") ? "WITHDRAWN" : "TODO";
                     case "REJECTED" -> "REJECTED";
                     case "SKIPPED" -> "SKIPPED";
                     default -> "TODO";

@@ -33,8 +33,8 @@ public class OvertimeFormHandler implements ApprovalFormHandler {
             INSERT INTO overtime_requests(document_id,overtime_date,start_time,end_time,reason,created_at,updated_at)
             VALUES(:id,:date,:start,:end,:reason,:now,:now) ON DUPLICATE KEY UPDATE overtime_date=VALUES(overtime_date),start_time=VALUES(start_time),end_time=VALUES(end_time),reason=VALUES(reason),updated_at=VALUES(updated_at)
             """, map("id", d.id(), "date", BodyValues.date(b, "overtimeDate"), "start", BodyValues.time(b, "startTime"),
-                "end", BodyValues.time(b, "endTime"), "reason", b.path("reason")
-                        .textValue(), "now", LocalDateTime.now(clock)));
+                "end", BodyValues.time(b, "endTime"), "reason", b.path("reason").textValue(),
+                "now", LocalDateTime.now(clock)));
     }
 
     public Map<String, Object> body(long id) {

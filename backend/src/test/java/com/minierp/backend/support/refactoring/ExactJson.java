@@ -51,8 +51,9 @@ public final class ExactJson {
         if (parser.currentToken() == null) {
             throw new IOException("Missing JSON value at " + path);
         }
-        String kind = parser.currentToken() == JsonToken.VALUE_STRING ? "string" : parser.currentToken()
-                .isNumeric() ? "number" : "literal";
+        String kind = parser.currentToken() == JsonToken.VALUE_STRING
+                ? "string"
+                : parser.currentToken().isNumeric() ? "number" : "literal";
         return mask.apply(path, new Atom(kind, parser.getText()));
     }
 

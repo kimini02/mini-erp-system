@@ -73,9 +73,10 @@ public class LeaveQueryService {
             """ + filter + " ORDER BY l.created_at DESC,l.id DESC", args).stream()
                 .map(l -> map("date", ((LocalDateTime) l.get("created_at")).toLocalDate(), "type", l.get("entry_type"),
                         "days", l.get("days"), "balance", l.get("balance"), "memo", l.get("memo"),
-                        "document", l.get("document_id") == null ? null : map("id", l.get("document_id"),
-                                "docNo", l.get("doc_no"), "status", l.get("status"))))
-                        .toList();
+                        "document", l.get("document_id") == null
+                                ? null
+                                : map("id", l.get("document_id"), "docNo", l.get("doc_no"), "status", l.get("status"))))
+                .toList();
     }
 
     public Map<String, Object> preview(JsonNode body) {

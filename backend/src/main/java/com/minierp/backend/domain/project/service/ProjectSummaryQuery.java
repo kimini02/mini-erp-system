@@ -9,7 +9,8 @@ public final class ProjectSummaryQuery {
             "SELECT p.*,u.user_name AS leader_name,pos.name AS leader_title FROM projects p LEFT JOIN users u ON u.id=p.leader_id LEFT JOIN positions pos ON pos.id=u.position_id";
     public static String sql(String where, boolean page) {
         String selected = ROWS + " WHERE " + where
-                + (page ? " ORDER BY COALESCE(p.updated_at,p.created_at) DESC,p.id DESC LIMIT :size OFFSET :offset"
+                + (page
+                        ? " ORDER BY COALESCE(p.updated_at,p.created_at) DESC,p.id DESC LIMIT :size OFFSET :offset"
                         : "");
         return "WITH selected AS (" + selected + "), " + """
    task_counts AS (

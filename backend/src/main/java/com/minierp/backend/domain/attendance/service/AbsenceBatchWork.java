@@ -30,8 +30,9 @@ public class AbsenceBatchWork {
             var user = records.lockUser(id);
             var row = records.record(id, date, true);
             var day = records.day(id, date);
-            LocalDate eligible = user.get("hire_date") == null ? ((LocalDateTime) user.get("created_at"))
-                    .toLocalDate() : (LocalDate) user.get("hire_date");
+            LocalDate eligible = user.get("hire_date") == null
+                    ? ((LocalDateTime) user.get("created_at")).toLocalDate()
+                    : (LocalDate) user.get("hire_date");
             if (row == null) {
                 if ("ON_LEAVE".equals(user.get("status")) || eligible.isAfter(date)
                         || ("RETIRED".equals(user.get("status"))

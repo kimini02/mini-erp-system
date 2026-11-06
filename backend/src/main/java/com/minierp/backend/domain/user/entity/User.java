@@ -56,9 +56,7 @@ public class User extends BaseEntity {
     private String roleCodes;
     @ElementCollection
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id")
-    , uniqueConstraints = @UniqueConstraint(columnNames = {
-        "user_id", "role_id"
-    })
+    , uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "role_id" })
     )
     @Column(name = "role_id", nullable = false)
     private Set<Long> roleIds = new HashSet<>();
@@ -157,8 +155,9 @@ public class User extends BaseEntity {
         // Reserved IDs belong to immutable seeded system roles; old domain fixtures use this adapter.
         this.roleIds.clear();
         this.roleIds.add(userRole == UserRole.ADMIN ? 1L : userRole == UserRole.TEAM_LEADER ? 2L : 3L);
-        this.roleCodes = userRole == UserRole.ADMIN ? "CHIEF" : userRole == UserRole.TEAM_LEADER ? "LEADER"
-                : "EMPLOYEE";
+        this.roleCodes = userRole == UserRole.ADMIN
+                ? "CHIEF"
+                : userRole == UserRole.TEAM_LEADER ? "LEADER" : "EMPLOYEE";
     }
 
     public boolean isActive() {

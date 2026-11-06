@@ -63,10 +63,8 @@ class InitialAdminInitializerTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-        "LOGIN_ID, missing", "NAME, missing", "EMAIL, missing", "PASSWORD, missing", "LOGIN_ID, blank", "NAME, blank",
-                "EMAIL, blank", "PASSWORD, blank"
-    })
+    @CsvSource({ "LOGIN_ID, missing", "NAME, missing", "EMAIL, missing", "PASSWORD, missing", "LOGIN_ID, blank",
+            "NAME, blank", "EMAIL, blank", "PASSWORD, blank" })
     void missingOrBlankCredentialOnlyWarns(String key, String kind, CapturedOutput output) {
         if (kind.equals("missing")) {
             ((org.springframework.core.env.MapPropertySource) environment.getPropertySources().get("mockProperties"))

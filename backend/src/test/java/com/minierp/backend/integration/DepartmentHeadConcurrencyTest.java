@@ -72,9 +72,7 @@ class DepartmentHeadConcurrencyTest extends MariaDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "MOVE", "RETIRED", "ON_LEAVE"
-    })
+    @ValueSource(strings = { "MOVE", "RETIRED", "ON_LEAVE" })
     void employeeChangeAndHeadAssignmentPreserveInvariant(String kind) throws Exception {
         int violations = 0;
         for (int trial = 0; trial < 3; trial++) {
@@ -122,9 +120,7 @@ class DepartmentHeadConcurrencyTest extends MariaDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "MOVE", "RETIRED", "ON_LEAVE"
-    })
+    @ValueSource(strings = { "MOVE", "RETIRED", "ON_LEAVE" })
     void headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot(String kind) throws Exception {
         int violations = 0;
         for (int trial = 0; trial < 3; trial++) {

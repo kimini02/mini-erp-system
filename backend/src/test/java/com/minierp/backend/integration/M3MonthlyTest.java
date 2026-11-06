@@ -126,9 +126,8 @@ class M3MonthlyTest extends AttendanceTestSupport {
             var u = user("성능 " + i, UserRole.USER);
             jdbc.update("UPDATE users SET department_id=?,hire_date=? WHERE id=?", dept, month.atDay(1), u.getId());
             for (int n = 1; n <= 31; n++) {
-                values.add(new Object[] {
-                    u.getId(), month.atDay(n), month.atDay(n).atTime(9, 0), LocalDateTime.now(clock)
-                });
+                values.add(new Object[] { u.getId(), month.atDay(n), month.atDay(n).atTime(9, 0),
+                        LocalDateTime.now(clock) });
             }
         }
         jdbc.batchUpdate(
@@ -145,11 +144,8 @@ class M3MonthlyTest extends AttendanceTestSupport {
         long queries = mockingDetails(target)
                 .getInvocations()
                 .stream()
-                .filter(i -> i.getMethod()
-                        .getName()
-                        .equals("rows") && i.getArgument(0)
-                        .toString()
-                        .contains("WITH RECURSIVE dates"))
+                .filter(i -> i.getMethod().getName().equals("rows")
+                        && i.getArgument(0).toString().contains("WITH RECURSIVE dates"))
                 .count();
         assertThat(queries).isEqualTo(1);
         long allSqlStoreReads = mockingDetails(target)

@@ -26,9 +26,7 @@ class M1DataMigrationTest {
         Flyway.configure().dataSource(dataSource).locations(location).target("1").load().migrate();
         var jdbc = new JdbcTemplate(dataSource);
         String hash = "encoded-fixture-" + UUID.randomUUID();
-        String[] roles = {
-            "ADMIN", "TEAM_LEADER", "USER", "USER"
-        };
+        String[] roles = { "ADMIN", "TEAM_LEADER", "USER", "USER" };
         for (int i = 0; i < 4; i++) {
             jdbc.update("""
             INSERT INTO users(created_at,user_name,user_email,user_pw,department_code,position_name,

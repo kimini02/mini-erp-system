@@ -43,8 +43,8 @@ public class LeaveFormHandler implements ApprovalFormHandler {
             INSERT INTO leave_requests(document_id,leave_type,start_date,end_date,used_days,handover_user_id,reason,created_at,updated_at)
             VALUES(:id,:type,:start,:end,0,:handover,:reason,:now,:now) ON DUPLICATE KEY UPDATE leave_type=VALUES(leave_type),start_date=VALUES(start_date),end_date=VALUES(end_date),used_days=0,handover_user_id=VALUES(handover_user_id),reason=VALUES(reason),updated_at=VALUES(updated_at)
             """, map("id", d.id(), "type", b.path("leaveType").textValue(), "start", BodyValues.date(b, "startDate"),
-                "end", BodyValues.date(b, "endDate"), "handover", handover, "reason", b.path("reason")
-                        .textValue(), "now", LocalDateTime.now(clock)));
+                "end", BodyValues.date(b, "endDate"), "handover", handover, "reason", b.path("reason").textValue(),
+                "now", LocalDateTime.now(clock)));
     }
 
     public Map<String, Object> raw(long id) {
@@ -95,8 +95,9 @@ public class LeaveFormHandler implements ApprovalFormHandler {
         if (working == 0) {
             throw new BusinessException(ErrorCode.LEAVE_NO_WORKING_DAY);
         }
-        return type.equals("SICK") || type.equals("FAMILY") ? BigDecimal.ZERO : half ? new BigDecimal("0.5")
-                : BigDecimal.valueOf(working);
+        return type.equals("SICK") || type.equals("FAMILY")
+                ? BigDecimal.ZERO
+                : half ? new BigDecimal("0.5") : BigDecimal.valueOf(working);
     }
 
     public void validate(ApprovalDraft draft) {
@@ -156,9 +157,8 @@ public class LeaveFormHandler implements ApprovalFormHandler {
             case "HALF_PM" -> "오후 반차";
             default -> "연차";
         };
-        return label + " " + ((LocalDate) r.get("start_date"))
-                .format(format) + "~" + ((LocalDate) r.get("end_date"))
-                .format(format);
+        return label + " " + ((LocalDate) r.get("start_date")).format(format)
+                + "~" + ((LocalDate) r.get("end_date")).format(format);
     }
 
     public void onApproved(ApprovalDocument d) {

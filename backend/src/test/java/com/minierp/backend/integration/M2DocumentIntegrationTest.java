@@ -245,8 +245,8 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         long id = submittedLeave();
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", employee.getId());
         var detail = result(
-                mvc.perform(get("/api/v1/approval-documents/" + id).header("Authorization", "Bearer "
-                        + employeeToken)));
+                mvc.perform(
+                        get("/api/v1/approval-documents/" + id).header("Authorization", "Bearer " + employeeToken)));
         assertThat(detail.path("line").get(0).path("approver").path("id").asLong()).isEqualTo(leader.getId());
         assertThat(detail.path("submittedAt").asText())
                 .isEqualTo(LocalDateTime.now(clock).format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME));

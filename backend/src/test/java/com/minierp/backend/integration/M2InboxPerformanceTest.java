@@ -23,9 +23,7 @@ class M2InboxPerformanceTest extends ApprovalApiTestSupport {
         List<Object[]> rows = new ArrayList<>();
         var now = LocalDateTime.now(clock);
         for (int n = first; n < first + count; n++) {
-            rows.add(new Object[] {
-                marker + "-" + n, employee.getId(), "performance " + n, now, now, now
-            });
+            rows.add(new Object[] { marker + "-" + n, employee.getId(), "performance " + n, now, now, now });
         }
         jdbc.batchUpdate(
                 "INSERT INTO approval_documents(doc_no,form_id,drafter_id,drafter_dept_id,title,status,current_step,version,manual_line,submitted_at,created_at,updated_at) VALUES(?,3,?,2,?,'IN_PROGRESS',1,0,0,?,?,?)",

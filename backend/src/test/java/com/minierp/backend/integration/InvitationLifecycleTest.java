@@ -33,9 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
-@TestPropertySource(properties = {
-    "app.mail.enabled=true", "app.mail.from=no-reply@example.test"
-})
+@TestPropertySource(properties = { "app.mail.enabled=true", "app.mail.from=no-reply@example.test" })
 class InvitationLifecycleTest extends MariaDbIntegrationTest {
     @Container
     static final GenericContainer<?> REDIS = new GenericContainer<>("redis:7.4-alpine").withExposedPorts(6379);

@@ -24,9 +24,7 @@ class ClockBehaviorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "2026-04-06T00:00:00Z", "2026-12-31T15:00:00Z"
-    })
+    @ValueSource(strings = { "2026-04-06T00:00:00Z", "2026-12-31T15:00:00Z" })
     void changingFixedDatePreservesOverdueRules(String instant) {
         Clock clock = Clock.fixed(Instant.parse(instant), new ClockConfig().clock().getZone());
         LocalDate today = LocalDate.now(clock);

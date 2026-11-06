@@ -61,12 +61,15 @@ public class AttendanceStore {
           SELECT l.leave_type,d.id,d.doc_no FROM leave_requests l JOIN approval_documents d ON d.id=l.document_id
           WHERE d.drafter_id=:user AND d.status='APPROVED' AND l.start_date<=:date AND l.end_date>=:date ORDER BY d.id LIMIT 1
           """, map("user", user, "date", date));
-        Map<String, Object> leave = leaves.isEmpty() ? null : map("type", leaves.get(0).get("leave_type"),
-                "documentId", leaves.get(0).get("id"), "docNo", leaves.get(0).get("doc_no"));
-        String type = off ? "HOLIDAY" : leave == null ? "WORKDAY" : leave.get("type")
-                .toString()
-                .startsWith("HALF_") ? leave.get("type")
-                .toString() : "LEAVE";
+        Map<String, Object> leave = leaves.isEmpty()
+                ? null
+                : map("type", leaves.get(0).get("leave_type"), "documentId", leaves.get(0).get("id"),
+                        "docNo", leaves.get(0).get("doc_no"));
+        String type = off
+                ? "HOLIDAY"
+                : leave == null
+                        ? "WORKDAY"
+                        : leave.get("type").toString().startsWith("HALF_") ? leave.get("type").toString() : "LEAVE";
         return new Day(type, holiday, leave);
     }
 
@@ -135,7 +138,8 @@ public class AttendanceStore {
           UPDATE attendances SET clock_in_at=:in,clock_out_at=:out,day_type=:day,in_result=:inResult,out_result=:outResult,absent=:absent,judged_at=:now,updated_at=:now
           WHERE id=:id AND NOT(clock_in_at<=>:in AND clock_out_at<=>:out AND day_type<=>:day AND in_result<=>:inResult AND out_result<=>:outResult AND absent<=>:absent)
           """, map("id", row.get("id"), "in", in, "out", out, "day", day, "inResult", judged.inResult(), "outResult",
-                judged.outResult(), "absent", row.get("fix_document_id") != null && (in != null || out != null) ? false
-                        : judged.absent(), "now", now));
+                judged.outResult(),
+                "absent", row.get("fix_document_id") != null && (in != null || out != null) ? false : judged.absent(),
+                "now", now));
     }
 }

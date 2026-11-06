@@ -115,9 +115,7 @@ public class CalendarService {
     private LocalDate[] resolveMonthRange(int year, int month) {
         try {
             YearMonth ym = YearMonth.of(year, month);
-            return new LocalDate[] {
-                ym.atDay(1), ym.atEndOfMonth()
-            };
+            return new LocalDate[] { ym.atDay(1), ym.atEndOfMonth() };
         } catch (DateTimeException e) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "year/month 값이 유효하지 않습니다.");
         }

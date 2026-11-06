@@ -11,9 +11,8 @@ import static org.assertj.core.api.Assertions.*;
 
 class M5ProdSecretsTest {
     @ParameterizedTest
-    @ValueSource(strings = {
-        "DB_APP_USERNAME", "DB_APP_PASSWORD", "DB_MIGRATOR_USERNAME", "DB_MIGRATOR_PASSWORD", "JWT_SECRET"
-    })
+    @ValueSource(strings = { "DB_APP_USERNAME", "DB_APP_PASSWORD", "DB_MIGRATOR_USERNAME", "DB_MIGRATOR_PASSWORD",
+            "JWT_SECRET" })
     void missingSecretFailsBeforeOpeningDatabase(String missing) {
         Map<String, Object> properties = new HashMap<>();
         for (String key : List.of("DB_APP_USERNAME", "DB_APP_PASSWORD", "DB_MIGRATOR_USERNAME", "DB_MIGRATOR_PASSWORD",

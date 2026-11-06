@@ -18,9 +18,7 @@ public abstract class BoardTestSupport extends AttendanceTestSupport {
         }
         List<Object[]> rows = new ArrayList<>();
         for (int i = 1; i <= count; i++) {
-            rows.add(new Object[] {
-                id, i, i * 1024L, date.plusMonths(1), LocalDateTime.now(clock)
-            });
+            rows.add(new Object[] { id, i, i * 1024L, date.plusMonths(1), LocalDateTime.now(clock) });
         }
         jdbc.batchUpdate(
                 "INSERT INTO tasks(project_id,task_no,position,end_date,created_at,task_title,task_content,task_status,priority) VALUES(?,?,?,?,?,'카드','','DOING','MEDIUM')",

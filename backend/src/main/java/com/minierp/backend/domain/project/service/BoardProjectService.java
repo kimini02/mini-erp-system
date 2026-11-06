@@ -47,8 +47,9 @@ public class BoardProjectService {
         access.require("PROJECT", Action.VIEW);
         var args = map("id", id, "today", LocalDate.now(clock));
         String where = visibilityPredicate(args);
-        String select = summary ? ProjectSummaryQuery.sql("p.id=:id AND " + where, false) : ProjectSummaryQuery.ROWS
-                + " WHERE p.id=:id AND " + where;
+        String select = summary
+                ? ProjectSummaryQuery.sql("p.id=:id AND " + where, false)
+                : ProjectSummaryQuery.ROWS + " WHERE p.id=:id AND " + where;
         var rows = db.rows(select, args);
         if (rows.isEmpty()) {
             if (db.count("SELECT COUNT(*) FROM projects WHERE id=:id", map("id", id)) == 0) {
@@ -86,8 +87,9 @@ public class BoardProjectService {
         return map("id", p.get("id"), "key", p.get("project_key"), "title", p.get("title"), "content", p.get("content"),
                 "status", p.get("status"), "priority", p.get("priority"), "startDate", p.get("start_date"),
                 "endDate", p.get("end_date"),
-                "leader", p.get("leader_id") == null ? null : map("id", p.get("leader_id"),
-                        "name", p.get("leader_name"), "title", p.get("leader_title")),
+                "leader", p.get("leader_id") == null
+                        ? null
+                        : map("id", p.get("leader_id"), "name", p.get("leader_name"), "title", p.get("leader_title")),
                 "memberCount", p.get("member_count"), "taskCount", total, "doneCount", done,
                 "overdueCount", p.get("overdue_count"), "progressPct", total == 0 ? 0 : done * 100 / total,
                 "myRole", p.get("leader_id") != null && number(p, "leader_id") == actor()
@@ -225,9 +227,10 @@ public class BoardProjectService {
             }
         }
         var removed = existing.stream().filter(u -> !selected.contains(u)).toList();
-        if (!removed.isEmpty() && db.count(
-                "SELECT COUNT(*) FROM tasks t JOIN task_assignments a ON a.task_id=t.id WHERE t.project_id=:id AND t.task_status<>'DONE' AND a.user_id IN (:removed)",
-                map("id", id, "removed", removed)) > 0) {
+        if (!removed.isEmpty()
+                && db.count(
+                        "SELECT COUNT(*) FROM tasks t JOIN task_assignments a ON a.task_id=t.id WHERE t.project_id=:id AND t.task_status<>'DONE' AND a.user_id IN (:removed)",
+                        map("id", id, "removed", removed)) > 0) {
             throw new BusinessException(ErrorCode.PROJECT_MEMBER_HAS_TASKS);
         }
         return selected;

@@ -102,9 +102,8 @@ public final class SnapshotComparator {
         JsonNode left = before.get(first);
         JsonNode right = before.get(second);
         Set<String> sql = new HashSet<>(List.of(left.path("sql").asText(), right.path("sql").asText()));
-        return sql.equals(M5_ACCOUNT_CREATIONS) && left.path("count")
-                .asLong() == 1 && right.path("count")
-                .asLong() == 1 && left.equals(after.get(second)) && right.equals(after.get(first));
+        return sql.equals(M5_ACCOUNT_CREATIONS) && left.path("count").asLong() == 1 && right.path("count").asLong() == 1
+                && left.equals(after.get(second)) && right.equals(after.get(first));
     }
 
     private void sql(Path baseline, Path candidate) throws Exception {

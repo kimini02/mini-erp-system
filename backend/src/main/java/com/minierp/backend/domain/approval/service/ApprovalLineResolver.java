@@ -44,10 +44,10 @@ public class ApprovalLineResolver {
         }
         List<Map<String, Object>> steps;
         if (manual != null) {
-            if (manual.stream().anyMatch(
-                    s -> s == null || s.userId() == null || s.lineKind() == null || !Set.of("APPROVER", "REFERENCE")
-                            .contains(s.lineKind()))
-                                    || manual.stream().noneMatch(s -> "APPROVER".equals(s.lineKind()))) {
+            if (manual.stream()
+                    .anyMatch(s -> s == null || s.userId() == null || s.lineKind() == null
+                            || !Set.of("APPROVER", "REFERENCE").contains(s.lineKind()))
+                    || manual.stream().noneMatch(s -> "APPROVER".equals(s.lineKind()))) {
                 throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
             }
             steps = new ArrayList<>();
@@ -89,10 +89,10 @@ public class ApprovalLineResolver {
                         if (type.equals("UPPER_DEPT_HEAD")) {
                             department = parent(department);
                         }
-                        String sourceDepartment = department == null ? null : (String) db.one(
-                                "SELECT name FROM departments WHERE id=:id", map("id", department),
-                                ErrorCode.APPROVER_NOT_FOUND)
-                                .get("name");
+                        String sourceDepartment = department == null
+                                ? null
+                                : (String) db.one("SELECT name FROM departments WHERE id=:id", map("id", department),
+                                        ErrorCode.APPROVER_NOT_FOUND).get("name");
                         person = null;
                         Set<Long> visited = new HashSet<>();
                         while (department != null && visited.add(department)) {

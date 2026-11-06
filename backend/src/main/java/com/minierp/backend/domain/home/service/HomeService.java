@@ -64,8 +64,10 @@ public class HomeService {
                 .stream()
                 .map(r -> map("id", r.get("id"), "docNo", r.get("doc_no"), "form", form(r), "title", r.get("title"),
                         "status", r.get("status"),
-                        "currentApprover", r.get("approver_id") == null ? null : map("id", r.get("approver_id"),
-                                "name", r.get("approver_name"), "title", r.get("approver_title")),
+                        "currentApprover", r.get("approver_id") == null
+                                ? null
+                                : map("id", r.get("approver_id"), "name", r.get("approver_name"),
+                                        "title", r.get("approver_title")),
                         "submittedAt", r.get("submitted_at")))
                 .toList();
         return map("todoCount", count, "todo", todo, "mine", mine);

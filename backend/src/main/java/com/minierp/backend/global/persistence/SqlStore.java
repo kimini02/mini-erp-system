@@ -47,9 +47,7 @@ public class SqlStore {
 
     public long insert(String sql, Map<String, ?> args) {
         var key = new GeneratedKeyHolder();
-        jdbc.update(sql, new MapSqlParameterSource(args), key, new String[] {
-            "id"
-        });
+        jdbc.update(sql, new MapSqlParameterSource(args), key, new String[] { "id" });
         return Objects.requireNonNull(key.getKey()).longValue();
     }
 

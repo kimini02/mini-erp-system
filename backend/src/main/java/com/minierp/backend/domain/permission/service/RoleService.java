@@ -63,8 +63,8 @@ public class RoleService {
             throw new BusinessException(ErrorCode.SYSTEM_ROLE_LOCKED);
         }
         db.rows("SELECT id FROM roles WHERE id=:id FOR UPDATE", map("id", id));
-        if (db.count("SELECT COUNT(*) FROM user_roles WHERE role_id=:id", map("id", id)) > 0 || db.count(
-                "SELECT COUNT(*) FROM approval_form_steps WHERE role_id=:id", map("id", id)) > 0) {
+        if (db.count("SELECT COUNT(*) FROM user_roles WHERE role_id=:id", map("id", id)) > 0
+                || db.count("SELECT COUNT(*) FROM approval_form_steps WHERE role_id=:id", map("id", id)) > 0) {
             throw new BusinessException(ErrorCode.ROLE_IN_USE);
         }
         db.update("DELETE FROM role_permissions WHERE role_id=:id", map("id", id));

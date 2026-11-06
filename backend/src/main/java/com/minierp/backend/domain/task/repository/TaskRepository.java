@@ -23,19 +23,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     long countByProjectIdInAndTaskStatus(List<Long> projectIds, TaskStatus taskStatus);
     // N+1 해결: @EntityGraph로 담당자(TaskAssignment→User)를 JOIN으로 즉시 로딩
     // distinct: LEFT JOIN으로 인한 중복 제거
-    @EntityGraph(attributePaths = {
-        "taskAssignments", "taskAssignments.user"
-    })
+    @EntityGraph(attributePaths = { "taskAssignments", "taskAssignments.user" })
     @Query("select distinct t from Task t")
     List<Task> findAllWithAssignees();
-    @EntityGraph(attributePaths = {
-        "taskAssignments", "taskAssignments.user"
-    })
+    @EntityGraph(attributePaths = { "taskAssignments", "taskAssignments.user" })
     @Query("select distinct t from Task t where t.project.id in :projectIds")
     List<Task> findByProjectIdInWithAssignees(@Param("projectIds") List<Long> projectIds);
-    @EntityGraph(attributePaths = {
-        "taskAssignments", "taskAssignments.user"
-    })
+    @EntityGraph(attributePaths = { "taskAssignments", "taskAssignments.user" })
     @Query("select distinct t from Task t join t.taskAssignments ta where ta.user.id = :userId")
     List<Task> findByAssigneeUserIdWithAssignees(@Param("userId") Long userId);
     // 프로젝트 목록 1+3N → GROUP BY 1개 쿼리로 일괄 집계

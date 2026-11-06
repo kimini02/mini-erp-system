@@ -285,10 +285,9 @@ public class DocumentService {
             throw new BusinessException(ErrorCode.DOCUMENT_STATE_CONFLICT);
         }
         var h = handler((String) d.get("form_code"));
-        var next = approve ? lines(id)
-                .stream()
-                .filter(l -> "WAITING".equals(l.get("status")))
-                .findFirst() : Optional.< Map<String, Object>> empty();
+        var next = approve
+                ? lines(id).stream().filter(l -> "WAITING".equals(l.get("status"))).findFirst()
+                : Optional.< Map<String, Object>> empty();
         if (next.isPresent()) {
             db.update("UPDATE approval_lines SET status='PENDING' WHERE id=:id AND status='WAITING'",
                     map("id", next.get().get("id")));
@@ -377,8 +376,8 @@ public class DocumentService {
                                 : map("id", h.get("actor_id"), "name", h.get("user_name")),
                         "comment", h.get("comment"), "at", h.get("created_at")))
                 .toList();
-        boolean canAct = pending && line.stream()
-                .anyMatch(l -> "PENDING".equals(l.get("status")) && number(l, "approver_id") == actor);
+        boolean canAct = pending
+                && line.stream().anyMatch(l -> "PENDING".equals(l.get("status")) && number(l, "approver_id") == actor);
         return map("id", id, "docNo", d.get("doc_no"),
                 "form", map("code", d.get("form_code"), "name", d.get("form_name")), "title", d.get("title"),
                 "status", d.get("status"),
@@ -391,8 +390,8 @@ public class DocumentService {
                         .map(DocumentService::snapshot)
                         .toList(), "history", history,
                 "myActions", map("canApprove", canAct, "canReject", canAct,
-                        "canWithdraw", own && pending && line.stream()
-                                .noneMatch(l -> "APPROVED".equals(l.get("status"))),
+                        "canWithdraw", own && pending
+                                && line.stream().noneMatch(l -> "APPROVED".equals(l.get("status"))),
                         "canResubmit", own && Set.of("REJECTED", "WITHDRAWN").contains(d.get("status"))),
                 "resubmittedFromId", d.get("resubmitted_from_id"));
     }

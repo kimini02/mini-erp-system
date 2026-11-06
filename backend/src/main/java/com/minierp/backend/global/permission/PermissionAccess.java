@@ -107,8 +107,8 @@ public class PermissionAccess {
         Map<String, Object> args = new HashMap<>();
         args.put("target", userId);
         String where = scope(menu, actorId).predicate("u", args);
-        if (jdbc.queryForObject("SELECT COUNT(*) FROM users u WHERE u.id=:target AND "
-                + where, args, Long.class) == 0) {
+        if (jdbc.queryForObject("SELECT COUNT(*) FROM users u WHERE u.id=:target AND " + where,
+                args, Long.class) == 0) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
     }

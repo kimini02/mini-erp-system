@@ -37,15 +37,17 @@ public class AttendanceService {
     public Map<String, Object> homeToday() {
         var date = LocalDate.now(clock);
         var r = records.homeSnapshot(access.actor(), date);
-        Map<String, Object> leave = r.get("leave_id") == null ? null : map("type", r.get("leave_type"),
-                "documentId", r.get("leave_id"), "docNo", r.get("leave_no"));
+        Map<String, Object> leave = r.get("leave_id") == null
+                ? null
+                : map("type", r.get("leave_type"), "documentId", r.get("leave_id"), "docNo", r.get("leave_no"));
         String holiday = (String) r.get("holiday_name");
         boolean off = holiday != null || date.getDayOfWeek() == DayOfWeek.SATURDAY
                 || date.getDayOfWeek() == DayOfWeek.SUNDAY;
-        String type = off ? "HOLIDAY" : leave == null ? "WORKDAY" : leave.get("type")
-                .toString()
-                .startsWith("HALF_") ? leave.get("type")
-                .toString() : "LEAVE";
+        String type = off
+                ? "HOLIDAY"
+                : leave == null
+                        ? "WORKDAY"
+                        : leave.get("type").toString().startsWith("HALF_") ? leave.get("type").toString() : "LEAVE";
         return render(date, r.get("id") == null ? null : r, new AttendanceStore.Day(type, holiday, leave),
                 records.snapshot(r), number(r, "late_count"), number(r, "absent_count"));
     }
@@ -176,8 +178,9 @@ public class AttendanceService {
                     map("date", date, "dayType", type, "clockInAt", row.get("clock_in_at"),
                             "clockOutAt", row.get("clock_out_at"), "inResult", row.get("in_result"),
                             "outResult", row.get("out_result"), "absent", bool(row, "absent"),
-                            "fixDocument", row.get("fix_document_id") == null ? null : map(
-                                    "id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no"))));
+                            "fixDocument", row.get("fix_document_id") == null
+                                    ? null
+                                    : map("id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no"))));
         }
         return map("month", month.toString(),
                 "summary", map("workDays", work, "present", present, "late", late, "early", early, "absent", absent,

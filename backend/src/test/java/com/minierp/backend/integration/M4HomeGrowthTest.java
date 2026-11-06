@@ -27,19 +27,12 @@ class M4HomeGrowthTest extends BoardTestSupport {
         var args = map("actor", employee.getId(), "department", 2, "today", date, "from", date, "to", date.plusDays(4));
         int previous = 0;
         Integer queryCount = null;
-        for (int scale : new int[] {
-            1, 10, 100
-        }) {
-            for (var pair : List.of(new long[] {
-                mine, 20, employee.getId()
-            }, new long[] {
-                noise, 980, outsider.getId()
-            })) {
+        for (int scale : new int[] { 1, 10, 100 }) {
+            for (var pair : List.of(new long[] { mine, 20, employee.getId() },
+                    new long[] { noise, 980, outsider.getId() })) {
                 List<Object[]> rows = new ArrayList<>();
                 for (int n = previous * (int) pair[1] + 1; n <= scale * pair[1]; n++) {
-                    rows.add(new Object[] {
-                        pair[0], n, n * 1024L, date.plusDays(2), LocalDateTime.now(clock)
-                    });
+                    rows.add(new Object[] { pair[0], n, n * 1024L, date.plusDays(2), LocalDateTime.now(clock) });
                 }
                 for (int offset = 0; offset < rows.size(); offset += 1000) {
                     jdbc.batchUpdate(
@@ -54,12 +47,9 @@ class M4HomeGrowthTest extends BoardTestSupport {
             List<Object[]> docs = new ArrayList<>();
             List<Object[]> notes = new ArrayList<>();
             for (int n = previous * 100; n < scale * 100; n++) {
-                docs.add(new Object[] {
-                    n % 10 == 0 ? employee.getId() : chief.getId(), LocalDateTime.now(clock), LocalDateTime.now(clock)
-                });
-                notes.add(new Object[] {
-                    employee.getId(), LocalDateTime.now(clock)
-                });
+                docs.add(new Object[] { n % 10 == 0 ? employee.getId() : chief.getId(), LocalDateTime.now(clock),
+                        LocalDateTime.now(clock) });
+                notes.add(new Object[] { employee.getId(), LocalDateTime.now(clock) });
             }
             jdbc.batchUpdate(
                     "INSERT INTO approval_documents(form_id,drafter_id,drafter_dept_id,title,status,current_step,submitted_at,created_at) VALUES(1,?,2,'부하','IN_PROGRESS',1,?,?)",

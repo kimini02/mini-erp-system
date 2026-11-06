@@ -82,9 +82,9 @@ public class EmployeeService {
         for (var row : rows) {
             long id = number(row, "id");
             var userRoles = roles.getOrDefault(id, List.of());
-            String legacy = userRoles.stream()
-                    .anyMatch(r -> "CHIEF".equals(r.get("code"))) ? "ADMIN" : userRoles.stream()
-                    .anyMatch(r -> "LEADER".equals(r.get("code"))) ? "TEAM_LEADER" : "USER";
+            String legacy = userRoles.stream().anyMatch(r -> "CHIEF".equals(r.get("code")))
+                    ? "ADMIN"
+                    : userRoles.stream().anyMatch(r -> "LEADER".equals(r.get("code"))) ? "TEAM_LEADER" : "USER";
             String code = (String) row.get("department_code");
             code = switch (code) {
                 case "D-0002" -> "01";
@@ -233,8 +233,9 @@ public class EmployeeService {
             treeLock.lock();
         }
         access.assertUserInScope("EMPLOYEE", id);
-        var old = r.email() == null && r.departmentId() == null ? raw(id) : db.one(
-                "SELECT * FROM users WHERE id=:id FOR UPDATE", map("id", id), ErrorCode.USER_NOT_FOUND);
+        var old = r.email() == null && r.departmentId() == null
+                ? raw(id)
+                : db.one("SELECT * FROM users WHERE id=:id FOR UPDATE", map("id", id), ErrorCode.USER_NOT_FOUND);
         if (r.email() != null && !r.email().equals(old.get("user_email"))) {
             requireRoleUpdateForPrivilegedTarget(id);
         }

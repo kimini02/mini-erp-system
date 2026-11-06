@@ -43,8 +43,10 @@ public class OrgService {
         Map<Long, Map<String, Object>> nodes = new LinkedHashMap<>();
         for (var row : departments) {
             long id = number(row, "id");
-            Object head = row.get("head_user_id") == null ? null : map("id", row.get("head_user_id"),
-                    "name", row.get("head_name"), "position", row.get("head_position"));
+            Object head = row.get("head_user_id") == null
+                    ? null
+                    : map("id", row.get("head_user_id"), "name", row.get("head_name"),
+                            "position", row.get("head_position"));
             nodes.put(id,
                     map("id", id, "name", row.get("name"), "code", row.get("code"), "head", head,
                             "directMemberCount", members.getOrDefault(id, 0L), "totalMemberCount", 0L,
@@ -175,8 +177,8 @@ public class OrgService {
     public void deleteDepartment(long id) {
         lockTree();
         department(id);
-        if (db.count("SELECT COUNT(*) FROM users WHERE department_id=:id", map("id", id)) > 0 || db.count(
-                "SELECT COUNT(*) FROM departments WHERE parent_id=:id", map("id", id)) > 0) {
+        if (db.count("SELECT COUNT(*) FROM users WHERE department_id=:id", map("id", id)) > 0
+                || db.count("SELECT COUNT(*) FROM departments WHERE parent_id=:id", map("id", id)) > 0) {
             throw new BusinessException(ErrorCode.DEPARTMENT_NOT_EMPTY);
         }
         db.update("DELETE FROM departments WHERE id=:id", map("id", id));
@@ -218,8 +220,9 @@ public class OrgService {
             db.update("UPDATE departments SET work_schedule_id=NULL WHERE id=:id", map("id", id));
         } else {
             validateSchedule(r);
-            Long scheduleId = d.get("work_schedule_id") == null ? null : ((Number) d.get("work_schedule_id"))
-                    .longValue();
+            Long scheduleId = d.get("work_schedule_id") == null
+                    ? null
+                    : ((Number) d.get("work_schedule_id")).longValue();
             var params = map("start", r.startTime(), "end", r.endTime(), "grace", r.lateGraceMin(), "name", "부서 근무시간");
             if (scheduleId == null) {
                 scheduleId = db.insert(

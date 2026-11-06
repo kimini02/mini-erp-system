@@ -15,13 +15,9 @@ class M3CsvLabelsTest extends AttendanceTestSupport {
         at(month.atDay(20), LocalTime.of(9, 20));
         String marker = "CSV-" + employee.getId();
         jdbc.update("UPDATE users SET user_name=? WHERE id=?", marker, employee.getId());
-        String[] codes = {
-            "ON_TIME", "LATE", "EARLY", "MISSING", "ABSENT", "LEAVE", "HALF_AM", "HALF_PM", "HOLIDAY_WORK", "HOLIDAY",
-                    "NONE", "FUTURE"
-        };
-        String[] labels = {
-            "정상", "지각", "조퇴", "퇴근 누락", "결근", "휴가", "오전 반차", "오후 반차", "휴일 근무", "", "", ""
-        };
+        String[] codes = { "ON_TIME", "LATE", "EARLY", "MISSING", "ABSENT", "LEAVE", "HALF_AM", "HALF_PM",
+                "HOLIDAY_WORK", "HOLIDAY", "NONE", "FUTURE" };
+        String[] labels = { "정상", "지각", "조퇴", "퇴근 누락", "결근", "휴가", "오전 반차", "오후 반차", "휴일 근무", "", "", "" };
         for (int i = 0; i < codes.length; i++) {
             String code = codes[i];
             var day = month.atDay(i == 11 ? 25 : i + 1);
