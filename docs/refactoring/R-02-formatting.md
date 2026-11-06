@@ -1477,3 +1477,18 @@ test: 78개
 - 안전망 기준선 세 파일, 기록 정책, 비교 규칙, 금지 경로의 의미/내용을 유지했습니다. SnapshotComparator/ExactJson/JdbcProbe의 Java 변경도 공백·줄바꿈뿐이며 전체 출력 동일성을 통과했습니다.
 
 검증 원본은 `backend/target/r02-wrap3-validation/`의 style/docs result.json, 컴파일·diff·ON/OFF·비교 로그와 기록입니다. 적용 전 safety.json, metrics-before/after.json, fixture 결과도 보존했습니다. 검증한 tree는 각 result.json에 남기고 실제 커밋 tree와 일치하는지 검사했습니다. 원본 로그 및 임시 편집 도구는 커밋하지 않았습니다. 기존 target 기록은 보존했습니다.
+
+## 2단계에서 남긴 모양(고치지 않음)
+
+952a64e 최종 리뷰에서 확인한 공백 모양입니다. 모두 2단계 도구가 만든 형식이며 동작에는 영향이 없습니다. 2단계는 완료했으므로 추가 형식 수정은 하지 않습니다. 3단계에서 해당 코드를 실제로 옮기는 경우에만 §2.1에 맞춰 정리할 수 있습니다. 아래 위치는 952a64e 기준입니다.
+
+| 위치 | 남긴 모양 |
+|---|---|
+| `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:58–60` | 줄 맨 앞 쉼표(`, uniqueConstraints = …`)와 혼자 있는 닫는 괄호 |
+| `backend/src/main/java/com/minierp/backend/domain/project/entity/ProjectMember.java:14–15` | @Table의 닫는 괄호가 별도 줄. 붙이면 115자 |
+| `backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java:290` | `Optional.< Map<String, Object>> empty()`처럼 명시적 타입 인자 안 공백 |
+| `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:277` | `List.< Map<String, Object>> of()`의 명시적 타입 인자 안 공백 |
+| `backend/src/test/java/com/minierp/backend/integration/M4BoardApiTest.java:178,193` | 명시적 타입 인자 안 공백 2곳 |
+| `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java:83` | `?.5`처럼 물음표 뒤 공백 없음 |
+| `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeRepository.java:36–37` | 향상된 for 문을 콜론 앞에서 나눔 |
+| `backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantWork.java:26–27` | 향상된 for 문을 콜론 앞에서 나눔 |
