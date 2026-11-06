@@ -1,11 +1,11 @@
 package com.minierp.backend.domain.org.service;
 
 import com.minierp.backend.domain.org.dto.OrgRequests.*;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.org.repository.OrgQueries;
 import com.minierp.backend.global.permission.PermissionAccess;
 import com.minierp.backend.global.exception.*;
+import com.minierp.backend.domain.org.repository.OrgStore;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -16,12 +16,12 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class OrgService {
-    private final SqlStore db;
+    private final OrgQueries queries;
+    private final OrgStore store;
     private final com.minierp.backend.domain.org.repository.DepartmentTreeLock treeLock;
-    private final JdbcTemplate jdbc;
     private final PermissionAccess permissions;
     private Map<String, Object> department(long id) {
-        return db.one("SELECT * FROM departments WHERE id=:id", map("id", id), ErrorCode.DEPARTMENT_NOT_FOUND);
+        return queries.findDepartment(id);
     }
 
     private void lockTree() {
@@ -30,12 +30,8 @@ public class OrgService {
 
     public Map<String, Object> tree() {
         // Exactly two queries regardless of department count, including heads/positions.
-        var departments = jdbc.queryForList("""
-            SELECT d.id,d.name,d.code,d.parent_id,d.head_user_id,h.user_name AS head_name,p.name AS head_position
-            FROM departments d LEFT JOIN users h ON h.id=d.head_user_id LEFT JOIN positions p ON p.id=h.position_id
-            ORDER BY d.sort_order,d.id
-            """);
-        var counts = jdbc.queryForList("SELECT department_id,COUNT(*) AS members FROM users GROUP BY department_id");
+        var departments = queries.findDepartments();
+        var counts = queries.findDepartmentMemberCounts();
         Map<Long, Long> members = new HashMap<>();
         for (var row : counts) {
             members.put(number(row, "department_id"), number(row, "members"));
@@ -85,9 +81,7 @@ public class OrgService {
         if (userId == null) {
             return null;
         }
-        var h = db.one(
-                "SELECT u.id,u.user_name AS name,p.name AS position,d.name AS departmentName FROM users u JOIN positions p ON p.id=u.position_id JOIN departments d ON d.id=u.department_id WHERE u.id=:id",
-                map("id", userId), ErrorCode.USER_NOT_FOUND);
+        var h = queries.findHead(userId);
         if (!includeDepartment) {
             h.remove("departmentName");
         }
@@ -114,19 +108,16 @@ public class OrgService {
         return map("id", id, "name", d.get("name"), "code", d.get("code"), "parentId", d.get("parent_id"), "path", path,
                 "head", head(d.get("head_user_id"), false),
                 "fallbackHead", d.get("head_user_id") == null ? fallback : null, "workSchedule", schedule,
-                "directMemberCount", db.count("SELECT COUNT(*) FROM users WHERE department_id=:id", map("id", id)),
-                "childCount", db.count("SELECT COUNT(*) FROM departments WHERE parent_id=:id", map("id", id)));
+                "directMemberCount", queries.countDepartmentMembers(id),
+                "childCount", queries.countChildDepartments(id));
     }
 
     @Transactional
     public Map<String, Object> createDepartment(DepartmentCreate r) {
         lockTree();
         department(r.parentId());
-        long id = db.insert(
-                "INSERT INTO departments(name,code,parent_id,sort_order,active) VALUES(:name,:code,:parent,:sort,1)",
-                map("name", r.name(), "code", UUID.randomUUID().toString(), "parent", r.parentId(),
-                        "sort", r.sortOrder()));
-        db.update("UPDATE departments SET code=:code WHERE id=:id", map("id", id, "code", String.format("D-%04d", id)));
+        long id = store.insertDepartment(r.name(), UUID.randomUUID().toString(), r.parentId(), r.sortOrder());
+        store.updateDepartmentCode(id, String.format("D-%04d", id));
         return detail(id);
     }
 
@@ -137,8 +128,7 @@ public class OrgService {
         if (r.name() != null && r.name().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        db.update("UPDATE departments SET name=COALESCE(:name,name),sort_order=COALESCE(:sort,sort_order) WHERE id=:id",
-                map("id", id, "name", r.name(), "sort", r.sortOrder()));
+        store.updateDepartment(id, r.name(), r.sortOrder());
         return detail(id);
     }
 
@@ -150,7 +140,7 @@ public class OrgService {
             throw new BusinessException(ErrorCode.INVALID_DEPARTMENT_MOVE);
         }
         department(parentId);
-        db.update("UPDATE departments SET parent_id=:parent WHERE id=:id", map("id", id, "parent", parentId));
+        store.updateDepartmentParent(id, parentId);
         return detail(id);
     }
 
@@ -159,8 +149,7 @@ public class OrgService {
         lockTree();
         department(id);
         if (userId != null) {
-            var user = db.one("SELECT id,department_id,status FROM users WHERE id=:id FOR UPDATE", map("id", userId),
-                    ErrorCode.USER_NOT_FOUND);
+            var user = store.lockHeadCandidate(userId);
             if (number(user, "department_id") != id) {
                 throw new BusinessException(ErrorCode.HEAD_NOT_IN_DEPARTMENT);
             }
@@ -169,7 +158,7 @@ public class OrgService {
                         org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY);
             }
         }
-        db.update("UPDATE departments SET head_user_id=:head WHERE id=:id", map("id", id, "head", userId));
+        store.updateDepartmentHead(id, userId);
         return detail(id);
     }
 
@@ -177,24 +166,18 @@ public class OrgService {
     public void deleteDepartment(long id) {
         lockTree();
         department(id);
-        if (db.count("SELECT COUNT(*) FROM users WHERE department_id=:id", map("id", id)) > 0
-                || db.count("SELECT COUNT(*) FROM departments WHERE parent_id=:id", map("id", id)) > 0) {
+        if (queries.countDepartmentMembers(id) > 0 || queries.countChildDepartments(id) > 0) {
             throw new BusinessException(ErrorCode.DEPARTMENT_NOT_EMPTY);
         }
-        db.update("DELETE FROM departments WHERE id=:id", map("id", id));
+        store.deleteDepartment(id);
     }
 
     private Map<String, Object> schedule(long id) {
-        return db.one(
-                "SELECT id,name,TIME_FORMAT(start_time,'%H:%i') AS startTime,TIME_FORMAT(end_time,'%H:%i') AS endTime,late_grace_min AS lateGraceMin FROM work_schedules WHERE id=:id",
-                map("id", id), ErrorCode.RESOURCE_NOT_FOUND);
+        return queries.findSchedule(id);
     }
 
     public Map<String, Object> defaultSchedule() {
-        return schedule(
-                number(
-                        db.one("SELECT id FROM work_schedules WHERE is_default=1", Map.of(),
-                                ErrorCode.RESOURCE_NOT_FOUND), "id"));
+        return schedule(number(queries.findDefaultSchedule(), "id"));
     }
 
     private void validateSchedule(Schedule r) {
@@ -207,8 +190,7 @@ public class OrgService {
     @Transactional
     public Map<String, Object> defaultSchedule(Schedule r) {
         validateSchedule(r);
-        db.update("UPDATE work_schedules SET start_time=:start,end_time=:end,late_grace_min=:grace WHERE is_default=1",
-                map("start", r.startTime(), "end", r.endTime(), "grace", r.lateGraceMin()));
+        store.updateDefaultSchedule(r.startTime(), r.endTime(), r.lateGraceMin());
         return defaultSchedule();
     }
 
@@ -217,43 +199,40 @@ public class OrgService {
         lockTree();
         var d = department(id);
         if (Boolean.TRUE.equals(r.useDefault())) {
-            db.update("UPDATE departments SET work_schedule_id=NULL WHERE id=:id", map("id", id));
+            store.updateDepartmentToDefaultSchedule(id);
         } else {
             validateSchedule(r);
             Long scheduleId = d.get("work_schedule_id") == null
                     ? null
                     : ((Number) d.get("work_schedule_id")).longValue();
-            var params = map("start", r.startTime(), "end", r.endTime(), "grace", r.lateGraceMin(), "name", "부서 근무시간");
+            var start = r.startTime();
+            var end = r.endTime();
+            var grace = r.lateGraceMin();
+            var name = "부서 근무시간";
             if (scheduleId == null) {
-                scheduleId = db.insert(
-                        "INSERT INTO work_schedules(name,start_time,end_time,late_grace_min,is_default) VALUES(:name,:start,:end,:grace,0)",
-                        params);
+                scheduleId = store.insertWorkSchedule(start, end, grace, name);
             } else {
-                params.put("id", scheduleId);
-                db.update(
-                        "UPDATE work_schedules SET start_time=:start,end_time=:end,late_grace_min=:grace WHERE id=:id",
-                        params);
+                store.updateWorkSchedule(start, end, grace, name, scheduleId);
             }
-            db.update("UPDATE departments SET work_schedule_id=:schedule WHERE id=:id",
-                    map("id", id, "schedule", scheduleId));
+            store.updateDepartmentSchedule(id, scheduleId);
         }
         return detail(id);
     }
 
     public List<Map<String, Object>> positions() {
-        return db.rows("SELECT id,name,rank_order AS rankOrder FROM positions ORDER BY rank_order,id", Map.of());
+        return queries.findPositions();
     }
 
     @Transactional
     public Map<String, Object> createPosition(String name) {
-        long id = db.insert("INSERT INTO positions(name,rank_order) VALUES(:name,0)", map("name", name));
+        long id = store.insertPosition(name);
         return map("id", id, "name", name, "rankOrder", 0);
     }
 
     @Transactional
     public Map<String, Object> renamePosition(long id, String name) {
-        db.one("SELECT id FROM positions WHERE id=:id", map("id", id), ErrorCode.POSITION_NOT_FOUND);
-        db.update("UPDATE positions SET name=:name WHERE id=:id", map("id", id, "name", name));
+        queries.findPosition(id);
+        store.updatePositionName(id, name);
         return map("id", id, "name", name);
     }
 
@@ -264,8 +243,7 @@ public class OrgService {
             if (!ids.add(item.id())) {
                 throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
             }
-            if (db.update("UPDATE positions SET rank_order=:rank WHERE id=:id",
-                    map("rank", item.rankOrder(), "id", item.id())) == 0) {
+            if (store.updatePositionOrder(item.rankOrder(), item.id()) == 0) {
                 throw new BusinessException(ErrorCode.POSITION_NOT_FOUND);
             }
         }
@@ -274,27 +252,24 @@ public class OrgService {
 
     @Transactional
     public void deletePosition(long id) {
-        db.one("SELECT id FROM positions WHERE id=:id FOR UPDATE", map("id", id), ErrorCode.POSITION_NOT_FOUND);
-        if (db.count("SELECT COUNT(*) FROM users WHERE position_id=:id", map("id", id)) > 0) {
+        store.lockPosition(id);
+        if (queries.countPositionMembers(id) > 0) {
             throw new BusinessException(ErrorCode.POSITION_IN_USE);
         }
-        db.update("DELETE FROM positions WHERE id=:id", map("id", id));
+        store.deletePosition(id);
     }
 
     public List<Map<String, Object>> holidays(int year) {
-        return db.rows(
-                "SELECT id,holiday_date AS date,name,substitute FROM holidays WHERE holiday_date>=:start AND holiday_date<:end ORDER BY holiday_date",
-                map("start", LocalDate.of(year, 1, 1), "end", LocalDate.of(year + 1, 1, 1)));
+        return queries.findHolidays(LocalDate.of(year, 1, 1), LocalDate.of(year + 1, 1, 1));
     }
 
     @Transactional
     public Map<String, Object> createHoliday(HolidayCreate r) {
-        if (db.count("SELECT COUNT(*) FROM holidays WHERE holiday_date=:date", map("date", r.date())) > 0) {
+        if (queries.countHolidaysOnDate(r.date()) > 0) {
             throw new BusinessException(ErrorCode.HOLIDAY_ALREADY_EXISTS);
         }
         try {
-            long id = db.insert("INSERT INTO holidays(holiday_date,name,substitute) VALUES(:date,:name,:sub)",
-                    map("date", r.date(), "name", r.name(), "sub", r.substitute()));
+            long id = store.insertHoliday(r.date(), r.name(), r.substitute());
             return map("id", id, "date", r.date(), "name", r.name(), "substitute", r.substitute());
         } catch (org.springframework.dao.DuplicateKeyException ex) {
             throw new BusinessException(ErrorCode.HOLIDAY_ALREADY_EXISTS);
@@ -303,16 +278,14 @@ public class OrgService {
 
     @Transactional
     public Map<String, Object> patchHoliday(long id, HolidayPatch r) {
-        db.one("SELECT id FROM holidays WHERE id=:id", map("id", id), ErrorCode.RESOURCE_NOT_FOUND);
-        db.update("UPDATE holidays SET name=COALESCE(:name,name),substitute=COALESCE(:sub,substitute) WHERE id=:id",
-                map("id", id, "name", r.name(), "sub", r.substitute()));
-        return db.one("SELECT id,holiday_date AS date,name,substitute FROM holidays WHERE id=:id", map("id", id),
-                ErrorCode.RESOURCE_NOT_FOUND);
+        queries.findHolidayIdentity(id);
+        store.updateHoliday(id, r.name(), r.substitute());
+        return queries.findHoliday(id);
     }
 
     @Transactional
     public void deleteHoliday(long id) {
-        if (db.update("DELETE FROM holidays WHERE id=:id", map("id", id)) == 0) {
+        if (store.deleteHoliday(id) == 0) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
     }

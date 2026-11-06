@@ -1,6 +1,6 @@
 package com.minierp.backend.domain.org.service;
 
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.org.repository.OrgQueries;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import java.time.*;
@@ -10,11 +10,10 @@ import static com.minierp.backend.global.persistence.SqlStore.map;
 @Component
 @RequiredArgsConstructor
 public class WorkingDays {
-    private final SqlStore db;
+    private final OrgQueries queries;
     public long count(LocalDate start, LocalDate end) {
         Set<LocalDate> holidays = new HashSet<>();
-        db.rows("SELECT holiday_date FROM holidays WHERE holiday_date BETWEEN :start AND :end",
-                map("start", start, "end", end))
+        queries.findHolidayDates(start, end)
                 .forEach(row -> holidays.add((LocalDate) row.get("holiday_date")));
         return start.datesUntil(end.plusDays(1))
                 .filter(date -> date.getDayOfWeek() != DayOfWeek.SATURDAY && date.getDayOfWeek() != DayOfWeek.SUNDAY
