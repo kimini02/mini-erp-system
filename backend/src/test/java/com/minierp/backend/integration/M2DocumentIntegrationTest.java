@@ -256,8 +256,8 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
     @Test
     void overtimeUsesOneDateAndTimesAndApproves() throws Exception {
         long id = draft("OVERTIME",
-                Map.of("overtimeDate", start.toString(), "startTime", "18:00", "endTime", "20:00", "reason",
-                        "fixture"));
+                Map.of("overtimeDate", start.toString(), "startTime", "18:00", "endTime", "20:00",
+                        "reason", "fixture"));
         result(postAs("/api/v1/approval-documents/" + id + "/submit", employeeToken, null));
         assertThat(
                 result(postAs("/api/v1/approval-documents/" + id + "/approve", leaderToken, null))

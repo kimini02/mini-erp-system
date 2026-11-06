@@ -211,11 +211,10 @@ public final class SnapshotComparator {
         for (JsonNode item : responses) {
             ordinal++;
             boolean concurrent = item.path("concurrent").asBoolean(false);
-            String key = item.path("method")
-                    .asText() + " " + item.path("path")
-                    .asText() + " " + item.path("query")
-                            + (concurrent ? " concurrent status=" + item.path("status") : " request=" + item.path(
-                            "requestIndex").asInt(ordinal));
+            String key = item.path("method").asText() + " " + item.path("path").asText() + " " + item.path("query")
+                    + (concurrent
+                            ? " concurrent status=" + item.path("status")
+                            : " request=" + item.path("requestIndex").asInt(ordinal));
             groups.computeIfAbsent(key, unused -> new ArrayList<>()).add(item);
         }
         // Main-thread requests keep their occurrence index, including status transitions.

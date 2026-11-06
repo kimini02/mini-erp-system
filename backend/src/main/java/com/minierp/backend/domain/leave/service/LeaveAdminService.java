@@ -81,8 +81,8 @@ public class LeaveAdminService {
         access.assertUserInScope(MENU, user);
         year(year);
         if (days == null || days.signum() == 0 || days.remainder(new BigDecimal("0.5")).signum() != 0
-                || days.abs().compareTo(
-                new BigDecimal("9999999.5")) > 0 || memo == null || memo.isBlank() || memo.length() > 500) {
+                || days.abs().compareTo(new BigDecimal("9999999.5")) > 0
+                || memo == null || memo.isBlank() || memo.length() > 500) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         db.one("SELECT id FROM users WHERE id=:id FOR UPDATE", map("id", user), ErrorCode.USER_NOT_FOUND);

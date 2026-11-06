@@ -47,9 +47,9 @@ public class InboxRepository {
     public String pageSql(String box, String formCode, String q) {
         return
                 "SELECT d.id,d.doc_no,d.title,d.status,d.submitted_at,d.updated_at,f.code,u.user_name,p.name AS position_name,dep.name AS department_name"
-                + selectionSql(box, formCode,
-                q) + " ORDER BY " + (box.equals("drafts") ? "d.updated_at" : "d.submitted_at")
-                        + " DESC,d.id DESC LIMIT :size OFFSET :offset";
+                + selectionSql(box, formCode, q) + " ORDER BY "
+                + (box.equals("drafts") ? "d.updated_at" : "d.submitted_at")
+                + " DESC,d.id DESC LIMIT :size OFFSET :offset";
     }
 
     public Map<String, Object> search(long actor, String box, String formCode, String q, int page, int size) {

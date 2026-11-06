@@ -104,10 +104,10 @@ public class RoleService {
             }
             String allowed = (String) m.get("allowedActions");
             boolean any = p.view() || p.create() || p.update() || p.deleteAction();
-            if (p.view() && !allowed.contains("V") || p.create() && !allowed.contains("C") || p.update()
-                    && !allowed.contains(
-                    "U") || p.deleteAction() && !allowed.contains("D") || !bool(m, "scopeApplicable")
-                            && p.scope() != null || bool(m, "scopeApplicable") && any && p.scope() == null) {
+            if (p.view() && !allowed.contains("V") || p.create() && !allowed.contains("C")
+                    || p.update() && !allowed.contains("U") || p.deleteAction() && !allowed.contains("D")
+                    || !bool(m, "scopeApplicable") && p.scope() != null
+                    || bool(m, "scopeApplicable") && any && p.scope() == null) {
                 throw new BusinessException(ErrorCode.INVALID_PERMISSION);
             }
         }

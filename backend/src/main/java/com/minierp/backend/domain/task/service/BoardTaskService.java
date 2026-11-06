@@ -105,8 +105,10 @@ public class BoardTaskService {
    """, map("id", id));
         result.put("history", history.stream().map(h -> {
             var event = map("action", h.get("action"),
-                    "actor", h.get("actor_id") == null ? null : map("id", h.get("actor_id"),
-                            "name", h.get("actor_name")), "at", h.get("created_at"));
+                    "actor", h.get("actor_id") == null
+                            ? null
+                            : map("id", h.get("actor_id"), "name", h.get("actor_name")),
+                    "at", h.get("created_at"));
             if (!"MOVED".equals(h.get("action"))) {
                 event.put("from", h.get("from_value"));
                 event.put("to", h.get("to_value"));

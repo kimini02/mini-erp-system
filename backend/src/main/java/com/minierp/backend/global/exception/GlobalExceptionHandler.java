@@ -50,8 +50,8 @@ public class GlobalExceptionHandler {
         // These v1 methods were removed in M4; their URLs still serve different v2 methods.
         String path = request.getRequestURI().substring(request.getContextPath().length());
         boolean removed = (request.getMethod().equals("PUT") && path.matches("/api/v1/(projects|tasks)/[0-9]+"))
-                || ((request.getMethod().equals(
-                "GET") || request.getMethod().equals("POST")) && path.matches("/api/v1/projects/[0-9]+/members"));
+                || ((request.getMethod().equals("GET") || request.getMethod().equals("POST"))
+                        && path.matches("/api/v1/projects/[0-9]+/members"));
         if (removed) {
             return handleNotFound(e);
         }

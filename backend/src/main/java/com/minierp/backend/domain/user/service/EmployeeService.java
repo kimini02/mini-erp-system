@@ -145,8 +145,8 @@ public class EmployeeService {
         String[] parts = sort.split(",");
         var columns = Map.of("userName", "u.user_name", "loginId", "u.login_id", "hireDate", "u.hire_date",
                 "status", "u.status");
-        if (!columns.containsKey(parts[0]) || parts.length > 2 || parts.length == 2 && !Set.of("asc", "desc").contains(
-                parts[1].toLowerCase())) {
+        if (!columns.containsKey(parts[0]) || parts.length > 2
+                || parts.length == 2 && !Set.of("asc", "desc").contains(parts[1].toLowerCase())) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         String order = columns.get(parts[0]) + (parts.length == 2 ? " " + parts[1] : " ASC");

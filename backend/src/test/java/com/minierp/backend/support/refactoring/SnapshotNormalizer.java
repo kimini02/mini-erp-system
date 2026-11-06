@@ -25,8 +25,8 @@ public final class SnapshotNormalizer {
                 if (response.path("kind").asText().equals("json")) {
                     response.put("body",
                             ExactJson.write(
-                                    ExactJson.read(body, (path, atom) -> SnapshotMask.apply(test.getKey(), path,
-                                            atom))));
+                                    ExactJson.read(body,
+                                            (path, atom) -> SnapshotMask.apply(test.getKey(), path, atom))));
                 } else {
                     response.put("body",
                             SnapshotMask.apply(test.getKey(), "$body", new ExactJson.Atom("string", body)).text());

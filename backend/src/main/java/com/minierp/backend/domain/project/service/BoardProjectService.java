@@ -90,8 +90,9 @@ public class BoardProjectService {
                         "name", p.get("leader_name"), "title", p.get("leader_title")),
                 "memberCount", p.get("member_count"), "taskCount", total, "doneCount", done,
                 "overdueCount", p.get("overdue_count"), "progressPct", total == 0 ? 0 : done * 100 / total,
-                "myRole", p.get("leader_id") != null && number(p, "leader_id") == actor() ? "LEADER" : number(p,
-                        "is_member") > 0 ? "MEMBER" : null);
+                "myRole", p.get("leader_id") != null && number(p, "leader_id") == actor()
+                        ? "LEADER"
+                        : number(p, "is_member") > 0 ? "MEMBER" : null);
     }
 
     public Map<String, Object> permissions(Map<String, Object> p) {

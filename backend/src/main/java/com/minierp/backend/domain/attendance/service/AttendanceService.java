@@ -104,8 +104,8 @@ public class AttendanceService {
             date = date.minusDays(1);
             row = records.record(user, date, true);
             if (row == null || row.get("clock_in_at") == null
-                    || (row.get("clock_out_at") != null && !((LocalDateTime) row.get(
-                    "clock_out_at")).toLocalDate().equals(now.toLocalDate()))) {
+                    || (row.get("clock_out_at") != null
+                            && !((LocalDateTime) row.get("clock_out_at")).toLocalDate().equals(now.toLocalDate()))) {
                 throw new BusinessException(ErrorCode.NOT_CLOCKED_IN);
             }
         }

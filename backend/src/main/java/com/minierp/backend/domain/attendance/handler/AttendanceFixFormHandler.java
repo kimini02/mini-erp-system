@@ -140,10 +140,12 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
     }
 
     private Times mergedTimes(Map<String, Object> correction, Map<String, Object> old, LocalDate date) {
-        LocalDateTime in = correction.get("clock_in") == null ? (old == null ? null : (LocalDateTime) old.get(
-                "clock_in_at")) : date.atTime(AttendanceStore.time(correction.get("clock_in")));
-        LocalDateTime out = correction.get("clock_out") == null ? (old == null ? null : (LocalDateTime) old.get(
-                "clock_out_at")) : date.atTime(AttendanceStore.time(correction.get("clock_out")));
+        LocalDateTime in = correction.get("clock_in") == null
+                ? (old == null ? null : (LocalDateTime) old.get("clock_in_at"))
+                : date.atTime(AttendanceStore.time(correction.get("clock_in")));
+        LocalDateTime out = correction.get("clock_out") == null
+                ? (old == null ? null : (LocalDateTime) old.get("clock_out_at"))
+                : date.atTime(AttendanceStore.time(correction.get("clock_out")));
         if (in == null) {
             throw new BusinessException(ErrorCode.ATTENDANCE_FIX_CLOCK_IN_REQUIRED);
         }

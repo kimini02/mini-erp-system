@@ -25,8 +25,9 @@ public class AttendanceStore {
     }
 
     public static LocalTime time(Object value) {
-        return value instanceof java.sql.Time t ? t.toLocalTime() : value instanceof LocalTime t ? t : LocalTime.parse(
-                value.toString());
+        return value instanceof java.sql.Time t
+                ? t.toLocalTime()
+                : value instanceof LocalTime t ? t : LocalTime.parse(value.toString());
     }
 
     public Map<String, Object> lockUser(long id) {

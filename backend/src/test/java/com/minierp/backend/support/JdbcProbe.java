@@ -54,8 +54,8 @@ public final class JdbcProbe {
         public long projectReads() {
             return queries.stream()
                     .filter(q -> (q.sql.startsWith("select") || q.sql.startsWith("with"))
-                            && (q.sql.contains("from projects") || q.sql.contains(
-                            "from tasks") || q.sql.contains("from project_members")))
+                            && (q.sql.contains("from projects") || q.sql.contains("from tasks")
+                                    || q.sql.contains("from project_members")))
                     .count();
         }
         public void close() {

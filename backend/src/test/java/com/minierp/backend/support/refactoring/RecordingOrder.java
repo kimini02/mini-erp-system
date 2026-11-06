@@ -15,7 +15,8 @@ final class RecordingOrder implements Filter {
             "M2DocumentIntegrationTest#concurrentSubmissionsCannotSpendSameRemainingDays()", 2,
             "M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()", 8,
             "M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
-                    2, "M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()", 2,
+                    2,
+            "M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()", 2,
             "M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()", 2);
     private final Map<String, List<Ticket>> waiting = new HashMap<>();
     private static final class Ticket {

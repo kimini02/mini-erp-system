@@ -89,8 +89,8 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
                         post("/api/v1/auth/login")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
-                                        mapper.writeValueAsString(Map.of("id", user.getLoginId(), "password",
-                                                password)))))
+                                        mapper.writeValueAsString(
+                                                Map.of("id", user.getLoginId(), "password", password)))))
                 .path("accessToken")
                 .asText();
     }

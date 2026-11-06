@@ -372,8 +372,10 @@ public class DocumentService {
                 map("id", id))
                 .stream()
                 .map(h -> map("action", h.get("action"),
-                        "actor", h.get("actor_id") == null ? null : map("id", h.get("actor_id"),
-                                "name", h.get("user_name")), "comment", h.get("comment"), "at", h.get("created_at")))
+                        "actor", h.get("actor_id") == null
+                                ? null
+                                : map("id", h.get("actor_id"), "name", h.get("user_name")),
+                        "comment", h.get("comment"), "at", h.get("created_at")))
                 .toList();
         boolean canAct = pending && line.stream()
                 .anyMatch(l -> "PENDING".equals(l.get("status")) && number(l, "approver_id") == actor);

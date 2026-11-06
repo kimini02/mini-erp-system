@@ -33,10 +33,11 @@ public class AbsenceBatchWork {
             LocalDate eligible = user.get("hire_date") == null ? ((LocalDateTime) user.get("created_at"))
                     .toLocalDate() : (LocalDate) user.get("hire_date");
             if (row == null) {
-                if ("ON_LEAVE".equals(user.get("status")) || eligible.isAfter(date) || ("RETIRED".equals(
-                        user.get("status")) && (user.get("retired_date") == null || !date.isBefore(
-                                (LocalDate) user.get("retired_date")))) || !bool(user, "activated")
-                                        || day.type().equals("HOLIDAY")) {
+                if ("ON_LEAVE".equals(user.get("status")) || eligible.isAfter(date)
+                        || ("RETIRED".equals(user.get("status"))
+                                && (user.get("retired_date") == null
+                                        || !date.isBefore((LocalDate) user.get("retired_date"))))
+                        || !bool(user, "activated") || day.type().equals("HOLIDAY")) {
                     skipped++;
                     continue;
                 }

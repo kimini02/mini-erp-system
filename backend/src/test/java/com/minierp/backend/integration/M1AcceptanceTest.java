@@ -581,8 +581,8 @@ class M1AcceptanceTest extends MariaDbIntegrationTest {
         var detail = body(mvc.perform(get("/api/v1/users/" + id).header("Authorization", auth(chiefToken))))
                 .path("data");
         assertThat(
-                detail.has("departmentCode") && detail.has("departmentName") && detail.has("position") && detail.has(
-                        "role"))
+                detail.has("departmentCode") && detail.has("departmentName") && detail.has("position")
+                        && detail.has("role"))
                 .isTrue();
         assertThat(detail.path("invitationPending").asBoolean()).isTrue();
         mvc.perform(

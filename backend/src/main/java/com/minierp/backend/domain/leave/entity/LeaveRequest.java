@@ -135,8 +135,8 @@ public class LeaveRequest extends BaseEntity {
         if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
             throw new IllegalArgumentException("종료일은 시작일보다 빠를 수 없습니다.");
         }
-        if (appType != null && appType.isHalfDay() && (startDate == null || endDate == null || !startDate.equals(
-                endDate))) {
+        if (appType != null && appType.isHalfDay()
+                && (startDate == null || endDate == null || !startDate.equals(endDate))) {
             throw new IllegalArgumentException("반차는 시작일과 종료일이 같은 하루만 신청할 수 있습니다.");
         }
     }

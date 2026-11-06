@@ -105,8 +105,9 @@ public class OrgService {
             }
             parent = ancestor.get("parent_id");
         }
-        var schedule = d.get("work_schedule_id") == null ? defaultSchedule() : schedule(
-                ((Number) d.get("work_schedule_id")).longValue());
+        var schedule = d.get("work_schedule_id") == null
+                ? defaultSchedule()
+                : schedule(((Number) d.get("work_schedule_id")).longValue());
         schedule.put("useDefault", d.get("work_schedule_id") == null);
         return map("id", id, "name", d.get("name"), "code", d.get("code"), "parentId", d.get("parent_id"), "path", path,
                 "head", head(d.get("head_user_id"), false),

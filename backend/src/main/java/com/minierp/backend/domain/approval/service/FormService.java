@@ -62,16 +62,20 @@ public class FormService {
         out.put("options",
                 map("dedupeApprover", bool(f, "dedupe_approver"), "fallbackToUpper", bool(f, "fallback_to_upper"),
                         "skipSelf", bool(f, "skip_self"), "allowLineEdit", bool(f, "allow_line_edit")));
-        out.put("steps", db.rows(
-                "SELECT s.*,r.code AS role_code,r.name AS role_name,u.user_name FROM approval_form_steps s LEFT JOIN roles r ON r.id=s.role_id LEFT JOIN users u ON u.id=s.user_id WHERE s.form_id=:id ORDER BY s.step_order",
-                map("id", f.get("id"))).stream().map(s -> map("order", s.get("step_order"), "lineKind", s.get(
-                        "line_kind"), "approverType", s.get("approver_type"), "roleCode", s.get("role_code"), "userId",
-                                s.get("user_id"), "label", switch ((String) s.get("approver_type")) {
-            case "DEPT_HEAD" -> "기안자의 부서장";
-            case "UPPER_DEPT_HEAD" -> "기안자의 상위 부서장";
-            case "ROLE" -> s.get("role_name");
-            default -> s.get("user_name");
-        })).toList());
+        out.put("steps",
+                db.rows(
+                        "SELECT s.*,r.code AS role_code,r.name AS role_name,u.user_name FROM approval_form_steps s LEFT JOIN roles r ON r.id=s.role_id LEFT JOIN users u ON u.id=s.user_id WHERE s.form_id=:id ORDER BY s.step_order",
+                        map("id", f.get("id")))
+                        .stream()
+                        .map(s -> map("order", s.get("step_order"), "lineKind", s.get("line_kind"),
+                                "approverType", s.get("approver_type"), "roleCode", s.get("role_code"),
+                                "userId", s.get("user_id"), "label", switch ((String) s.get("approver_type")) {
+                                    case "DEPT_HEAD" -> "기안자의 부서장";
+                                    case "UPPER_DEPT_HEAD" -> "기안자의 상위 부서장";
+                                    case "ROLE" -> s.get("role_name");
+                                    default -> s.get("user_name");
+                                }))
+                        .toList());
         return out;
     }
 
@@ -88,12 +92,12 @@ public class FormService {
     @Transactional
     public Map<String, Object> steps(String code, List<Step> steps) {
         var f = resolver.form(code);
-        if (steps == null || steps.isEmpty() || steps.stream().anyMatch(
-                s -> s == null || s.lineKind() == null || !Set.of("APPROVER", "REFERENCE")
-                        .contains(s.lineKind()) || s.approverType() == null || !Set.of("DEPT_HEAD", "UPPER_DEPT_HEAD",
-                                "ROLE", "USER")
-                        .contains(s.approverType()))
-                                || steps.stream().noneMatch(s -> "APPROVER".equals(s.lineKind()))) {
+        if (steps == null || steps.isEmpty()
+                || steps.stream()
+                        .anyMatch(s -> s == null || s.lineKind() == null
+                                || !Set.of("APPROVER", "REFERENCE").contains(s.lineKind()) || s.approverType() == null
+                                || !Set.of("DEPT_HEAD", "UPPER_DEPT_HEAD", "ROLE", "USER").contains(s.approverType()))
+                || steps.stream().noneMatch(s -> "APPROVER".equals(s.lineKind()))) {
             throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
         }
         List<Map<String, Object>> resolved = new ArrayList<>();
