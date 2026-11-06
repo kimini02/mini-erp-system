@@ -97,8 +97,8 @@ class M4HomeGrowthTest extends BoardTestSupport {
             var statements = map("my_items", HomeQueries.myItems(scope), "my_project", HomeQueries.mySummary(scope),
                     "team_week", HomeQueries.teamWeek(true, true, scope));
             String beforeTeam = LegacyHomeQueries.teamWeek(true, true, scope);
-            System.out.printf(Locale.ROOT, "M4_HOME_TEAM_BEFORE scale=%d median_ms=%.3f reads=%s%n", scale, MariaDbPlan
-                    .median(named, beforeTeam, args), MariaDbPlan.analyze(named, beforeTeam, args));
+            System.out.printf(Locale.ROOT, "M4_HOME_TEAM_BEFORE scale=%d median_ms=%.3f reads=%s%n", scale,
+                    MariaDbPlan.median(named, beforeTeam, args), MariaDbPlan.analyze(named, beforeTeam, args));
             assertThat(named.queryForList(HomeQueries.teamWeek(true, true, scope), args))
                     .containsExactlyInAnyOrderElementsOf(named.queryForList(beforeTeam, args));
             var teamPlan = MariaDbPlan.analyze(named, HomeQueries.teamWeek(true, true, scope), args);
@@ -109,8 +109,8 @@ class M4HomeGrowthTest extends BoardTestSupport {
             for (var entry : statements.entrySet()) {
                 String sql = (String) entry.getValue();
                 var reads = MariaDbPlan.analyze(named, sql, args);
-                System.out.printf(Locale.ROOT, "M4_HOME_ANALYZE kind=%s scale=%d median_ms=%.3f reads=%s%n", entry
-                        .getKey(), scale, MariaDbPlan.median(named, sql, args), reads);
+                System.out.printf(Locale.ROOT, "M4_HOME_ANALYZE kind=%s scale=%d median_ms=%.3f reads=%s%n",
+                        entry.getKey(), scale, MariaDbPlan.median(named, sql, args), reads);
             }
         }
     }

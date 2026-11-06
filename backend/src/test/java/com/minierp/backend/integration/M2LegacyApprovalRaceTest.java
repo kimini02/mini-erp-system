@@ -39,23 +39,23 @@ class M2LegacyApprovalRaceTest {
                 var readBarrier = new CyclicBarrier(2);
                 Callable<Boolean> approve = () -> new TransactionTemplate(new DataSourceTransactionManager(source))
                         .execute(status -> {
-                    String state = jdbc.queryForObject("SELECT app_status FROM leave_requests WHERE id=1", String
-                            .class);
-                    var remaining = jdbc.queryForObject("SELECT remaining_annual_leave FROM users WHERE id=1", java.math
-                            .BigDecimal.class);
-                    try {
-                        readBarrier.await(10, TimeUnit.SECONDS);
-                    } catch (Exception ex) {
-                        throw new IllegalStateException(ex);
-                    }
-                    if (!"PENDING".equals(state)) {
-                        return false;
-                    }
-                    jdbc.update("UPDATE leave_requests SET app_status='APPROVED' WHERE id=1");
-                    jdbc.update("UPDATE users SET used_annual_leave=1,remaining_annual_leave=? WHERE id=1", remaining
-                            .subtract(java.math.BigDecimal.ONE));
-                    return true;
-                });
+                            String state = jdbc.queryForObject("SELECT app_status FROM leave_requests WHERE id=1",
+                                    String.class);
+                            var remaining = jdbc.queryForObject("SELECT remaining_annual_leave FROM users WHERE id=1",
+                                    java.math.BigDecimal.class);
+                            try {
+                                readBarrier.await(10, TimeUnit.SECONDS);
+                            } catch (Exception ex) {
+                                throw new IllegalStateException(ex);
+                            }
+                            if (!"PENDING".equals(state)) {
+                                return false;
+                            }
+                            jdbc.update("UPDATE leave_requests SET app_status='APPROVED' WHERE id=1");
+                            jdbc.update("UPDATE users SET used_annual_leave=1,remaining_annual_leave=? WHERE id=1",
+                                    remaining.subtract(java.math.BigDecimal.ONE));
+                            return true;
+                        });
                 var first = pool.submit(approve);
                 var second = pool.submit(approve);
                 if (first.get(15, TimeUnit.SECONDS) && second.get(15, TimeUnit.SECONDS)) {

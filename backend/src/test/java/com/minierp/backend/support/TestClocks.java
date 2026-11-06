@@ -10,8 +10,8 @@ public final class TestClocks {
     }
 
     public static Clock fixed() {
-        return Clock.fixed(Instant.parse(System.getProperty("test.clock.instant", "2026-04-06T00:00:00Z")), ZoneId
-                .of("Asia/Seoul"));
+        return Clock.fixed(Instant.parse(System.getProperty("test.clock.instant", "2026-04-06T00:00:00Z")),
+                ZoneId.of("Asia/Seoul"));
     }
 
     public static LocalDate today() {

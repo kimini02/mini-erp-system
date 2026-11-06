@@ -27,8 +27,7 @@ class M3DataMigrationTest {
         db.update("UPDATE work_schedules SET start_time='09:00',end_time='18:00',late_grace_min=10 WHERE is_default=1");
         db.update(
                 "INSERT INTO work_schedules(name,start_time,end_time,late_grace_min,is_default) VALUES('부서 기준','10:00','19:00',0,0)");
-        db
-                .update(
+        db.update(
                 "UPDATE departments SET work_schedule_id=(SELECT id FROM work_schedules WHERE name='부서 기준') WHERE id=2");
         String[] statuses = {
             "LATE", "NORMAL", "ABSENT", "LEAVE"
@@ -43,8 +42,7 @@ class M3DataMigrationTest {
         }
         var flyway = Flyway.configure().dataSource(source).target("4").load();
         assertThat(flyway.migrate().migrationsExecuted).isEqualTo(1);
-        var rows = db
-                .queryForList(
+        var rows = db.queryForList(
                 "SELECT *,DATE_FORMAT(clock_in_at,'%Y-%m-%dT%H:%i:%s') AS local_in FROM attendances ORDER BY work_date");
         assertThat(rows).hasSize(4);
         assertThat(rows.get(0).get("local_in")).isEqualTo(date + "T09:10:59");
@@ -54,10 +52,11 @@ class M3DataMigrationTest {
         assertThat(rows.get(2).get("absent")).isEqualTo(true);
         assertThat(rows.get(3).get("day_type")).isEqualTo("LEAVE");
         assertThat(rows.get(0).get("sched_source")).isEqualTo("COMPANY");
-        assertThat(db
-                .queryForList(
-                "SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='attendances'",
-                String.class)).doesNotContain("clock_in_time", "clock_out_time", "att_status");
+        assertThat(
+                db.queryForList(
+                        "SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='attendances'",
+                        String.class))
+                .doesNotContain("clock_in_time", "clock_out_time", "att_status");
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
     }

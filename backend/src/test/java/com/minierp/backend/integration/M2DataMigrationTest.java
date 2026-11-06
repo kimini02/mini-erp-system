@@ -51,36 +51,44 @@ class M2DataMigrationTest {
                 .containsExactly(migrationYear);
         assertThat(db.queryForList("SELECT DISTINCT memo FROM leave_ledger", String.class)).containsExactly("v1 이관");
         for (var row : before) {
-            var after = db.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=?", BigDecimal.class, row
-                    .get("id"));
+            var after = db.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=?", BigDecimal.class,
+                    row.get("id"));
             assertThat(after).isEqualByComparingTo((BigDecimal) row.get("available"));
         }
         assertThat(db.queryForObject("SELECT COUNT(*) FROM approval_documents", Integer.class)).isEqualTo(8);
-        assertThat(db.queryForList("SELECT status FROM approval_documents WHERE form_id=1 ORDER BY doc_no", String
-                .class)).containsExactly("IN_PROGRESS", "APPROVED", "REJECTED", "WITHDRAWN");
-        assertThat(db.queryForList("SELECT doc_no FROM approval_documents WHERE form_id=1 ORDER BY doc_no", String
-                .class)).containsExactly("HR-2025-0001", "HR-2025-0002", "HR-2025-0003", "HR-2025-0004");
-        assertThat(db.queryForObject("SELECT last_seq FROM doc_no_sequences WHERE prefix='HR' AND doc_year=2025",
-                Integer.class)).isEqualTo(4);
+        assertThat(
+                db.queryForList("SELECT status FROM approval_documents WHERE form_id=1 ORDER BY doc_no", String.class))
+                .containsExactly("IN_PROGRESS", "APPROVED", "REJECTED", "WITHDRAWN");
+        assertThat(
+                db.queryForList("SELECT doc_no FROM approval_documents WHERE form_id=1 ORDER BY doc_no", String.class))
+                .containsExactly("HR-2025-0001", "HR-2025-0002", "HR-2025-0003", "HR-2025-0004");
+        assertThat(
+                db.queryForObject("SELECT last_seq FROM doc_no_sequences WHERE prefix='HR' AND doc_year=2025",
+                        Integer.class))
+                .isEqualTo(4);
         assertThat(db.queryForObject("SELECT COUNT(*) FROM approval_lines", Integer.class)).isEqualTo(7);
         assertThat(db.queryForObject("SELECT COUNT(*) FROM approval_lines WHERE status='PENDING'", Integer.class))
                 .isEqualTo(1);
-        assertThat(db
-                .queryForObject(
-                "SELECT COUNT(*) FROM leave_requests WHERE leave_type='HALF_AM' AND document_id IS NOT NULL", Integer
-                .class)).isEqualTo(4);
-        assertThat(db
-                .queryForObject("SELECT COUNT(*) FROM approval_histories WHERE action='REJECT' AND comment='기존 사유'",
-                Integer.class)).isEqualTo(1);
-        assertThat(db
-                .queryForList(
-                "SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='users'",
-                String.class)).doesNotContain("total_annual_leave", "used_annual_leave", "remaining_annual_leave");
+        assertThat(
+                db.queryForObject(
+                        "SELECT COUNT(*) FROM leave_requests WHERE leave_type='HALF_AM' AND document_id IS NOT NULL",
+                        Integer.class))
+                .isEqualTo(4);
+        assertThat(
+                db.queryForObject("SELECT COUNT(*) FROM approval_histories WHERE action='REJECT' AND comment='기존 사유'",
+                        Integer.class))
+                .isEqualTo(1);
+        assertThat(
+                db.queryForList(
+                        "SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='users'",
+                        String.class))
+                .doesNotContain("total_annual_leave", "used_annual_leave", "remaining_annual_leave");
         for (String table : java.util.List.of("leave_requests", "overtime_requests")) {
-            assertThat(db
-                    .queryForList(
-                    "SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name=?",
-                    String.class, table)).doesNotContain("requester_id", "approver_id", "app_status", "status");
+            assertThat(
+                    db.queryForList(
+                            "SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name=?",
+                            String.class, table))
+                    .doesNotContain("requester_id", "approver_id", "app_status", "status");
         }
         assertThat(db.queryForObject("SELECT COUNT(*) FROM approval_forms", Integer.class)).isEqualTo(3);
         assertThat(db.queryForObject("SELECT COUNT(*) FROM approval_form_steps", Integer.class)).isEqualTo(5);

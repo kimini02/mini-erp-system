@@ -50,8 +50,10 @@ class M4LegacyExperimentTest extends BoardTestSupport {
                 for (var f : futures) {
                     f.get(30, TimeUnit.SECONDS);
                 }
-                assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM tasks WHERE project_id=? AND task_status='DONE'",
-                        Integer.class, p)).isEqualTo(2);
+                assertThat(
+                        jdbc.queryForObject("SELECT COUNT(*) FROM tasks WHERE project_id=? AND task_status='DONE'",
+                                Integer.class, p))
+                        .isEqualTo(2);
                 if (!"DONE".equals(jdbc.queryForObject("SELECT status FROM projects WHERE id=?", String.class, p))) {
                     broken++;
                 }
@@ -112,8 +114,8 @@ class M4LegacyExperimentTest extends BoardTestSupport {
                 List<Future<?>> futures = new ArrayList<>();
                 for (long id : ids.subList(98, 100)) {
                     futures.add(pool.submit(() -> tx().executeWithoutResult(s -> {
-                        long before = jdbc.queryForObject("SELECT position FROM tasks WHERE id=?", Long.class, ids
-                                .get(0));
+                        long before = jdbc.queryForObject("SELECT position FROM tasks WHERE id=?", Long.class,
+                                ids.get(0));
                         long after = jdbc.queryForObject(
                                 "SELECT MIN(position) FROM tasks WHERE project_id=? AND position>?", Long.class, p,
                                 before);
@@ -129,8 +131,9 @@ class M4LegacyExperimentTest extends BoardTestSupport {
         } finally {
             pool.shutdownNow();
         }
-        System.out.println("M4_BEFORE_ORDER cards=100 update_rows=" + updated
-                + " concurrent_trials=20 duplicate_positions=" + duplicates);
+        System.out.println(
+                "M4_BEFORE_ORDER cards=100 update_rows=" + updated + " concurrent_trials=20 duplicate_positions="
+                        + duplicates);
         assertThat(duplicates).isEqualTo(20);
     }
 }

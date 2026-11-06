@@ -60,9 +60,11 @@ class DepartmentHeadConcurrencyTest extends MariaDbIntegrationTest {
     }
 
     private void validHead() {
-        assertThat(db.count(
-                "SELECT COUNT(*) FROM departments d JOIN users u ON u.id=d.head_user_id WHERE u.department_id<>d.id OR u.status<>'ACTIVE'",
-                Map.of())).isZero();
+        assertThat(
+                db.count(
+                        "SELECT COUNT(*) FROM departments d JOIN users u ON u.id=d.head_user_id WHERE u.department_id<>d.id OR u.status<>'ACTIVE'",
+                        Map.of()))
+                .isZero();
     }
 
     private static void await(CountDownLatch latch) throws InterruptedException {
@@ -132,20 +134,21 @@ class DepartmentHeadConcurrencyTest extends MariaDbIntegrationTest {
             var assigned = new CountDownLatch(1);
             var pool = Executors.newSingleThreadExecutor();
             try {
-                var mutation = pool.submit(() -> attempt(() -> new TransactionTemplate(transactions)
-                        .executeWithoutResult(tx -> {
-                    // Establish a REPEATABLE READ snapshot before the other transaction assigns a head.
-                    assertThat(db.count("SELECT COUNT(*) FROM departments WHERE head_user_id=:id", Map.of("id", id)))
-                            .isZero();
-                    snapshot.countDown();
-                    try {
-                        await(assigned);
-                    } catch (InterruptedException ex) {
-                        Thread.currentThread().interrupt();
-                        throw new IllegalStateException(ex);
-                    }
-                    change(id, kind);
-                })));
+                var mutation = pool.submit(
+                        () -> attempt(() -> new TransactionTemplate(transactions).executeWithoutResult(tx -> {
+                            // Establish a REPEATABLE READ snapshot before the other transaction assigns a head.
+                            assertThat(db.count("SELECT COUNT(*) FROM departments WHERE head_user_id=:id",
+                                    Map.of("id", id)))
+                                    .isZero();
+                            snapshot.countDown();
+                            try {
+                                await(assigned);
+                            } catch (InterruptedException ex) {
+                                Thread.currentThread().interrupt();
+                                throw new IllegalStateException(ex);
+                            }
+                            change(id, kind);
+                        })));
                 await(snapshot);
                 organizations.setHead(2, id);
                 assigned.countDown();

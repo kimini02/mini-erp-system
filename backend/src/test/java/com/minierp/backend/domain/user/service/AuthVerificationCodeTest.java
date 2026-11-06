@@ -30,8 +30,8 @@ class AuthVerificationCodeTest {
         ReflectionTestUtils.setField(request, "email", email);
         // Verify the cryptographic source and both six-digit boundaries without
         // probabilistic assertions about output uniqueness or entropy.
-        try (var random = mockConstruction(SecureRandom.class, (generator, context) -> when(generator.nextInt(900_000))
-                .thenReturn(0, 899_999))) {
+        try (var random = mockConstruction(SecureRandom.class,
+                (generator, context) -> when(generator.nextInt(900_000)).thenReturn(0, 899_999))) {
             var service = new AuthService(users, mock(PasswordEncoder.class), mock(JwtTokenProvider.class), mail,
                     store);
             service.requestPasswordReset(request);

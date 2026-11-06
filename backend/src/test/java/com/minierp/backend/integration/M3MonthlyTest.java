@@ -49,8 +49,10 @@ class M3MonthlyTest extends AttendanceTestSupport {
                 LocalDateTime.now(clock));
         assertThat(row(data(getAs("/api/v1/attendance/monthly?month=" + month, chiefToken)), old.getId()).isNull())
                 .isFalse();
-        assertThat(row(data(getAs("/api/v1/attendance/monthly?month=" + month.plusMonths(1), chiefToken)), old.getId())
-                .isNull()).isTrue();
+        assertThat(
+                row(data(getAs("/api/v1/attendance/monthly?month=" + month.plusMonths(1), chiefToken)), old.getId())
+                        .isNull())
+                .isTrue();
         var list = data(getAs("/api/v1/users?size=200", chiefToken));
         assertThat(list.path("content").findValuesAsText("retiredDate")).contains(retired.toString());
     }
@@ -67,7 +69,10 @@ class M3MonthlyTest extends AttendanceTestSupport {
         getAs("/api/v1/attendance/records/" + outsider.getId() + "/" + date, leaderToken)
                 .andExpect(status().isForbidden());
         var bytes = getAs("/api/v1/attendance/monthly/export?month=" + YearMonth.from(date), chiefToken)
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsByteArray();
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsByteArray();
         assertThat(bytes).startsWith((byte) 0xEF, (byte) 0xBB, (byte) 0xBF);
         at(date.plusDays(1), LocalTime.of(0, 10));
         long before = jdbc.queryForObject("SELECT COUNT(*) FROM batch_runs", Long.class);
@@ -80,11 +85,17 @@ class M3MonthlyTest extends AttendanceTestSupport {
         }
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM batch_runs", Long.class)).isEqualTo(before);
         data(postAs("/api/v1/attendance/rejudge", chiefToken, Map.of("date", date.toString())));
-        assertThat(data(getAs("/api/v1/attendance/records/" + employee.getId() + "/" + date, chiefToken)).path("code")
-                .asText()).isEqualTo("MISSING");
+        assertThat(
+                data(getAs("/api/v1/attendance/records/" + employee.getId() + "/" + date, chiefToken))
+                        .path("code")
+                        .asText())
+                .isEqualTo("MISSING");
         data(postAs("/api/v1/attendance/clock-out", employeeToken, null));
-        assertThat(data(getAs("/api/v1/attendance/records/" + employee.getId() + "/" + date, chiefToken)).path("reason")
-                .asText()).doesNotContain("조퇴도");
+        assertThat(
+                data(getAs("/api/v1/attendance/records/" + employee.getId() + "/" + date, chiefToken))
+                        .path("reason")
+                        .asText())
+                .doesNotContain("조퇴도");
     }
 
     double median(String sql, Map<String, Object> args) {
@@ -120,8 +131,7 @@ class M3MonthlyTest extends AttendanceTestSupport {
                 });
             }
         }
-        jdbc
-                .batchUpdate(
+        jdbc.batchUpdate(
                 "INSERT INTO attendances(user_id,work_date,clock_in_at,in_result,created_at) VALUES(?,?,?,'ON_TIME',?)",
                 values);
         jdbc.execute("ANALYZE TABLE attendances");
@@ -132,12 +142,21 @@ class M3MonthlyTest extends AttendanceTestSupport {
         for (var r : result.path("rows")) {
             assertThat(r.path("cells").size()).isEqualTo(31);
         }
-        long queries = mockingDetails(target).getInvocations().stream()
-                .filter(i -> i.getMethod().getName().equals("rows") && i.getArgument(0).toString()
-                .contains("WITH RECURSIVE dates")).count();
+        long queries = mockingDetails(target)
+                .getInvocations()
+                .stream()
+                .filter(i -> i.getMethod()
+                        .getName()
+                        .equals("rows") && i.getArgument(0)
+                        .toString()
+                        .contains("WITH RECURSIVE dates"))
+                .count();
         assertThat(queries).isEqualTo(1);
-        long allSqlStoreReads = mockingDetails(target).getInvocations().stream()
-                .filter(i -> Set.of("rows", "count").contains(i.getMethod().getName())).count();
+        long allSqlStoreReads = mockingDetails(target)
+                .getInvocations()
+                .stream()
+                .filter(i -> Set.of("rows", "count").contains(i.getMethod().getName()))
+                .count();
         assertThat(allSqlStoreReads).isEqualTo(2);
         // department existence + one table query; no per-cell reads
         var args = map("start", month.atDay(1), "end", month.atEndOfMonth(), "dept", dept);

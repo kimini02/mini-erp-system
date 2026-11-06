@@ -38,8 +38,11 @@ class M2InboxPerformanceTest extends ApprovalApiTestSupport {
     }
 
     private long readQueries(SqlStore target) {
-        return mockingDetails(target).getInvocations().stream()
-                .filter(i -> Set.of("rows", "count").contains(i.getMethod().getName())).count();
+        return mockingDetails(target)
+                .getInvocations()
+                .stream()
+                .filter(i -> Set.of("rows", "count").contains(i.getMethod().getName()))
+                .count();
     }
 
     private double median(String sql, Map<String, Object> args) {
@@ -67,8 +70,10 @@ class M2InboxPerformanceTest extends ApprovalApiTestSupport {
         assertThat(smallQueries).isEqualTo(3);
         insert(100, 9900);
         jdbc.execute("ANALYZE TABLE approval_lines,approval_documents");
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM approval_documents WHERE doc_no LIKE ?", Long.class, marker
-                + "%")).isEqualTo(10000);
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM approval_documents WHERE doc_no LIKE ?", Long.class,
+                        marker + "%"))
+                .isEqualTo(10000);
         clearInvocations(target);
         var large = inbox.search(leader.getId(), "todo", null, null, 0, 20);
         long largeQueries = readQueries(target);

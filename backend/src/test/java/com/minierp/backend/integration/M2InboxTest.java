@@ -38,8 +38,9 @@ public class M2InboxTest extends ApprovalApiTestSupport {
         var drafts = data(getAs("/api/v1/approval-inbox?box=drafts", employeeToken));
         assertThat(drafts.path("content").get(0).path("id").asLong()).isEqualTo(older);
         assertThat(drafts.path("page").path("totalElements").asInt()).isEqualTo(2);
-        assertThat(data(getAs("/api/v1/approval-inbox?box=mine&formCode=OVERTIME", employeeToken)).path("content")
-                .size()).isZero();
+        assertThat(
+                data(getAs("/api/v1/approval-inbox?box=mine&formCode=OVERTIME", employeeToken)).path("content").size())
+                .isZero();
         getAs("/api/v1/approval-inbox?box=unknown", employeeToken).andExpect(status().isBadRequest());
     }
 }

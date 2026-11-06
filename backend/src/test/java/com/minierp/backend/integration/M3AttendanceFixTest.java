@@ -70,14 +70,16 @@ class M3AttendanceFixTest extends AttendanceTestSupport {
         long holiday = draft("ATTENDANCE_FIX", body(date.minusDays(1), "09:00", null));
         postAs("/api/v1/approval-documents/" + holiday + "/submit", employeeToken, null)
                 .andExpect(status().isBadRequest());
-        postAs("/api/v1/approval-documents", employeeToken, Map
-                .of("formCode", "ATTENDANCE_FIX", "title", "잘못된 시각", "body",
-                body(date.minusWeeks(1), "18:00", "09:00"))).andExpect(status().isBadRequest());
+        postAs("/api/v1/approval-documents", employeeToken,
+                Map.of("formCode", "ATTENDANCE_FIX", "title", "잘못된 시각",
+                        "body", body(date.minusWeeks(1), "18:00", "09:00")))
+                .andExpect(status().isBadRequest());
         var day = date.minusWeeks(1);
         long a = draft("ATTENDANCE_FIX", body(day, "09:00", null));
         submit(a);
         long b = draft("ATTENDANCE_FIX", body(day, "09:00", null));
-        postAs("/api/v1/approval-documents/" + b + "/submit", employeeToken, null).andExpect(status().isConflict())
+        postAs("/api/v1/approval-documents/" + b + "/submit", employeeToken, null)
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("ATTENDANCE_FIX_DUPLICATE"));
         assertThat(count("notifications", b)).isZero();
     }
@@ -91,7 +93,8 @@ class M3AttendanceFixTest extends AttendanceTestSupport {
         var before = attendance(day);
         long alerts = count("notifications", id);
         NotificationService target = org.springframework.test.util.AopTestUtils.getUltimateTargetObject(notifications);
-        doThrow(new IllegalStateException("injected")).when(target)
+        doThrow(new IllegalStateException("injected"))
+                .when(target)
                 .store(anyLong(), eq(id), eq("APPROVED"), anyString());
         try {
             postAs("/api/v1/approval-documents/" + id + "/approve", leaderToken, null)
@@ -134,8 +137,10 @@ class M3AttendanceFixTest extends AttendanceTestSupport {
         assertThat(count("notifications", id)).isZero();
         assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?", String.class, id))
                 .isEqualTo("DRAFT");
-        assertThat(jdbc.queryForObject("SELECT before_json FROM attendance_fix_requests WHERE document_id=?", String
-                .class, id)).isNull();
+        assertThat(
+                jdbc.queryForObject("SELECT before_json FROM attendance_fix_requests WHERE document_id=?", String.class,
+                        id))
+                .isNull();
     }
 
     @Test
@@ -145,7 +150,8 @@ class M3AttendanceFixTest extends AttendanceTestSupport {
         jdbc.update("UPDATE attendances SET clock_out_at=? WHERE user_id=?", day.atTime(18, 0), employee.getId());
         var before = attendance(day);
         long id = draft("ATTENDANCE_FIX", body(day, "18:01", null));
-        postAs("/api/v1/approval-documents/" + id + "/submit", employeeToken, null).andExpect(status().isBadRequest())
+        postAs("/api/v1/approval-documents/" + id + "/submit", employeeToken, null)
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.code").value("INVALID_ATTENDANCE_TIME"));
         assertThat(attendance(day)).isEqualTo(before);
         assertThat(count("notifications", id)).isZero();

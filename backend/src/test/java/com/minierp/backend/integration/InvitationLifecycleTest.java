@@ -74,9 +74,14 @@ class InvitationLifecycleTest extends MariaDbIntegrationTest {
         var chief = User.create("chief", login, login + "@example.test", encoder.encode(password), "01", "관리소장");
         chief.changeRole(UserRole.ADMIN);
         users.saveAndFlush(chief);
-        String response = mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(Map.of("id", login, "password", password))))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String response = mvc.perform(
+                post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(Map.of("id", login, "password", password))))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
         chiefToken = mapper.readTree(response).path("data").path("accessToken").asText();
         sent.clear();
         reset(mail);
@@ -87,9 +92,9 @@ class InvitationLifecycleTest extends MariaDbIntegrationTest {
     }
 
     private RegistrationResult register() {
-        return employees.register(new EmployeeRequests
-                .Create("초대검증", UUID.randomUUID() + "@example.test", LocalDate.now(clock), 2L, 1L, List
-                .of("EMPLOYEE")));
+        return employees.register(
+                new EmployeeRequests.Create("초대검증", UUID.randomUUID() + "@example.test", LocalDate.now(clock), 2L, 1L,
+                        List.of("EMPLOYEE")));
     }
 
     private String linkToken(int index) {
@@ -98,18 +103,24 @@ class InvitationLifecycleTest extends MariaDbIntegrationTest {
     }
 
     private void changeEmail(long id, String email) throws Exception {
-        mvc.perform(patch("/api/v1/users/" + id).header("Authorization", "Bearer " + chiefToken)
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(Map.of("email", email))))
+        mvc.perform(
+                patch("/api/v1/users/" + id)
+                        .header("Authorization", "Bearer " + chiefToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(Map.of("email", email))))
                 .andExpect(status().isOk());
     }
 
     private org.springframework.test.web.servlet.ResultActions setup(String token) throws Exception {
-        return mvc.perform(post("/api/v1/auth/password/setup").contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(Map.of("setupToken", token, "newPassword", password))));
+        return mvc.perform(
+                post("/api/v1/auth/password/setup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(Map.of("setupToken", token, "newPassword", password))));
     }
 
     private void invalid(String token) throws Exception {
-        setup(token).andExpect(status().isUnauthorized())
+        setup(token)
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error.code").value("SETUP_TOKEN_INVALID"));
     }
 
@@ -151,9 +162,9 @@ class InvitationLifecycleTest extends MariaDbIntegrationTest {
         var employee = register();
         String oldEmail = sent.get(0).getTo()[0];
         changeEmail(employee.getId(), UUID.randomUUID() + "@example.test");
-        invitations.send(new EmployeeService
-                .InvitationRequested(employee.getId(), oldEmail,
-                new RegistrationResult(employee.getId(), employee.getLoginId())));
+        invitations.send(
+                new EmployeeService.InvitationRequested(employee.getId(), oldEmail,
+                        new RegistrationResult(employee.getId(), employee.getLoginId())));
         assertThat(sent).hasSize(1);
     }
 

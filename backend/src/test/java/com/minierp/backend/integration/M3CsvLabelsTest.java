@@ -45,11 +45,16 @@ class M3CsvLabelsTest extends AttendanceTestSupport {
             }
         }
         assertThat(row).isNotNull();
-        var bytes = getAs("/api/v1/attendance/monthly/export?month=" + month, chiefToken).andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsByteArray();
+        var bytes = getAs("/api/v1/attendance/monthly/export?month=" + month, chiefToken)
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsByteArray();
         assertThat(bytes).startsWith((byte) 0xEF, (byte) 0xBB, (byte) 0xBF);
         String line = Arrays.stream(new String(bytes, StandardCharsets.UTF_8).split("\r\n"))
-                .filter(v -> v.startsWith("\"" + marker + "\",")).findFirst().orElseThrow();
+                .filter(v -> v.startsWith("\"" + marker + "\","))
+                .findFirst()
+                .orElseThrow();
         String[] cells = line.split(",", -1);
         for (int i = 0; i < codes.length; i++) {
             int day = i == 11 ? 25 : i + 1;

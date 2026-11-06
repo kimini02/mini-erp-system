@@ -58,18 +58,24 @@ class SqlStoreDateTimeMariaDbTest extends MariaDbIntegrationTest {
         User user = User.create("시각 검증", login, login + "@example.test", "unused-encoded", "01", "사원");
         user.changeRole(UserRole.ADMIN);
         users.saveAndFlush(user);
-        LocalDateTime koreanTime = LocalDateTime.now(clock).withHour(21).withMinute(7).withSecond(29)
+        LocalDateTime koreanTime = LocalDateTime.now(clock)
+                .withHour(21)
+                .withMinute(7)
+                .withSecond(29)
                 .withNano(213456000);
-        jdbc.update("UPDATE users SET created_at=?, updated_at=NULL, hire_date=? WHERE id=?", koreanTime, koreanTime
-                .toLocalDate(), user.getId());
+        jdbc.update("UPDATE users SET created_at=?, updated_at=NULL, hire_date=? WHERE id=?", koreanTime,
+                koreanTime.toLocalDate(), user.getId());
         // Read text directly from MariaDB so the expected value cannot inherit a JDBC timezone conversion.
         String databaseTime = jdbc.queryForObject(
-                "SELECT DATE_FORMAT(created_at,'%Y-%m-%dT%H:%i:%s.%f') FROM users WHERE id=?", String.class, user
-                .getId());
+                "SELECT DATE_FORMAT(created_at,'%Y-%m-%dT%H:%i:%s.%f') FROM users WHERE id=?", String.class,
+                user.getId());
         assertThat(databaseTime).isEqualTo(koreanTime.toString());
         String token = tokens.generateAccessToken(user.getId().toString(), user.getTokenVersion());
         var response = mvc.perform(get("/api/v1/users").param("q", login).header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
         var content = mapper.readTree(response).path("data").path("content");
         assertThat(content.size()).isEqualTo(1);
         assertThat(content.get(0).path("createdAt").asText()).isEqualTo(databaseTime);

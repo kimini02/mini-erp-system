@@ -95,10 +95,13 @@ public final class SafetyNetRun {
         item.put("method", request.getMethod());
         item.put("path", SnapshotMask.path(request.getRequestURI()));
         Map<String, List<String>> query = new TreeMap<>();
-        request.getParameterMap().forEach((key, values) -> query
-                .put(key, Arrays.stream(values)
-                .map(value -> SnapshotMask.apply(test, "$request.query." + key, new ExactJson.Atom("string", value))
-                .text()).toList()));
+        request.getParameterMap()
+                .forEach((key, values) -> query.put(key,
+                        Arrays.stream(values)
+                                .map(value -> SnapshotMask.apply(test, "$request.query." + key,
+                                        new ExactJson.Atom("string", value))
+                                        .text())
+                                .toList()));
         item.put("query", query);
         item.put("status", response.getStatus());
         item.put("kind", kind);
@@ -137,21 +140,23 @@ public final class SafetyNetRun {
                 distinct.add(run.sql);
                 runs.add(orderedMap("sql", run.sql, "count", run.count));
             }
-            sql.put(test.getKey(), orderedMap("queryCount", entry.count, "comparedQueryCount", entry.count - entry
-                    .monitor, "diagnosticQueryCount", entry.monitor, "workerSql", entry.workerSql, "sql", runs));
+            sql.put(test.getKey(),
+                    orderedMap("queryCount", entry.count, "comparedQueryCount", entry.count - entry.monitor,
+                            "diagnosticQueryCount", entry.monitor, "workerSql", entry.workerSql, "sql", runs));
             responses.put(test.getKey(), entry.responses);
         }
         ObjectMapper mapper = new ObjectMapper();
         mapper.writerWithDefaultPrettyPrinter()
                 .writeValue(directory.resolve("sql.json").toFile(),
-                orderedMap("recordingPolicy", RecordingOrder.POLICY, "normalization", "whitespace collapse + lowercase",
-                "diagnosticExclusion", MONITOR, "distinctSql", distinct, "tests", sql));
+                        orderedMap("recordingPolicy", RecordingOrder.POLICY, "normalization",
+                                "whitespace collapse + lowercase", "diagnosticExclusion", MONITOR, "distinctSql",
+                                distinct, "tests", sql));
         mapper.writerWithDefaultPrettyPrinter()
                 .writeValue(directory.resolve("responses.json").toFile(),
-                orderedMap("recordingPolicy", RecordingOrder.POLICY, "tests", responses));
+                        orderedMap("recordingPolicy", RecordingOrder.POLICY, "tests", responses));
         Files.write(directory.resolve("masked-fields.txt"), MASKS, StandardCharsets.UTF_8);
-        Files.writeString(directory.resolve("classpath.txt"), System
-                .getProperty("surefire.test.class.path", System.getProperty("java.class.path")));
+        Files.writeString(directory.resolve("classpath.txt"),
+                System.getProperty("surefire.test.class.path", System.getProperty("java.class.path")));
         System.out.printf("REFACTORING_RECORDED frames=%d sql_shapes=%d responses=%d output=%s%n", ENTRIES.size(),
                 distinct.size(), ENTRIES.values().stream().mapToInt(entry -> entry.responses.size()).sum(), directory);
     }

@@ -32,8 +32,8 @@ class M4OverdueTest extends BoardTestSupport {
     }
 
     private long sent() {
-        return jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE user_id=? AND type='TASK_OVERDUE'", Long
-                .class, employee.getId());
+        return jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE user_id=? AND type='TASK_OVERDUE'",
+                Long.class, employee.getId());
     }
 
     @Test
@@ -46,8 +46,9 @@ class M4OverdueTest extends BoardTestSupport {
         String key = jdbc.queryForObject(
                 "SELECT CONCAT(p.project_key,'-',t.task_no,' ',t.task_title) FROM tasks t JOIN projects p ON p.id=t.project_id WHERE t.id=?",
                 String.class, task);
-        assertThat(jdbc.queryForObject("SELECT title FROM notifications WHERE user_id=?", String.class, employee
-                .getId())).isEqualTo(key);
+        assertThat(
+                jdbc.queryForObject("SELECT title FROM notifications WHERE user_id=?", String.class, employee.getId()))
+                .isEqualTo(key);
         jdbc.update("UPDATE tasks SET end_date=? WHERE id=?", date.minusDays(2), task);
         service.runToday();
         assertThat(alerts(task)).isEqualTo(2);
@@ -55,11 +56,13 @@ class M4OverdueTest extends BoardTestSupport {
         jdbc.update("UPDATE tasks SET task_status='DONE',end_date=? WHERE id=?", date.minusDays(3), task);
         service.runToday();
         assertThat(sent()).isEqualTo(2);
-        assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM batch_runs WHERE job_name='TASK_OVERDUE' AND status='SUCCESS'", Long.class))
+        assertThat(
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM batch_runs WHERE job_name='TASK_OVERDUE' AND status='SUCCESS'",
+                        Long.class))
                 .isEqualTo(4);
-        System.out
-                .println("M4_OVERDUE repeat_notifications=1 changed_deadline_total=2 done_additional=0 run_records=4");
+        System.out.println(
+                "M4_OVERDUE repeat_notifications=1 changed_deadline_total=2 done_additional=0 run_records=4");
     }
 
     @Test
@@ -71,7 +74,8 @@ class M4OverdueTest extends BoardTestSupport {
             service.runToday();
             var rows = trace.queries.stream()
                     .filter(q -> q.sql.startsWith("insert") && q.sql.contains("into task_due_alerts"))
-                    .map(q -> q.updates).toList();
+                    .map(q -> q.updates)
+                    .toList();
             assertThat(rows).containsExactly(1L, 0L);
         }
         assertThat(alerts(task)).isEqualTo(1);
@@ -126,8 +130,9 @@ class M4OverdueTest extends BoardTestSupport {
     void notificationFailureRollsBackClaimAndHistoryAndAllowsRetry() {
         long task = dueTask();
         doThrow(new IllegalStateException("test failure"))
-                .when((NotificationService) org.springframework.test.util.AopTestUtils
-                .getUltimateTargetObject(notifications))
+                .when(
+                        (NotificationService) org.springframework.test.util.AopTestUtils.getUltimateTargetObject(
+                                notifications))
                 .storeTaskOverdue(eq(employee.getId()), anyString(), anyString());
         assertThatThrownBy(() -> service.runToday()).isInstanceOf(IllegalStateException.class);
         assertThat(alerts(task)).isZero();
@@ -135,8 +140,10 @@ class M4OverdueTest extends BoardTestSupport {
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM task_histories WHERE task_id=?", Long.class, task))
                 .isZero();
         assertThat(jdbc.queryForObject("SELECT status FROM batch_runs", String.class)).isEqualTo("FAILED");
-        doCallRealMethod().when((NotificationService) org.springframework.test.util.AopTestUtils
-                .getUltimateTargetObject(notifications))
+        doCallRealMethod()
+                .when(
+                        (NotificationService) org.springframework.test.util.AopTestUtils.getUltimateTargetObject(
+                                notifications))
                 .storeTaskOverdue(eq(employee.getId()), anyString(), anyString());
         service.runToday();
         assertThat(sent()).isEqualTo(1);

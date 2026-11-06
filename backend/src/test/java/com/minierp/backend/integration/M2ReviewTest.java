@@ -13,14 +13,15 @@ class M2ReviewTest extends ApprovalApiTestSupport {
         jdbc.update(
                 "INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type,role_id) VALUES(1,2,'REFERENCE','ROLE',2)");
         jdbc.update("DELETE FROM user_roles WHERE role_id=2");
-        var preview = data(postAs("/api/v1/approval-documents/line-preview", employeeToken, Map
-                .of("formCode", "LEAVE")));
+        var preview = data(
+                postAs("/api/v1/approval-documents/line-preview", employeeToken, Map.of("formCode", "LEAVE")));
         assertThat(preview.path("rows").get(1).path("status").asText()).isEqualTo("SKIPPED");
         assertThat(preview.path("rows").get(1).path("note").asText()).isEqualTo("참조할 사람이 없어 건너뜁니다.");
         long id = draft("LEAVE", leaveBody("ANNUAL", start, start));
         assertThat(submit(id).path("references").size()).isZero();
-        assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM approval_lines WHERE document_id=? AND line_kind='REFERENCE'", Integer.class, id))
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM approval_lines WHERE document_id=? AND line_kind='REFERENCE'",
+                        Integer.class, id))
                 .isZero();
     }
 
@@ -29,8 +30,8 @@ class M2ReviewTest extends ApprovalApiTestSupport {
         jdbc.update(
                 "INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type,user_id) VALUES(1,2,'REFERENCE','USER',?),(1,3,'REFERENCE','USER',?)",
                 employee.getId(), chief.getId());
-        var preview = data(postAs("/api/v1/approval-documents/line-preview", employeeToken, Map
-                .of("formCode", "LEAVE")));
+        var preview = data(
+                postAs("/api/v1/approval-documents/line-preview", employeeToken, Map.of("formCode", "LEAVE")));
         assertThat(preview.path("rows").get(0).path("kind").asText()).isEqualTo("APPROVER");
         assertThat(preview.path("rows").get(0).path("result").path("department").asText()).isNotBlank();
         assertThat(preview.path("references").size()).isEqualTo(1);
@@ -44,8 +45,8 @@ class M2ReviewTest extends ApprovalApiTestSupport {
     @Test
     void fallbackExplainsSourceAndDestinationAndSkippedLineHasReason() throws Exception {
         jdbc.update("UPDATE departments SET head_user_id=NULL WHERE id=2");
-        var preview = data(postAs("/api/v1/approval-documents/line-preview", employeeToken, Map
-                .of("formCode", "LEAVE")));
+        var preview = data(
+                postAs("/api/v1/approval-documents/line-preview", employeeToken, Map.of("formCode", "LEAVE")));
         assertThat(preview.path("rows").get(0).path("note").asText()).contains("부서장이 비어 있어", "부서장에게 넘어갑니다.");
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", employee.getId());
         long id = draft("LEAVE", leaveBody("ANNUAL", start, start));
@@ -74,10 +75,14 @@ class M2ReviewTest extends ApprovalApiTestSupport {
             assertThat(count("leave_ledger", id)).isZero();
         }
         long id = submittedLeave();
-        assertThat(jdbc.queryForObject("SELECT memo FROM leave_ledger WHERE document_id=? AND entry_type='RESERVE'",
-                String.class, id)).startsWith("연차 ");
+        assertThat(
+                jdbc.queryForObject("SELECT memo FROM leave_ledger WHERE document_id=? AND entry_type='RESERVE'",
+                        String.class, id))
+                .startsWith("연차 ");
         data(postAs("/api/v1/approval-documents/" + id + "/reject", leaderToken, Map.of("comment", "검증")));
-        assertThat(jdbc.queryForObject("SELECT memo FROM leave_ledger WHERE document_id=? AND entry_type='RELEASE'",
-                String.class, id)).isEqualTo("예약 해제 (반려)");
+        assertThat(
+                jdbc.queryForObject("SELECT memo FROM leave_ledger WHERE document_id=? AND entry_type='RELEASE'",
+                        String.class, id))
+                .isEqualTo("예약 해제 (반려)");
     }
 }

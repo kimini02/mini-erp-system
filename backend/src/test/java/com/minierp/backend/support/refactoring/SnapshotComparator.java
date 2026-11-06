@@ -7,25 +7,24 @@ import java.util.*;
 public final class SnapshotComparator {
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final String M5_BOOT = "com.minierp.backend.integration.M5ProductionTest#<before-all>";
-    private static final Set<String> M5_ACCOUNT_CREATIONS = Set
-            .of("create user 'workflow_app'@'%' identified by ?",
+    private static final Set<String> M5_ACCOUNT_CREATIONS = Set.of("create user 'workflow_app'@'%' identified by ?",
             "create user 'workflow_migrator'@'%' identified by ?");
     // Non-test threads do not imply concurrent SQL. See R-01-review-hardening.md, second review.
     private static final Map<String, String> STRICT_ORDER = Map.of(
             "com.minierp.backend.integration.M5ProductionTest#separatedAccountsMigrateAndPerformRepresentativeWritesButRejectDdl()",
-            "Blocking HttpClient.send completes each request before the next starts",
+                    "Blocking HttpClient.send completes each request before the next starts",
             "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#1]",
-            "snapshot/assigned latches serialize worker SELECT, main assignment, worker MOVE",
+                    "snapshot/assigned latches serialize worker SELECT, main assignment, worker MOVE",
             "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#2]",
-            "snapshot/assigned latches serialize worker SELECT, main assignment, worker RETIRED",
+                    "snapshot/assigned latches serialize worker SELECT, main assignment, worker RETIRED",
             "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#3]",
-            "snapshot/assigned latches serialize worker SELECT, main assignment, worker ON_LEAVE",
+                    "snapshot/assigned latches serialize worker SELECT, main assignment, worker ON_LEAVE",
             "com.minierp.backend.integration.M1AcceptanceTest#concurrentInvitationLinksCannotOverwriteFirstPassword()",
-            "Only the valid invitation reaches SQL; revoked token fails at the in-memory owner lookup",
+                    "Only the valid invitation reaches SQL; revoked token fails at the in-memory owner lookup",
             "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentSubmissionsCannotSpendSameRemainingDays()",
-            "RecordingOrder v2 completes each submission before releasing the next",
+                    "RecordingOrder v2 completes each submission before releasing the next",
             "com.minierp.backend.integration.M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()",
-            "RecordingOrder v2 completes each move before releasing the next");
+                    "RecordingOrder v2 completes each move before releasing the next");
     private int differences;
     private int orderChanges;
     private final String selected;
@@ -40,8 +39,8 @@ public final class SnapshotComparator {
         SnapshotComparator comparison = new SnapshotComparator(args.length > 2 ? args[2] : "");
         comparison.sql(Path.of(args[0]), Path.of(args[1]));
         comparison.responses(Path.of(args[0]), Path.of(args[1]));
-        System.out.printf("REFACTORING_COMPARE differences=%d sqlOrderChanges=%d%n", comparison.differences, comparison
-                .orderChanges);
+        System.out.printf("REFACTORING_COMPARE differences=%d sqlOrderChanges=%d%n", comparison.differences,
+                comparison.orderChanges);
         if (comparison.differences > 0) {
             System.exit(1);
         }
@@ -103,20 +102,21 @@ public final class SnapshotComparator {
         JsonNode left = before.get(first);
         JsonNode right = before.get(second);
         Set<String> sql = new HashSet<>(List.of(left.path("sql").asText(), right.path("sql").asText()));
-        return sql.equals(M5_ACCOUNT_CREATIONS) && left.path("count").asLong() == 1 && right.path("count").asLong() == 1
-                && left.equals(after.get(second)) && right.equals(after.get(first));
+        return sql.equals(M5_ACCOUNT_CREATIONS) && left.path("count")
+                .asLong() == 1 && right.path("count")
+                .asLong() == 1 && left.equals(after.get(second)) && right.equals(after.get(first));
     }
 
     private void sql(Path baseline, Path candidate) throws Exception {
         JsonNode before = read(baseline, "sql.json");
         JsonNode after = read(candidate, "sql.json");
         if (!before.path("recordingPolicy").equals(after.path("recordingPolicy"))) {
-            difference("suite", "SQL", "recordingPolicy", before.path("recordingPolicy"), after
-                    .path("recordingPolicy"));
+            difference("suite", "SQL", "recordingPolicy", before.path("recordingPolicy"),
+                    after.path("recordingPolicy"));
         }
         if (!before.path("diagnosticExclusion").equals(after.path("diagnosticExclusion"))) {
-            difference("suite", "SQL", "diagnosticExclusion", before.path("diagnosticExclusion"), after
-                    .path("diagnosticExclusion"));
+            difference("suite", "SQL", "diagnosticExclusion", before.path("diagnosticExclusion"),
+                    after.path("diagnosticExclusion"));
         }
         if (selected.isEmpty()) {
             Set<String> expected = new TreeSet<>();
@@ -185,8 +185,7 @@ public final class SnapshotComparator {
                 if (strict == null) {
                     if (M5_BOOT.equals(test)) {
                         if (onlyM5AccountCreationSwap(a.path("sql"), b.path("sql"))) {
-                            allowed
-                                    =
+                            allowed =
                                     "Map.of swaps only workflow_app/workflow_migrator CREATE USER; all other runs identical";
                         }
                     } else if (a.path("workerSql").asBoolean(false)) {
@@ -194,13 +193,13 @@ public final class SnapshotComparator {
                     }
                 }
                 if (allowed == null) {
-                    difference(test, "SQL", "sql.order", strict != null ? "strict order: " + strict
-                            : "identical serial execution order", "changed");
+                    difference(test, "SQL", "sql.order",
+                            strict != null ? "strict order: " + strict : "identical serial execution order", "changed");
                 } else {
                     orderChanges++;
                     System.out.printf("SQL_ORDER_CHANGED test=%s reason=%s rawCount=%s->%s diagnosticCount=%s->%s%n",
-                            test, allowed, a.path("queryCount"), b.path("queryCount"), a.path("diagnosticQueryCount"), b
-                            .path("diagnosticQueryCount"));
+                            test, allowed, a.path("queryCount"), b.path("queryCount"), a.path("diagnosticQueryCount"),
+                            b.path("diagnosticQueryCount"));
                 }
             }
         }
@@ -212,9 +211,11 @@ public final class SnapshotComparator {
         for (JsonNode item : responses) {
             ordinal++;
             boolean concurrent = item.path("concurrent").asBoolean(false);
-            String key = item.path("method").asText() + " " + item.path("path").asText() + " " + item.path("query")
-                    + (concurrent ? " concurrent status=" + item.path("status") : " request=" + item
-                    .path("requestIndex").asInt(ordinal));
+            String key = item.path("method")
+                    .asText() + " " + item.path("path")
+                    .asText() + " " + item.path("query")
+                            + (concurrent ? " concurrent status=" + item.path("status") : " request=" + item.path(
+                            "requestIndex").asInt(ordinal));
             groups.computeIfAbsent(key, unused -> new ArrayList<>()).add(item);
         }
         // Main-thread requests keep their occurrence index, including status transitions.
@@ -278,8 +279,9 @@ public final class SnapshotComparator {
             keys.addAll((Set<String>) second.keySet());
             for (String key : keys) {
                 if (!first.containsKey(key) || !second.containsKey(key)) {
-                    difference(test, request, path + "." + key, first.containsKey(key) ? first.get(key)
-                            : "<MISSING_KEY>", second.containsKey(key) ? second.get(key) : "<MISSING_KEY>");
+                    difference(test, request, path + "." + key,
+                            first.containsKey(key) ? first.get(key) : "<MISSING_KEY>",
+                            second.containsKey(key) ? second.get(key) : "<MISSING_KEY>");
                 } else {
                     value(test, request, path + "." + key, first.get(key), second.get(key));
                 }

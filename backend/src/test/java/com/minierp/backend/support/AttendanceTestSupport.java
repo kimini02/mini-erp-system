@@ -65,16 +65,14 @@ public abstract class AttendanceTestSupport extends MariaDbIntegrationTest {
         jdbc.update("UPDATE users SET department_id=1 WHERE id=?", chief.getId());
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", leader.getId());
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=1", chief.getId());
-        jdbc
-                .update(
+        jdbc.update(
                 "UPDATE approval_forms SET allow_line_edit=(code='GENERAL'),skip_self=1,dedupe_approver=1,fallback_to_upper=1");
         jdbc.update("DELETE FROM approval_form_steps");
         jdbc.update(
                 "INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type) VALUES(1,1,'APPROVER','DEPT_HEAD'),(2,1,'APPROVER','DEPT_HEAD'),(3,1,'APPROVER','DEPT_HEAD'),(4,1,'APPROVER','DEPT_HEAD')");
-        jdbc.update("UPDATE users SET hire_date=? WHERE id IN (?,?,?,?)", date.minusYears(1), employee.getId(), leader
-                .getId(), chief.getId(), outsider.getId());
-        jdbc
-                .update(
+        jdbc.update("UPDATE users SET hire_date=? WHERE id IN (?,?,?,?)", date.minusYears(1), employee.getId(),
+                leader.getId(), chief.getId(), outsider.getId());
+        jdbc.update(
                 "UPDATE work_schedules SET start_time='09:00',end_time='18:00',late_grace_min=10 WHERE is_default=1");
         employeeToken = token(employee);
         leaderToken = token(leader);
@@ -98,8 +96,9 @@ public abstract class AttendanceTestSupport extends MariaDbIntegrationTest {
     }
 
     protected JsonNode data(ResultActions action) throws Exception {
-        return mapper.readTree(action.andExpect(status().is2xxSuccessful()).andReturn().getResponse()
-                .getContentAsString()).path("data");
+        return mapper.readTree(
+                action.andExpect(status().is2xxSuccessful()).andReturn().getResponse().getContentAsString())
+                .path("data");
     }
 
     protected ResultActions postAs(String url, String token, Object body) throws Exception {
@@ -119,8 +118,11 @@ public abstract class AttendanceTestSupport extends MariaDbIntegrationTest {
     }
 
     protected long draft(String form, Object body) throws Exception {
-        return data(postAs("/api/v1/approval-documents", employeeToken, Map
-                .of("formCode", form, "title", "검증 문서", "body", body))).path("id").asLong();
+        return data(
+                postAs("/api/v1/approval-documents", employeeToken,
+                        Map.of("formCode", form, "title", "검증 문서", "body", body)))
+                .path("id")
+                .asLong();
     }
 
     protected JsonNode submit(long id) throws Exception {

@@ -9,7 +9,8 @@ public final class SafetyNetExtension implements BeforeAllCallback, BeforeEachCa
         if (!SafetyNetRun.enabled()) {
             return;
         }
-        context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL)
+        context.getRoot()
+                .getStore(ExtensionContext.Namespace.GLOBAL)
                 .getOrComputeIfAbsent(SafetyNetExtension.class, key -> new RunResource());
         SafetyNetRun.begin(context.getRequiredTestClass().getName() + "#<before-all>");
     }

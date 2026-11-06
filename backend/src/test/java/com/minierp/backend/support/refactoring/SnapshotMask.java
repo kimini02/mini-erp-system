@@ -3,8 +3,8 @@ package com.minierp.backend.support.refactoring;
 import java.util.regex.Pattern;
 /** Rules are deliberately value/path specific; timestamps and ordinary numbers are never masked. */
 public final class SnapshotMask {
-    private static final Pattern UUID = Pattern
-            .compile("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+    private static final Pattern UUID = Pattern.compile(
+            "(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
     private static final Pattern PROJECT_KEY = Pattern.compile("(?<![A-Za-z0-9])[0-9A-F]{10}(?=-|$)");
     private static final Pattern API_PROJECT_KEY = Pattern.compile("(?<![A-Za-z0-9])X[0-9A-F]{8}(?=-|$)");
     private static final Pattern SHORT_LOGIN = Pattern.compile("\\b(chief|leader|employee|outside)[0-9a-f]{8}(?=@|$)");

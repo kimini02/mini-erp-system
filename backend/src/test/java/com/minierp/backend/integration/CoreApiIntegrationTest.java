@@ -53,8 +53,7 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
         chiefToken = login(chief);
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", leader.getId());
         jdbc.update("DELETE FROM approval_form_steps WHERE form_id=1");
-        jdbc
-                .update(
+        jdbc.update(
                 "INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type) VALUES(1,1,'APPROVER','DEPT_HEAD')");
         workDate = LocalDate.now(clock).with(next(DayOfWeek.WEDNESDAY));
         overtimeDate = workDate.with(next(DayOfWeek.SATURDAY));
@@ -71,8 +70,9 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
     }
 
     private JsonNode body(ResultActions action) throws Exception {
-        return mapper.readTree(action.andExpect(status().is2xxSuccessful()).andReturn().getResponse()
-                .getContentAsString()).path("data");
+        return mapper.readTree(
+                action.andExpect(status().is2xxSuccessful()).andReturn().getResponse().getContentAsString())
+                .path("data");
     }
 
     private ResultActions postAs(String path, String token, Object body) throws Exception {
@@ -84,19 +84,28 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
     }
 
     private String login(User user) throws Exception {
-        return body(mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(Map.of("id", user.getLoginId(), "password", password)))))
-                .path("accessToken").asText();
+        return body(
+                mvc.perform(
+                        post("/api/v1/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        mapper.writeValueAsString(Map.of("id", user.getLoginId(), "password",
+                                                password)))))
+                .path("accessToken")
+                .asText();
     }
 
     private long draft(String code, Object request) throws Exception {
-        return body(postAs("/api/v1/approval-documents", employeeToken, Map
-                .of("formCode", code, "title", "통합 검증", "body", request))).path("id").asLong();
+        return body(
+                postAs("/api/v1/approval-documents", employeeToken,
+                        Map.of("formCode", code, "title", "통합 검증", "body", request)))
+                .path("id")
+                .asLong();
     }
 
     private Map<String, Object> leaveBody(String type, LocalDate end) {
-        return Map.of("leaveType", type, "startDate", workDate.toString(), "endDate", end.toString(), "reason",
-                "병원 진료");
+        return Map.of("leaveType", type, "startDate", workDate.toString(), "endDate", end.toString(),
+                "reason", "병원 진료");
     }
 
     private long leave() throws Exception {
@@ -106,9 +115,9 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
     }
 
     private long overtime() throws Exception {
-        long id = draft("OVERTIME", Map
-                .of("overtimeDate", overtimeDate.toString(), "startTime", "09:00:00", "endTime", "12:00:00", "reason",
-                "주말 긴급 작업"));
+        long id = draft("OVERTIME",
+                Map.of("overtimeDate", overtimeDate.toString(), "startTime", "09:00:00", "endTime", "12:00:00",
+                        "reason", "주말 긴급 작업"));
         body(postAs("/api/v1/approval-documents/" + id + "/submit", employeeToken, null));
         return id;
     }
@@ -119,19 +128,24 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
 
     @Test
     void login_shouldIssueAccessToken() throws Exception {
-        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(Map.of("id", employee.getLoginId(), "password", password))))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.accessToken").isNotEmpty())
+        mvc.perform(
+                post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(Map.of("id", employee.getLoginId(), "password", password))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
-                .andExpect(r -> assertThat(LocalDateTime
-                .parse(mapper.readTree(r.getResponse().getContentAsString()).path("timestamp").asText()))
-                .isEqualTo(LocalDateTime.now(clock)));
+                .andExpect(r -> assertThat(
+                        LocalDateTime.parse(
+                                mapper.readTree(r.getResponse().getContentAsString()).path("timestamp").asText()))
+                        .isEqualTo(LocalDateTime.now(clock)));
     }
 
     @Test
     void getUsers_adminShouldSeeList() throws Exception {
-        mvc.perform(get("/api/v1/users").header("Authorization", "Bearer " + chiefToken)
-                .param("q", employee.getLoginId())).andExpect(status().isOk())
+        mvc.perform(
+                get("/api/v1/users").header("Authorization", "Bearer " + chiefToken).param("q", employee.getLoginId()))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].id").value(employee.getId()));
     }
 
@@ -156,18 +170,23 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
         approve(leave());
         approve(overtime());
         for (var expected : Map.of(workDate, "LEAVE", overtimeDate, "OVERTIME").entrySet()) {
-            mvc.perform(get("/api/v1/calendar/events").header("Authorization", "Bearer " + employeeToken)
-                    .param("year", "" + expected.getKey().getYear())
-                    .param("month", "" + expected.getKey().getMonthValue())).andExpect(status().isOk())
+            mvc.perform(
+                    get("/api/v1/calendar/events")
+                            .header("Authorization", "Bearer " + employeeToken)
+                            .param("year", "" + expected.getKey().getYear())
+                            .param("month", "" + expected.getKey().getMonthValue()))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data[*].type", hasItems(expected.getValue())));
         }
     }
 
     @Test
     void attendance_checkInAndCheckOut_shouldSucceed() throws Exception {
-        postAs("/api/v1/attendance/clock-in", employeeToken, null).andExpect(status().isOk())
+        postAs("/api/v1/attendance/clock-in", employeeToken, null)
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.clockInAt").exists());
-        postAs("/api/v1/attendance/clock-out", employeeToken, null).andExpect(status().isOk())
+        postAs("/api/v1/attendance/clock-out", employeeToken, null)
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.clockOutAt").exists());
     }
 
@@ -176,7 +195,8 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
         leave();
         long duplicate = draft("LEAVE", leaveBody("ANNUAL", workDate));
         postAs("/api/v1/approval-documents/" + duplicate + "/submit", employeeToken, null)
-                .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LEAVE_PERIOD_OVERLAP"));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code").value("LEAVE_PERIOD_OVERLAP"));
     }
 
     @Test
@@ -192,7 +212,10 @@ class CoreApiIntegrationTest extends MariaDbIntegrationTest {
     @Test
     void cancelLeave_shouldSucceedForOwnPendingRequest() throws Exception {
         long id = leave();
-        assertThat(body(postAs("/api/v1/approval-documents/" + id + "/withdraw", employeeToken, null)).path("status")
-                .asText()).isEqualTo("WITHDRAWN");
+        assertThat(
+                body(postAs("/api/v1/approval-documents/" + id + "/withdraw", employeeToken, null))
+                        .path("status")
+                        .asText())
+                .isEqualTo("WITHDRAWN");
     }
 }

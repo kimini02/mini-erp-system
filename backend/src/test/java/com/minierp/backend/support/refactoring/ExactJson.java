@@ -25,8 +25,10 @@ public final class ExactJson {
         }
     }
 
-    private static Object value(JsonParser parser, String path, BiFunction<String, Atom,
-            Atom> mask) throws IOException {
+    private static Object value(
+            JsonParser parser,
+            String path,
+            BiFunction<String, Atom, Atom> mask) throws IOException {
         if (parser.currentToken() == JsonToken.START_OBJECT) {
             Map<String, Object> object = new TreeMap<>();
             while (parser.nextToken() != JsonToken.END_OBJECT) {
@@ -49,8 +51,8 @@ public final class ExactJson {
         if (parser.currentToken() == null) {
             throw new IOException("Missing JSON value at " + path);
         }
-        String kind = parser.currentToken() == JsonToken.VALUE_STRING ? "string" : parser.currentToken().isNumeric()
-                ? "number" : "literal";
+        String kind = parser.currentToken() == JsonToken.VALUE_STRING ? "string" : parser.currentToken()
+                .isNumeric() ? "number" : "literal";
         return mask.apply(path, new Atom(kind, parser.getText()));
     }
 

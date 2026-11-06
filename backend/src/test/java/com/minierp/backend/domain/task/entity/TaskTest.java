@@ -15,8 +15,8 @@ class TaskTest {
     @DisplayName("업무 생성 시 상태가 없으면 TODO로 저장된다")
     void createTask_success() {
         Project project = createProject();
-        Task task = Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().minusDays(4), null, Priority
-                .HIGH, project);
+        Task task = Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().minusDays(4), null,
+                Priority.HIGH, project);
         assertThat(task.getTaskTitle()).isEqualTo("내 업무 화면 구현");
         assertThat(task.getTaskContent()).isEqualTo("React 페이지 및 API 연동");
         assertThat(task.getEndDate()).isEqualTo(TestClocks.today().minusDays(4));
@@ -49,10 +49,12 @@ class TaskTest {
     @Test
     @DisplayName("업무 생성 시 마감일이 프로젝트 종료일보다 늦으면 예외가 발생한다")
     void createTask_invalidPeriod_throwsException() {
-        assertThatThrownBy(() -> Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().plusDays(25), null,
-                Priority.HIGH, createProject())).isInstanceOf(BusinessException.class)
+        assertThatThrownBy(
+                () -> Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().plusDays(25), null,
+                        Priority.HIGH, createProject()))
+                .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> assertThat(((BusinessException) exception).getErrorCode())
-                .isEqualTo(ErrorCode.INVALID_TASK_PERIOD));
+                        .isEqualTo(ErrorCode.INVALID_TASK_PERIOD));
     }
 
     @Test
@@ -63,20 +65,21 @@ class TaskTest {
         assertThatThrownBy(() -> task.update("수정된 제목", "수정된 내용", TestClocks.today().plusDays(39), Priority.HIGH))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> assertThat(((BusinessException) exception).getErrorCode())
-                .isEqualTo(ErrorCode.INVALID_TASK_PERIOD));
+                        .isEqualTo(ErrorCode.INVALID_TASK_PERIOD));
     }
 
     @Test
     @DisplayName("완료되지 않았고 마감일이 지난 업무는 지연 상태로 판단한다")
     void isOverdue_whenTaskIsPastDueAndNotDone_returnsTrue() {
         Task task = Task.create("내 업무 화면 구현", "React 페이지 및 API 연동", TestClocks.today().minusDays(1), TaskStatus.DOING,
-                Priority.LOW, Project.create("지연 검증", "", TestClocks.today().minusDays(7), TestClocks.today()
-                .plusDays(7), Priority.MEDIUM));
+                Priority.LOW,
+                Project.create("지연 검증", "", TestClocks.today().minusDays(7), TestClocks.today().plusDays(7),
+                        Priority.MEDIUM));
         assertThat(task.isOverdue(TestClocks.today())).isTrue();
     }
 
     private Project createProject() {
-        return Project.create("ERP 재구축", "사내 업무 시스템 고도화", TestClocks.today().minusDays(6), TestClocks.today()
-                .plusDays(24), Priority.MEDIUM);
+        return Project.create("ERP 재구축", "사내 업무 시스템 고도화", TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24), Priority.MEDIUM);
     }
 }

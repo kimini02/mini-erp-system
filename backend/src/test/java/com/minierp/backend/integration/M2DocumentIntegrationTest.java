@@ -59,8 +59,7 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", leader.getId());
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=1", chief.getId());
         jdbc.update("DELETE FROM approval_form_steps WHERE form_id=1");
-        jdbc
-                .update(
+        jdbc.update(
                 "INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type) VALUES(1,1,'APPROVER','DEPT_HEAD')");
         jdbc.update(
                 "INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,memo,created_at) VALUES(?,?,'GRANT',10,'fixture',?)",
@@ -80,8 +79,9 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
     }
 
     private JsonNode result(ResultActions request) throws Exception {
-        return mapper.readTree(request.andExpect(status().is2xxSuccessful()).andReturn().getResponse()
-                .getContentAsString()).path("data");
+        return mapper.readTree(
+                request.andExpect(status().is2xxSuccessful()).andReturn().getResponse().getContentAsString())
+                .path("data");
     }
 
     private ResultActions postAs(String path, String token, Object body) throws Exception {
@@ -93,13 +93,17 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
     }
 
     private long draft(String form, Object body) throws Exception {
-        return result(postAs("/api/v1/approval-documents", employeeToken, Map
-                .of("formCode", form, "title", "M2 fixture", "body", body))).path("id").asLong();
+        return result(
+                postAs("/api/v1/approval-documents", employeeToken,
+                        Map.of("formCode", form, "title", "M2 fixture", "body", body)))
+                .path("id")
+                .asLong();
     }
 
     private long leave(LocalDate from, LocalDate to) throws Exception {
-        return draft("LEAVE", Map.of("leaveType", "ANNUAL", "startDate", from.toString(), "endDate", to.toString(),
-                "reason", "fixture"));
+        return draft("LEAVE",
+                Map.of("leaveType", "ANNUAL", "startDate", from.toString(), "endDate", to.toString(),
+                        "reason", "fixture"));
     }
 
     private long submittedLeave() throws Exception {
@@ -131,7 +135,8 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
     }
 
     private int approve(long id) throws Exception {
-        var response = postAs("/api/v1/approval-documents/" + id + "/approve", leaderToken, null).andReturn()
+        var response = postAs("/api/v1/approval-documents/" + id + "/approve", leaderToken, null)
+                .andReturn()
                 .getResponse();
         if (response.getStatus() == 409) {
             assertThat(mapper.readTree(response.getContentAsString()).path("error").path("code").asText())
@@ -151,7 +156,8 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         doAnswer(invocation -> {
             invocation.callRealMethod();
             throw new IllegalStateException("injected notification storage failure");
-        }).when((NotificationService) org.springframework.test.util.AopTestUtils.getUltimateTargetObject(notifications))
+        }).when(
+                (NotificationService) org.springframework.test.util.AopTestUtils.getUltimateTargetObject(notifications))
                 .store(eq(employee.getId()), eq(id), eq("APPROVED"), anyString());
         postAs("/api/v1/approval-documents/" + id + "/approve", leaderToken, null)
                 .andExpect(status().isInternalServerError());
@@ -175,26 +181,35 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
                 violations++;
             }
             assertThat(results).containsExactlyInAnyOrder(200, 409);
-            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE document_id=? AND entry_type='USE'",
-                    Integer.class, id)).isEqualTo(1);
-            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE document_id=? AND type='APPROVED'",
-                    Integer.class, id)).isEqualTo(1);
+            assertThat(
+                    jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE document_id=? AND entry_type='USE'",
+                            Integer.class, id))
+                    .isEqualTo(1);
+            assertThat(
+                    jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE document_id=? AND type='APPROVED'",
+                            Integer.class, id))
+                    .isEqualTo(1);
             assertThat(count("notifications", id)).isEqualTo(2);
             // one submit + one successful approval
-            assertThat(jdbc.queryForObject(
-                    "SELECT COUNT(*) FROM approval_histories WHERE document_id=? AND action='APPROVE'", Integer.class,
-                    id)).isEqualTo(1);
+            assertThat(
+                    jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM approval_histories WHERE document_id=? AND action='APPROVE'",
+                            Integer.class, id))
+                    .isEqualTo(1);
         }
-        System.out.println("M2_FIXED_APPROVAL_RACE trials=10 double_success=" + violations
-                + " losing_request_notifications=0");
+        System.out.println(
+                "M2_FIXED_APPROVAL_RACE trials=10 double_success=" + violations + " losing_request_notifications=0");
     }
 
     @Test
     void concurrentApprovalAndWithdrawalHaveOnlyOneWinner() throws Exception {
         long id = submittedLeave();
-        assertThat(race(() -> approve(id), ()
-                -> postAs("/api/v1/approval-documents/" + id + "/withdraw", employeeToken, null).andReturn()
-                .getResponse().getStatus())).containsExactlyInAnyOrder(200, 409);
+        assertThat(race(() -> approve(id),
+                () -> postAs("/api/v1/approval-documents/" + id + "/withdraw", employeeToken, null)
+                        .andReturn()
+                        .getResponse()
+                        .getStatus()))
+                .containsExactlyInAnyOrder(200, 409);
         assertThat(count("notifications", id)).isEqualTo(2);
     }
 
@@ -204,12 +219,18 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         long first = leave(start, start.plusDays(1));
         long second = leave(start.plusWeeks(1), start.plusWeeks(1).plusDays(1));
         var outcomes = race(() -> postAs("/api/v1/approval-documents/" + first + "/submit", employeeToken, null)
-                .andReturn().getResponse().getStatus(), ()
-                -> postAs("/api/v1/approval-documents/" + second + "/submit", employeeToken, null).andReturn()
-                .getResponse().getStatus());
+                .andReturn()
+                .getResponse()
+                .getStatus(),
+                () -> postAs("/api/v1/approval-documents/" + second + "/submit", employeeToken, null)
+                        .andReturn()
+                        .getResponse()
+                        .getStatus());
         assertThat(outcomes).containsExactlyInAnyOrder(200, 422);
-        assertThat(jdbc.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=?", BigDecimal.class, employee
-                .getId())).isEqualByComparingTo("0");
+        assertThat(
+                jdbc.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=?", BigDecimal.class,
+                        employee.getId()))
+                .isEqualByComparingTo("0");
     }
 
     @Test
@@ -223,8 +244,9 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", leader.getId());
         long id = submittedLeave();
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", employee.getId());
-        var detail = result(mvc.perform(get("/api/v1/approval-documents/" + id)
-                .header("Authorization", "Bearer " + employeeToken)));
+        var detail = result(
+                mvc.perform(get("/api/v1/approval-documents/" + id).header("Authorization", "Bearer "
+                        + employeeToken)));
         assertThat(detail.path("line").get(0).path("approver").path("id").asLong()).isEqualTo(leader.getId());
         assertThat(detail.path("submittedAt").asText())
                 .isEqualTo(LocalDateTime.now(clock).format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -233,11 +255,15 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
 
     @Test
     void overtimeUsesOneDateAndTimesAndApproves() throws Exception {
-        long id = draft("OVERTIME", Map
-                .of("overtimeDate", start.toString(), "startTime", "18:00", "endTime", "20:00", "reason", "fixture"));
+        long id = draft("OVERTIME",
+                Map.of("overtimeDate", start.toString(), "startTime", "18:00", "endTime", "20:00", "reason",
+                        "fixture"));
         result(postAs("/api/v1/approval-documents/" + id + "/submit", employeeToken, null));
-        assertThat(result(postAs("/api/v1/approval-documents/" + id + "/approve", leaderToken, null)).path("status")
-                .asText()).isEqualTo("APPROVED");
+        assertThat(
+                result(postAs("/api/v1/approval-documents/" + id + "/approve", leaderToken, null))
+                        .path("status")
+                        .asText())
+                .isEqualTo("APPROVED");
     }
 
     @Test
@@ -253,10 +279,15 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         var self = result(postAs("/api/v1/approval-documents/line-preview", employeeToken, preview));
         assertThat(self.path("rows").get(0).path("status").asText()).isEqualTo("SKIPPED");
         long auto = leave(start, start);
-        assertThat(result(postAs("/api/v1/approval-documents/" + auto + "/submit", employeeToken, null)).path("status")
-                .asText()).isEqualTo("APPROVED");
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE document_id=? AND entry_type='USE'",
-                Integer.class, auto)).isEqualTo(1);
+        assertThat(
+                result(postAs("/api/v1/approval-documents/" + auto + "/submit", employeeToken, null))
+                        .path("status")
+                        .asText())
+                .isEqualTo("APPROVED");
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE document_id=? AND entry_type='USE'",
+                        Integer.class, auto))
+                .isEqualTo(1);
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id IN (1,2)", leader.getId());
         jdbc.update(
                 "INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type) VALUES(1,2,'APPROVER','UPPER_DEPT_HEAD')");
@@ -273,9 +304,13 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
             var drafter = user("number", UserRole.USER, "01");
             String token = token(drafter);
             tokens.add(token);
-            ids.add(result(postAs("/api/v1/approval-documents", token, Map
-                    .of("formCode", "GENERAL", "title", "번호 검증", "body", Map.of("content", "fixture")))).path("id")
-                    .asLong());
+            ids.add(
+                    result(
+                            postAs("/api/v1/approval-documents", token,
+                                    Map.of("formCode", "GENERAL", "title", "번호 검증",
+                                            "body", Map.of("content", "fixture"))))
+                            .path("id")
+                            .asLong());
         }
         var gate = new CyclicBarrier(8);
         var pool = Executors.newFixedThreadPool(8);
@@ -285,8 +320,10 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
                 final int index = i;
                 futures.add(pool.submit(() -> {
                     gate.await(10, TimeUnit.SECONDS);
-                    return result(postAs("/api/v1/approval-documents/" + ids.get(index) + "/submit", tokens.get(index),
-                            null)).path("docNo").asText();
+                    return result(
+                            postAs("/api/v1/approval-documents/" + ids.get(index) + "/submit", tokens.get(index), null))
+                            .path("docNo")
+                            .asText();
                 }));
             }
             var numbers = new ArrayList<String>();
@@ -305,13 +342,21 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         long rejected = submittedLeave();
         postAs("/api/v1/approval-documents/" + rejected + "/reject", leaderToken, Map.of())
                 .andExpect(status().isBadRequest());
-        assertThat(result(postAs("/api/v1/approval-documents/" + rejected + "/reject", leaderToken, Map
-                .of("comment", "사유"))).path("status").asText()).isEqualTo("REJECTED");
+        assertThat(
+                result(
+                        postAs("/api/v1/approval-documents/" + rejected + "/reject", leaderToken,
+                                Map.of("comment", "사유")))
+                        .path("status")
+                        .asText())
+                .isEqualTo("REJECTED");
         long copied = result(postAs("/api/v1/approval-documents/" + rejected + "/resubmit", employeeToken, null))
-                .path("id").asLong();
+                .path("id")
+                .asLong();
         assertThat(copied).isNotEqualTo(rejected);
-        var copy = result(mvc.perform(get("/api/v1/approval-documents/" + copied)
-                .header("Authorization", "Bearer " + employeeToken)));
+        var copy = result(
+                mvc.perform(
+                        get("/api/v1/approval-documents/" + copied)
+                                .header("Authorization", "Bearer " + employeeToken)));
         assertThat(copy.path("resubmittedFromId").asLong()).isEqualTo(rejected);
         result(postAs("/api/v1/approval-documents/" + copied + "/submit", employeeToken, null));
         result(postAs("/api/v1/approval-documents/" + copied + "/withdraw", employeeToken, null));
@@ -319,8 +364,10 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         assertThat(approve(approved)).isEqualTo(200);
         long pending = leave(start.plusWeeks(1), start.plusWeeks(1));
         result(postAs("/api/v1/approval-documents/" + pending + "/submit", employeeToken, null));
-        assertThat(jdbc.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=?", BigDecimal.class, employee
-                .getId())).isEqualByComparingTo("8");
+        assertThat(
+                jdbc.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=?", BigDecimal.class,
+                        employee.getId()))
+                .isEqualByComparingTo("8");
         assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?", String.class, rejected))
                 .isEqualTo("REJECTED");
     }
@@ -351,8 +398,8 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         jdbc.update(
                 "INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type) VALUES(1,2,'APPROVER','UPPER_DEPT_HEAD')");
         jdbc.update("UPDATE departments SET head_user_id=NULL WHERE id=1");
-        var preview = result(postAs("/api/v1/approval-documents/line-preview", employeeToken, Map
-                .of("formCode", "LEAVE")));
+        var preview = result(
+                postAs("/api/v1/approval-documents/line-preview", employeeToken, Map.of("formCode", "LEAVE")));
         assertThat(preview.path("rows").size()).isEqualTo(2);
         assertThat(preview.path("rows").get(0).path("status").asText()).isEqualTo("OK");
         assertThat(preview.path("rows").get(1).path("order").asInt()).isEqualTo(2);

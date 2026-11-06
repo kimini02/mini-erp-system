@@ -53,15 +53,20 @@ class M1RegressionTest extends ApprovalApiTestSupport {
             getAs("/api/v1/dashboard/" + path, chiefToken).andExpect(status().isNotFound());
         }
         data(postAs("/api/v1/approval-documents/" + leave + "/approve", leaderToken, null));
-        long overtime = draft("OVERTIME", Map
-                .of("overtimeDate", start.toString(), "startTime", "09:00", "endTime", "12:00", "reason", "호환 검증"));
+        long overtime = draft("OVERTIME",
+                Map.of("overtimeDate", start.toString(), "startTime", "09:00", "endTime", "12:00", "reason", "호환 검증"));
         submit(overtime);
         data(postAs("/api/v1/approval-documents/" + overtime + "/approve", leaderToken, null));
-        var events = data(getAs("/api/v1/calendar/events?year=" + start.getYear() + "&month=" + start.getMonthValue(),
-                employeeToken));
+        var events = data(
+                getAs("/api/v1/calendar/events?year=" + start.getYear() + "&month=" + start.getMonthValue(),
+                        employeeToken));
         assertThat(events.size()).isEqualTo(2);
         assertThat(events.findValuesAsText("type")).containsExactlyInAnyOrder("LEAVE", "OVERTIME");
-        assertThat(data(getAs("/api/v1/calendar/events?year=" + start.getYear() + "&month=" + start.getMonthValue(),
-                outsideToken)).size()).isZero();
+        assertThat(
+                data(
+                        getAs("/api/v1/calendar/events?year=" + start.getYear() + "&month=" + start.getMonthValue(),
+                                outsideToken))
+                        .size())
+                .isZero();
     }
 }

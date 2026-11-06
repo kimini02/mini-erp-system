@@ -21,13 +21,19 @@ class M4BoardApiTest extends BoardTestSupport {
     @MockitoSpyBean
     NotificationService notifications;
     ResultActions patchAs(String url, String token, Object body) throws Exception {
-        return mvc.perform(patch(url).header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(body)));
+        return mvc.perform(
+                patch(url)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(body)));
     }
 
     ResultActions members(long p, String token, List<Long> ids) throws Exception {
-        return mvc.perform(put("/api/v1/projects/" + p + "/members").header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(Map.of("userIds", ids))));
+        return mvc.perform(
+                put("/api/v1/projects/" + p + "/members")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(Map.of("userIds", ids))));
     }
 
     ResultActions move(long id, String token, String state, Long after, int version) throws Exception {
@@ -40,8 +46,7 @@ class M4BoardApiTest extends BoardTestSupport {
     }
 
     long history(long p) {
-        return jdbc
-                .queryForObject(
+        return jdbc.queryForObject(
                 "SELECT COUNT(*) FROM task_histories h JOIN tasks t ON t.id=h.task_id WHERE t.project_id=?", Long.class,
                 p);
     }
@@ -58,13 +63,14 @@ class M4BoardApiTest extends BoardTestSupport {
     @Test
     void projectLifecycleKeepsKeyLeaderAndMemberContract() throws Exception {
         String key = "X" + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
-        var body = map("key", key, "title", "새 프로젝트", "startDate", date, "endDate", date.plusMonths(1), "leaderId",
-                employee.getId());
+        var body = map("key", key, "title", "새 프로젝트", "startDate", date, "endDate", date.plusMonths(1),
+                "leaderId", employee.getId());
         var created = data(postAs("/api/v1/projects", chiefToken, body).andExpect(status().isCreated()));
         long p = created.path("id").asLong();
         assertThat(created.path("status").asText()).isEqualTo("READY");
         assertThat(created.path("members").size()).isEqualTo(1);
-        postAs("/api/v1/projects", chiefToken, body).andExpect(status().isConflict())
+        postAs("/api/v1/projects", chiefToken, body)
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("PROJECT_KEY_DUPLICATE"));
         postAs("/api/v1/projects", employeeToken, body).andExpect(status().isForbidden());
         patchAs("/api/v1/projects/" + p, employeeToken, Map.of("key", "ZZ")).andExpect(status().isBadRequest());
@@ -98,12 +104,15 @@ class M4BoardApiTest extends BoardTestSupport {
         long other = project(chief, 1);
         getAs("/api/v1/projects/" + other, leaderToken).andExpect(status().isForbidden());
         move(taskIds(other).get(0), leaderToken, "DONE", null, 0).andExpect(status().isForbidden());
-        postAs("/api/v1/projects/" + p + "/tasks", outsideToken, Map
-                .of("title", "금지", "assigneeIds", List.of(employee.getId()))).andExpect(status().isForbidden());
+        postAs("/api/v1/projects/" + p + "/tasks", outsideToken,
+                Map.of("title", "금지", "assigneeIds", List.of(employee.getId())))
+                .andExpect(status().isForbidden());
         assertThat(history(p)).isZero();
         assertThat(jdbc.queryForObject("SELECT version FROM tasks WHERE id=?", Integer.class, task)).isZero();
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE user_id=?", Integer.class, employee
-                .getId())).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE user_id=?", Integer.class,
+                        employee.getId()))
+                .isZero();
         assertThat(jdbc.queryForObject("SELECT last_task_seq FROM projects WHERE id=?", Integer.class, p)).isEqualTo(1);
     }
 
@@ -139,10 +148,13 @@ class M4BoardApiTest extends BoardTestSupport {
     void memberRemovalAndAssignmentsAreValidatedAtomically() throws Exception {
         long p = project(leader, 0);
         long task = create(p, leaderToken, Map.of("title", "배정", "assigneeIds", List.of(employee.getId())));
-        members(p, leaderToken, List.of()).andExpect(status().isConflict())
+        members(p, leaderToken, List.of())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("PROJECT_MEMBER_HAS_TASKS"));
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM project_members WHERE project_id=? AND user_id=?", Integer
-                .class, p, employee.getId())).isEqualTo(1);
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM project_members WHERE project_id=? AND user_id=?",
+                        Integer.class, p, employee.getId()))
+                .isEqualTo(1);
         long previous = history(p);
         patchAs("/api/v1/tasks/" + task, leaderToken, Map.of("title", "롤백", "assigneeIds", List.of(chief.getId())))
                 .andExpect(status().isUnprocessableEntity())
@@ -152,32 +164,42 @@ class M4BoardApiTest extends BoardTestSupport {
         patchAs("/api/v1/tasks/" + task, leaderToken, Map.of("assigneeIds", List.of(outsider.getId())))
                 .andExpect(status().isOk());
         members(p, leaderToken, List.of(outsider.getId())).andExpect(status().isOk());
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM task_histories WHERE task_id=? AND action='UNASSIGNED'",
-                Integer.class, task)).isEqualTo(1);
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM task_histories WHERE task_id=? AND action='UNASSIGNED'",
+                        Integer.class, task))
+                .isEqualTo(1);
     }
 
     @Test
     void notificationFailureRollsBackTaskSequenceHistoryAndAssignment() throws Exception {
         long p = project(leader, 0);
         doThrow(new IllegalStateException("test notification failure"))
-                .when(org.springframework.test.util.AopTestUtils.< NotificationService
-                > getUltimateTargetObject(notifications))
+                .when(
+                        org.springframework.test.util.AopTestUtils.< NotificationService > getUltimateTargetObject(
+                                notifications))
                 .storeTask(eq(employee.getId()), anyLong(), anyString(), anyString());
-        postAs("/api/v1/projects/" + p + "/tasks", leaderToken, Map
-                .of("title", "실패", "assigneeIds", List.of(employee.getId())))
+        postAs("/api/v1/projects/" + p + "/tasks", leaderToken,
+                Map.of("title", "실패", "assigneeIds", List.of(employee.getId())))
                 .andExpect(status().isInternalServerError());
         assertThat(taskIds(p)).isEmpty();
         assertThat(history(p)).isZero();
         assertThat(jdbc.queryForObject("SELECT last_task_seq FROM projects WHERE id=?", Integer.class, p)).isZero();
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE user_id=?", Integer.class, employee
-                .getId())).isZero();
-        doCallRealMethod().when(org.springframework.test.util.AopTestUtils.< NotificationService
-                > getUltimateTargetObject(notifications)).storeTask(anyLong(), anyLong(), anyString(), anyString());
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE user_id=?", Integer.class,
+                        employee.getId()))
+                .isZero();
+        doCallRealMethod()
+                .when(
+                        org.springframework.test.util.AopTestUtils.< NotificationService > getUltimateTargetObject(
+                                notifications))
+                .storeTask(anyLong(), anyLong(), anyString(), anyString());
         long task = create(p, leaderToken, Map.of("title", "성공", "assigneeIds", List.of(employee.getId())));
         assertThat(jdbc.queryForObject("SELECT task_no FROM tasks WHERE id=?", Integer.class, task)).isEqualTo(1);
-        assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM notifications WHERE user_id=? AND type='TASK_ASSIGNED' AND document_id IS NULL",
-                Integer.class, employee.getId())).isEqualTo(1);
+        assertThat(
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM notifications WHERE user_id=? AND type='TASK_ASSIGNED' AND document_id IS NULL",
+                        Integer.class, employee.getId()))
+                .isEqualTo(1);
     }
 
     @Test
@@ -187,7 +209,8 @@ class M4BoardApiTest extends BoardTestSupport {
         move(ids.get(2), leaderToken, "DOING", ids.get(0), 0).andExpect(status().isOk());
         var order = jdbc.queryForList("SELECT id,position,version FROM tasks WHERE project_id=? ORDER BY position", p);
         long events = history(p);
-        move(ids.get(2), leaderToken, "TODO", null, 0).andExpect(status().isConflict())
+        move(ids.get(2), leaderToken, "TODO", null, 0)
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("TASK_VERSION_CONFLICT"))
                 .andExpect(jsonPath("$.error.details.currentTask.version").value(1));
         move(ids.get(2), leaderToken, "TODO", ids.get(0), 1).andExpect(status().isUnprocessableEntity());

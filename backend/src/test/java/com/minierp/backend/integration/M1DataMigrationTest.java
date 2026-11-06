@@ -18,10 +18,10 @@ class M1DataMigrationTest {
     @Container
     static final MariaDBContainer<?> DATABASE = new MariaDBContainer<>("mariadb:10.11");
     @Test
-    void migratesPopulatedM0DatabaseWithoutLosingLegacyValues(org.springframework.boot.test.system
-            .CapturedOutput output) {
-        var dataSource = new DriverManagerDataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE
-                .getPassword());
+    void migratesPopulatedM0DatabaseWithoutLosingLegacyValues(
+            org.springframework.boot.test.system.CapturedOutput output) {
+        var dataSource = new DriverManagerDataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(),
+                DATABASE.getPassword());
         String location = "classpath:db/migration";
         Flyway.configure().dataSource(dataSource).locations(location).target("1").load().migrate();
         var jdbc = new JdbcTemplate(dataSource);
@@ -40,16 +40,21 @@ class M1DataMigrationTest {
         var migration = Flyway.configure().dataSource(dataSource).locations(location).target("2").load();
         assertThat(migration.migrate().migrationsExecuted).isEqualTo(1);
         assertThat(migration.validateWithResult().validationSuccessful).isTrue();
-        assertThat(output.getAll()).contains("M1: migrated_inactive_to_retired=1")
+        assertThat(output.getAll())
+                .contains("M1: migrated_inactive_to_retired=1")
                 .contains("M1: migrated_unknown_department=1");
-        assertThat(jdbc.queryForObject(
-                "SELECT is_nullable FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='users' AND column_name='hire_date'",
-                String.class)).isEqualTo("YES");
+        assertThat(
+                jdbc.queryForObject(
+                        "SELECT is_nullable FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='users' AND column_name='hire_date'",
+                        String.class))
+                .isEqualTo("YES");
         assertThat(jdbc.queryForList("SELECT login_id FROM users ORDER BY id", String.class))
                 .containsExactly("legacy0", "legacy1", "2026012", "legacy3");
-        assertThat(jdbc
-                .queryForList("SELECT r.code FROM user_roles ur JOIN roles r ON r.id=ur.role_id ORDER BY ur.user_id",
-                String.class)).containsExactly("CHIEF", "LEADER", "EMPLOYEE", "EMPLOYEE");
+        assertThat(
+                jdbc.queryForList(
+                        "SELECT r.code FROM user_roles ur JOIN roles r ON r.id=ur.role_id ORDER BY ur.user_id",
+                        String.class))
+                .containsExactly("CHIEF", "LEADER", "EMPLOYEE", "EMPLOYEE");
         assertThat(jdbc.queryForList("SELECT department_id FROM users ORDER BY id", Long.class))
                 .containsExactly(2L, 3L, 4L, 1L);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM positions WHERE name='기존직급'", Integer.class)).isEqualTo(1);
@@ -63,10 +68,11 @@ class M1DataMigrationTest {
             assertThat((BigDecimal) row.get("remaining_annual_leave")).isEqualByComparingTo("13.5");
             assertThat((BigDecimal) row.get("total_annual_leave")).isEqualByComparingTo("15.5");
         }
-        assertThat(jdbc
-                .queryForList(
-                "SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='users'",
-                String.class)).doesNotContain("department_code", "position_name", "user_role", "is_active");
+        assertThat(
+                jdbc.queryForList(
+                        "SELECT column_name FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='users'",
+                        String.class))
+                .doesNotContain("department_code", "position_name", "user_role", "is_active");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM menus", Integer.class)).isEqualTo(11);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM departments WHERE parent_id=1", Integer.class))
                 .isEqualTo(3);

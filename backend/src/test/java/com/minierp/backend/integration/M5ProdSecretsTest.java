@@ -21,15 +21,21 @@ class M5ProdSecretsTest {
             properties.put(key, UUID.randomUUID().toString());
         }
         properties.remove(missing);
-        assertThatThrownBy(() -> new SpringApplicationBuilder(BackendApplication.class).web(WebApplicationType.NONE)
-                .profiles("prod").logStartupInfo(false)
-                .properties("spring.config.location=classpath:application-prod.properties", "logging.level.root=OFF",
-                "spring.main.banner-mode=off").initializers(c -> {
-            c.getEnvironment().getPropertySources().remove("systemEnvironment");
-            c.getEnvironment().getPropertySources().remove("systemProperties");
-            c.getEnvironment().getPropertySources()
-                    .addFirst(new MapPropertySource("missing-production-secret", properties));
-        }).run()).hasStackTraceContaining("Required production setting is missing: " + missing);
+        assertThatThrownBy(() -> new SpringApplicationBuilder(BackendApplication.class)
+                .web(WebApplicationType.NONE)
+                .profiles("prod")
+                .logStartupInfo(false)
+                .properties("spring.config.location=classpath:application-prod.properties",
+                        "logging.level.root=OFF", "spring.main.banner-mode=off")
+                .initializers(c -> {
+                    c.getEnvironment().getPropertySources().remove("systemEnvironment");
+                    c.getEnvironment().getPropertySources().remove("systemProperties");
+                    c.getEnvironment()
+                            .getPropertySources()
+                            .addFirst(new MapPropertySource("missing-production-secret", properties));
+                })
+                .run())
+                .hasStackTraceContaining("Required production setting is missing: " + missing);
         System.out.println("M5_PROD missing=" + missing + " startup=REJECTED before_external_connections");
     }
 }

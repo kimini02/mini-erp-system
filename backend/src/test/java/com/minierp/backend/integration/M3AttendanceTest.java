@@ -21,8 +21,7 @@ class M3AttendanceTest extends AttendanceTestSupport {
         at(date, LocalTime.of(9, 10, 59));
         var in = data(postAs("/api/v1/attendance/clock-in", employeeToken, null));
         assertThat(in.path("inResult").asText()).isEqualTo("ON_TIME");
-        jdbc
-                .update(
+        jdbc.update(
                 "UPDATE work_schedules SET start_time='10:00',end_time='19:00',late_grace_min=0 WHERE is_default=1");
         at(date, LocalTime.of(17, 59));
         var early = data(postAs("/api/v1/attendance/clock-out", employeeToken, null));
@@ -31,8 +30,7 @@ class M3AttendanceTest extends AttendanceTestSupport {
         at(date, LocalTime.of(18, 0));
         assertThat(data(postAs("/api/v1/attendance/clock-out", employeeToken, null)).path("outResult").asText())
                 .isEqualTo("ON_TIME");
-        jdbc
-                .update(
+        jdbc.update(
                 "UPDATE work_schedules SET start_time='09:00',end_time='18:00',late_grace_min=10 WHERE is_default=1");
         at(date, LocalTime.of(9, 11));
         assertThat(data(postAs("/api/v1/attendance/clock-in", outsideToken, null)).path("inResult").asText())
@@ -56,7 +54,8 @@ class M3AttendanceTest extends AttendanceTestSupport {
                 .isEqualTo("ON_TIME");
         at(date.plusDays(2), LocalTime.of(9, 0));
         approved("SICK", date.plusDays(2));
-        postAs("/api/v1/attendance/clock-in", employeeToken, null).andExpect(status().isConflict())
+        postAs("/api/v1/attendance/clock-in", employeeToken, null)
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("ATTENDANCE_ON_LEAVE"));
     }
 
@@ -90,11 +89,11 @@ class M3AttendanceTest extends AttendanceTestSupport {
                 };
                 var first = pool.submit(call);
                 var second = pool.submit(call);
-                var status = List.of(first.get(20, java.util.concurrent.TimeUnit.SECONDS), second
-                        .get(20, java.util.concurrent.TimeUnit.SECONDS));
+                var status = List.of(first.get(20, java.util.concurrent.TimeUnit.SECONDS),
+                        second.get(20, java.util.concurrent.TimeUnit.SECONDS));
                 assertThat(status).containsExactlyInAnyOrder(200, 409);
-                if (jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?", Integer.class, u.getId())
-                        != 1) {
+                if (jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?", Integer.class,
+                        u.getId()) != 1) {
                     violations++;
                 }
             }
@@ -118,8 +117,10 @@ class M3AttendanceTest extends AttendanceTestSupport {
                 "UPDATE role_permissions SET can_create=0 WHERE role_id=3 AND menu_id=(SELECT id FROM menus WHERE code='MY_ATTENDANCE')");
         try {
             postAs("/api/v1/attendance/clock-in", outsideToken, null).andExpect(status().isForbidden());
-            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?", Integer.class, outsider
-                    .getId())).isZero();
+            assertThat(
+                    jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?", Integer.class,
+                            outsider.getId()))
+                    .isZero();
         } finally {
             jdbc.update(
                     "UPDATE role_permissions SET can_create=1 WHERE role_id=3 AND menu_id=(SELECT id FROM menus WHERE code='MY_ATTENDANCE')");

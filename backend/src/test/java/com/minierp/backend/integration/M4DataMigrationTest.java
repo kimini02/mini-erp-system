@@ -31,17 +31,16 @@ class M4DataMigrationTest {
         for (int i = 1; i <= 5; i++) {
             db.update(
                     "INSERT INTO tasks(id,created_at,task_title,task_content,end_date,task_status,priority,project_id) VALUES(?,?,?,'내용',?,?,'MEDIUM',?)",
-                    i, today.atStartOfDay(), "업무 " + i, today.plusDays(1), i % 2 == 0 ? "DOING" : "TODO", i < 4 ? 1
-                    : 2);
+                    i, today.atStartOfDay(), "업무 " + i, today.plusDays(1), i % 2 == 0 ? "DOING" : "TODO",
+                    i < 4 ? 1 : 2);
         }
-        var old = db
-                .queryForList(
+        var old = db.queryForList(
                 "SELECT id,task_title,task_content,end_date,task_status,project_id FROM tasks ORDER BY id");
         var flyway = Flyway.configure().dataSource(source).load();
         assertThat(flyway.migrate().migrationsExecuted).isEqualTo(1);
-        assertThat(db
-                .queryForList(
-                "SELECT id,task_title,task_content,end_date,task_status,project_id FROM tasks ORDER BY id"))
+        assertThat(
+                db.queryForList(
+                        "SELECT id,task_title,task_content,end_date,task_status,project_id FROM tasks ORDER BY id"))
                 .isEqualTo(old);
         assertThat(db.queryForList("SELECT project_key FROM projects ORDER BY id", String.class))
                 .containsExactly("P1", "P2");

@@ -37,8 +37,11 @@ class M3BatchTest extends AttendanceTestSupport {
         long half = draft("LEAVE", leaveBody("HALF_PM", date, date));
         submit(half);
         data(postAs("/api/v1/approval-documents/" + half + "/approve", leaderToken, null));
-        long sick = data(postAs("/api/v1/approval-documents", leaderToken, Map
-                .of("formCode", "LEAVE", "title", "병가", "body", leaveBody("SICK", date, date)))).path("id").asLong();
+        long sick = data(
+                postAs("/api/v1/approval-documents", leaderToken,
+                        Map.of("formCode", "LEAVE", "title", "병가", "body", leaveBody("SICK", date, date))))
+                .path("id")
+                .asLong();
         data(postAs("/api/v1/approval-documents/" + sick + "/submit", leaderToken, null));
         at(date.plusDays(1), LocalTime.of(0, 10));
         batch.runPreviousDay();
@@ -60,21 +63,27 @@ class M3BatchTest extends AttendanceTestSupport {
         var future = user("입사 전", UserRole.USER);
         jdbc.update("UPDATE users SET hire_date=? WHERE id=?", date.plusDays(3), future.getId());
         var retired = user("퇴사", UserRole.USER);
-        jdbc.update("UPDATE users SET status='RETIRED',retired_date=DATE(created_at),hire_date=? WHERE id=?", date
-                .minusYears(1), retired.getId());
+        jdbc.update("UPDATE users SET status='RETIRED',retired_date=DATE(created_at),hire_date=? WHERE id=?",
+                date.minusYears(1), retired.getId());
         at(date.plusDays(1), LocalTime.of(0, 5));
         batch.runPreviousDay();
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id IN (?,?)", Integer.class, future
-                .getId(), retired.getId())).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id IN (?,?)", Integer.class,
+                        future.getId(), retired.getId()))
+                .isZero();
         at(date.plusWeeks(1), LocalTime.of(0, 10));
         batch.runPreviousDay();
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE work_date=?", Integer.class, date
-                .plusDays(6))).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE work_date=?", Integer.class,
+                        date.plusDays(6)))
+                .isZero();
         jdbc.update("INSERT INTO holidays(holiday_date,name,substitute) VALUES(?,'휴일',0)", date.plusDays(1));
         at(date.plusDays(2), LocalTime.of(0, 10));
         batch.runPreviousDay();
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE work_date=?", Integer.class, date
-                .plusDays(1))).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE work_date=?", Integer.class,
+                        date.plusDays(1)))
+                .isZero();
     }
 
     @Test
@@ -88,8 +97,10 @@ class M3BatchTest extends AttendanceTestSupport {
         assertThat(row(employee.getId(), date).get("absent")).isEqualTo(true);
         assertThat(row(outsider.getId(), date).get("absent")).isEqualTo(true);
         batch.run(date.minusDays(1));
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=? AND work_date=?", Integer
-                .class, outsider.getId(), date.minusDays(1))).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=? AND work_date=?", Integer.class,
+                        outsider.getId(), date.minusDays(1)))
+                .isZero();
     }
 
     @Test
@@ -99,10 +110,10 @@ class M3BatchTest extends AttendanceTestSupport {
         doAnswer(call -> {
             call.callRealMethod();
             throw new IllegalStateException("injected");
-        }).when(target).insert(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.eq(date), org
-                .mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers
-                .isNull(), org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.eq(true), org.mockito
-                .ArgumentMatchers.any());
+        }).when(target).insert(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.eq(date),
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.isNull(),
+                org.mockito.ArgumentMatchers.eq(true), org.mockito.ArgumentMatchers.any());
         assertThatThrownBy(() -> batch.runPreviousDay())
                 .isInstanceOf(org.springframework.dao.InvalidDataAccessApiUsageException.class)
                 .hasRootCauseInstanceOf(IllegalStateException.class);

@@ -12,8 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(JdbcProbe.Configuration.class)
 class M4HomeTest extends BoardTestSupport {
     private void assign(long task, long user) {
-        jdbc.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(?,?,?)", task, user, LocalDateTime
-                .now(clock));
+        jdbc.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(?,?,?)", task, user,
+                LocalDateTime.now(clock));
     }
 
     private long document(long drafter, long approver) {

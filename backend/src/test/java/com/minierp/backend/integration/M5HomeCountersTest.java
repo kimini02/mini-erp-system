@@ -14,8 +14,8 @@ class M5HomeCountersTest extends BoardTestSupport {
     @Autowired
     AttendanceStore attendance;
     private void assign(long task, long user) {
-        jdbc.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(?,?,?)", task, user, LocalDateTime
-                .now(clock));
+        jdbc.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(?,?,?)", task, user,
+                LocalDateTime.now(clock));
     }
 
     @Test
@@ -53,11 +53,15 @@ class M5HomeCountersTest extends BoardTestSupport {
             attendance.insert(employee.getId(), day, attendance.schedule(employee.getId()), "WORKDAY", null, null, true,
                     LocalDateTime.now(clock));
         }
-        org.junit.jupiter.api.Assertions
-                .assertAll(() -> assertThat(data(getAs("/api/v1/attendance/today", employeeToken))
-                .path("monthAbsentCount").asInt(-1)).as("attendance month").isEqualTo(1), ()
-                -> assertThat(data(getAs("/api/v1/home", employeeToken)).path("today").path("monthAbsentCount")
-                .asInt(-1)).as("home month").isEqualTo(1));
+        org.junit.jupiter.api.Assertions.assertAll(
+                () -> assertThat(
+                        data(getAs("/api/v1/attendance/today", employeeToken)).path("monthAbsentCount").asInt(-1))
+                        .as("attendance month")
+                        .isEqualTo(1),
+                () -> assertThat(
+                        data(getAs("/api/v1/home", employeeToken)).path("today").path("monthAbsentCount").asInt(-1))
+                        .as("home month")
+                        .isEqualTo(1));
     }
 
     @Test

@@ -10,12 +10,12 @@ import java.util.concurrent.*;
 */
 final class RecordingOrder implements Filter {
     static final String POLICY = "ordered-outcome-dependent-http-races-v2";
-    private static final Map<String, Integer> BATCHES = Map
-            .of("M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()", 2,
+    private static final Map<String, Integer> BATCHES = Map.of(
+            "M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()", 2,
             "M2DocumentIntegrationTest#concurrentSubmissionsCannotSpendSameRemainingDays()", 2,
             "M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()", 8,
             "M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
-            2, "M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()", 2,
+                    2, "M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()", 2,
             "M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()", 2);
     private final Map<String, List<Ticket>> waiting = new HashMap<>();
     private static final class Ticket {
@@ -37,8 +37,8 @@ final class RecordingOrder implements Filter {
             chain.doFilter(request, response);
             return;
         }
-        Ticket ticket = new Ticket(((HttpServletRequest) request).getMethod() + " " + ((HttpServletRequest) request)
-                .getRequestURI());
+        Ticket ticket = new Ticket(
+                ((HttpServletRequest) request).getMethod() + " " + ((HttpServletRequest) request).getRequestURI());
         synchronized (waiting) {
             List<Ticket> group = waiting.computeIfAbsent(test, key -> new ArrayList<>());
             group.add(ticket);

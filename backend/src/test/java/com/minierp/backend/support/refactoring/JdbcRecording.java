@@ -21,11 +21,18 @@ public final class JdbcRecording {
             for (String name : List.of("Statement", "BasePreparedStatement", "ClientPreparedStatement",
                     "ServerPreparedStatement", "BaseCallableStatement", "ProcedureStatement", "FunctionStatement")) {
                 Class<?> type = Class.forName("org.mariadb.jdbc." + name);
-                new ByteBuddy().redefine(type)
-                        .visit(Advice.to(ExecuteAdvice.class)
-                        .on(isPublic().and(not(isAbstract()))
-                        .and(namedOneOf("execute", "executeQuery", "executeUpdate", "executeLargeUpdate", "addBatch",
-                        "clearBatch", "executeBatch", "executeLargeBatch")))).make()
+                new ByteBuddy()
+                        .redefine(type)
+                        .visit(
+                                Advice.to(ExecuteAdvice.class)
+                                        .on(
+                                                isPublic()
+                                                        .and(not(isAbstract()))
+                                                        .and(
+                                                                namedOneOf("execute", "executeQuery", "executeUpdate",
+                                                                        "executeLargeUpdate", "addBatch", "clearBatch",
+                                                                        "executeBatch", "executeLargeBatch"))))
+                        .make()
                         .load(type.getClassLoader(), ClassReloadingStrategy.of(instrumentation));
             }
         } catch (Exception error) {
@@ -36,12 +43,9 @@ public final class JdbcRecording {
     public static class ExecuteAdvice {
         @Advice.OnMethodEnter
         public static void enter(
-                @Advice.This
-                Object statement,
-                @Advice.Origin("#m")
-                String method,
-                @Advice.AllArguments
-                Object[] args) throws Exception {
+                @Advice.This Object statement,
+                @Advice.Origin("#m") String method,
+                @Advice.AllArguments Object[] args) throws Exception {
             JdbcRecording.enter(statement, method, args);
         }
         @Advice.OnMethodExit(onThrowable = Throwable.class)

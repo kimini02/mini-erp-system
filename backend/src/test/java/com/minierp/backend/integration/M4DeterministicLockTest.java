@@ -44,15 +44,15 @@ class M4DeterministicLockTest extends BoardTestSupport {
         var firstVisible = new AtomicBoolean();
         var events = new CopyOnWriteArrayList<String>();
         var pool = Executors.newFixedThreadPool(2);
-        var monitor = new JdbcTemplate(new DriverManagerDataSource(DATABASE.getJdbcUrl(), "root", DATABASE
-                .getPassword()));
+        var monitor = new JdbcTemplate(
+                new DriverManagerDataSource(DATABASE.getJdbcUrl(), "root", DATABASE.getPassword()));
         String status = completing ? "DONE" : "DOING";
         Long after = completing ? null : ids.get(0);
         try {
             var a = pool.submit(() -> {
                 try (var hook = JdbcProbe.observe(new JdbcProbe.Observer() {
                     @Override
-                            public void after(Statement st, String sql) throws Exception {
+                    public void after(Statement st, String sql) throws Exception {
                         if (sql.startsWith("update tasks set task_status=")) {
                             events.add("A_TASK_UPDATED_UNCOMMITTED");
                             firstUpdated.countDown();
@@ -62,7 +62,8 @@ class M4DeterministicLockTest extends BoardTestSupport {
                     }
                 })) {
                     postAs("/api/v1/tasks/" + first + "/move", leaderToken,
-                            map("status", status, "afterTaskId", after, "version", 0)).andExpect(status().isOk());
+                            map("status", status, "afterTaskId", after, "version", 0))
+                            .andExpect(status().isOk());
                 }
                 return null;
             });
@@ -71,10 +72,10 @@ class M4DeterministicLockTest extends BoardTestSupport {
             var b = pool.submit(() -> {
                 try (var hook = JdbcProbe.observe(new JdbcProbe.Observer() {
                     @Override
-                            public void before(Statement st, String sql) throws Exception {
+                    public void before(Statement st, String sql) throws Exception {
                         if (sql.startsWith("select id from projects") && sql.contains("for update")) {
                             try (var q = st.getConnection().createStatement();
-                                    var rs = q.executeQuery("SELECT CONNECTION_ID()")) {
+                            var rs = q.executeQuery("SELECT CONNECTION_ID()")) {
                                 rs.next();
                                 secondConnection.set(rs.getLong(1));
                             }
@@ -84,7 +85,7 @@ class M4DeterministicLockTest extends BoardTestSupport {
                         }
                     }
                     @Override
-                            public void after(Statement st, String sql) throws Exception {
+                    public void after(Statement st, String sql) throws Exception {
                         if (sql.startsWith("select id from projects") && sql.contains("for update")) {
                             waitFinished.set(System.nanoTime());
                             try (var q = st.getConnection().prepareStatement("SELECT version FROM tasks WHERE id=?")) {
@@ -100,7 +101,8 @@ class M4DeterministicLockTest extends BoardTestSupport {
                     }
                 })) {
                     postAs("/api/v1/tasks/" + second + "/move", leaderToken,
-                            map("status", status, "afterTaskId", after, "version", 0)).andExpect(status().isOk());
+                            map("status", status, "afterTaskId", after, "version", 0))
+                            .andExpect(status().isOk());
                 }
                 return null;
             });

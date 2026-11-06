@@ -34,7 +34,8 @@ class InitialAdminInitializerTest {
         repository = mock(UserRepository.class);
         encoder = new BCryptPasswordEncoder();
         password = "Aa1!" + UUID.randomUUID().toString().substring(0, 12);
-        environment = new MockEnvironment().withProperty("INITIAL_ADMIN_LOGIN_ID", "initial-admin")
+        environment = new MockEnvironment()
+                .withProperty("INITIAL_ADMIN_LOGIN_ID", "initial-admin")
                 .withProperty("INITIAL_ADMIN_NAME", "초기 관리소장")
                 .withProperty("INITIAL_ADMIN_EMAIL", "initial-admin@example.test")
                 .withProperty("INITIAL_ADMIN_PASSWORD", password);
@@ -69,7 +70,8 @@ class InitialAdminInitializerTest {
     void missingOrBlankCredentialOnlyWarns(String key, String kind, CapturedOutput output) {
         if (kind.equals("missing")) {
             ((org.springframework.core.env.MapPropertySource) environment.getPropertySources().get("mockProperties"))
-                    .getSource().remove("INITIAL_ADMIN_" + key);
+                    .getSource()
+                    .remove("INITIAL_ADMIN_" + key);
         } else {
             environment.setProperty("INITIAL_ADMIN_" + key, "   ");
         }
@@ -108,8 +110,8 @@ class InitialAdminInitializerTest {
     void duplicateLoginIdFailsWithoutChangingExistingAccount() {
         when(repository.existsByLoginId("initial-admin")).thenReturn(true);
         assertThatThrownBy(() -> initializer.run(new DefaultApplicationArguments()))
-                .isInstanceOfSatisfying(BusinessException.class, ex -> assertThat(ex.getErrorCode())
-                .isEqualTo(ErrorCode.LOGIN_ID_ALREADY_EXISTS));
+                .isInstanceOfSatisfying(BusinessException.class,
+                        ex -> assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.LOGIN_ID_ALREADY_EXISTS));
         verify(repository, never()).saveAndFlush(any());
     }
 
@@ -117,8 +119,8 @@ class InitialAdminInitializerTest {
     void duplicateEmailFailsWithoutChangingExistingAccount() {
         when(repository.existsByUserEmail("initial-admin@example.test")).thenReturn(true);
         assertThatThrownBy(() -> initializer.run(new DefaultApplicationArguments()))
-                .isInstanceOfSatisfying(BusinessException.class, ex -> assertThat(ex.getErrorCode())
-                .isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS));
+                .isInstanceOfSatisfying(BusinessException.class,
+                        ex -> assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS));
         verify(repository, never()).saveAndFlush(any());
     }
 }

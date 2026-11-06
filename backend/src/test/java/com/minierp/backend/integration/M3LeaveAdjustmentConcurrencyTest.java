@@ -19,8 +19,8 @@ class M3LeaveAdjustmentConcurrencyTest extends AttendanceTestSupport {
     }
 
     BigDecimal balance(long id) {
-        return jdbc.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=? AND leave_year=?", BigDecimal
-                .class, id, date.getYear());
+        return jdbc.queryForObject("SELECT SUM(days) FROM leave_ledger WHERE user_id=? AND leave_year=?",
+                BigDecimal.class, id, date.getYear());
     }
 
     @Test
@@ -33,8 +33,8 @@ class M3LeaveAdjustmentConcurrencyTest extends AttendanceTestSupport {
                 long id = funded();
                 var gate = new CyclicBarrier(2);
                 Callable<Void> old = () -> {
-                    try (var c = DriverManager.getConnection(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE
-                            .getPassword())) {
+                    try (var c = DriverManager.getConnection(DATABASE.getJdbcUrl(), DATABASE.getUsername(),
+                            DATABASE.getPassword())) {
                         c.setAutoCommit(false);
                         c.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                         try (var read = c.prepareStatement(
@@ -73,9 +73,11 @@ class M3LeaveAdjustmentConcurrencyTest extends AttendanceTestSupport {
                 var gate = new CyclicBarrier(2);
                 Callable<Integer> safe = () -> {
                     gate.await(10, TimeUnit.SECONDS);
-                    return postAs("/api/v1/leave/admin/adjustments", chiefToken, Map
-                            .of("userId", id, "year", date.getYear(), "days", -6, "memo", "동시 조정")).andReturn()
-                            .getResponse().getStatus();
+                    return postAs("/api/v1/leave/admin/adjustments", chiefToken,
+                            Map.of("userId", id, "year", date.getYear(), "days", -6, "memo", "동시 조정"))
+                            .andReturn()
+                            .getResponse()
+                            .getStatus();
                 };
                 var a = pool.submit(safe);
                 var b = pool.submit(safe);
@@ -87,20 +89,27 @@ class M3LeaveAdjustmentConcurrencyTest extends AttendanceTestSupport {
             long id = funded();
             var actor = users.findById(id).orElseThrow();
             String actorToken = token(actor);
-            long doc = data(postAs("/api/v1/approval-documents", actorToken, Map
-                    .of("formCode", "LEAVE", "title", "동시 상신", "body", leaveBody("ANNUAL", start, start.plusDays(7)))))
-                    .path("id").asLong();
+            long doc = data(
+                    postAs("/api/v1/approval-documents", actorToken,
+                            Map.of("formCode", "LEAVE", "title", "동시 상신",
+                                    "body", leaveBody("ANNUAL", start, start.plusDays(7)))))
+                    .path("id")
+                    .asLong();
             var gate = new CyclicBarrier(2);
             var submit = pool.submit(() -> {
                 gate.await(10, TimeUnit.SECONDS);
-                return postAs("/api/v1/approval-documents/" + doc + "/submit", actorToken, null).andReturn()
-                        .getResponse().getStatus();
+                return postAs("/api/v1/approval-documents/" + doc + "/submit", actorToken, null)
+                        .andReturn()
+                        .getResponse()
+                        .getStatus();
             });
             var adjust = pool.submit(() -> {
                 gate.await(10, TimeUnit.SECONDS);
-                return postAs("/api/v1/leave/admin/adjustments", chiefToken, Map
-                        .of("userId", id, "year", date.getYear(), "days", -6, "memo", "상신 경합")).andReturn()
-                        .getResponse().getStatus();
+                return postAs("/api/v1/leave/admin/adjustments", chiefToken,
+                        Map.of("userId", id, "year", date.getYear(), "days", -6, "memo", "상신 경합"))
+                        .andReturn()
+                        .getResponse()
+                        .getStatus();
             });
             assertThat(List.of(submit.get(20, TimeUnit.SECONDS), adjust.get(20, TimeUnit.SECONDS)))
                     .containsExactlyInAnyOrder(200, 422);

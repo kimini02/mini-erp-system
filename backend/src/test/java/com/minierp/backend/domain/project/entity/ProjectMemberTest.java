@@ -12,8 +12,8 @@ class ProjectMemberTest {
     @Test
     @DisplayName("프로젝트 팀원 생성 시 프로젝트와 사용자가 연결된다")
     void createProjectMember_success() throws Exception {
-        Project project = Project.create("ERP 재구축", "사내 업무 시스템 고도화", TestClocks.today().minusDays(6), TestClocks.today()
-                .plusDays(24), Priority.MEDIUM);
+        Project project = Project.create("ERP 재구축", "사내 업무 시스템 고도화", TestClocks.today().minusDays(6),
+                TestClocks.today().plusDays(24), Priority.MEDIUM);
         User user = createUser();
         ProjectMember projectMember = ProjectMember.create(project, user);
         assertThat(projectMember.getProject()).isSameAs(project);

@@ -42,8 +42,7 @@ class M3LegacyAttendanceTest {
             db.update(
                     "INSERT INTO attendances(user_id,work_date,clock_in_time,att_status,created_at) VALUES(?,?,'08:50','NORMAL',?)",
                     user, fake, LocalDateTime.now(TestClocks.fixed()));
-            if (db
-                    .queryForObject(
+            if (db.queryForObject(
                     "SELECT COUNT(*) FROM attendances WHERE user_id=? AND work_date=? AND clock_in_time='08:50'",
                     Integer.class, user, fake) == 1) {
                 forged++;
@@ -63,8 +62,8 @@ class M3LegacyAttendanceTest {
                 long user = user();
                 var gate = new CyclicBarrier(2);
                 Callable<String> call = () -> {
-                    try (var c = DriverManager.getConnection(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE
-                            .getPassword())) {
+                    try (var c = DriverManager.getConnection(DATABASE.getJdbcUrl(), DATABASE.getUsername(),
+                            DATABASE.getPassword())) {
                         c.setAutoCommit(false);
                         c.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                         try (var read = c.prepareStatement(

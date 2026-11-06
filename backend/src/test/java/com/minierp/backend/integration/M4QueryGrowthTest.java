@@ -58,14 +58,16 @@ class M4QueryGrowthTest extends BoardTestSupport {
                 var reads = MariaDbPlan.analyze(named, sql, args);
                 double ms = MariaDbPlan.median(named, sql, args);
                 System.out.printf(Locale.ROOT,
-                        "M4_SUMMARY_BEFORE kind=%s scale=%d total_tasks=%d median_ms=%.3f reads=%s%n", kind, scale, 1000
-                        * scale, ms, reads);
-                String optimized = ProjectSummaryQuery
-                        .sql(kind.equals("list") ? where : "p.id=:id AND " + where, kind.equals("list"));
+                        "M4_SUMMARY_BEFORE kind=%s scale=%d total_tasks=%d median_ms=%.3f reads=%s%n", kind, scale,
+                        1000 * scale, ms, reads);
+                String optimized = ProjectSummaryQuery.sql(kind.equals("list") ? where : "p.id=:id AND " + where,
+                        kind.equals("list"));
                 var after = MariaDbPlan.analyze(named, optimized, args);
                 double afterMs = MariaDbPlan.median(named, optimized, args);
-                double taskReads = after.stream().filter(r -> r.table().equals("t"))
-                        .mapToDouble(MariaDbPlan.Read::total).sum();
+                double taskReads = after.stream()
+                        .filter(r -> r.table().equals("t"))
+                        .mapToDouble(MariaDbPlan.Read::total)
+                        .sum();
                 assertThat(taskReads).isLessThanOrEqualTo(kind.equals("list") ? 40 : 20);
                 assertThat(named.queryForList(optimized, args)).isEqualTo(named.queryForList(sql, args));
                 System.out.printf(Locale.ROOT,
@@ -92,15 +94,16 @@ class M4QueryGrowthTest extends BoardTestSupport {
         }
         try (var trace = JdbcProbe.start()) {
             var projects = db.rows("SELECT id,status,end_date FROM projects", Map.of());
-            projects.stream().sorted(Comparator
-                    .comparing((Map<String, Object> p) -> !"PROGRESS".equals(p.get("status")))
-                    .thenComparing(p -> (LocalDate) p.get("end_date"))).limit(5).forEach(p -> {
-                db.count("SELECT COUNT(*) FROM tasks WHERE project_id=:id", p);
-                db.count("SELECT COUNT(*) FROM tasks WHERE project_id=:id AND task_status='DONE'", p);
-            });
+            projects.stream()
+                    .sorted(Comparator.comparing((Map<String, Object> p) -> !"PROGRESS".equals(p.get("status")))
+                            .thenComparing(p -> (LocalDate) p.get("end_date")))
+                    .limit(5)
+                    .forEach(p -> {
+                        db.count("SELECT COUNT(*) FROM tasks WHERE project_id=:id", p);
+                        db.count("SELECT COUNT(*) FROM tasks WHERE project_id=:id AND task_status='DONE'", p);
+                    });
             assertThat(trace.queries).hasSize(11);
-            System.out
-                    .println(
+            System.out.println(
                     "M4_DASHBOARD_COMPARISON projects=5 task_count_queries=10 core_queries=11; actual_removed_HTTP_before=13");
         }
     }

@@ -11,8 +11,10 @@ public final class MariaDbPlan {
         }
     }
 
-    public static List<Read> analyze(NamedParameterJdbcTemplate jdbc, String sql, Map<String,
-            ?> args) throws Exception {
+    public static List<Read> analyze(
+            NamedParameterJdbcTemplate jdbc,
+            String sql,
+            Map<String, ?> args) throws Exception {
         String json = jdbc.queryForObject("ANALYZE FORMAT=JSON " + sql, args, String.class);
         List<Read> result = new ArrayList<>();
         walk(new ObjectMapper().readTree(json), result);
@@ -21,8 +23,9 @@ public final class MariaDbPlan {
 
     private static void walk(JsonNode node, List<Read> rows) {
         if (node.isObject() && node.has("table_name")) {
-            rows.add(new Read(node.path("table_name").asText(), node.path("key").asText("none"), node.path("r_loops")
-                    .asDouble(), node.path("r_rows").asDouble()));
+            rows.add(
+                    new Read(node.path("table_name").asText(), node.path("key").asText("none"),
+                            node.path("r_loops").asDouble(), node.path("r_rows").asDouble()));
         }
         if (node.isContainerNode()) {
             node.elements().forEachRemaining(n -> walk(n, rows));

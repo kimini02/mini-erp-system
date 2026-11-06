@@ -21,11 +21,13 @@ class M3BatchResponseTest extends AttendanceTestSupport {
         var response = data(postAs("/api/v1" + endpoint, chiefToken, Map.of("date", day.toString())));
         List<String> names = new ArrayList<>();
         response.fieldNames().forEachRemaining(names::add);
-        assertThat(names).containsExactlyInAnyOrder("id", "jobName", "targetDate", "status", "processedCount",
-                "skippedCount", "message", "startedAt", "finishedAt");
+        assertThat(names)
+                .containsExactlyInAnyOrder("id", "jobName", "targetDate", "status", "processedCount", "skippedCount",
+                        "message", "startedAt", "finishedAt");
         var stored = db.rows(
                 "SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
-                Map.of("id", response.path("id").asLong())).get(0);
+                Map.of("id", response.path("id").asLong()))
+                .get(0);
         assertThat(response).isEqualTo(mapper.readTree(mapper.writeValueAsString(stored)));
         assertThat(response.path("targetDate").asText()).isEqualTo(day.toString());
         assertThat(response.path("startedAt").asText()).isEqualTo(date + "T09:20:00");

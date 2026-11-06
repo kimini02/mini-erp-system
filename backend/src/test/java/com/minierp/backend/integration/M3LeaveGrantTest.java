@@ -33,10 +33,14 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
         assertThat(amount("M-" + id + "-1")).isEqualByComparingTo("1");
         at(hire.plusMonths(11), LocalTime.of(0, 30));
         grants.runToday();
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key LIKE 'M-%'",
-                Integer.class, id)).isEqualTo(11);
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key LIKE 'A-%'",
-                Integer.class, id)).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key LIKE 'M-%'",
+                        Integer.class, id))
+                .isEqualTo(11);
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key LIKE 'A-%'",
+                        Integer.class, id))
+                .isZero();
         System.out.println("M3_GRANT_MONTHLY january31_to=" + hire.plusMonths(1) + " monthly_count=11 days=11");
     }
 
@@ -55,12 +59,13 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
         }
         grants.run(LocalDate.of(year, 1, 1));
         assertThat(amount("A-" + ids.get(0))).isEqualByComparingTo("15");
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE grant_key=?", Integer.class, "Y-" + ids
-                .get(0) + "-" + year)).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE grant_key=?", Integer.class,
+                        "Y-" + ids.get(0) + "-" + year))
+                .isZero();
         assertThat(amount("Y-" + ids.get(1) + "-" + year)).isEqualByComparingTo("16");
         assertThat(amount("Y-" + ids.get(2) + "-" + year)).isEqualByComparingTo("25");
-        System.out
-                .println(
+        System.out.println(
                 "M3_GRANT_RULES july_anniversary=8 january_anniversary=15 tenure3=16 tenure21=25 duplicate_jan1=0");
     }
 
@@ -73,14 +78,18 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
         var run = LocalDate.of(date.getYear(), 1, 2);
         at(run, LocalTime.of(0, 30));
         data(postAs("/api/v1/leave/admin/grant-runs", chiefToken, Map.of("date", run.toString())));
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE grant_key=?", Integer.class, "M-" + id
-                + "-1")).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE grant_key=?", Integer.class,
+                        "M-" + id + "-1"))
+                .isZero();
         assertThat(amount("M-" + id + "-2")).isEqualByComparingTo("1");
         long count = jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger", Long.class);
         grants.runToday();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger", Long.class)).isEqualTo(count);
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id IN (?,?)", Integer.class,
-                missing, retired)).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id IN (?,?)", Integer.class, missing,
+                        retired))
+                .isZero();
         var runs = data(getAs("/api/v1/leave/admin/grant-runs", chiefToken));
         assertThat(runs.get(0).path("message").asText()).contains(Long.toString(missing));
         assertThat(runs.get(0).path("processedCount").asInt()).isZero();
@@ -102,8 +111,10 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
                 var b = pool.submit(call);
                 a.get(30, java.util.concurrent.TimeUnit.SECONDS);
                 b.get(30, java.util.concurrent.TimeUnit.SECONDS);
-                assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE grant_key=?", Integer.class,
-                        "M-" + id + "-1")).isEqualTo(1);
+                assertThat(
+                        jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE grant_key=?", Integer.class,
+                                "M-" + id + "-1"))
+                        .isEqualTo(1);
             }
         } finally {
             pool.shutdownNow();
@@ -121,11 +132,14 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
         postAs("/api/v1/leave/admin/adjustments", employeeToken, request).andExpect(status().isForbidden());
         var changed = data(postAs("/api/v1/leave/admin/adjustments", chiefToken, request));
         assertThat(changed.path("available").decimalValue()).isEqualByComparingTo("9.5");
-        assertThat(jdbc.queryForObject("SELECT created_by FROM leave_ledger WHERE id=?", Long.class, changed.path("id")
-                .asLong())).isEqualTo(chief.getId());
+        assertThat(
+                jdbc.queryForObject("SELECT created_by FROM leave_ledger WHERE id=?", Long.class,
+                        changed.path("id").asLong()))
+                .isEqualTo(chief.getId());
         long count = jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger", Long.class);
         request.put("days", -10);
-        postAs("/api/v1/leave/admin/adjustments", chiefToken, request).andExpect(status().isUnprocessableEntity())
+        postAs("/api/v1/leave/admin/adjustments", chiefToken, request)
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.error.code").value("LEAVE_BALANCE_NEGATIVE"));
         request.put("days", 0.3);
         postAs("/api/v1/leave/admin/adjustments", chiefToken, request).andExpect(status().isBadRequest());
@@ -149,8 +163,12 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
             assertThat(r.path("user").path("id").asLong()).isEqualTo(employee.getId());
             assertThat(r.path("adjusted").decimalValue()).isEqualByComparingTo("-0.5");
         });
-        assertThat(data(getAs("/api/v1/leave/admin/ledger/" + employee.getId() + "?year=" + date.getYear(), chiefToken))
-                .get(0).path("type").asText()).isEqualTo("ADJUST");
+        assertThat(
+                data(getAs("/api/v1/leave/admin/ledger/" + employee.getId() + "?year=" + date.getYear(), chiefToken))
+                        .get(0)
+                        .path("type")
+                        .asText())
+                .isEqualTo("ADJUST");
     }
 
     @Test
@@ -159,13 +177,14 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
         jdbc.update("UPDATE users SET hire_date=? WHERE id=?", date.minusYears(3), chief.getId());
         long id = hired(date.minusYears(3), "ACTIVE");
         long missing = hired(null, "ACTIVE");
-        jdbc
-                .update(
+        jdbc.update(
                 "INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,memo,created_at) VALUES(?,?,'GRANT',7,'v1 이관',?)",
                 id, date.getYear(), LocalDateTime.now(clock));
         grants.run(date);
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NOT NULL",
-                Integer.class, id)).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NOT NULL",
+                        Integer.class, id))
+                .isZero();
         var run = data(getAs("/api/v1/leave/admin/grant-runs", chiefToken)).get(0);
         assertThat(run.path("skippedCount").asInt()).isEqualTo(2);
         assertThat(run.path("message").asText()).contains("입사일 없음: [" + missing + "]", "옛 부여 있음: [" + id + "]");
@@ -173,11 +192,15 @@ class M3LeaveGrantTest extends AttendanceTestSupport {
         at(next, LocalTime.of(0, 30));
         grants.runToday();
         assertThat(amount("Y-" + id + "-" + next.getYear())).isEqualByComparingTo("16");
-        assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NULL AND days=7", Integer.class,
-                id)).isEqualTo(1);
-        assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NOT NULL AND leave_year<?", Integer
-                .class, id, next.getYear())).isZero();
+        assertThat(
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NULL AND days=7",
+                        Integer.class, id))
+                .isEqualTo(1);
+        assertThat(
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM leave_ledger WHERE user_id=? AND grant_key IS NOT NULL AND leave_year<?",
+                        Integer.class, id, next.getYear()))
+                .isZero();
     }
 }

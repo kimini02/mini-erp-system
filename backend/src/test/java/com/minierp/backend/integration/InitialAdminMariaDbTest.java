@@ -55,8 +55,8 @@ class InitialAdminMariaDbTest extends MariaDbIntegrationTest {
         assertThat(admin.getRemainingAnnualLeave()).isZero();
         assertThat(admin.getUserPw().equals(PASSWORD)).isFalse();
         assertThat(encoder.matches(PASSWORD, admin.getUserPw())).isTrue();
-        var login = objectMapper.convertValue(Map.of("id", "bootstrap-admin", "password", PASSWORD), LoginRequestDto
-                .class);
+        var login = objectMapper.convertValue(Map.of("id", "bootstrap-admin", "password", PASSWORD),
+                LoginRequestDto.class);
         assertThat(authService.login(login).getAccessToken()).isNotBlank();
         initializer.run(new DefaultApplicationArguments());
         var admins = repository.findByUserRole(UserRole.ADMIN);

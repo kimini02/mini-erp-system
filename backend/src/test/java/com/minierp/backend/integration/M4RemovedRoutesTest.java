@@ -22,15 +22,19 @@ class M4RemovedRoutesTest extends BoardTestSupport {
         for (String path : reads) {
             getAs("/api/v1" + path, chiefToken).andExpect(status().isNotFound());
         }
-        var writes = List.of("PUT /projects/" + project, "PATCH /projects/" + project + "/leader", "POST /projects/"
-                + project + "/members", "DELETE /projects/" + project + "/members/" + employee.getId(),
-                "PUT /projects/permissions/" + employee.getId(), "POST /tasks", "PUT /tasks/" + task, "PATCH /tasks/"
-                + task + "/status", "POST /tasks/" + task + "/assignments", "DELETE /tasks/" + task + "/assignments/"
-                + employee.getId());
+        var writes = List.of("PUT /projects/" + project, "PATCH /projects/" + project + "/leader",
+                "POST /projects/" + project + "/members",
+                "DELETE /projects/" + project + "/members/" + employee.getId(),
+                "PUT /projects/permissions/" + employee.getId(), "POST /tasks", "PUT /tasks/" + task,
+                "PATCH /tasks/" + task + "/status", "POST /tasks/" + task + "/assignments",
+                "DELETE /tasks/" + task + "/assignments/" + employee.getId());
         for (String route : writes) {
             String[] parts = route.split(" ");
-            mvc.perform(request(HttpMethod.valueOf(parts[0]), "/api/v1" + parts[1])
-                    .header("Authorization", "Bearer " + chiefToken).contentType("application/json").content("{}"))
+            mvc.perform(
+                    request(HttpMethod.valueOf(parts[0]), "/api/v1" + parts[1])
+                            .header("Authorization", "Bearer " + chiefToken)
+                            .contentType("application/json")
+                            .content("{}"))
                     .andExpect(status().isNotFound());
         }
         assertThat(jdbc.queryForObject("SELECT version FROM tasks WHERE id=?", Integer.class, task)).isZero();

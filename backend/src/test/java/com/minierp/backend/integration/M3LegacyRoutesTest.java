@@ -12,15 +12,20 @@ class M3LegacyRoutesTest extends AttendanceTestSupport {
         for (String suffix : new String[] {
             "/check-in", "/check-out"
         }) {
-            postAs("/api/v1/attendance" + suffix, employeeToken, java.util.Map
-                    .of("workDate", date.toString(), "clockInTime", "08:50", "clockOutTime", "18:00"))
+            postAs("/api/v1/attendance" + suffix, employeeToken,
+                    java.util.Map.of("workDate", date.toString(), "clockInTime", "08:50", "clockOutTime", "18:00"))
                     .andExpect(status().isNotFound());
         }
         getAs("/api/v1/attendance/summary", employeeToken).andExpect(status().isNotFound());
-        mvc.perform(put("/api/v1/attendance").header("Authorization", "Bearer " + employeeToken)
-                .contentType("application/json").content("{\"clockInTime\":\"08:50\"}"))
+        mvc.perform(
+                put("/api/v1/attendance")
+                        .header("Authorization", "Bearer " + employeeToken)
+                        .contentType("application/json")
+                        .content("{\"clockInTime\":\"08:50\"}"))
                 .andExpect(status().isNotFound());
-        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?", Integer.class, employee
-                .getId())).isZero();
+        assertThat(
+                jdbc.queryForObject("SELECT COUNT(*) FROM attendances WHERE user_id=?", Integer.class,
+                        employee.getId()))
+                .isZero();
     }
 }

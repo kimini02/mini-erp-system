@@ -47,13 +47,16 @@ public final class JdbcProbe {
             return queries.stream().filter(q -> q.sql.startsWith("update tasks")).mapToLong(q -> q.updates).sum();
         }
         public long rebalances() {
-            return queries.stream().filter(q -> q.sql.startsWith("update tasks") && q.sql.contains("row_number()"))
+            return queries.stream()
+                    .filter(q -> q.sql.startsWith("update tasks") && q.sql.contains("row_number()"))
                     .count();
         }
         public long projectReads() {
-            return queries.stream().filter(q -> (q.sql.startsWith("select") || q.sql.startsWith("with"))
-                    && (q.sql.contains("from projects") || q.sql.contains("from tasks") || q.sql
-                    .contains("from project_members"))).count();
+            return queries.stream()
+                    .filter(q -> (q.sql.startsWith("select") || q.sql.startsWith("with"))
+                            && (q.sql.contains("from projects") || q.sql.contains(
+                            "from tasks") || q.sql.contains("from project_members")))
+                    .count();
         }
         public void close() {
             CURRENT.remove();
@@ -98,14 +101,16 @@ public final class JdbcProbe {
         final Query[] current = {
             null
         };
-        Class<? extends Statement> type = statement instanceof PreparedStatement ? PreparedStatement.class : Statement
-                .class;
+        Class<? extends Statement> type = statement instanceof PreparedStatement ? PreparedStatement.class
+                : Statement.class;
         return proxy(type, statement, (p, m, a) -> {
             String name = m.getName();
             boolean executing = name.equals("execute") || name.equals("executeQuery") || name.equals("executeUpdate")
                     || name.equals("executeLargeUpdate");
             Observer observer = OBSERVER.get();
-            String observed = executing ? (sql != null ? sql : (String) a[0]).replaceAll("\\s+", " ").trim()
+            String observed = executing ? (sql != null ? sql : (String) a[0])
+                    .replaceAll("\\s+", " ")
+                    .trim()
                     .toLowerCase(Locale.ROOT) : null;
             if (executing && observer != null) {
                 observer.before(statement, observed);
