@@ -48,6 +48,7 @@ class SqlMeasure {
                     Deque<String> classes = new ArrayDeque<>();
                     String method = "<class>";
                     Set<String> notificationReceivers = new HashSet<>();
+                    Set<String> scopeFilterReceivers = new HashSet<>();
                     long line(Tree tree) { return unit.getLineMap().getLineNumber(positions.getStartPosition(unit, tree)); }
                     String owner() { return unit.getPackageName() + "." + String.join(".", classes); }
                     void output(String kind, Tree tree, String value) {
@@ -83,6 +84,8 @@ class SqlMeasure {
                     @Override public Void visitVariable(VariableTree tree, Void unused) {
                         if (tree.getType() != null && tree.getType().toString().endsWith("NotificationService"))
                             notificationReceivers.add(tree.getName().toString());
+                        if (tree.getType() != null && tree.getType().toString().matches("(?:.*\\.)?ScopeFilter"))
+                            scopeFilterReceivers.add(tree.getName().toString());
                         return super.visitVariable(tree, unused);
                     }
                     @Override public Void visitLiteral(LiteralTree tree, Void unused) {
@@ -96,7 +99,9 @@ class SqlMeasure {
                         String name = tree.getMethodSelect().toString();
                         String shortName = name.substring(name.lastIndexOf('.') + 1);
                         if (shortName.equals("valueOf") || shortName.startsWith("parse")) output("P", tree, name);
-                        if (Set.of("now", "actor", "scope").contains(shortName)
+                        boolean scopeAccessor = tree.getArguments().isEmpty()
+                                && scopeFilterReceivers.stream().anyMatch(n -> name.equals(n + ".scope"));
+                        if ((Set.of("now", "actor", "scope").contains(shortName) && !scopeAccessor)
                                 || name.startsWith("BodyValues.") || name.startsWith("LeaveGrantRules.")
                                 || name.startsWith("NotificationService.")
                                 || notificationReceivers.stream().anyMatch(n -> name.startsWith(n + "."))) output("V", tree, name);
