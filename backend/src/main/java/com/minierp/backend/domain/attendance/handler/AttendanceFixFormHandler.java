@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.*;
 import com.minierp.backend.domain.approval.handler.*;
 import com.minierp.backend.domain.approval.model.*;
 import com.minierp.backend.domain.attendance.service.*;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.attendance.repository.AttendanceFixStore;
 import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @Component
 @RequiredArgsConstructor
 public class AttendanceFixFormHandler implements ApprovalFormHandler {
-    private final SqlStore db;
+    private final AttendanceFixStore store;
     private final AttendanceStore records;
     private final Clock clock;
     private final ObjectMapper mapper;
@@ -55,16 +55,12 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
 
     public void saveBody(ApprovalDocument d, JsonNode b) {
         checkFormat(b);
-        db.update("""
-          INSERT INTO attendance_fix_requests(document_id,work_date,clock_in,clock_out,reason) VALUES(:id,:date,:in,:out,:reason)
-          ON DUPLICATE KEY UPDATE work_date=VALUES(work_date),clock_in=VALUES(clock_in),clock_out=VALUES(clock_out),reason=VALUES(reason),before_json=NULL
-          """, map("id", d.id(), "date", BodyValues.date(b, "workDate"), "in", optionalTime(b, "clockIn"), "out",
-                optionalTime(b, "clockOut"), "reason", b.path("reason").textValue()));
+        store.updateBody(d.id(), BodyValues.date(b, "workDate"), optionalTime(b, "clockIn"),
+                optionalTime(b, "clockOut"), b.path("reason").textValue());
     }
 
     private Map<String, Object> raw(long id) {
-        return db.one("SELECT * FROM attendance_fix_requests WHERE document_id=:id", map("id", id),
-                ErrorCode.DOCUMENT_NOT_FOUND);
+        return store.findBody(id);
     }
 
     private Object json(String text) {
@@ -86,13 +82,11 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
     }
 
     public void copyBody(long id, ApprovalDocument target) {
-        db.update(
-                "INSERT INTO attendance_fix_requests(document_id,work_date,clock_in,clock_out,reason) SELECT :target,work_date,clock_in,clock_out,reason FROM attendance_fix_requests WHERE document_id=:id",
-                map("id", id, "target", target.id()));
+        store.insertBodyCopy(id, target.id());
     }
 
     public void deleteBody(long id) {
-        db.update("DELETE FROM attendance_fix_requests WHERE document_id=:id", map("id", id));
+        store.deleteBody(id);
     }
 
     public void validate(ApprovalDraft draft) {
@@ -108,9 +102,7 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
             throw BodyValues.invalid();
         }
         mergedTimes(r, old, date);
-        if (db.count(
-                "SELECT COUNT(*) FROM attendance_fix_requests f JOIN approval_documents d ON d.id=f.document_id WHERE d.drafter_id=:user AND d.status='IN_PROGRESS' AND f.work_date=:date AND d.id<>:id",
-                map("user", d.drafterId(), "date", date, "id", d.id())) > 0) {
+        if (store.countOtherPending(d.drafterId(), date, d.id()) > 0) {
             throw new BusinessException(ErrorCode.ATTENDANCE_FIX_DUPLICATE);
         }
     }
@@ -129,11 +121,9 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         String code = AttendanceRules.code(date, LocalDate.now(clock),
                 old == null ? day.type() : (String) old.get("day_type"), verdict, in);
         try {
-            db.update("UPDATE attendance_fix_requests SET before_json=:json WHERE document_id=:id",
-                    map("id", d.id(),
-                            "json", mapper.writeValueAsString(
-                                    map("clockIn", in == null ? null : hh(in.toLocalTime()),
-                                            "clockOut", out == null ? null : hh(out.toLocalTime()), "code", code))));
+            store.updateBeforeSnapshot(d.id(), mapper.writeValueAsString(
+                    map("clockIn", in == null ? null : hh(in.toLocalTime()),
+                            "clockOut", out == null ? null : hh(out.toLocalTime()), "code", code)));
         } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
             throw new IllegalStateException(ex);
         }
@@ -172,9 +162,7 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         } else {
             records.judge(old, day.type(), in, out, true, now);
         }
-        db.update(
-                "UPDATE attendances SET absent=0,fix_document_id=:doc,judged_at=:now,updated_at=:now WHERE user_id=:user AND work_date=:date",
-                map("doc", d.id(), "user", d.drafterId(), "date", date, "now", now));
+        store.updateAttendanceFix(d.id(), d.drafterId(), date, now);
     }
 
     public void onRejected(ApprovalDocument d) {

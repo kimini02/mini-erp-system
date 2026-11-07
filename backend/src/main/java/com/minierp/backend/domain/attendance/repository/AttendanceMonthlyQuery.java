@@ -1,6 +1,9 @@
 package com.minierp.backend.domain.attendance.repository;
 
 import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.global.permission.ScopeFilter;
+import java.time.LocalDate;
+import static com.minierp.backend.global.persistence.SqlStore.map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.util.*;
@@ -36,7 +39,17 @@ public class AttendanceMonthlyQuery {
           """;
     }
 
-    public List<Map<String, Object>> fetch(String scope, Map<String, Object> args) {
-        return db.rows(sql(scope), args);
+    public List<Map<String, Object>> findMonthly(
+            LocalDate start,
+            LocalDate end,
+            ScopeFilter scope,
+            List<Long> departments) {
+        var args = map("start", start, "end", end);
+        String where = scope.predicate("u", args);
+        if (departments != null) {
+            args.put("departments", departments);
+            where += " AND u.department_id IN (:departments)";
+        }
+        return db.rows(sql(where), args);
     }
 }

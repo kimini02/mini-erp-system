@@ -1,7 +1,7 @@
 package com.minierp.backend.domain.attendance.service;
 
 import com.minierp.backend.domain.attendance.repository.AttendanceStore;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.attendance.repository.AttendanceQueries;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;
@@ -11,7 +11,7 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @Service
 @RequiredArgsConstructor
 public class AbsenceBatchWork {
-    private final SqlStore db;
+    private final AttendanceQueries queries;
     private final AttendanceStore records;
     private final Clock clock;
     public record Counts(int processed, int skipped) {
@@ -22,10 +22,7 @@ public class AbsenceBatchWork {
         int processed = 0;
         int skipped = 0;
         var now = LocalDateTime.now(clock);
-        var candidates = db.rows("""
-          SELECT u.id FROM users u WHERE (u.status<>'ON_LEAVE' AND COALESCE(u.hire_date,DATE(u.created_at))<=:date AND (u.status<>'RETIRED' OR u.retired_date>:date) AND u.user_pw IS NOT NULL)
-          OR EXISTS(SELECT 1 FROM attendances a WHERE a.user_id=u.id AND a.work_date=:date) ORDER BY u.id
-          """, map("date", date));
+        var candidates = queries.findAbsenceCandidates(date);
         for (var candidate : candidates) {
             long id = number(candidate, "id");
             var user = records.lockUser(id);

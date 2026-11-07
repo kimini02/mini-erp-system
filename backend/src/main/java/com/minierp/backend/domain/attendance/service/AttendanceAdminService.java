@@ -2,7 +2,7 @@ package com.minierp.backend.domain.attendance.service;
 
 import com.minierp.backend.domain.attendance.repository.AttendanceMonthlyQuery;
 import com.minierp.backend.domain.attendance.repository.AttendanceStore;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.attendance.repository.AttendanceQueries;
 import com.minierp.backend.global.permission.*;
 import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @Service
 @RequiredArgsConstructor
 public class AttendanceAdminService {
-    private final SqlStore db;
+    private final AttendanceQueries queries;
     private final PermissionAccess access;
     private final AttendanceMonthlyQuery query;
     private final AttendanceStore records;
@@ -26,18 +26,15 @@ public class AttendanceAdminService {
     private static final String MENU = "ATTENDANCE_MONTHLY";
     public static final List<String> LEGEND = List.of("ON_TIME", "LATE", "EARLY", "MISSING", "ABSENT", "LEAVE",
             "HALF_AM", "HALF_PM", "HOLIDAY", "HOLIDAY_WORK", "NONE", "FUTURE");
-    private String scope(Long department, boolean sub, Map<String, Object> args) {
+    private ScopeFilter scope(Long department) {
         var scope = access.scope(MENU);
-        String where = scope.predicate("u", args);
         if (department != null) {
             if (!scope.includesDepartment(department)) {
                 throw new BusinessException(ErrorCode.ACCESS_DENIED);
             }
-            db.one("SELECT id FROM departments WHERE id=:id", map("id", department), ErrorCode.DEPARTMENT_NOT_FOUND);
-            args.put("departments", sub ? access.descendants(department) : List.of(department));
-            where += " AND u.department_id IN (:departments)";
+            queries.findDepartment(department);
         }
-        return where;
+        return scope;
     }
 
     private boolean employed(LocalDate date, LocalDate start, LocalDate retired) {
@@ -47,8 +44,11 @@ public class AttendanceAdminService {
     @Transactional(readOnly = true)
     public Map<String, Object> monthly(String value, Long department, boolean sub) {
         var month = AttendanceService.month(value);
-        var args = map("start", month.atDay(1), "end", month.atEndOfMonth());
-        var data = query.fetch(scope(department, sub, args), args);
+        var start = month.atDay(1);
+        var end = month.atEndOfMonth();
+        var scope = scope(department);
+        var departments = department == null ? null : sub ? access.descendants(department) : List.of(department);
+        var data = query.findMonthly(start, end, scope, departments);
         var today = LocalDate.now(clock);
         Map<LocalDate, Map<String, Object>> days = new TreeMap<>();
         Map<Long, Map<String, Object>> rows = new LinkedHashMap<>();
@@ -107,9 +107,7 @@ public class AttendanceAdminService {
     @Transactional(readOnly = true)
     public Map<String, Object> detail(long user, LocalDate date) {
         access.assertUserInScope(MENU, user);
-        var u = db.one(
-                "SELECT id,user_name,COALESCE(hire_date,DATE(created_at)) AS employed_from,retired_date FROM users WHERE id=:id",
-                map("id", user), ErrorCode.USER_NOT_FOUND);
+        var u = queries.findUser(user);
         var row = records.record(user, date, false);
         var day = records.day(user, date);
         var s = row == null ? records.schedule(user) : records.snapshot(row);

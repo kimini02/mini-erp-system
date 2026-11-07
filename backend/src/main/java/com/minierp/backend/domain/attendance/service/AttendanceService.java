@@ -1,7 +1,7 @@
 package com.minierp.backend.domain.attendance.service;
 
 import com.minierp.backend.domain.attendance.repository.AttendanceStore;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.attendance.repository.AttendanceQueries;
 import com.minierp.backend.global.exception.*;
 import com.minierp.backend.global.permission.PermissionAccess;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
 public class AttendanceService {
     private final AttendanceStore records;
-    private final SqlStore db;
+    private final AttendanceQueries queries;
     private final Clock clock;
     private final PermissionAccess access;
     public Map<String, Object> today() {
@@ -28,9 +28,7 @@ public class AttendanceService {
         var context = records.day(user, date);
         var schedule = row == null ? records.schedule(user) : records.snapshot(row);
         var month = YearMonth.now(clock);
-        var counts = db.one(
-                "SELECT COALESCE(SUM(in_result='LATE'),0) AS late_count,COALESCE(SUM(absent=1),0) AS absent_count FROM attendances WHERE user_id=:user AND work_date BETWEEN :begin AND :end",
-                map("user", user, "begin", month.atDay(1), "end", month.atEndOfMonth()), ErrorCode.USER_NOT_FOUND);
+        var counts = queries.findMonthlyCounts(user, month.atDay(1), month.atEndOfMonth());
         return render(date, row, context, schedule, number(counts, "late_count"), number(counts, "absent_count"));
     }
 
@@ -132,9 +130,7 @@ public class AttendanceService {
         long user = access.actor();
         var today = LocalDate.now(clock);
         Map<LocalDate, Map<String, Object>> found = new HashMap<>();
-        db.rows(
-                "SELECT a.*,d.doc_no AS fix_doc_no FROM attendances a LEFT JOIN approval_documents d ON d.id=a.fix_document_id WHERE a.user_id=:user AND a.work_date BETWEEN :start AND :end",
-                map("user", user, "start", month.atDay(1), "end", month.atEndOfMonth()))
+        queries.findMyMonth(user, month.atDay(1), month.atEndOfMonth())
                 .forEach(r -> found.put((LocalDate) r.get("work_date"), r));
         List<Map<String, Object>> days = new ArrayList<>();
         int work = 0;
