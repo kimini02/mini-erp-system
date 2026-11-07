@@ -535,3 +535,474 @@ protected_fragment_splits (1개):
 ternary_layout (1개):
 
 - `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:35`
+
+## 묶음 1 리뷰 보완과 측정 도구 보완 (2026-11-07)
+
+위 묶음 1 본문은 당시 기록으로 유지한다. 아래는 이번 리뷰 지시와 추가 타입 판단에 따른 보완이며, 다음 절의 묶음 2와 함께 검증했다.
+
+- WorkingDays·RoleService·EmployeeService의 짧아진 문장 3곳을 한 줄로 합쳤다. EmployeeQueries의 텍스트 블록 닫는 줄은 원래 `""", map("ids", ids));`로 복구했다.
+- SQL 없는 정렬 보조 메서드는 `sortColumns()`·`orderBy(...)`로 바꾸고, WorkingDays·UserLookupService에서 쓰지 않는 import를 제거했다.
+- 사용자 추가 지시에 따라 `OrgStore.lockHeadCandidate(Long id)`와 `updateWorkSchedule(..., Long id)`로 맞췄다. 원래 map/put 값 `Long`을 기본형으로 받던 두 곳의 불필요한 언박싱을 제거했다.
+- `RoleStore.insertPermission`의 scope는 String을 유지한다. `map(Object...)` 문맥에서 조건식 전체가 Object로 귀속되더라도 두 분기의 독립적인 타입은 String이다. 최신 사용자 결정에 따라 참조 넓히기는 차이가 아니며, 박싱·언박싱·기본형 변환만 금지한다. 도구는 javac로 분기 타입과 참조 상위 타입을 얻는다. 서로 다른 분기 타입의 일반적인 LUB/제네릭 추론까지 대신 계산하지 않으며, 간접 흐름은 수동 목록으로 남긴다.
+
+### 재실행 가능한 도구
+
+- `R-03-sql-location-measure.py`: javac 문자열 값·트랜잭션 목록 검사 유지. ScopeFilter 허용, 정확한 파일/값 오탐 목록, repository의 now/actor/scope/BodyValues/NotificationService/LeaveGrantRules 호출 검사를 추가했다. 인스턴스 NotificationService 호출도 선언된 수신자 타입으로 확인한다.
+- `R-03-format-units.py`: 명세에 열거한 문장·선언·제어문/메서드 머리·어노테이션의 javac 범위를 읽는다. 텍스트 블록·주석·블록 람다·switch 식·익명 클래스가 포함된 단위를 제외한다. 줄바꿈을 공백 하나로 줄이고 지정된 구두점 공백을 정리해 120자 이내인 여러 줄 단위를 센다. 원본은 수정하지 않는다.
+- `R-03-call-site-check.py`: 별도 컴파일 사본과 기록의 classpath.txt를 사용해 원래 SQL 실행을 새 repository 호출과 연결한다. SQL 식 원문 토큰열, map 키/순서, 호출 인자 식/순서, standalone 타입을 대조한다. map 뒤 put의 값과 새 쿼리 매개변수도 검사한다. 짝이 없거나 간접 map/helper 흐름인 항목은 자동 통과로 위장하지 않고 manualReview/putManualReview로 출력한다. 클래스패스의 프로젝트 classes는 각 사본의 것으로 치환하며 실제 DB에 접속하지 않는다.
+
+| 대조 | 결과 |
+|---|---|
+| 한 줄 단위: 952a64e | main 1(ProjectMember:14–15), test 0 |
+| 한 줄 단위: c6270e0 | main 4, test 0 |
+| 한 줄 단위: 준비 보완 뒤 | main 1(동일 기존 예외), test 0 |
+| 952a64e → c6270e0, standalone/put 보완 도구 | 호출 87, 자동 84, 간접 흐름 3; 타입 차이 2, exit 1 |
+| 952a64e → 준비 보완 후보 | 호출 87, 자동 84, 간접 흐름 3; 차이 0, exit 0 |
+| put 3곳 | scheduleId Long→Long, q String→String, departmentId Long→Long; 타입 차이 0 |
+
+간접 흐름 3곳은 OrgService.departmentSchedule INSERT/UPDATE와 UserLookupService.lookup이다. 근무시간 값은 startTime→endTime→lateGraceMin→이름 순서로 서비스에서 보관하고, repository map도 start/end/grace/name 순서이며 UPDATE에만 Long id를 마지막에 붙인다. 검색은 원래 이스케이프 식을 서비스의 prefix에 그대로 보관한다. size→q→dept 바인딩 순서와 검색/부서 조건 조립 순서를 유지했다. put q의 식→지역 변수 흐름은 도구에도 수동 확인으로 표시된다.
+
+준비 보완 최종 검증: `a843fc1`, UTC 기록 ON 231/0/0/0, 588.24초, `REFACTORING_COMPARE differences=0 sqlOrderChanges=10`. (a) 문자열 집합 동일, (b) 트랜잭션 83개 동일, (c) repository 금지 호출 0, (f) 기존 예외만 남았다. OFF는 지시대로 생략했다.
+타입 두 곳을 반영하기 전 예비 실행은 231/0/0/0·694.27초·differences=0이었지만 최종 후보의 완료 증거로 쓰지 않았다. 위 최종 실행으로 대체했다.
+
+## 묶음 2 — approval · leave · overtime
+
+### 범위와 커밋
+
+develop `26226bd2392ff8b6840e10a3fa918b16286679c5`의 7차 머리말과 merge-tree를 확인하고 병합했다. 실제 병합 차이는 backend/md/17-refactoring.md 한 파일이다. 모든 누적 비교는 952a64e 기준이다. 묶음 3·4단계, 다른 기능/버그 수정, develop으로의 병합·푸시는 하지 않는다.
+
+| 커밋 | 묶음 | 변경 파일 수 | 검증 |
+|---|---|---:|---|
+| `f9aa570` | 명세 17 7차 병합 | 1 | archive test-compile exit 0, 9.43초 |
+| `a843fc1` | 묶음 1 보완 | 6 | 정적 검사 + ON 전체 |
+| `649f4e9` | 읽기 전용 도구 3개 | 3 | archive test-compile exit 0, 9.87초 |
+| `e839fce` | approval SQL 이동 | 10 | 적용 전 (a)(b)(c)(g), 적용 뒤 (d)(e)(f) |
+| `03ed3a0` | leave SQL 이동 | 6 | 적용 전 (a)(b)(c)(g), 적용 뒤 (d)(e)(f) |
+| `7a28fcc` | overtime SQL 이동 | 2 | 적용 전 (a)(b)(c)(g), 적용 뒤 (d)(e)(f) |
+| 이 문서 커밋 | 묶음 2 기록 | 1 | Java 변경 없음, archive test-compile exit 0 |
+
+### (a)·(b)·(c)·(g) 적용 전 검사
+
+각 도메인 후보를 작업 트리 밖에 만들고 컴파일했다. 정적 검사를 통과한 후보의 파일 SHA-256을 보관한 뒤 동일한 파일만 적용했다. 각 커밋 직전에 staged tree와 파일 해시를 다시 확인했다.
+
+| 후보 | 문자열 출현/서로 다른 값 | 새 값/사라진 값 | 트랜잭션 | repository 위반 | 호출 자동/수동 | 자동 차이 |
+|---|---|---|---:|---:|---|---:|
+| approval 누적 | 3216/1314 | 0/0 | 83개 동일 | 0 | 40/1 | 0 |
+| leave 누적 | 3216/1314 | 0/0 | 83개 동일 | 0 | 20/4 | 0 |
+| overtime 누적 | 3216/1314 | 0/0 | 83개 동일 | 0 | 5/0 | 0 |
+
+추가 중복 제거는 DocumentService의 동일한 DELETE approval_lines 3곳→DocumentStore.deleteLines 1곳뿐이다. SQL 리터럴 2개와 `id` map 키 2개 출현 감소를 묶음 1 허용 목록에 더했다. 전체 감소는 23개이며 그 외 감소/증가가 없다. 도메인을 넘는 동일 SQL은 합치지 않았다.
+
+누적 감소 허용 목록(아래 JSON을 임시 파일로 저장해 --allow-count-reductions에 전달):
+
+```json
+{
+  "id": 10,
+  "SELECT COUNT(*) FROM users WHERE department_id=:id": 1,
+  "SELECT COUNT(*) FROM departments WHERE parent_id=:id": 1,
+  "SELECT id FROM departments WHERE id=:id": 2,
+  "SELECT * FROM users WHERE id=:id FOR UPDATE": 2,
+  "SELECT COUNT(*) FROM user_roles WHERE role_id=:id": 1,
+  "DELETE FROM role_permissions WHERE role_id=:id": 1,
+  "SELECT COUNT(*) FROM user_roles WHERE user_id=:user AND role_id=:role": 1,
+  "user": 1,
+  "role": 1,
+  "DELETE FROM approval_lines WHERE document_id=:id": 2
+}
+```
+
+### 수동 확인과 설계 판단
+
+- FormService.steps: 첫 반복의 역할/사원 조회·검증과 값 계산을 유지한다. 기존 map의 form(Object), kind(String), type(String), role(Long), user(Long), order(int)를 같은 순서로 private StepValues에 보관한다. 양식 잠금→기존 단계 삭제→등록 반복 순서는 그대로다. INSERT 메서드에서 form/kind/type/role/user/order 순서로 map을 만든다. 응답 record는 도입하지 않았다. 쿼리 클래스에서 검증까지 실행하는 대안은 예외 변환과 트랜잭션 경계가 달라져 제외했다.
+- LeaveAdminService.balances COUNT/목록(수동 2곳): year 검증→offset 계산→access.scope SQL→부서 범위 검사→검색어 가공→COUNT→목록 순서다. ScopeFilter.predicate는 DB 호출 없이 map에 범위 값만 넣으므로 부서 검사 뒤로 옮겨도 조회 결과·거절 시 부작용이 같다(사용자 지시). 두 쿼리는 같은 balanceParameters/balanceWhere helper로 year(int), size(int), offset(long), scopeUser/scopeDepartments, dept(Long), q(String) 순서의 동일 map/WHERE를 각각 만든다. 결과의 stream 가공은 서비스에 남겼다. ScopeFilter 또는 권한 SQL 자체를 복제하는 대안은 공통 권한 규칙이 갈라져 제외했다.
+- LeaveAdminService.adjust(수동 1곳): 사용자 FOR UPDATE→id(long)/year(int) 잔여 조회→잔여 검증→INSERT 순서를 유지한다. INSERT 값에서 access.actor()를 먼저, now(clock)를 다음에 평가한다. 잔여 BigDecimal 변환과 계산은 서비스에 남겼다.
+- LeaveQueryService.ledger(수동 1곳): 유형 검증→year 계산→비어 있지 않은 type만 전달한다. repository의 map은 user(long)/year(int), 필요할 때 type(String) 순서이며 기존 WHERE 조각과 window-query 식 원문이 같다. 잔여 계산 뒤 type 필터가 붙는 구조도 유지했다.
+- DocumentService: 클래스 수준 1개와 메서드 수준 7개의 트랜잭션 선언 및 격리 수준을 유지한다. transition의 completed 시각과 now 시각은 원래처럼 두 번 읽는다. nextNumber INSERT→FOR UPDATE→UPDATE 및 lockDocument의 잠금 조회→raw 재조회도 유지한다. NotificationService.store는 서비스 안에 있어 기존 주입 실패 500/전체 롤백 테스트 경로를 유지한다.
+- ApprovalLineResolver: 쿼리 클래스에 @Transactional을 두지 않는다. APPROVER_NOT_FOUND를 잡아 참조 건너뛰기/ResolutionFailure로 바꾸는 기존 처리에서 rollback-only 부작용을 추가하지 않는다. person의 텍스트 블록 닫는 줄과 public 메서드 시그니처를 유지했다.
+- LeaveGrantWork: now는 반복 전에 한 번, 사원별 잠금→옛 부여 COUNT→기존 grant_key 조회→INSERT 순서를 유지한다. grant_key stream과 LeaveGrantRules 계산은 서비스에 남겼다.
+- General/Leave/Overtime handler의 BodyValues.date/time/optionalLong, JsonNode 읽기, Clock 값과 비교·형변환·응답 가공은 기존 handler에서 평가한다. public raw/available/days 및 ApprovalFormHandler 인터페이스는 그대로다.
+
+repository에 옮긴 SQL 조립 코드는 LeaveQueries.balanceParameters/balanceWhere 두 private helper와 findLedger의 선택적 type 필터다. 그 외는 파라미터 map 구성·SQL 실행·반환이며 throw, @Transactional, valueOf/parse, 값 계산/NotificationService 호출은 없다. GeneralRequestStore와 OvertimeStore는 요청한 소규모 읽기/쓰기 통합 클래스로 만들었다. 기존 JPA repository는 수정하지 않았다.
+
+### (d)·(e) 전체 UTC 실행
+
+Java 17·MariaDB 10.11 Testcontainers, 기록 ON/OFF를 도메인별로 순차 실행했다. 시간은 Maven 전체 wall time(컴파일·컨테이너 시작 포함)이며 성능 개선 지표가 아니다. 테스트와 기대값, 기준선·기록 정책·비교 규칙은 수정하지 않았다.
+
+| 묶음 | ON 성공/실패/오류/건너뜀 | ON 초 | 기록 비교 | OFF 성공/실패/오류/건너뜀 | OFF 초 | OFF 기록 출력 |
+|---|---|---:|---|---|---:|---:|
+| approval | 231/0/0/0 | 689.23 | REFACTORING_COMPARE differences=0 sqlOrderChanges=12 | 231/0/0/0 | 544.89 | 0 |
+| leave | 231/0/0/0 | 549.63 | REFACTORING_COMPARE differences=0 sqlOrderChanges=12 | 231/0/0/0 | 655.82 | 0 |
+| overtime | 231/0/0/0 | 917.52 | REFACTORING_COMPARE differences=0 sqlOrderChanges=12 | 231/0/0/0 | 687.45 | 0 |
+
+묶음 2의 기록 ON 세 실행에서 오류 응답 각각 191건도 별도 다중집합 대조 결과 차이 0이며 masked-fields.txt도 동일했다. 로그/기록은 `backend/target/r03-group2-validation/{preparation-final,approval,leave,overtime}/`에 보존했다. target을 clean하지 않았다.
+
+순서 경고 합집합은 13개, 기존 13개 밖의 프레임은 0개다. 아래 프레임은 기존 worker-thread 경쟁 또는 M5 CREATE USER 순서 예외이며 비교 규칙을 넓히지 않았다.
+
+| 프레임 | 경고 발생 실행 |
+|---|---|
+| `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()` | 준비 보완, approval, leave, overtime |
+| `M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()` | 준비 보완, approval, leave, overtime |
+| `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()` | 준비 보완, approval, leave, overtime |
+| `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()` | 준비 보완, approval, leave, overtime |
+| `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()` | 준비 보완, approval, leave, overtime |
+| `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()` | 준비 보완, approval, leave, overtime |
+| `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()` | 준비 보완, approval, leave, overtime |
+| `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()` | 준비 보완, approval, leave, overtime |
+| `M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()` | approval, leave |
+| `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()` | 준비 보완, approval, leave, overtime |
+| `M4LegacyExperimentTest#fullRenumberUpdatesOneHundredRowsAndUnlockedMovesDuplicateTwentyTimes()` | approval, overtime |
+| `M4OverdueTest#concurrentRunsSendOnlyOnce()` | 준비 보완, approval, leave, overtime |
+| `M5ProductionTest#<before-all>` | leave, overtime |
+
+### (f) 형식과 SQL 위치 전후
+
+main/test의 일반 120자 초과·여러 문장·여러 선언자·짧은 호출 분할·조각 분할·분리 어노테이션·angle line ends는 모두 0이다. 새 한 줄 단위는 main의 ProjectMember:14–15 기존 예외 1곳, test 0곳이다. DocumentService.nextNumber의 number(...) + 1, LeaveGrantWork의 향상된 for 머리 등 짧아진 단위는 한 줄로 합쳤다.
+
+| 도메인 | 준비 뒤 SQL 값/파일 | 묶음 2 뒤 SQL 값/파일 |
+|---|---:|---:|
+| org | 0/0 | 0/0 |
+| user | 0/0 | 0/0 |
+| permission | 0/0 | 0/0 |
+| approval | 41/4 | 0/0 |
+| leave | 29/4 | 0/0 |
+| overtime | 5/1 | 0/0 |
+| attendance | 24/6 | 24/6 |
+| calendar | 0/0 | 0/0 |
+| home | 16/2 | 16/2 |
+| notification | 11/2 | 11/2 |
+| project | 26/3 | 26/3 |
+| task | 25/2 | 25/2 |
+| dashboard | 0/0 | 0/0 |
+| global | 0/0 | 0/0 |
+| 전체 | 177/24 | 102/15 |
+
+오탐 1개: global/config/WebConfig.java의 정확한 문자열 값 `DELETE`는 HTTP 메서드다. ScopeFilter는 명세상 허용 위치로 별도 제외한다. SQL 키워드 없는 조각은 이 카운트만으로 찾지 못하므로 호출 지점 원문 대조를 함께 사용한다.
+
+predicate 호출 위치(선언 제외):
+
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java:29` — `String where = scope.predicate("u", args);`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java:136` — `String where = scope.predicate("u", args);`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeRepository.java:26` — `String where = scope.predicate("u", args);`
+- `backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java:109` — `String where = scope(menu, actorId).predicate("u", args);`
+
+서비스에 남은 호출은 묶음 3 대상 AttendanceAdminService 한 곳이다.
+
+### 만든 클래스·메서드와 원래 SQL 위치
+
+원래 위치는 952a64e, 경로는 backend/src/main/java/com/minierp/backend/domain/ 아래다. 같은 메서드로 합친 호출도 원래 위치별로 표시한다.
+
+| 새 메서드 | 원래 파일:줄 | SQL 요약 | 반환 타입 |
+|---|---|---|---|
+| `DocumentQueries.findDocument` | `approval/service/DocumentService.java:36` | SELECT d.*,f.code AS form_code,f.name AS form_name,f.doc_prefix FROM approval_documents … | `Map<String, Object>` |
+| `DocumentQueries.countReadableDocument` | `approval/service/DocumentService.java:59` | SELECT COUNT(*) FROM approval_documents d WHERE d.id=:id AND (d.drafter_id=:actor OR EXI… | `long` |
+| `DocumentStore.lockUser` | `approval/service/DocumentService.java:67` | SELECT id FROM users WHERE id=:id FOR UPDATE | `Map<String, Object>` |
+| `DocumentStore.lockDocument` | `approval/service/DocumentService.java:71` | SELECT id FROM approval_documents WHERE id=:id FOR UPDATE | `Map<String, Object>` |
+| `DocumentQueries.findLines` | `approval/service/DocumentService.java:77` | SELECT * FROM approval_lines WHERE document_id=:id ORDER BY step_order | `List<Map<String, Object>>` |
+| `DocumentStore.insertLine` | `approval/service/DocumentService.java:105` | INSERT INTO approval_lines(document_id,step_order,line_kind,approver_id,approver_name,ap… | `int` |
+| `DocumentStore.insertDraft` | `approval/service/DocumentService.java:121` | INSERT INTO approval_documents(form_id,drafter_id,drafter_dept_id,title,status,version,m… | `long` |
+| `DocumentStore.deleteLines` | `approval/service/DocumentService.java:167` | DELETE FROM approval_lines WHERE document_id=:id | `int` |
+| `DocumentStore.updateDraft` | `approval/service/DocumentService.java:169` | UPDATE approval_documents SET title=:title,manual_line=:manual,version=version+1,updated… | `int` |
+| `DocumentStore.deleteLines` | `approval/service/DocumentService.java:184` | DELETE FROM approval_lines WHERE document_id=:id | `int` |
+| `DocumentStore.deleteDocument` | `approval/service/DocumentService.java:185` | DELETE FROM approval_documents WHERE id=:id | `int` |
+| `DocumentStore.insertNumberSequence` | `approval/service/DocumentService.java:189` | INSERT INTO doc_no_sequences(prefix,doc_year,last_seq) VALUES(:prefix,:year,0) ON DUPLIC… | `int` |
+| `DocumentStore.lockNumberSequence` | `approval/service/DocumentService.java:193` | SELECT last_seq FROM doc_no_sequences WHERE prefix=:prefix AND doc_year=:year FOR UPDATE | `Map<String, Object>` |
+| `DocumentStore.updateNumberSequence` | `approval/service/DocumentService.java:195` | UPDATE doc_no_sequences SET last_seq=:seq WHERE prefix=:prefix AND doc_year=:year | `int` |
+| `DocumentStore.insertHistory` | `approval/service/DocumentService.java:201` | INSERT INTO approval_histories(document_id,actor_id,action,comment,created_at) VALUES(:i… | `int` |
+| `DocumentStore.updateTransition` | `approval/service/DocumentService.java:207` | UPDATE approval_documents SET status=:status,current_step=:step,completed_at=:completed,… | `int` |
+| `DocumentStore.deleteLines` | `approval/service/DocumentService.java:231` | DELETE FROM approval_lines WHERE document_id=:id | `int` |
+| `DocumentStore.updateSubmission` | `approval/service/DocumentService.java:234` | UPDATE approval_documents SET doc_no=:no,submitted_at=:now WHERE id=:id | `int` |
+| `DocumentQueries.countApprover` | `approval/service/DocumentService.java:262` | SELECT COUNT(*) FROM approval_lines WHERE document_id=:id AND approver_id=:actor AND lin… | `long` |
+| `DocumentStore.updateAction` | `approval/service/DocumentService.java:281` | UPDATE approval_lines SET status=:status,acted_at=:now,comment=:comment WHERE id=:id AND… | `int` |
+| `DocumentStore.updatePendingLine` | `approval/service/DocumentService.java:292` | UPDATE approval_lines SET status='PENDING' WHERE id=:id AND status='WAITING' | `int` |
+| `DocumentQueries.findHistory` | `approval/service/DocumentService.java:369` | SELECT h.action,h.actor_id,u.user_name,h.comment,h.created_at FROM approval_histories h … | `List<Map<String, Object>>` |
+| `ApprovalLineQueries.findForm` | `approval/service/ApprovalLineResolver.java:16` | SELECT * FROM approval_forms WHERE code=:code | `Map<String, Object>` |
+| `ApprovalLineQueries.findPerson` | `approval/service/ApprovalLineResolver.java:20` | SELECT u.id,u.user_name AS name,p.name AS title,d.name AS department,u.department_id,u.s… | `Map<String, Object>` |
+| `ApprovalLineQueries.findSteps` | `approval/service/ApprovalLineResolver.java:61` | SELECT * FROM approval_form_steps WHERE form_id=:id ORDER BY step_order | `List<Map<String, Object>>` |
+| `ApprovalLineQueries.findRoleHolder` | `approval/service/ApprovalLineResolver.java:79` | SELECT u.id FROM users u JOIN user_roles ur ON ur.user_id=u.id WHERE ur.role_id=:role AN… | `List<Map<String, Object>>` |
+| `ApprovalLineQueries.findDepartmentName` | `approval/service/ApprovalLineResolver.java:94` | SELECT name FROM departments WHERE id=:id | `Map<String, Object>` |
+| `ApprovalLineQueries.findDepartmentHead` | `approval/service/ApprovalLineResolver.java:99` | SELECT parent_id,head_user_id FROM departments WHERE id=:id | `Map<String, Object>` |
+| `ApprovalLineQueries.findParent` | `approval/service/ApprovalLineResolver.java:165` | SELECT parent_id FROM departments WHERE id=:id | `Map<String, Object>` |
+| `FormQueries.findForms` | `approval/service/FormService.java:46` | SELECT f.*,COUNT(CASE WHEN s.line_kind='APPROVER' THEN 1 END) AS approvers, COUNT(CASE W… | `List<Map<String, Object>>` |
+| `FormQueries.findSteps` | `approval/service/FormService.java:66` | SELECT s.*,r.code AS role_code,r.name AS role_name,u.user_name FROM approval_form_steps … | `List<Map<String, Object>>` |
+| `FormStore.updateOptions` | `approval/service/FormService.java:85` | UPDATE approval_forms SET dedupe_approver=COALESCE(:dedupe,dedupe_approver),fallback_to_… | `int` |
+| `FormQueries.findRole` | `approval/service/FormService.java:112` | SELECT id FROM roles WHERE code=:code | `Map<String, Object>` |
+| `FormQueries.findUser` | `approval/service/FormService.java:120` | SELECT id FROM users WHERE id=:id | `Map<String, Object>` |
+| `FormStore.lockForm` | `approval/service/FormService.java:127` | SELECT id FROM approval_forms WHERE id=:id FOR UPDATE | `Map<String, Object>` |
+| `FormStore.deleteSteps` | `approval/service/FormService.java:129` | DELETE FROM approval_form_steps WHERE form_id=:id | `int` |
+| `GeneralRequestStore.upsertBody` | `approval/general/GeneralFormHandler.java:28` | INSERT INTO general_requests(document_id,content,amount) VALUES(:id,:content,:amount) ON… | `int` |
+| `GeneralRequestStore.findBody` | `approval/general/GeneralFormHandler.java:35` | SELECT content,amount FROM general_requests WHERE document_id=:id | `Map<String, Object>` |
+| `GeneralRequestStore.copyBody` | `approval/general/GeneralFormHandler.java:40` | INSERT INTO general_requests(document_id,content,amount) SELECT :target,content,amount F… | `int` |
+| `GeneralRequestStore.deleteBody` | `approval/general/GeneralFormHandler.java:46` | DELETE FROM general_requests WHERE document_id=:id | `int` |
+| `FormStore.insertStep` | `approval/service/FormService.java:131` | INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type,role_id,user_… | `int` |
+| `LeaveStore.lockUser` | `leave/service/LeaveAdminService.java:88` | SELECT id FROM users WHERE id=:id FOR UPDATE | `Map<String, Object>` |
+| `LeaveStore.insertAdjustment` | `leave/service/LeaveAdminService.java:97` | INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,memo,created_by,created_at) … | `long` |
+| `LeaveQueries.findGrantRuns` | `leave/service/LeaveAdminService.java:121` | SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS proces… | `List<Map<String, Object>>` |
+| `LeaveQueries.findBalance` | `leave/service/LeaveQueryService.java:38` | SELECT COALESCE(SUM(CASE WHEN entry_type='GRANT' THEN days ELSE 0 END),0) AS granted, -C… | `Map<String, Object>` |
+| `LeaveQueries.findGrantCandidates` | `leave/service/LeaveGrantWork.java:27` | SELECT id FROM users WHERE status IN ('ACTIVE','ON_LEAVE') ORDER BY id | `List<Map<String, Object>>` |
+| `LeaveStore.lockGrantUser` | `leave/service/LeaveGrantWork.java:29` | SELECT id,status,hire_date FROM users WHERE id=:id FOR UPDATE | `Map<String, Object>` |
+| `LeaveQueries.countLegacyGrants` | `leave/service/LeaveGrantWork.java:38` | SELECT COUNT(*) FROM leave_ledger WHERE user_id=:id AND leave_year=:year AND entry_type=… | `long` |
+| `LeaveQueries.findGrantKeys` | `leave/service/LeaveGrantWork.java:45` | SELECT grant_key FROM leave_ledger WHERE user_id=:id AND grant_key IS NOT NULL | `List<Map<String, Object>>` |
+| `LeaveStore.insertGrant` | `leave/service/LeaveGrantWork.java:54` | INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,grant_key,memo,created_at) V… | `int` |
+| `LeaveQueries.findHandoverUser` | `leave/handler/LeaveFormHandler.java:40` | SELECT id FROM users WHERE id=:id | `Map<String, Object>` |
+| `LeaveStore.upsertBody` | `leave/handler/LeaveFormHandler.java:42` | INSERT INTO leave_requests(document_id,leave_type,start_date,end_date,used_days,handover… | `int` |
+| `LeaveQueries.findRequest` | `leave/handler/LeaveFormHandler.java:51` | SELECT * FROM leave_requests WHERE document_id=:id | `Map<String, Object>` |
+| `LeaveQueries.findHandoverName` | `leave/handler/LeaveFormHandler.java:59` | SELECT id,user_name AS name FROM users WHERE id=:id | `Map<String, Object>` |
+| `LeaveStore.copyBody` | `leave/handler/LeaveFormHandler.java:67` | INSERT INTO leave_requests(document_id,leave_type,start_date,end_date,used_days,handover… | `int` |
+| `LeaveStore.deleteBody` | `leave/handler/LeaveFormHandler.java:73` | DELETE FROM leave_requests WHERE document_id=:id | `int` |
+| `LeaveQueries.findAvailable` | `leave/handler/LeaveFormHandler.java:77` | SELECT COALESCE(SUM(days),0) AS available FROM leave_ledger WHERE user_id=:user AND leav… | `Map<String, Object>` |
+| `LeaveQueries.countOverlap` | `leave/handler/LeaveFormHandler.java:112` | SELECT COUNT(*) FROM leave_requests l JOIN approval_documents d ON d.id=l.document_id WH… | `long` |
+| `LeaveStore.insertLedger` | `leave/handler/LeaveFormHandler.java:124` | INSERT INTO leave_ledger(user_id,leave_year,entry_type,days,document_id,memo,created_at)… | `int` |
+| `LeaveStore.updateUsedDays` | `leave/handler/LeaveFormHandler.java:134` | UPDATE leave_requests SET used_days=:days WHERE document_id=:id | `int` |
+| `LeaveQueries.findReservations` | `leave/handler/LeaveFormHandler.java:140` | SELECT leave_year,-SUM(days) AS days FROM leave_ledger WHERE document_id=:id AND entry_t… | `List<Map<String, Object>>` |
+| `LeaveQueries.countBalances` | `leave/service/LeaveAdminService.java:51` | SELECT COUNT(*) FROM users u WHERE " + where | `long` |
+| `LeaveQueries.findBalances` | `leave/service/LeaveAdminService.java:52` | SELECT u.id,u.user_name,p.name AS title,d.name AS department,u.hire_date, COALESCE(l.gra… | `List<Map<String, Object>>` |
+| `LeaveQueries.findAdjustmentBalance` | `leave/service/LeaveAdminService.java:90` | SELECT COALESCE(SUM(days),0) AS balance FROM leave_ledger WHERE user_id=:id AND leave_ye… | `Map<String, Object>` |
+| `LeaveQueries.findLedger` | `leave/service/LeaveQueryService.java:68` | SELECT l.*,d.doc_no,d.status FROM ( SELECT x.*,SUM(x.days) OVER(ORDER BY x.created_at,x.… | `List<Map<String, Object>>` |
+| `OvertimeStore.upsertBody` | `overtime/handler/OvertimeFormHandler.java:32` | INSERT INTO overtime_requests(document_id,overtime_date,start_time,end_time,reason,creat… | `int` |
+| `OvertimeStore.findBody` | `overtime/handler/OvertimeFormHandler.java:41` | SELECT overtime_date AS overtimeDate,TIME_FORMAT(start_time,'%H:%i:%s') AS startTime,TIM… | `Map<String, Object>` |
+| `OvertimeStore.copyBody` | `overtime/handler/OvertimeFormHandler.java:47` | INSERT INTO overtime_requests(document_id,overtime_date,start_time,end_time,reason,creat… | `int` |
+| `OvertimeStore.deleteBody` | `overtime/handler/OvertimeFormHandler.java:53` | DELETE FROM overtime_requests WHERE document_id=:id | `int` |
+| `OvertimeStore.countValidTime` | `overtime/handler/OvertimeFormHandler.java:57` | SELECT COUNT(*) FROM overtime_requests WHERE document_id=:id AND end_time>start_time | `long` |
+
+### 재현 명령
+
+```bash
+# 먼저 952a64e를 작업 트리 밖에 git archive하고, 그 사본에서 UTC test-compile한다.
+# JAVA_HOME은 설치된 Java 17로 지정한다. root에는 저장소 최상위 경로를 넘긴다.
+python3 docs/refactoring/R-03-sql-location-measure.py --root "$PWD" \
+  --baseline "$BASE_DIR" --allow-count-reductions /tmp/r03-reductions.json \
+  --output /tmp/r03-location.json
+python3 docs/refactoring/R-03-format-units.py --root "$PWD" --output /tmp/r03-units.json
+python3 docs/refactoring/R-02-format-measure.py --root "$PWD" --output /tmp/r03-format.json
+# --file을 해당 묶음의 원래 서비스/handler별로 반복한다.
+python3 docs/refactoring/R-03-call-site-check.py --before "$BASE_DIR" --after "$PWD" \
+  --classpath backend/target/r03-group2-validation/approval/recording/classpath.txt \
+  --file backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java \
+  --output /tmp/r03-call-sites.json
+# backend에서 실행(각 도메인 커밋마다):
+./mvnw -Duser.timezone=UTC -Drefactoring.record=target/r03-review-recording test
+./mvnw -Duser.timezone=UTC test
+```
+
+repository 검사에는 새 파일 경로마다 `--check-repository`를 추가한다. 기록 비교는 기존 SnapshotComparator와 recording/classpath.txt를 그대로 사용한다. 그룹1 전체 호출은 OrgService·WorkingDays·EmployeeService·UserLookupService·RoleService 5개 파일을 --file로 지정하면 87개다. 클래스패스 대상 사본은 먼저 test-compile해야 한다.
+
+### 남은 예외 위치와 한계
+
+**main 기존 형식 예외(최종 위치)**
+
+literal_exceptions: 88개
+
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java:32`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java:17`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java:36`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java:42`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:67`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:77`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:93`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:105`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:116`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java:26`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java:17`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java:31`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java:17`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java:28`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:21`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:23`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:29`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:43`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:49`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:69`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java:89`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java:111`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java:175`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java:109`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java:31`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java:135`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java:35`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java:78`
+- `backend/src/main/java/com/minierp/backend/domain/home/service/HomeQueries.java:15`
+- `backend/src/main/java/com/minierp/backend/domain/home/service/HomeQueries.java:52`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:41`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:51`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:54`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java:19`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java:39`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java:76`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java:23`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java:34`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java:56`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java:73`
+- `backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationService.java:19`
+- `backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationService.java:27`
+- `backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationService.java:34`
+- `backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java:36`
+- `backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java:50`
+- `backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java:72`
+- `backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java:102`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java:26`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java:32`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java:22`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java:28`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java:42`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java:43`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectMemberRepository.java:16`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:31`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:128`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:161`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:195`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java:232`
+- `backend/src/main/java/com/minierp/backend/domain/project/service/ProjectSummaryQuery.java:9`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskRepository.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskRepository.java:45`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:36`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:127`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:177`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:200`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:268`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java:279`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/TaskOverdueWork.java:26`
+- `backend/src/main/java/com/minierp/backend/domain/task/service/TaskOverdueWork.java:58`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:45`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:53`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:64`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:67`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java:21`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java:35`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java:84`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java:22`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java:32`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java:81`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java:88`
+- `backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java:27`
+- `backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java:31`
+
+non_chain_breaks: 1개
+
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java:102`
+
+key_value_splits: 2개
+
+- `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java:60`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java:140`
+
+protected_fragment_splits: 3개
+
+- `backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java:60`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java:102`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceStore.java:140`
+
+**test 기존 형식 예외(최종 위치)**
+
+literal_exceptions: 78개
+
+- `backend/src/test/java/com/minierp/backend/integration/CoreApiIntegrationTest.java:57`
+- `backend/src/test/java/com/minierp/backend/integration/CoreApiIntegrationTest.java:61`
+- `backend/src/test/java/com/minierp/backend/integration/DepartmentHeadConcurrencyTest.java:65`
+- `backend/src/test/java/com/minierp/backend/integration/M1AcceptanceTest.java:330`
+- `backend/src/test/java/com/minierp/backend/integration/M1AcceptanceTest.java:338`
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:46`
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:71`
+- `backend/src/test/java/com/minierp/backend/integration/M2DataMigrationTest.java:81`
+- `backend/src/test/java/com/minierp/backend/integration/M2DataMigrationTest.java:87`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:63`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:65`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:293`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:399`
+- `backend/src/test/java/com/minierp/backend/integration/M2FormApiTest.java:103`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxPerformanceTest.java:29`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxPerformanceTest.java:92`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxTest.java:16`
+- `backend/src/test/java/com/minierp/backend/integration/M2ReviewTest.java:14`
+- `backend/src/test/java/com/minierp/backend/integration/M2ReviewTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceFixTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceTest.java:117`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceTest.java:126`
+- `backend/src/test/java/com/minierp/backend/integration/M3BatchResponseTest.java:28`
+- `backend/src/test/java/com/minierp/backend/integration/M3CsvLabelsTest.java:32`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:25`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:29`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:36`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:42`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:53`
+- `backend/src/test/java/com/minierp/backend/integration/M3LeaveAdjustmentConcurrencyTest.java:51`
+- `backend/src/test/java/com/minierp/backend/integration/M3LeaveGrantTest.java:181`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:43`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:77`
+- `backend/src/test/java/com/minierp/backend/integration/M3MonthlyTest.java:170`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardApiTest.java:200`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardApiTest.java:281`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardConcurrencyTest.java:159`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardConcurrencyTest.java:231`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:24`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:28`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:33`
+- `backend/src/test/java/com/minierp/backend/integration/M4DeterministicLockTest.java:114`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:26`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:39`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:43`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:55`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:58`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:61`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:21`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:24`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:48`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:150`
+- `backend/src/test/java/com/minierp/backend/integration/M4LegacyExperimentTest.java:88`
+- `backend/src/test/java/com/minierp/backend/integration/M4OverdueTest.java:47`
+- `backend/src/test/java/com/minierp/backend/integration/M4OverdueTest.java:90`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:34`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:48`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:103`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:157`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:207`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:231`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:55`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:58`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:65`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:69`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:72`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:83`
+- `backend/src/test/java/com/minierp/backend/support/BoardTestSupport.java:11`
+- `backend/src/test/java/com/minierp/backend/support/BoardTestSupport.java:24`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:14`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:16`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:18`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:20`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:24`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:26`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:188`
+
+key_value_splits: 8개
+
+- `backend/src/test/java/com/minierp/backend/support/refactoring/RecordingOrder.java:17`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:14`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:16`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:18`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:20`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:22`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:24`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:26`
+
+outer_operator_unsplit: 1개
+
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardConcurrencyTest.java:164`
+
+protected_fragment_splits: 1개
+
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:35`
+
+ternary_layout: 1개
+
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:35`
+
+- 새 기능 버그는 확인하지 않았다. 묶음 1의 타입 문제 두 곳은 사용자 추가 지시 범위에서만 보완했다. 기존 알려진 이슈와 묶음 3의 SQL은 그대로다.
+- 안전망은 기존 테스트가 실행한 경로를 확인한다. 호출 도구는 소스 내 간접 map·지역 변수·record 전달의 일반적인 데이터 흐름 증명기가 아니므로 위 5곳 및 묶음 1의 3곳을 수동 대조했다. 정적 검사만으로 운영 성능·락 대기 시간을 보장하지 않는다.
+- 개발 DB/Redis·실제 서버 검증은 하지 않았다(금지 범위). frontend, 마이그레이션 V1~V6, .claude, 기준선·정책·비교기는 변경하지 않았다. backend/md는 허용된 develop 병합 한 파일 외에 변경하지 않았다.
+- 묶음 2까지 마쳤으며 묶음 3은 리뷰 후 별도 지시를 기다린다.
