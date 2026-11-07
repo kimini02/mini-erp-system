@@ -1006,3 +1006,492 @@ ternary_layout: 1개
 - 안전망은 기존 테스트가 실행한 경로를 확인한다. 호출 도구는 소스 내 간접 map·지역 변수·record 전달의 일반적인 데이터 흐름 증명기가 아니므로 위 5곳 및 묶음 1의 3곳을 수동 대조했다. 정적 검사만으로 운영 성능·락 대기 시간을 보장하지 않는다.
 - 개발 DB/Redis·실제 서버 검증은 하지 않았다(금지 범위). frontend, 마이그레이션 V1~V6, .claude, 기준선·정책·비교기는 변경하지 않았다. backend/md는 허용된 develop 병합 한 파일 외에 변경하지 않았다.
 - 묶음 2까지 마쳤으며 묶음 3은 리뷰 후 별도 지시를 기다린다.
+
+
+## 묶음 2 리뷰 보완
+
+시작은 `64b5555`이며 develop 병합은 하지 않았다. 준비 보완 `5584474`에서 DocumentQueries·FormQueries·LeaveQueries의 닫는 줄 4곳을 복원하고, LeaveAdminService/LeaveQueries의 `prefix`를 `pattern`, LeaveQueryService의 `filter`를 `entryType`으로 바꿨다. 값 이름이 달라진 기존 7곳은 그대로 뒀다. 닫는 줄 검사: 원본 64b5555 **4건 → 준비 후보 0건**.
+
+기록 ON: **231/0/0/0**, 578.23초, `REFACTORING_COMPARE differences=0 sqlOrderChanges=12`. 순서 경고는 모두 기존 13개 목록 안이다. 준비에는 지시대로 OFF를 추가 실행하지 않았다. 문자열 집합 1,314개·@Transactional 83개·허용 목록·형식·호출 지점은 모두 통과했다.
+
+### 도구 보완
+
+- `298be1b`: `R-03-call-site-check.py`는 map 이후 인자 토큰열(ErrorCode 포함)도 대조하고, `--moved 옛경로=새경로`로 같은 메서드의 직접 SQL 호출을 짝짓는다. SQL 식·키·값 순서·standalone 타입 및 기존 put 대조는 유지했다.
+- 정상 묶음 1 **87개(자동 84·수동 3), 차이 0**, 묶음 2 **70개(자동 65·수동 5), 차이 0**. DocumentStore.lockDocument의 ErrorCode만 USER_NOT_FOUND로 바꾼 작업 트리 밖 사본은 **차이 1, 종료 1**이었다. 사본은 저장소에 적용하지 않았다.
+- `R-03-text-block-check.py`: 952a64e의 SQL 호출과 옮긴 텍스트 블록을 연결하고, 닫는 줄 뒤 인자 토큰이 같은 경우 물리적인 닫는 줄을 비교한다. SQL 호출 밖의 `> 0`·`.stream()`은 서비스에 남아도 위반으로 세지 않는다. 인자 이름이 달라진 경우는 별도 목록으로 남긴다.
+- `R-03-package-move-check.py`: 옮긴 클래스는 package/import 줄만, 바뀐 테스트는 import 줄만 제외하고 나머지 원문을 대조한다. 빈 줄도 비교한다.
+- `R-03-sql-location-measure.py`: `--rename-class`로 ProjectStateStore의 트랜잭션 소유자만 대응한다. `--preserve-repository`는 원본에도 존재하는 지정된 기존 위반 3개만 별도 출력한다. 새로운 위반은 허용하지 않는다. 키워드 없는 파라미터·비교식 조각도 별도 수집한다.
+- 프로젝트 후보 검사 중 `ScopeFilter.scope()` getter가 권한을 계산하는 `access.scope(...)`처럼 집계되는 오탐 2건을 발견했다. 명시된 ScopeFilter 변수의 무인자 scope 접근자만 구분하도록 프로젝트 커밋에서 도구를 추가 보완했다. `access.scope("PROJECT")` 등 권한 조회는 여전히 금지 호출로 탐지한다. 기록기·비교기·기준선은 바꾸지 않았다.
+- `HH:mm`의 콜론은 SQL 바인딩이 아니다. 앞 문자가 식별자 문자인 콜론을 제외한다. 시작점에서는 지시에 적힌 4개 출현 외에 NotificationQueryService의 `user_id=:user` 1개도 발견했다. 모두 이동했다.
+- 도구 전용 커밋은 별도 git archive에서 test-compile 종료 0, 11.05초였다.
+
+## 묶음 3
+
+### 범위와 커밋
+
+`notification · attendance · project · task · home`의 SQL 이동까지다. calendar·dashboard는 SQL이 없어 변경하지 않았다. 묶음 3을 마치고 리뷰를 기다리며 4단계는 시작하지 않는다.
+
+|커밋|묶음|추가·변경·삭제 경로 수|
+|---|---|---|
+|5584474|묶음 2 Java 리뷰 보완|5|
+|298be1b|읽기 전용 측정 도구|4|
+|d26988f|moved|23|
+|fdf3fb6|notification|4|
+|52cc02c|attendance|7|
+|41ecb91|project|4|
+|d6b2354|task|4|
+|292f6fd|home|2|
+|이 문서 커밋|R-03 보고서|1|
+
+패키지 이동의 수는 삭제·새 경로를 각각 센다. Git rename 표시에서는 5쌍이 이동으로 표시된다.
+
+### 커밋별 (a)~(g) 검증
+
+후보는 `/private/tmp/r03-group3/`에서 만들었다. 정적 검사를 통과한 파일의 SHA-256을 고정하고 적용했다. 각 코드 커밋은 ON과 OFF 전체 UTC 테스트가 끝난 뒤 만들었다. 비교 기준은 누적 `952a64e`다. Java 17, Testcontainers MariaDB만 사용했다.
+
+|후보|문자열 출현|서로 다른 값|새 값/사라진 값 (a)|트랜잭션 (b)|신규 위반 (c)|호출 자동/수동/차이 (g)|120자 일반 초과/기존 한 줄 예외/닫는 줄 차이 (f)|
+|---|---|---|---|---|---|---|---|
+|moved|3216|1314|0 / 0|83 동일|0 + 기존 3|11 / 0 / 0|0 / 1 / 0|
+|notification|3216|1314|0 / 0|83 동일|0 + 기존 3|7 / 2 / 0|0 / 1 / 0|
+|attendance|3216|1314|0 / 0|83 동일|0 + 기존 3|12 / 0 / 0|0 / 1 / 0|
+|project|3214|1314|0 / 0|83 동일|0 + 기존 3|15 / 3 / 0|0 / 1 / 0|
+|task|3226|1314|0 / 0|83 동일|0 + 기존 3|18 / 7 / 0|0 / 1 / 0|
+|home|3226|1314|0 / 0|83 동일|0 + 기존 3|0 / 8 / 0|0 / 1 / 0|
+
+근태 표의 호출 수는 서비스·handler 12개다. 기존 AttendanceMonthlyQuery.fetch → findMonthly의 간접 SQL 호출 1개는 아래에서 추가 수동 대조했다. 패키지 이동 커밋의 직접 호출 11개에는 기존 fetch가 포함된다. 모든 후보는 축소 허용 목록의 누락·초과 0이다.
+
+|커밋|후보|ON 전체/실패/오류/건너뜀|ON 초|기록 비교 (d)|오류 응답 수/차이|OFF 전체/실패/오류/건너뜀|OFF 초 (e)|OFF 기록 출력|
+|---|---|---|---|---|---|---|---|---|
+|d26988f|moved|231/0/0/0|784.62|REFACTORING_COMPARE differences=0 sqlOrderChanges=11|191 / 0|231/0/0/0|656.17|0|
+|fdf3fb6|notification|231/0/0/0|569.24|REFACTORING_COMPARE differences=0 sqlOrderChanges=11|191 / 0|231/0/0/0|517.23|0|
+|52cc02c|attendance|231/0/0/0|552.36|REFACTORING_COMPARE differences=0 sqlOrderChanges=10|191 / 0|231/0/0/0|530.95|0|
+|41ecb91|project|231/0/0/0|492.81|REFACTORING_COMPARE differences=0 sqlOrderChanges=10|191 / 0|231/0/0/0|497.95|0|
+|d6b2354|task|231/0/0/0|524.09|REFACTORING_COMPARE differences=0 sqlOrderChanges=12|191 / 0|231/0/0/0|465.35|0|
+|292f6fd|home|231/0/0/0|488.08|REFACTORING_COMPARE differences=0 sqlOrderChanges=10|191 / 0|231/0/0/0|460.6|0|
+
+로그와 정적 결과: `backend/target/r03-group3-validation/{preparation,moved,notification,attendance,project,task,home}/`. target은 커밋하지 않는다. 시간은 해당 실행 환경의 관측값이다.
+
+#### 순서 경고 프레임
+
+모든 실행에서 기존 13개 범위를 벗어난 경고는 0이다. SQL별 횟수·응답·직렬 순서 규칙은 기존 비교기 그대로 적용했다.
+
+- preparation: `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()`, `M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()`, `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()`, `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()`, `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()`, `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()`, `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()`, `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()`, `M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()`, `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()`, `M4OverdueTest#concurrentRunsSendOnlyOnce()`, `M5ProductionTest#<before-all>`
+
+- moved: `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()`, `M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()`, `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()`, `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()`, `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()`, `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()`, `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()`, `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()`, `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()`, `M4LegacyExperimentTest#fullRenumberUpdatesOneHundredRowsAndUnlockedMovesDuplicateTwentyTimes()`, `M4OverdueTest#concurrentRunsSendOnlyOnce()`
+
+- notification: `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()`, `M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()`, `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()`, `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()`, `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()`, `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()`, `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()`, `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()`, `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()`, `M4OverdueTest#concurrentRunsSendOnlyOnce()`, `M5ProductionTest#<before-all>`
+
+- attendance: `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()`, `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()`, `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()`, `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()`, `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()`, `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()`, `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()`, `M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()`, `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()`, `M4OverdueTest#concurrentRunsSendOnlyOnce()`
+
+- project: `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()`, `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()`, `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()`, `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()`, `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()`, `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()`, `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()`, `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()`, `M4OverdueTest#concurrentRunsSendOnlyOnce()`, `M5ProductionTest#<before-all>`
+
+- task: `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()`, `M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()`, `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()`, `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()`, `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()`, `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()`, `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()`, `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()`, `M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()`, `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()`, `M4LegacyExperimentTest#fullRenumberUpdatesOneHundredRowsAndUnlockedMovesDuplicateTwentyTimes()`, `M4OverdueTest#concurrentRunsSendOnlyOnce()`
+
+- home: `M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()`, `M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()`, `M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()`, `M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()`, `M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()`, `M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()`, `M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()`, `M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()`, `M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()`, `M4OverdueTest#concurrentRunsSendOnlyOnce()`
+
+### 패키지 이동과 보존한 코드
+
+패키지 이동 검사는 5개 모두 차이 0, 테스트 본문 검사도 차이 0이다. 최종 후보에서 AttendanceStore·ProjectStateStore·ProjectSummaryQuery는 package/import를 제외한 본문이 원문과 같다. HomeQueries의 기존 public static 멤버 토큰열도 전부 같다. 테스트 79개 파일 본문과 비 Java 테스트·메인 리소스 26개가 보존됐다.
+
+|클래스|새 패키지|이번에 남긴 SQL 외 코드|
+|---|---|---|
+|AttendanceStore|attendance.repository|Schedule.view(), time()의 LocalTime.parse, day 판정, AttendanceRules.judge 호출, 날짜·시각 결과 처리|
+|AttendanceMonthlyQuery|attendance.repository|sql(String) 원문·public 시그니처 유지; fetch만 findMonthly로 교체하고 범위·map 조립을 이동|
+|HomeQueries|home.repository|public static SQL 멤버 유지; final/private 생성자만 제거하고 @Repository·@RequiredArgsConstructor·실행 메서드 추가|
+|ProjectStateStore|project.repository|상태 집계 후 계산, Clock 조회, @Transactional(MANDATORY) 유지|
+|ProjectSummaryQuery|project.repository|기존 정적 SQL 조립과 public static 멤버 유지|
+
+기존 repository 예외: AttendanceStore.time의 `LocalTime.parse`(P), ProjectStateStore.recalculate의 `@Transactional(MANDATORY)`(T), 같은 메서드의 `LocalDateTime.now`(V). 세 예외 밖의 X/T/P/V 위반은 0이다. 이 코드들의 추가 분리는 다음 단계 후보이며 이번에 변경하지 않았다.
+
+테스트 import: M3MonthlyTest(AttendanceMonthlyQuery), M4BoardConcurrencyTest(ProjectStateStore), M5HomeCountersTest(AttendanceStore), M4HomeGrowthTest(HomeQueries·ProjectSummaryQuery), M4QueryGrowthTest(ProjectSummaryQuery). 지시 목록에 없던 M3BatchTest는 기존 `attendance.service.*` 때문에 AttendanceStore의 명시적 import 1줄이 추가로 필요했다. 총 6개 파일·7개 import이며 본문은 그대로다.
+
+### 새 실행 메서드와 원래 위치
+
+아래 원래 위치는 64b5555의 소스다. 같은 SQL의 복수 호출은 모두 표시한다. SQL 본문은 전체 복사하지 않고 식의 앞부분만 요약한다. 반환 타입과 전체 map 대조는 methods/calls JSON에도 남아 있다.
+
+|쿼리 메서드|원래 파일:줄|SQL 요약|반환 타입|
+|---|---|---|---|
+|NotificationStore.insertDocumentNotification|NotificationService.java:18|`"INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,:doc,:type,:title,:lin…`|int|
+|NotificationStore.insertTaskNotification|NotificationService.java:26|`"INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,NULL,'TASK_ASSIGNED',:…`|int|
+|NotificationStore.insertOverdueNotification|NotificationService.java:33|`"INSERT INTO notifications(user_id,document_id,type,title,link,created_at) VALUES(:user,NULL,'TASK_OVERDUE',:t…`|int|
+|NotificationQueries.countUnread|NotificationQueryService.java:40|`"SELECT COUNT(*) FROM notifications WHERE user_id=:user AND read_at IS NULL"`|long|
+|NotificationQueries.findOwner|NotificationQueryService.java:46|`"SELECT user_id FROM notifications WHERE id=:id"`|Map&lt;String, Object&gt;|
+|NotificationStore.updateRead|NotificationQueryService.java:50|`"UPDATE notifications SET read_at=COALESCE(read_at,:now) WHERE id=:id AND user_id=:user"`|int|
+|NotificationStore.updateAllRead|NotificationQueryService.java:56|`"UPDATE notifications SET read_at=:now WHERE user_id=:user AND read_at IS NULL"`|int|
+|NotificationQueries.countNotifications|NotificationQueryService.java:27|`"SELECT COUNT(*) FROM notifications WHERE " + where`|long|
+|NotificationQueries.findNotifications|NotificationQueryService.java:28|`"SELECT id,type,title,link,read_at,created_at FROM notifications WHERE " + where + " ORDER BY id DESC LIMIT :s…`|List&lt;Map&lt;String, Object&gt;&gt;|
+|AttendanceQueries.findMonthlyCounts|AttendanceService.java:30|`"SELECT COALESCE(SUM(in_result='LATE'),0) AS late_count,COALESCE(SUM(absent=1),0) AS absent_count FROM attenda…`|Map&lt;String, Object&gt;|
+|AttendanceQueries.findMyMonth|AttendanceService.java:134|`"SELECT a.*,d.doc_no AS fix_doc_no FROM attendances a LEFT JOIN approval_documents d ON d.id=a.fix_document_id…`|List&lt;Map&lt;String, Object&gt;&gt;|
+|AttendanceQueries.findDepartment|AttendanceAdminService.java:34|`"SELECT id FROM departments WHERE id=:id"`|Map&lt;String, Object&gt;|
+|AttendanceQueries.findUser|AttendanceAdminService.java:108|`"SELECT id,user_name,COALESCE(hire_date,DATE(created_at)) AS employed_from,retired_date FROM users WHERE id=:i…`|Map&lt;String, Object&gt;|
+|AttendanceQueries.findAbsenceCandidates|AbsenceBatchWork.java:24|`""" SELECT u.id FROM users u WHERE (u.status<>'ON_LEAVE' AND COALESCE(u.hire_date,DATE(u.created_at))<=:date A…`|List&lt;Map&lt;String, Object&gt;&gt;|
+|AttendanceFixStore.updateBody|AttendanceFixFormHandler.java:57|`""" INSERT INTO attendance_fix_requests(document_id,work_date,clock_in,clock_out,reason) VALUES(:id,:date,:in,…`|int|
+|AttendanceFixStore.findBody|AttendanceFixFormHandler.java:65|`"SELECT * FROM attendance_fix_requests WHERE document_id=:id"`|Map&lt;String, Object&gt;|
+|AttendanceFixStore.insertBodyCopy|AttendanceFixFormHandler.java:88|`"INSERT INTO attendance_fix_requests(document_id,work_date,clock_in,clock_out,reason) SELECT :target,work_date…`|int|
+|AttendanceFixStore.deleteBody|AttendanceFixFormHandler.java:94|`"DELETE FROM attendance_fix_requests WHERE document_id=:id"`|int|
+|AttendanceFixStore.countOtherPending|AttendanceFixFormHandler.java:110|`"SELECT COUNT(*) FROM attendance_fix_requests f JOIN approval_documents d ON d.id=f.document_id WHERE d.drafte…`|long|
+|AttendanceFixStore.updateBeforeSnapshot|AttendanceFixFormHandler.java:131|`"UPDATE attendance_fix_requests SET before_json=:json WHERE document_id=:id"`|int|
+|AttendanceFixStore.updateAttendanceFix|AttendanceFixFormHandler.java:174|`"UPDATE attendances SET absent=0,fix_document_id=:doc,judged_at=:now,updated_at=:now WHERE user_id=:user AND w…`|int|
+|ProjectQueries.countProject|BoardProjectService.java:55|`"SELECT COUNT(*) FROM projects WHERE id=:id"`|long|
+|ProjectStore.findLockedProject|BoardProjectService.java:66|`"SELECT id FROM projects WHERE id=:id FOR UPDATE"`|Map&lt;String, Object&gt;|
+|ProjectQueries.findMembers|BoardProjectService.java:127|`"SELECT u.id,u.user_name AS name,pos.name AS title FROM project_members m JOIN users u ON u.id=m.user_id LEFT …`|List&lt;Map&lt;String, Object&gt;&gt;|
+|ProjectQueries.countActiveUser|BoardProjectService.java:141|`"SELECT COUNT(*) FROM users WHERE id=:id AND status='ACTIVE'"`|long|
+|ProjectStore.insertProject|BoardProjectService.java:160|`"INSERT INTO projects(project_key,title,content,start_date,end_date,priority,status,leader_id,created_at) VALU…`|long|
+|ProjectStore.insertLeaderMember|BoardProjectService.java:168|`"INSERT INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)"`|int|
+|ProjectQueries.findSummary|BoardProjectService.java:172, BoardProjectService.java:201|`ProjectSummaryQuery.sql("p.id=:id", false)`|Map&lt;String, Object&gt;|
+|ProjectStore.insertLeaderIfMissing|BoardProjectService.java:191|`"INSERT IGNORE INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)"`|int|
+|ProjectStore.updateProject|BoardProjectService.java:194|`"UPDATE projects SET title=COALESCE(:title,title),content=COALESCE(:content,content),start_date=:start,end_dat…`|int|
+|ProjectQueries.countUnfinishedForMembers|BoardProjectService.java:231|`"SELECT COUNT(*) FROM tasks t JOIN task_assignments a ON a.task_id=t.id WHERE t.project_id=:id AND t.task_stat…`|long|
+|ProjectQueries.findMemberIds|BoardProjectService.java:240|`"SELECT user_id FROM project_members WHERE project_id=:id"`|List&lt;Map&lt;String, Object&gt;&gt;|
+|ProjectStore.deleteMembers|BoardProjectService.java:250|`"DELETE FROM project_members WHERE project_id=:id AND user_id IN (:removed)"`|int|
+|ProjectStore.insertMember|BoardProjectService.java:255|`"INSERT INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)"`|int|
+|ProjectStore.updateChangedAt|BoardProjectService.java:259|`"UPDATE projects SET updated_at=:now WHERE id=:id"`|int|
+|ProjectQueries.findVisible|BoardProjectService.java:53|`select`|List&lt;Map&lt;String, Object&gt;&gt;|
+|ProjectQueries.countProjects|BoardProjectService.java:120|`"SELECT COUNT(*) FROM projects p LEFT JOIN users u ON u.id=p.leader_id WHERE " + where`|long|
+|ProjectQueries.findProjects|BoardProjectService.java:122|`ProjectSummaryQuery.sql(where, true)`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskQueries.findTask|BoardTaskService.java:26|`"SELECT * FROM tasks WHERE id=:id"`|Map&lt;String, Object&gt;|
+|TaskQueries.findTaskProject|BoardTaskService.java:30|`"SELECT project_id FROM tasks WHERE id=:id"`|Map&lt;String, Object&gt;|
+|TaskQueries.findAssignees|BoardTaskService.java:35|`"SELECT u.id,u.user_name AS name,p.name AS title FROM task_assignments a JOIN users u ON u.id=a.user_id LEFT J…`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskQueries.findBoardTasks|BoardTaskService.java:60|`"SELECT * FROM tasks WHERE project_id=:id ORDER BY position,id"`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskQueries.findBoardPeople|BoardTaskService.java:62|`""" SELECT NULL AS task_id,u.id,u.user_name AS name,pos.name AS title FROM project_members m JOIN users u ON u…`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskQueries.findHistory|BoardTaskService.java:100|`""" SELECT h.*,u.user_name AS actor_name,target.user_name AS target_name, CASE h.action WHEN 'ASSIGNED' THEN C…`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskStore.insertHistory|BoardTaskService.java:126|`"INSERT INTO task_histories(task_id,actor_id,action,from_value,to_value,created_at) VALUES(:id,:actor,:action,…`|int|
+|TaskQueries.countMembers|BoardTaskService.java:135|`"SELECT COUNT(*) FROM project_members WHERE project_id=:p AND user_id IN (:ids)"`|long|
+|TaskQueries.findAssigneeIds|BoardTaskService.java:143|`"SELECT user_id FROM task_assignments WHERE task_id=:id"`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskStore.deleteAssignment|BoardTaskService.java:149|`"DELETE FROM task_assignments WHERE task_id=:id AND user_id=:user"`|int|
+|TaskStore.insertAssignment|BoardTaskService.java:156|`"INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(:id,:user,:now)"`|int|
+|TaskStore.insertTask|BoardTaskService.java:176|`"INSERT INTO tasks(project_id,task_no,position,version,created_by,task_title,task_content,end_date,priority,ta…`|long|
+|TaskStore.updateLastSequence|BoardTaskService.java:182|`"UPDATE projects SET last_task_seq=:seq WHERE id=:id"`|int|
+|TaskStore.updateTask|BoardTaskService.java:199|`"UPDATE tasks SET task_title=COALESCE(:title,task_title),task_content=COALESCE(:content,task_content),end_date…`|int|
+|TaskStore.updatePosition|BoardTaskService.java:243|`"UPDATE tasks SET task_status=:status,position=:pos,version=version+1,updated_at=:now WHERE id=:id"`|int|
+|TaskQueries.findOverdueProjects|TaskOverdueWork.java:25|`"SELECT DISTINCT project_id FROM tasks WHERE end_date<:today AND task_status<>'DONE' ORDER BY project_id"`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskStore.findLockedProject|TaskOverdueWork.java:30|`"SELECT id FROM projects WHERE id=:id FOR UPDATE"`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskQueries.findOverdueTasks|TaskOverdueWork.java:34|`""" SELECT t.id,t.task_no,t.task_title,t.end_date,p.project_key,a.user_id FROM tasks t JOIN projects p ON p.id…`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskQueries.countValidPredecessor|BoardTaskService.java:259|`"SELECT COUNT(*) FROM tasks WHERE id=:after AND project_id=:p AND task_status=:status"`|long|
+|TaskQueries.countMaxPosition|BoardTaskService.java:267|`"SELECT COALESCE(MAX(position),0) FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving"`|long|
+|TaskQueries.findPredecessorPosition|BoardTaskService.java:272|`"SELECT position FROM tasks WHERE id=:after"`|Map&lt;String, Object&gt;|
+|TaskQueries.findNextPosition|BoardTaskService.java:278|`"SELECT position FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving AND position>:lower OR…`|List&lt;Map&lt;String, Object&gt;&gt;|
+|TaskStore.updateRebalancedPositions|BoardTaskService.java:290|`""" UPDATE tasks t JOIN (SELECT id,ROW_NUMBER() OVER(ORDER BY position,id)*1024 AS new_position FROM tasks WHE…`|int|
+|TaskStore.insertDueClaim|TaskOverdueWork.java:44|`""" INSERT INTO task_due_alerts(task_id,user_id,due_date,created_at) SELECT :task,:user,:due,:now FROM DUAL WH…`|int|
+|TaskStore.insertOverdueHistory|TaskOverdueWork.java:57|`"INSERT INTO task_histories(task_id,actor_id,action,to_value,created_at) VALUES(:task,NULL,'OVERDUE_NOTIFIED',…`|int|
+|HomeQueries.countTodo|HomeService.java:56|`"SELECT COUNT(*) FROM approval_documents d WHERE " + HomeQueries.TODO`|long|
+|HomeQueries.findTodo|HomeService.java:57|`HomeQueries.TODO_ROWS`|List&lt;Map&lt;String, Object&gt;&gt;|
+|HomeQueries.findMine|HomeService.java:63|`HomeQueries.MINE`|List&lt;Map&lt;String, Object&gt;&gt;|
+|HomeQueries.findDepartment|HomeService.java:77|`"SELECT d.id,d.name FROM users u JOIN departments d ON d.id=u.department_id WHERE u.id=:actor"`|Map&lt;String, Object&gt;|
+|HomeQueries.findTeamWeek|HomeService.java:87|`HomeQueries.teamWeek(leave, tasks, scope)`|List&lt;Map&lt;String, Object&gt;&gt;|
+|HomeQueries.findMySummary|HomeService.java:116|`HomeQueries.mySummary(scope)`|List&lt;Map&lt;String, Object&gt;&gt;|
+|HomeQueries.findMyItems|HomeService.java:126|`HomeQueries.myItems(scope)`|List&lt;Map&lt;String, Object&gt;&gt;|
+|HomeQueries.findNotifications|HomeService.java:138|`HomeQueries.NOTIFICATIONS`|List&lt;Map&lt;String, Object&gt;&gt;|
+|AttendanceMonthlyQuery.findMonthly|AttendanceMonthlyQuery.java:39 / AttendanceAdminService.java:27,49|기존 sql(String) + 범위·부서 조립|List&lt;Map&lt;String,Object&gt;&gt;|
+
+### 합친 SQL과 값 출현 횟수
+
+Project create·patch의 `ProjectSummaryQuery.sql("p.id=:id", false)` 요약 재조회를 findSummary 한 메서드로 합쳤다. 문자열 `p.id=:id`, 키 id/today/actor는 각각 1회 줄었다. 두 멤버 INSERT는 SQL이 같지만 leaderId는 Long, applyMembers의 user는 long이므로 타입을 유지하려고 각각의 메서드로 뒀다. 도메인을 넘는 병합은 없다.
+
+PROJECT 권한 문자열은 visible/list에서 각각 ScopeFilter를 구하도록 경계를 옮기면서 기존 값 출현이 2회 늘었다. task 공유 map 분리로 user +1, status +3, now +1, task +1, after +1, p +3, moving +2가 늘었다. 새 문자열 값은 모두 0이다. 기존 묶음의 user -1과 이번 +1은 상쇄되므로 최종 누적 축소 허용 목록에서는 user 항목이 빠진다. 범용 허용이나 차이 무시는 쓰지 않았다.
+
+|최종 누적 감소 값|감소 횟수|
+|---|---|
+|`id`|11|
+|`actor`|1|
+|`role`|1|
+|`DELETE FROM approval_lines WHERE document_id=:id`|2|
+|`SELECT id FROM departments WHERE id=:id`|2|
+|`today`|1|
+|`SELECT COUNT(*) FROM users WHERE department_id=:id`|1|
+|`SELECT COUNT(*) FROM departments WHERE parent_id=:id`|1|
+|`SELECT COUNT(*) FROM user_roles WHERE role_id=:id`|1|
+|`DELETE FROM role_permissions WHERE role_id=:id`|1|
+|`SELECT COUNT(*) FROM user_roles WHERE user_id=:user AND role_id=:role`|1|
+|`p.id=:id`|1|
+|`SELECT * FROM users WHERE id=:id FOR UPDATE`|2|
+
+### 간접 흐름 수동 대조와 이번 판단
+
+- notification.list: 쪽 검사 후 actor(long) → offset(long)을 서비스에서 구한다. count/find가 같은 parameters(user,size,offset)·where(unreadOnly)를 사용한다. map 순서 user(long), size(int), offset(long), 조건식 전체가 같다. read의 소유자 오류 RESOURCE_NOT_FOUND와 actor 호출 2회, NotificationService의 MANDATORY 3개, 링크·시각 계산 순서를 보존했다.
+- attendance.monthly: 서비스에서 start/end 계산 → access.scope → includesDepartment 검사 → 부서 존재 SQL(DEPARTMENT_NOT_FOUND) → descendants SQL → findMonthly. predicate와 부서 조건 문자열만 query로 옮겼다. map 키는 start/end/범위 파라미터/departments. predicate가 부서 확인 뒤로 가도 입력 ScopeFilter·map 값만 조립하고 SQL/외부 상태를 바꾸지 않으므로 조회·오류 순서는 같다. 기존 fetch의 `db.rows(sql(scope), args)`와 새 `db.rows(sql(where), args)`가 같은 sql(String)과 같은 조건/키를 받는 것을 수동 대조했다.
+- AttendanceFix handler: BodyValues/optionalTime 순서, copyBody(id,target), mapper 쓰기와 UPDATE의 동일 try, onApproved의 단일 now 공유를 유지했다. 월 집계의 YearMonth와 배치 now도 서비스에서 계산한다.
+- project.visible: require → today → access.scope → actor → findVisible → 비었을 때 count/throw. map id/today/actor/[departments], summary 삼항 SQL 식은 통째로 이동했다. list는 today/offset/size/actor/[departments]/[status]/[q] 순서, status.name와 검색 이스케이프는 서비스에 남기고 count → rows를 유지했다. helper는 SQL을 실행하지 않는다. 범위 getter와 map 조립을 COUNT와 목록에서 각각 수행해도 권한 조회 SQL은 한 번만 실행된다.
+- TaskOverdueWork: 프로젝트 잠금 rows → 빈 결과 continue를 유지했다. t.get의 Object 타입을 좁히지 않았고, now는 한 번만 읽는다. inserted != 1, 알림 제목·링크, 알림 호출 위치는 두 INSERT 사이 그대로다.
+- HomeService의 args는 승인된 예외다. actor/today/from/to를 같은 위치에서 만들고 project helper의 actor/departments 및 teamWeek의 department 추가도 같은 map에 반영한다. 쿼리별로 나누면 프로젝트 공개 범위 API까지 바꿔야 하므로 이번 범위에서 버렸다. 8개 실행 메서드 모두 동일 map 객체를 받으며 ErrorCode.USER_NOT_FOUND와 실행 순서를 유지한다.
+
+|분리한 map|키 순서|값·standalone 타입|사용하지 않는 키|
+|---|---|---|---|
+|position 선행 카드 확인|p, status, after|project:long, status:String, after:Long|moving 제거|
+|position MAX|p, status, moving|project:long, status:String, moving:long|after/lower 제거|
+|position 선행 위치|after|after:Long|p/status/moving 제거|
+|position 다음 위치|p, status, moving, lower|project:long, status:String, moving:long, lower:long|after 제거|
+|position 재배치|p, status, moving|project:long, status:String, moving:long|after/lower 제거|
+|마감 대상 INSERT|task, user, due, now|t.get(id):Object, t.get(user_id):Object, t.get(end_date):Object, now:LocalDateTime|그대로|
+|마감 이력 INSERT|task, user, now|위와 같은 task/user/now 변수|due 제거|
+
+반복 2회·단락 평가·position 계산·마지막 IllegalStateException은 서비스에 그대로 있다. NamedParameterJdbcTemplate가 읽는 이름과 바인딩 값은 같으며 사용하지 않는 키만 제거했다.
+
+### SQL 위치·호출 위치 측정
+
+|도메인|시작 SQL 값/파일|패키지 이동 뒤|최종|
+|---|---|---|---|
+|notification|11 / 2|11 / 2|0 / 0|
+|attendance|24 / 6|13 / 4|0 / 0|
+|project|26 / 3|20 / 1|0 / 0|
+|task|25 / 2|25 / 2|0 / 0|
+|home|16 / 2|2 / 1|0 / 0|
+|calendar|0 / 0|0 / 0|0 / 0|
+|dashboard|0 / 0|0 / 0|0 / 0|
+|합계|102 / 15|71 / 10|0 / 0|
+
+SQL 키워드 오탐은 WebConfig의 HTTP 메서드 문자열 `DELETE` 1개다. 키워드 없는 실제 SQL 조각은 시작 **5출현 → 최종 0**: 0=1, 1=1, p.id=:id 두 번, user_id=:user. HH:mm 두 곳은 시간 형식이므로 제외한다.
+
+ScopeFilter.predicate 호출은 서비스 0, repository 3(EmployeeRepository·LeaveQueries·AttendanceMonthlyQuery), PermissionAccess 1이다. 프로젝트 공개 범위 helper 호출은 BoardProjectService.visibilityPredicate → ProjectQueries.visibility, HomeService.home → BoardProjectService.visibilityPredicate다. ProjectQueries 내부 findVisible/where도 같은 visibility를 사용한다.
+
+### 형식과 보호 파일
+
+최종 main 일반 120자 초과 0·복수 문장 0·복수 선언자 0·한 줄 단위 기존 ProjectMember 1, test는 같은 항목 모두 0이다. 문자열 리터럴 예외는 main 88/test 78이며, 기존 보호된 name/member·key/value·text block 모양은 다음 위치에만 남는다. 테스트 형식은 바꾸지 않았다.
+
+#### main 잔여 예외 위치
+
+literal_exceptions: 88개
+
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java:32`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java:17`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java:35`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java:41`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:67`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:77`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:93`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:105`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java:116`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java:17`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java:31`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java:17`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java:28`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:21`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:23`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:29`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:43`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:49`
+- `backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:69`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceFixStore.java:31`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceFixStore.java:41`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceFixStore.java:52`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceQueries.java:18`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceQueries.java:24`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceQueries.java:34`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java:36`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java:79`
+- `backend/src/main/java/com/minierp/backend/domain/home/repository/HomeQueries.java:23`
+- `backend/src/main/java/com/minierp/backend/domain/home/repository/HomeQueries.java:60`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:41`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:51`
+- `backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java:54`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java:19`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java:39`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java:76`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java:23`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java:34`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java:56`
+- `backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java:73`
+- `backend/src/main/java/com/minierp/backend/domain/notification/repository/NotificationStore.java:24`
+- `backend/src/main/java/com/minierp/backend/domain/notification/repository/NotificationStore.java:30`
+- `backend/src/main/java/com/minierp/backend/domain/notification/repository/NotificationStore.java:36`
+- `backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java:36`
+- `backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java:50`
+- `backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java:72`
+- `backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java:102`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java:26`
+- `backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java:32`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java:22`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java:28`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java:42`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java:25`
+- `backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java:43`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectMemberRepository.java:16`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectQueries.java:23`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectQueries.java:38`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectQueries.java:89`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStore.java:30`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStore.java:55`
+- `backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectSummaryQuery.java:9`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskQueries.java:26`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskQueries.java:63`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskQueries.java:82`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskQueries.java:93`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskRepository.java:37`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskRepository.java:45`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskStore.java:18`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskStore.java:44`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskStore.java:55`
+- `backend/src/main/java/com/minierp/backend/domain/task/repository/TaskStore.java:88`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:45`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:53`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:64`
+- `backend/src/main/java/com/minierp/backend/domain/user/entity/User.java:67`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java:21`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java:35`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java:84`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java:22`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java:32`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java:81`
+- `backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java:88`
+- `backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java:27`
+- `backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java:31`
+
+name_member_breaks: 1개
+
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java:103`
+
+non_chain_breaks: 1개
+
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java:103`
+
+key_value_splits: 1개
+
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java:141`
+
+protected_fragment_splits: 2개
+
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java:103`
+- `backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java:141`
+
+#### test 잔여 예외 위치
+
+literal_exceptions: 78개
+
+- `backend/src/test/java/com/minierp/backend/integration/CoreApiIntegrationTest.java:57`
+- `backend/src/test/java/com/minierp/backend/integration/CoreApiIntegrationTest.java:61`
+- `backend/src/test/java/com/minierp/backend/integration/DepartmentHeadConcurrencyTest.java:65`
+- `backend/src/test/java/com/minierp/backend/integration/M1AcceptanceTest.java:330`
+- `backend/src/test/java/com/minierp/backend/integration/M1AcceptanceTest.java:338`
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:46`
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:71`
+- `backend/src/test/java/com/minierp/backend/integration/M2DataMigrationTest.java:81`
+- `backend/src/test/java/com/minierp/backend/integration/M2DataMigrationTest.java:87`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:63`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:65`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:293`
+- `backend/src/test/java/com/minierp/backend/integration/M2DocumentIntegrationTest.java:399`
+- `backend/src/test/java/com/minierp/backend/integration/M2FormApiTest.java:103`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxPerformanceTest.java:29`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxPerformanceTest.java:92`
+- `backend/src/test/java/com/minierp/backend/integration/M2InboxTest.java:16`
+- `backend/src/test/java/com/minierp/backend/integration/M2ReviewTest.java:14`
+- `backend/src/test/java/com/minierp/backend/integration/M2ReviewTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceFixTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceTest.java:117`
+- `backend/src/test/java/com/minierp/backend/integration/M3AttendanceTest.java:126`
+- `backend/src/test/java/com/minierp/backend/integration/M3BatchResponseTest.java:28`
+- `backend/src/test/java/com/minierp/backend/integration/M3CsvLabelsTest.java:32`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:25`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:29`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:36`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:42`
+- `backend/src/test/java/com/minierp/backend/integration/M3DataMigrationTest.java:53`
+- `backend/src/test/java/com/minierp/backend/integration/M3LeaveAdjustmentConcurrencyTest.java:51`
+- `backend/src/test/java/com/minierp/backend/integration/M3LeaveGrantTest.java:181`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:31`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:43`
+- `backend/src/test/java/com/minierp/backend/integration/M3LegacyAttendanceTest.java:77`
+- `backend/src/test/java/com/minierp/backend/integration/M3MonthlyTest.java:170`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardApiTest.java:200`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardApiTest.java:281`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardConcurrencyTest.java:159`
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardConcurrencyTest.java:231`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:24`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:28`
+- `backend/src/test/java/com/minierp/backend/integration/M4DataMigrationTest.java:33`
+- `backend/src/test/java/com/minierp/backend/integration/M4DeterministicLockTest.java:114`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:26`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:39`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:43`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:55`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:58`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeGrowthTest.java:61`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:21`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:24`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:48`
+- `backend/src/test/java/com/minierp/backend/integration/M4HomeTest.java:150`
+- `backend/src/test/java/com/minierp/backend/integration/M4LegacyExperimentTest.java:88`
+- `backend/src/test/java/com/minierp/backend/integration/M4OverdueTest.java:47`
+- `backend/src/test/java/com/minierp/backend/integration/M4OverdueTest.java:90`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:34`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:48`
+- `backend/src/test/java/com/minierp/backend/integration/M4QueryGrowthTest.java:103`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:157`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:207`
+- `backend/src/test/java/com/minierp/backend/integration/M5ProductionTest.java:231`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:55`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:58`
+- `backend/src/test/java/com/minierp/backend/support/ApprovalApiTestSupport.java:65`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:69`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:72`
+- `backend/src/test/java/com/minierp/backend/support/AttendanceTestSupport.java:83`
+- `backend/src/test/java/com/minierp/backend/support/BoardTestSupport.java:11`
+- `backend/src/test/java/com/minierp/backend/support/BoardTestSupport.java:24`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:14`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:16`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:18`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:20`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:24`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:26`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:188`
+
+key_value_splits: 8개
+
+- `backend/src/test/java/com/minierp/backend/support/refactoring/RecordingOrder.java:17`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:14`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:16`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:18`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:20`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:22`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:24`
+- `backend/src/test/java/com/minierp/backend/support/refactoring/SnapshotComparator.java:26`
+
+outer_operator_unsplit: 1개
+
+- `backend/src/test/java/com/minierp/backend/integration/M4BoardConcurrencyTest.java:164`
+
+protected_fragment_splits: 1개
+
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:35`
+
+ternary_layout: 1개
+
+- `backend/src/test/java/com/minierp/backend/integration/M1DataMigrationTest.java:35`
+
+### 재현 명령과 남은 한계
+
+```sh
+# 후보/기준은 작업 트리 밖 archive. 기존 target 기록을 지우지 않는다.
+JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home
+export JAVA_HOME
+python3 docs/refactoring/R-03-sql-location-measure.py --root "$CANDIDATE" --baseline "$BASE" \
+  --allow-count-reductions "$REDUCTIONS" \
+  --rename-class com.minierp.backend.domain.project.service.ProjectStateStore=com.minierp.backend.domain.project.repository.ProjectStateStore \
+  --check-repository "$REPOSITORY_FILE" --preserve-repository "$OLD_FILE=$NEW_FILE" --output "$SAFETY_JSON"
+python3 docs/refactoring/R-03-call-site-check.py --before "$BASE" --after "$CANDIDATE" \
+  --classpath "$CLASSPATH_TXT" --file "$ORIGINAL_FILE" --moved "$OLD_FILE=$NEW_FILE" --output "$CALLS_JSON"
+python3 docs/refactoring/R-03-text-block-check.py --before "$BASE" --after "$CANDIDATE" --output "$CLOSING_JSON"
+python3 docs/refactoring/R-03-package-move-check.py --before "$BEFORE_MOVE" --after "$AFTER_MOVE" \
+  --moved "$OLD_FILE=$NEW_FILE" --output "$PACKAGE_JSON"
+python3 docs/refactoring/R-02-format-measure.py --root "$CANDIDATE" --output "$FORMAT_JSON"
+python3 docs/refactoring/R-03-format-units.py --root "$CANDIDATE" --output "$UNITS_JSON"
+# --file/--moved/--check-repository/--preserve-repository는 대상별 반복한다.
+cd backend
+./mvnw -Duser.timezone=UTC -Drefactoring.record="$RECORDING" test
+"$JAVA_HOME/bin/java" -cp "$(cat "$RECORDING/classpath.txt")" \
+  com.minierp.backend.support.refactoring.SnapshotComparator src/test/resources/refactoring-baseline "$RECORDING"
+./mvnw -Duser.timezone=UTC test
+```
+
+- SQL 합치기로 타입을 통일하는 대안은 버렸다(Long/long 변환 금지). 기존 쿼리 클래스의 판정·시계 코드를 같이 정리하는 대안도 범위 밖이라 하지 않았다.
+- 이번 작업에서 새 기능 버그는 확인하지 않았다. 기존 클래스의 SQL 외 코드는 위 목록대로 후속 검토 대상으로 남겼다.
+- 비교 도구는 간접 map의 일반적인 데이터 흐름 증명기가 아니므로 위 표의 키·값·타입·실행 순서를 직접 대조했다. 기록 모드는 기존 정책대로 경합 순서를 고정하는 한계가 있으며 이번에 정책을 변경하지 않았다.
+- 실제 서버·개발 DB/Redis·운영 부하 실험은 수행하지 않았다(금지 범위). frontend/backend/md/V1~V6/.claude/기준선/기록기/비교기는 변경하지 않았다. 병합·푸시는 하지 않았다.
+
+- 이 보고서 커밋의 별도 git archive 컴파일: test-compile 종료 0, 9.49초. Java 변경은 없으며 보고서만 추가했다.
