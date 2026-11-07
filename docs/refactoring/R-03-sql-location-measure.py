@@ -19,7 +19,8 @@ import subprocess
 import tempfile
 
 SQL = re.compile(r'\b(?:SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|SET|VALUES|ORDER BY|GROUP BY|LIMIT|FOR UPDATE|AND|OR|IN)\b')
-GLOBAL_QUERIES = {'PermissionAccess', 'BatchRunRecorder', 'InvitationTokenStore'}
+GLOBAL_QUERIES = {'PermissionAccess', 'BatchRunRecorder', 'InvitationTokenStore', 'ScopeFilter'}
+FALSE_POSITIVES = {('backend/src/main/java/com/minierp/backend/global/config/WebConfig.java', 'DELETE'): 'HTTP method name, not SQL'}
 SCANNER = r'''
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
@@ -46,6 +47,7 @@ class SqlMeasure {
                 new TreePathScanner<Void, Void>() {
                     Deque<String> classes = new ArrayDeque<>();
                     String method = "<class>";
+                    Set<String> notificationReceivers = new HashSet<>();
                     long line(Tree tree) { return unit.getLineMap().getLineNumber(positions.getStartPosition(unit, tree)); }
                     String owner() { return unit.getPackageName() + "." + String.join(".", classes); }
                     void output(String kind, Tree tree, String value) {
@@ -78,6 +80,11 @@ class SqlMeasure {
                         method = previous;
                         return null;
                     }
+                    @Override public Void visitVariable(VariableTree tree, Void unused) {
+                        if (tree.getType() != null && tree.getType().toString().endsWith("NotificationService"))
+                            notificationReceivers.add(tree.getName().toString());
+                        return super.visitVariable(tree, unused);
+                    }
                     @Override public Void visitLiteral(LiteralTree tree, Void unused) {
                         if (tree.getValue() instanceof String value) output("L", tree, value);
                         return super.visitLiteral(tree, unused);
@@ -89,6 +96,10 @@ class SqlMeasure {
                         String name = tree.getMethodSelect().toString();
                         String shortName = name.substring(name.lastIndexOf('.') + 1);
                         if (shortName.equals("valueOf") || shortName.startsWith("parse")) output("P", tree, name);
+                        if (Set.of("now", "actor", "scope").contains(shortName)
+                                || name.startsWith("BodyValues.") || name.startsWith("LeaveGrantRules.")
+                                || name.startsWith("NotificationService.")
+                                || notificationReceivers.stream().anyMatch(n -> name.startsWith(n + "."))) output("V", tree, name);
                         return super.visitMethodInvocation(tree, unused);
                     }
                 }.scan(unit, null);
@@ -119,11 +130,15 @@ def scan(root):
 
 def summarize(records):
     outside = []
+    false_positives = []
     literals = [r for r in records if r['kind'] == 'L']
     for record in literals:
         file = record['file']
         allowed = ('/repository/' in file or '/global/persistence/' in file
                    or '/global/' in file and Path(file).stem in GLOBAL_QUERIES)
+        if (file, record['value']) in FALSE_POSITIVES:
+            false_positives.append({**record, 'reason': FALSE_POSITIVES[(file, record['value'])]})
+            continue
         if SQL.search(record['value']) and not allowed:
             item = dict(record)
             item['domain'] = file.split('/domain/')[1].split('/')[0] if '/domain/' in file else 'global'
@@ -135,7 +150,7 @@ def summarize(records):
         domains[domain] = {'sqlValues': len(items), 'files': len(files), 'byFile': dict(sorted(files.items()))}
     return {'literalCount': len(literals), 'uniqueLiteralValues': len({r['value'] for r in literals}),
             'outsideSqlValues': len(outside), 'outsideSqlFiles': len({r['file'] for r in outside}),
-            'domains': domains, 'outside': outside,
+            'domains': domains, 'outside': outside, 'falsePositives': false_positives,
             'transactions': sorted(({'owner': r['owner'], 'annotation': r['value']}
                                    for r in records if r['kind'] == 'T'), key=lambda r: (r['owner'], r['annotation']))}
 
@@ -173,7 +188,7 @@ def main():
         parser.error('Missing repository files: ' + ', '.join(missing))
     records = scan(args.root.resolve())
     result = summarize(records)
-    violations = [r for r in records if r['file'] in args.check_repository and r['kind'] in ('T', 'X', 'P')]
+    violations = [r for r in records if r['file'] in args.check_repository and r['kind'] in ('T', 'X', 'P', 'V')]
     result['repositoryViolations'] = violations
     failed = bool(violations)
     if args.baseline:
