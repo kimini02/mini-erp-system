@@ -1,4 +1,4 @@
-package com.minierp.backend.domain.project.service;
+package com.minierp.backend.domain.project.repository;
 
 import com.minierp.backend.global.persistence.SqlStore;
 import lombok.RequiredArgsConstructor;

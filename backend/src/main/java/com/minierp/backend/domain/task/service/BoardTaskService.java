@@ -1,5 +1,6 @@
 package com.minierp.backend.domain.task.service;
 
+import com.minierp.backend.domain.project.repository.ProjectStateStore;
 import com.minierp.backend.domain.task.dto.BoardTaskRequests.*;
 import com.minierp.backend.domain.project.service.*;
 import com.minierp.backend.domain.notification.service.NotificationService;

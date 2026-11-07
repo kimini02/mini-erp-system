@@ -1,5 +1,6 @@
 package com.minierp.backend.domain.home.service;
 
+import com.minierp.backend.domain.home.repository.HomeQueries;
 import com.minierp.backend.domain.attendance.service.AttendanceService;
 import com.minierp.backend.domain.approval.service.FormService;
 import com.minierp.backend.domain.leave.service.LeaveQueryService;

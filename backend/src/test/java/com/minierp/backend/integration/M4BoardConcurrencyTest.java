@@ -1,7 +1,7 @@
 package com.minierp.backend.integration;
 
 import com.minierp.backend.support.*;
-import com.minierp.backend.domain.project.service.ProjectStateStore;
+import com.minierp.backend.domain.project.repository.ProjectStateStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;

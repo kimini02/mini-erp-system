@@ -1,4 +1,4 @@
-package com.minierp.backend.domain.home.service;
+package com.minierp.backend.domain.home.repository;
 
 /** Shared SQL text lets MariaDB ANALYZE tests measure the exact production queries. */
 public final class HomeQueries {

@@ -1,5 +1,6 @@
 package com.minierp.backend.domain.attendance.service;
 
+import com.minierp.backend.domain.attendance.repository.AttendanceStore;
 import com.minierp.backend.global.persistence.SqlStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

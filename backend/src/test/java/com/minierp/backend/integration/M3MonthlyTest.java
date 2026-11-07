@@ -1,7 +1,7 @@
 package com.minierp.backend.integration;
 
 import com.minierp.backend.support.AttendanceTestSupport;
-import com.minierp.backend.domain.attendance.service.AttendanceMonthlyQuery;
+import com.minierp.backend.domain.attendance.repository.AttendanceMonthlyQuery;
 import com.minierp.backend.domain.user.entity.UserRole;
 import com.minierp.backend.global.persistence.SqlStore;
 import org.junit.jupiter.api.Test;

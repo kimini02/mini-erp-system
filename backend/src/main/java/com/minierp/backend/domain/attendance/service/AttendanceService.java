@@ -1,5 +1,6 @@
 package com.minierp.backend.domain.attendance.service;
 
+import com.minierp.backend.domain.attendance.repository.AttendanceStore;
 import com.minierp.backend.global.persistence.SqlStore;
 import com.minierp.backend.global.exception.*;
 import com.minierp.backend.global.permission.PermissionAccess;

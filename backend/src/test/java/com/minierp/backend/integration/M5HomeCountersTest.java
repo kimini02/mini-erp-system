@@ -1,6 +1,6 @@
 package com.minierp.backend.integration;
 
-import com.minierp.backend.domain.attendance.service.AttendanceStore;
+import com.minierp.backend.domain.attendance.repository.AttendanceStore;
 import com.minierp.backend.support.BoardTestSupport;
 import com.minierp.backend.support.JdbcProbe;
 import org.junit.jupiter.api.Test;

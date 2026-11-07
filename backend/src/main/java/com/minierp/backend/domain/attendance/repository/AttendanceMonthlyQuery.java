@@ -1,4 +1,4 @@
-package com.minierp.backend.domain.attendance.service;
+package com.minierp.backend.domain.attendance.repository;
 
 import com.minierp.backend.global.persistence.SqlStore;
 import lombok.RequiredArgsConstructor;

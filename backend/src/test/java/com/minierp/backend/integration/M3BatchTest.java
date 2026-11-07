@@ -1,5 +1,6 @@
 package com.minierp.backend.integration;
 
+import com.minierp.backend.domain.attendance.repository.AttendanceStore;
 import com.minierp.backend.support.AttendanceTestSupport;
 import com.minierp.backend.domain.attendance.service.*;
 import com.minierp.backend.domain.user.entity.UserRole;

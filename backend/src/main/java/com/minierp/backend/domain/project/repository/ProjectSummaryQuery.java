@@ -1,4 +1,4 @@
-package com.minierp.backend.domain.project.service;
+package com.minierp.backend.domain.project.repository;
 
 /** Select the authorized page first, then aggregate only its project ids. */
 public final class ProjectSummaryQuery {
