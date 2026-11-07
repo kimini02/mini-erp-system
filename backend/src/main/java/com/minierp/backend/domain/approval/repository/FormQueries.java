@@ -17,8 +17,7 @@ public class FormQueries {
           SELECT f.*,COUNT(CASE WHEN s.line_kind='APPROVER' THEN 1 END) AS approvers,
           COUNT(CASE WHEN s.line_kind='REFERENCE' THEN 1 END) AS refs
           FROM approval_forms f LEFT JOIN approval_form_steps s ON s.form_id=f.id GROUP BY f.id ORDER BY f.id
-          """,
-                Map.of());
+          """, Map.of());
     }
 
     public List<Map<String, Object>> findSteps(Object id) {

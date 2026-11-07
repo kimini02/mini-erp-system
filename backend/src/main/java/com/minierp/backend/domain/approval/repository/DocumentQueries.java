@@ -23,8 +23,7 @@ public class DocumentQueries {
             SELECT COUNT(*) FROM approval_documents d WHERE d.id=:id AND (d.drafter_id=:actor
             OR EXISTS(SELECT 1 FROM approval_lines l WHERE l.document_id=d.id AND l.approver_id=:actor)
             OR EXISTS(SELECT 1 FROM user_roles ur JOIN roles r ON r.id=ur.role_id WHERE ur.user_id=:actor AND r.code='CHIEF'))
-            """,
-                map("id", id, "actor", actor));
+            """, map("id", id, "actor", actor));
     }
 
     public List<Map<String, Object>> findLines(long id) {

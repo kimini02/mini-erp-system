@@ -77,9 +77,9 @@ public class LeaveQueries {
                 map("id", id));
     }
 
-    public long countBalances(int year, int size, long offset, ScopeFilter scope, Long department, String prefix) {
+    public long countBalances(int year, int size, long offset, ScopeFilter scope, Long department, String pattern) {
         var args = balanceParameters(year, size, offset);
-        String where = balanceWhere(scope, args, department, prefix);
+        String where = balanceWhere(scope, args, department, pattern);
         return db.count("SELECT COUNT(*) FROM users u WHERE " + where, args);
     }
 
@@ -89,9 +89,9 @@ public class LeaveQueries {
             long offset,
             ScopeFilter scope,
             Long department,
-            String prefix) {
+            String pattern) {
         var args = balanceParameters(year, size, offset);
-        String where = balanceWhere(scope, args, department, prefix);
+        String where = balanceWhere(scope, args, department, pattern);
         return db.rows("""
           SELECT u.id,u.user_name,p.name AS title,d.name AS department,u.hire_date,
           COALESCE(l.granted,0) AS granted,COALESCE(l.used,0) AS used,COALESCE(l.reserved,0) AS reserved,COALESCE(l.adjusted,0) AS adjusted,COALESCE(l.available,0) AS available
@@ -102,8 +102,7 @@ public class LeaveQueries {
             SUM(CASE WHEN entry_type='ADJUST' THEN days ELSE 0 END) AS adjusted,SUM(days) AS available
             FROM leave_ledger WHERE leave_year=:year GROUP BY user_id
           ) l ON l.user_id=u.id WHERE
-          """ + where + " ORDER BY u.user_name,u.id LIMIT :size OFFSET :offset",
-                args);
+          """ + where + " ORDER BY u.user_name,u.id LIMIT :size OFFSET :offset", args);
     }
 
     public Map<String, Object> findAdjustmentBalance(long id, int year) {
@@ -124,22 +123,21 @@ public class LeaveQueries {
               SELECT x.*,SUM(x.days) OVER(ORDER BY x.created_at,x.id ROWS UNBOUNDED PRECEDING) AS balance
               FROM leave_ledger x WHERE x.user_id=:user AND x.leave_year=:year
             ) l LEFT JOIN approval_documents d ON d.id=l.document_id
-            """ + filter + " ORDER BY l.created_at DESC,l.id DESC",
-                args);
+            """ + filter + " ORDER BY l.created_at DESC,l.id DESC", args);
     }
 
     private Map<String, Object> balanceParameters(int year, int size, long offset) {
         return map("year", year, "size", size, "offset", offset);
     }
 
-    private String balanceWhere(ScopeFilter scope, Map<String, Object> args, Long department, String prefix) {
+    private String balanceWhere(ScopeFilter scope, Map<String, Object> args, Long department, String pattern) {
         String where = scope.predicate("u", args);
         if (department != null) {
             args.put("dept", department);
             where += " AND u.department_id=:dept";
         }
-        if (prefix != null) {
-            args.put("q", prefix);
+        if (pattern != null) {
+            args.put("q", pattern);
             where += " AND (u.user_name LIKE :q ESCAPE '!' OR u.login_id LIKE :q ESCAPE '!')";
         }
         return where;

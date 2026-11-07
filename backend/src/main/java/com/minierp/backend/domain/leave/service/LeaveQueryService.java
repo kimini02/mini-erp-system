@@ -55,11 +55,11 @@ public class LeaveQueryService {
         }
         // Calculate balance before filtering: a USE-only view must still include earlier GRANTs in its balance.
         int y = year(requestedYear);
-        String filter = null;
+        String entryType = null;
         if (type != null && !type.isBlank()) {
-            filter = type;
+            entryType = type;
         }
-        return queries.findLedger(user, y, filter).stream()
+        return queries.findLedger(user, y, entryType).stream()
                 .map(l -> map("date", ((LocalDateTime) l.get("created_at")).toLocalDate(), "type", l.get("entry_type"),
                         "days", l.get("days"), "balance", l.get("balance"), "memo", l.get("memo"),
                         "document", l.get("document_id") == null

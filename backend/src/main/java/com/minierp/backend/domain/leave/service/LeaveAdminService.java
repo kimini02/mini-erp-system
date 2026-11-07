@@ -44,12 +44,12 @@ public class LeaveAdminService {
                 throw new BusinessException(ErrorCode.ACCESS_DENIED);
             }
         }
-        String prefix = null;
+        String pattern = null;
         if (search != null && !search.isBlank()) {
-            prefix = "%" + search.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+            pattern = "%" + search.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
         }
-        long total = queries.countBalances(year, size, offset, scope, department, prefix);
-        var rows = queries.findBalances(year, size, offset, scope, department, prefix).stream()
+        long total = queries.countBalances(year, size, offset, scope, department, pattern);
+        var rows = queries.findBalances(year, size, offset, scope, department, pattern).stream()
                 .map(r -> map(
                         "user", map("id", r.get("id"), "name", r.get("user_name"), "title", r.get("title"),
                                 "department", r.get("department")), "hireDate", r.get("hire_date"),
