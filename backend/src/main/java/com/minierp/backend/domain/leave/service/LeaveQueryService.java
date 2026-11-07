@@ -5,7 +5,7 @@ import com.minierp.backend.domain.approval.handler.BodyValues;
 import com.minierp.backend.domain.leave.handler.LeaveFormHandler;
 import com.minierp.backend.domain.org.service.WorkingDays;
 import com.minierp.backend.global.exception.*;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.leave.repository.LeaveQueries;
 import com.minierp.backend.global.permission.PermissionAccess;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class LeaveQueryService {
-    private final SqlStore db;
+    private final LeaveQueries queries;
     private final PermissionAccess access;
     private final Clock clock;
     private final LeaveFormHandler handler;
@@ -35,12 +35,7 @@ public class LeaveQueryService {
 
     public Map<String, Object> balance(Integer requestedYear) {
         int y = year(requestedYear);
-        var result = db.one("""
-            SELECT COALESCE(SUM(CASE WHEN entry_type='GRANT' THEN days ELSE 0 END),0) AS granted,
-            -COALESCE(SUM(CASE WHEN entry_type='USE' THEN days ELSE 0 END),0) AS used,
-            -COALESCE(SUM(CASE WHEN entry_type IN ('RESERVE','RELEASE') THEN days ELSE 0 END),0) AS reserved,
-            COALESCE(SUM(days),0) AS available FROM leave_ledger WHERE user_id=:user AND leave_year=:year
-            """, map("user", access.actor(), "year", y), ErrorCode.USER_NOT_FOUND);
+        var result = queries.findBalance(access.actor(), y);
         result.put("year", y);
         return result;
     }
@@ -59,18 +54,12 @@ public class LeaveQueryService {
             throw BodyValues.invalid();
         }
         // Calculate balance before filtering: a USE-only view must still include earlier GRANTs in its balance.
-        var args = map("user", user, "year", year(requestedYear));
-        String filter = "";
+        int y = year(requestedYear);
+        String filter = null;
         if (type != null && !type.isBlank()) {
-            args.put("type", type);
-            filter = " WHERE l.entry_type=:type";
+            filter = type;
         }
-        return db.rows("""
-            SELECT l.*,d.doc_no,d.status FROM (
-              SELECT x.*,SUM(x.days) OVER(ORDER BY x.created_at,x.id ROWS UNBOUNDED PRECEDING) AS balance
-              FROM leave_ledger x WHERE x.user_id=:user AND x.leave_year=:year
-            ) l LEFT JOIN approval_documents d ON d.id=l.document_id
-            """ + filter + " ORDER BY l.created_at DESC,l.id DESC", args).stream()
+        return queries.findLedger(user, y, filter).stream()
                 .map(l -> map("date", ((LocalDateTime) l.get("created_at")).toLocalDate(), "type", l.get("entry_type"),
                         "days", l.get("days"), "balance", l.get("balance"), "memo", l.get("memo"),
                         "document", l.get("document_id") == null
