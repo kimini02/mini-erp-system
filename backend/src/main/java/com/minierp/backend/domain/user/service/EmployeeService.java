@@ -135,12 +135,12 @@ public class EmployeeService {
             departments = includeSub ? access.descendants(departmentId) : List.of(departmentId);
         }
         String[] parts = sort.split(",");
-        var columns = queries.findSortColumns();
+        var columns = queries.sortColumns();
         if (!columns.containsKey(parts[0]) || parts.length > 2
                 || parts.length == 2 && !Set.of("asc", "desc").contains(parts[1].toLowerCase())) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        String order = queries.findSortOrder(columns, parts);
+        String order = queries.orderBy(columns, parts);
         var selected = repository.search(scope, q, departments, status, page, size, order);
         var result = page(views(selected.ids()), page, size, selected.total());
         result.put("statusCounts", selected.counts());
@@ -213,9 +213,7 @@ public class EmployeeService {
             treeLock.lock();
         }
         access.assertUserInScope("EMPLOYEE", id);
-        var old = r.email() == null && r.departmentId() == null
-                ? raw(id)
-                : store.lockUser(id);
+        var old = r.email() == null && r.departmentId() == null ? raw(id) : store.lockUser(id);
         if (r.email() != null && !r.email().equals(old.get("user_email"))) {
             requireRoleUpdateForPrivilegedTarget(id);
         }

@@ -27,8 +27,7 @@ public class EmployeeQueries {
             SELECT u.id,u.login_id,u.user_name,u.user_email,u.department_id,u.position_id,u.hire_date,u.retired_date,u.status,u.user_pw,
               (SELECT COALESCE(SUM(l.days),0) FROM leave_ledger l WHERE l.user_id=u.id) AS remaining_annual_leave,u.created_at,u.updated_at,d.name AS department_name,d.code AS department_code,p.name AS position_name
             FROM users u JOIN departments d ON d.id=u.department_id JOIN positions p ON p.id=u.position_id WHERE u.id IN (:ids)
-            """,
-                map("ids", ids));
+            """, map("ids", ids));
     }
 
     public List<Map<String, Object>> findEmployeeRoles(List<Long> ids) {
@@ -61,12 +60,12 @@ public class EmployeeQueries {
         return db.one("SELECT id FROM positions WHERE id=:id", map("id", id), ErrorCode.POSITION_NOT_FOUND);
     }
 
-    public Map<String, String> findSortColumns() {
+    public Map<String, String> sortColumns() {
         return Map.of("userName", "u.user_name", "loginId", "u.login_id", "hireDate", "u.hire_date",
                 "status", "u.status");
     }
 
-    public String findSortOrder(Map<String, String> columns, String[] parts) {
+    public String orderBy(Map<String, String> columns, String[] parts) {
         return columns.get(parts[0]) + (parts.length == 2 ? " " + parts[1] : " ASC");
     }
 

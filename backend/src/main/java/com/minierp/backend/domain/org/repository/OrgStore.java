@@ -33,7 +33,7 @@ public class OrgStore {
         return db.update("UPDATE departments SET parent_id=:parent WHERE id=:id", map("id", id, "parent", parent));
     }
 
-    public Map<String, Object> lockHeadCandidate(long id) {
+    public Map<String, Object> lockHeadCandidate(Long id) {
         return db.one("SELECT id,department_id,status FROM users WHERE id=:id FOR UPDATE", map("id", id),
                 ErrorCode.USER_NOT_FOUND);
     }
@@ -103,7 +103,7 @@ public class OrgStore {
                 params);
     }
 
-    public int updateWorkSchedule(LocalTime start, LocalTime end, Integer grace, String name, long id) {
+    public int updateWorkSchedule(LocalTime start, LocalTime end, Integer grace, String name, Long id) {
         var params = workScheduleParameters(start, end, grace, name);
         params.put("id", id);
         return db.update("UPDATE work_schedules SET start_time=:start,end_time=:end,late_grace_min=:grace WHERE id=:id",
