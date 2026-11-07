@@ -1,6 +1,7 @@
 package com.minierp.backend.domain.approval.service;
 
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.approval.repository.FormQueries;
+import com.minierp.backend.domain.approval.repository.FormStore;
 import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,12 +13,16 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class FormService {
-    private final SqlStore db;
+    private final FormQueries queries;
+    private final FormStore store;
     private final ApprovalLineResolver resolver;
     public record Options(Boolean dedupeApprover, Boolean fallbackToUpper, Boolean skipSelf, Boolean allowLineEdit) {
     }
 
     public record Step(String lineKind, String approverType, String roleCode, Long userId) {
+    }
+
+    private record StepValues(Object form, String kind, String type, Long role, Long user, int order) {
     }
 
     public static String shortName(String code) {
@@ -43,11 +48,7 @@ public class FormService {
     }
 
     public List<Map<String, Object>> list() {
-        return db.rows("""
-          SELECT f.*,COUNT(CASE WHEN s.line_kind='APPROVER' THEN 1 END) AS approvers,
-          COUNT(CASE WHEN s.line_kind='REFERENCE' THEN 1 END) AS refs
-          FROM approval_forms f LEFT JOIN approval_form_steps s ON s.form_id=f.id GROUP BY f.id ORDER BY f.id
-          """, Map.of()).stream().map(f -> {
+        return queries.findForms().stream().map(f -> {
             var out = presentation(f);
             out.put("allowLineEdit", bool(f, "allow_line_edit"));
             out.put("approverStepCount", f.get("approvers"));
@@ -63,9 +64,7 @@ public class FormService {
                 map("dedupeApprover", bool(f, "dedupe_approver"), "fallbackToUpper", bool(f, "fallback_to_upper"),
                         "skipSelf", bool(f, "skip_self"), "allowLineEdit", bool(f, "allow_line_edit")));
         out.put("steps",
-                db.rows(
-                        "SELECT s.*,r.code AS role_code,r.name AS role_name,u.user_name FROM approval_form_steps s LEFT JOIN roles r ON r.id=s.role_id LEFT JOIN users u ON u.id=s.user_id WHERE s.form_id=:id ORDER BY s.step_order",
-                        map("id", f.get("id")))
+                queries.findSteps(f.get("id"))
                         .stream()
                         .map(s -> map("order", s.get("step_order"), "lineKind", s.get("line_kind"),
                                 "approverType", s.get("approver_type"), "roleCode", s.get("role_code"),
@@ -82,10 +81,7 @@ public class FormService {
     @Transactional
     public Map<String, Object> patch(String code, Options o) {
         var f = resolver.form(code);
-        db.update(
-                "UPDATE approval_forms SET dedupe_approver=COALESCE(:dedupe,dedupe_approver),fallback_to_upper=COALESCE(:fallback,fallback_to_upper),skip_self=COALESCE(:self,skip_self),allow_line_edit=COALESCE(:edit,allow_line_edit) WHERE id=:id",
-                map("id", f.get("id"), "dedupe", o.dedupeApprover(), "fallback", o.fallbackToUpper(),
-                        "self", o.skipSelf(), "edit", o.allowLineEdit()));
+        store.updateOptions(f.get("id"), o.dedupeApprover(), o.fallbackToUpper(), o.skipSelf(), o.allowLineEdit());
         return detail(code);
     }
 
@@ -100,7 +96,7 @@ public class FormService {
                 || steps.stream().noneMatch(s -> "APPROVER".equals(s.lineKind()))) {
             throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
         }
-        List<Map<String, Object>> resolved = new ArrayList<>();
+        List<StepValues> resolved = new ArrayList<>();
         for (var step : steps) {
             Long role = null;
             Long user = null;
@@ -108,29 +104,21 @@ public class FormService {
                 if (step.roleCode() == null || step.roleCode().isBlank()) {
                     throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
                 }
-                role = number(
-                        db.one("SELECT id FROM roles WHERE code=:code", map("code", step.roleCode()),
-                                ErrorCode.ROLE_NOT_FOUND), "id");
+                role = number(queries.findRole(step.roleCode()), "id");
             }
             if (step.approverType().equals("USER")) {
                 if (step.userId() == null) {
                     throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
                 }
-                user = number(
-                        db.one("SELECT id FROM users WHERE id=:id", map("id", step.userId()), ErrorCode.USER_NOT_FOUND),
-                        "id");
+                user = number(queries.findUser(step.userId()), "id");
             }
             resolved.add(
-                    map("form", f.get("id"), "kind", step.lineKind(), "type", step.approverType(), "role", role,
-                            "user", user, "order", resolved.size() + 1));
+                    new StepValues(f.get("id"), step.lineKind(), step.approverType(), role, user, resolved.size() + 1));
         }
-        db.one("SELECT id FROM approval_forms WHERE id=:id FOR UPDATE", map("id", f.get("id")),
-                ErrorCode.FORM_NOT_FOUND);
-        db.update("DELETE FROM approval_form_steps WHERE form_id=:id", map("id", f.get("id")));
+        store.lockForm(f.get("id"));
+        store.deleteSteps(f.get("id"));
         for (var step : resolved) {
-            db.update(
-                    "INSERT INTO approval_form_steps(form_id,step_order,line_kind,approver_type,role_id,user_id) VALUES(:form,:order,:kind,:type,:role,:user)",
-                    step);
+            store.insertStep(step.form(), step.kind(), step.type(), step.role(), step.user(), step.order());
         }
         return detail(code);
     }

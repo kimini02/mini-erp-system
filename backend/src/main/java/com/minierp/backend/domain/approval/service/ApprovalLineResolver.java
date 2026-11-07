@@ -1,7 +1,7 @@
 package com.minierp.backend.domain.approval.service;
 
 import com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.approval.repository.ApprovalLineQueries;
 import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,16 +11,13 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @Service
 @RequiredArgsConstructor
 public class ApprovalLineResolver {
-    private final SqlStore db;
+    private final ApprovalLineQueries queries;
     public Map<String, Object> form(String code) {
-        return db.one("SELECT * FROM approval_forms WHERE code=:code", map("code", code), ErrorCode.FORM_NOT_FOUND);
+        return queries.findForm(code);
     }
 
     public Map<String, Object> person(long id) {
-        return db.one("""
-        SELECT u.id,u.user_name AS name,p.name AS title,d.name AS department,u.department_id,u.status
-        FROM users u JOIN positions p ON p.id=u.position_id JOIN departments d ON d.id=u.department_id WHERE u.id=:id
-        """, map("id", id), ErrorCode.APPROVER_NOT_FOUND);
+        return queries.findPerson(id);
     }
 
     public record Resolved(
@@ -58,8 +55,7 @@ public class ApprovalLineResolver {
                                 "user_id", s.userId()));
             }
         } else {
-            steps = db.rows("SELECT * FROM approval_form_steps WHERE form_id=:id ORDER BY step_order",
-                    map("id", form.get("id")));
+            steps = queries.findSteps(form.get("id"));
         }
         if (steps.stream().noneMatch(s -> "APPROVER".equals(s.get("line_kind")))) {
             throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
@@ -76,9 +72,7 @@ public class ApprovalLineResolver {
                 switch (type) {
                     case "USER" -> person = person(number(step, "user_id"));
                     case "ROLE" -> {
-                        var rows = db.rows(
-                                "SELECT u.id FROM users u JOIN user_roles ur ON ur.user_id=u.id WHERE ur.role_id=:role AND u.status='ACTIVE' ORDER BY u.id LIMIT 1",
-                                map("role", step.get("role_id")));
+                        var rows = queries.findRoleHolder(step.get("role_id"));
                         if (rows.isEmpty()) {
                             throw new BusinessException(ErrorCode.APPROVER_NOT_FOUND);
                         }
@@ -91,13 +85,11 @@ public class ApprovalLineResolver {
                         }
                         String sourceDepartment = department == null
                                 ? null
-                                : (String) db.one("SELECT name FROM departments WHERE id=:id", map("id", department),
-                                        ErrorCode.APPROVER_NOT_FOUND).get("name");
+                                : (String) queries.findDepartmentName(department).get("name");
                         person = null;
                         Set<Long> visited = new HashSet<>();
                         while (department != null && visited.add(department)) {
-                            var d = db.one("SELECT parent_id,head_user_id FROM departments WHERE id=:id",
-                                    map("id", department), ErrorCode.APPROVER_NOT_FOUND);
+                            var d = queries.findDepartmentHead(department);
                             if (d.get("head_user_id") != null) {
                                 var candidate = person(number(d, "head_user_id"));
                                 if ("ACTIVE".equals(candidate.get("status"))) {
@@ -162,8 +154,7 @@ public class ApprovalLineResolver {
     }
 
     private Long parent(long department) {
-        var row = db.one("SELECT parent_id FROM departments WHERE id=:id", map("id", department),
-                ErrorCode.APPROVER_NOT_FOUND);
+        var row = queries.findParent(department);
         return row.get("parent_id") == null ? null : number(row, "parent_id");
     }
 
