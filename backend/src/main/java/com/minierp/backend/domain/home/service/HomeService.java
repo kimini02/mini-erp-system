@@ -5,7 +5,6 @@ import com.minierp.backend.domain.attendance.service.AttendanceService;
 import com.minierp.backend.domain.approval.service.FormService;
 import com.minierp.backend.domain.leave.service.LeaveQueryService;
 import com.minierp.backend.domain.project.service.*;
-import com.minierp.backend.global.persistence.SqlStore;
 import com.minierp.backend.global.permission.PermissionAccess;
 import com.minierp.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,7 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
 public class HomeService {
-    private final SqlStore db;
+    private final HomeQueries queries;
     private final Clock clock;
     private final PermissionAccess access;
     private final AttendanceService attendance;
@@ -36,7 +35,7 @@ public class HomeService {
         LocalDate from = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate to = from.plusDays(4);
         var args = map("actor", actor, "today", today, "from", from, "to", to);
-        String scope = projectView ? projects.visibilityPredicate(args) : "0=1";
+        String scope = projectView ? projects.visibilityPredicate(args) : HomeQueries.NO_PROJECTS;
         return map("today", attendanceView ? attendance.homeToday() : null,
                 "approvals", approvalView ? approvals(args) : null, "leave", leave.balance(null),
                 "teamWeek", attendanceView || projectView ? teamWeek(args, attendanceView, projectView, scope) : null,
@@ -54,14 +53,14 @@ public class HomeService {
     }
 
     private Map<String, Object> approvals(Map<String, Object> args) {
-        long count = db.count("SELECT COUNT(*) FROM approval_documents d WHERE " + HomeQueries.TODO, args);
-        var todo = db.rows(HomeQueries.TODO_ROWS, args)
+        long count = queries.countTodo(args);
+        var todo = queries.findTodo(args)
                 .stream()
                 .map(r -> map("id", r.get("id"), "docNo", r.get("doc_no"), "form", form(r), "title", r.get("title"),
                         "drafter", map("id", r.get("drafter_id"), "name", r.get("user_name"),
                                 "title", r.get("user_title")), "submittedAt", r.get("submitted_at")))
                 .toList();
-        var mine = db.rows(HomeQueries.MINE, args)
+        var mine = queries.findMine(args)
                 .stream()
                 .map(r -> map("id", r.get("id"), "docNo", r.get("doc_no"), "form", form(r), "title", r.get("title"),
                         "status", r.get("status"),
@@ -75,9 +74,7 @@ public class HomeService {
     }
 
     private Map<String, Object> teamWeek(Map<String, Object> args, boolean leave, boolean tasks, String scope) {
-        var department = db.one(
-                "SELECT d.id,d.name FROM users u JOIN departments d ON d.id=u.department_id WHERE u.id=:actor", args,
-                ErrorCode.USER_NOT_FOUND);
+        var department = queries.findDepartment(args);
         args.put("department", department.get("id"));
         LocalDate from = (LocalDate) args.get("from");
         LocalDate to = (LocalDate) args.get("to");
@@ -85,7 +82,7 @@ public class HomeService {
         for (int i = 0; i < 5; i++) {
             days.put(from.plusDays(i), new ArrayList<>());
         }
-        for (var r : db.rows(HomeQueries.teamWeek(leave, tasks, scope), args)) {
+        for (var r : queries.findTeamWeek(args, leave, tasks, scope)) {
             Map<String, Object> item;
             if ("TASK_DUE".equals(r.get("type"))) {
                 item = map("type", "TASK_DUE",
@@ -114,7 +111,7 @@ public class HomeService {
     }
 
     private Map<String, Object> myTasks(Map<String, Object> args, String scope, LocalDate today) {
-        var summaries = db.rows(HomeQueries.mySummary(scope), args);
+        var summaries = queries.findMySummary(args, scope);
         Map<String, Object> project = null;
         if (!summaries.isEmpty()) {
             var p = summaries.get(0);
@@ -124,7 +121,7 @@ public class HomeService {
                     "done", done, "overdue", p.get("overdue_count"),
                     "progressPct", total == 0 ? 0 : done * 100 / total);
         }
-        var rows = db.rows(HomeQueries.myItems(scope), args);
+        var rows = queries.findMyItems(args, scope);
         var items = rows.stream()
                 .map(r -> map("id", r.get("id"), "projectId", r.get("project_id"),
                         "key", r.get("project_key") + "-" + r.get("task_no"), "title", r.get("task_title"),
@@ -136,7 +133,7 @@ public class HomeService {
     }
 
     private Map<String, Object> notifications(Map<String, Object> args) {
-        var rows = db.rows(HomeQueries.NOTIFICATIONS, args);
+        var rows = queries.findNotifications(args);
         return map("unread", rows.get(0).get("unread"),
                 "items", rows.stream()
                         .filter(r -> r.get("id") != null)

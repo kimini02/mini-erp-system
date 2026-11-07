@@ -1,9 +1,17 @@
 package com.minierp.backend.domain.home.repository;
 
+import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.global.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import java.util.*;
+
 /** Shared SQL text lets MariaDB ANALYZE tests measure the exact production queries. */
-public final class HomeQueries {
-    private HomeQueries() {
-    }
+@Repository
+@RequiredArgsConstructor
+public class HomeQueries {
+    private final SqlStore db;
+    public static final String NO_PROJECTS = "0=1";
 
     public static final String MY_FROM = """
    FROM task_assignments a JOIN tasks t ON t.id=a.task_id JOIN projects p ON p.id=t.project_id
@@ -65,4 +73,41 @@ public final class HomeQueries {
    SELECT c.unread,n.* FROM (SELECT COUNT(*) AS unread FROM notifications WHERE user_id=:actor AND read_at IS NULL) c
    LEFT JOIN (SELECT id,type,title,link,read_at,created_at FROM notifications WHERE user_id=:actor ORDER BY id DESC LIMIT 5) n ON 1=1 ORDER BY n.id DESC
    """;
+
+    public long countTodo(Map<String, Object> args) {
+        return db.count("SELECT COUNT(*) FROM approval_documents d WHERE " + HomeQueries.TODO, args);
+    }
+
+    public List<Map<String, Object>> findTodo(Map<String, Object> args) {
+        return db.rows(HomeQueries.TODO_ROWS, args);
+    }
+
+    public List<Map<String, Object>> findMine(Map<String, Object> args) {
+        return db.rows(HomeQueries.MINE, args);
+    }
+
+    public Map<String, Object> findDepartment(Map<String, Object> args) {
+        return db.one("SELECT d.id,d.name FROM users u JOIN departments d ON d.id=u.department_id WHERE u.id=:actor",
+                args, ErrorCode.USER_NOT_FOUND);
+    }
+
+    public List<Map<String, Object>> findTeamWeek(
+            Map<String, Object> args,
+            boolean leave,
+            boolean tasks,
+            String scope) {
+        return db.rows(HomeQueries.teamWeek(leave, tasks, scope), args);
+    }
+
+    public List<Map<String, Object>> findMySummary(Map<String, Object> args, String scope) {
+        return db.rows(HomeQueries.mySummary(scope), args);
+    }
+
+    public List<Map<String, Object>> findMyItems(Map<String, Object> args, String scope) {
+        return db.rows(HomeQueries.myItems(scope), args);
+    }
+
+    public List<Map<String, Object>> findNotifications(Map<String, Object> args) {
+        return db.rows(HomeQueries.NOTIFICATIONS, args);
+    }
 }
