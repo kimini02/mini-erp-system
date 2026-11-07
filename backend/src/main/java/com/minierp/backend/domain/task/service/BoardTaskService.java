@@ -4,7 +4,8 @@ import com.minierp.backend.domain.project.repository.ProjectStateStore;
 import com.minierp.backend.domain.task.dto.BoardTaskRequests.*;
 import com.minierp.backend.domain.project.service.*;
 import com.minierp.backend.domain.notification.service.NotificationService;
-import com.minierp.backend.global.persistence.SqlStore;
+import com.minierp.backend.domain.task.repository.TaskQueries;
+import com.minierp.backend.domain.task.repository.TaskStore;
 import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,24 +19,22 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
 public class BoardTaskService {
-    private final SqlStore db;
+    private final TaskQueries queries;
+    private final TaskStore store;
     private final BoardProjectService projects;
     private final ProjectStateStore states;
     private final NotificationService notifications;
     private final Clock clock;
     private Map<String, Object> raw(long id) {
-        return db.one("SELECT * FROM tasks WHERE id=:id", map("id", id), ErrorCode.TASK_NOT_FOUND);
+        return queries.findTask(id);
     }
 
     private long projectId(long task) {
-        return number(db.one("SELECT project_id FROM tasks WHERE id=:id", map("id", task), ErrorCode.TASK_NOT_FOUND),
-                "project_id");
+        return number(queries.findTaskProject(task), "project_id");
     }
 
     private List<Map<String, Object>> assignees(long id) {
-        return db.rows(
-                "SELECT u.id,u.user_name AS name,p.name AS title FROM task_assignments a JOIN users u ON u.id=a.user_id LEFT JOIN positions p ON p.id=u.position_id WHERE a.task_id=:id ORDER BY u.id",
-                map("id", id));
+        return queries.findAssignees(id);
     }
 
     private boolean assigned(List<Map<String, Object>> people) {
@@ -58,13 +57,9 @@ public class BoardTaskService {
 
     public Map<String, Object> board(long id) {
         var p = projects.visible(id);
-        var tasks = db.rows("SELECT * FROM tasks WHERE project_id=:id ORDER BY position,id", map("id", id));
+        var tasks = queries.findBoardTasks(id);
         // Members and all assignments in one query: no per-card lookups, including empty boards.
-        var people = db.rows("""
-   SELECT NULL AS task_id,u.id,u.user_name AS name,pos.name AS title FROM project_members m JOIN users u ON u.id=m.user_id LEFT JOIN positions pos ON pos.id=u.position_id WHERE m.project_id=:id
-   UNION ALL
-   SELECT a.task_id,u.id,u.user_name AS name,pos.name AS title FROM task_assignments a JOIN tasks t ON t.id=a.task_id JOIN users u ON u.id=a.user_id LEFT JOIN positions pos ON pos.id=u.position_id WHERE t.project_id=:id
-   """, map("id", id));
+        var people = queries.findBoardPeople(id);
         List<Map<String, Object>> members = new ArrayList<>();
         Map<Long, List<Map<String, Object>>> assignments = new HashMap<>();
         for (var row : people) {
@@ -98,13 +93,7 @@ public class BoardTaskService {
         result.put("projectId", task.get("project_id"));
         result.put("content", task.get("task_content"));
         result.put("canManage", projects.canManage(p));
-        var history = db.rows("""
-   SELECT h.*,u.user_name AS actor_name,target.user_name AS target_name,
-     CASE h.action WHEN 'ASSIGNED' THEN CAST(h.to_value AS UNSIGNED) WHEN 'UNASSIGNED' THEN CAST(h.from_value AS UNSIGNED) WHEN 'OVERDUE_NOTIFIED' THEN CAST(h.to_value AS UNSIGNED) END AS target_id
-   FROM task_histories h LEFT JOIN users u ON u.id=h.actor_id
-   LEFT JOIN users target ON target.id=CASE h.action WHEN 'ASSIGNED' THEN CAST(h.to_value AS UNSIGNED) WHEN 'UNASSIGNED' THEN CAST(h.from_value AS UNSIGNED) WHEN 'OVERDUE_NOTIFIED' THEN CAST(h.to_value AS UNSIGNED) END
-   WHERE task_id=:id ORDER BY h.id DESC LIMIT 50
-   """, map("id", id));
+        var history = queries.findHistory(id);
         result.put("history", history.stream().map(h -> {
             var event = map("action", h.get("action"),
                     "actor", h.get("actor_id") == null
@@ -124,38 +113,28 @@ public class BoardTaskService {
     }
 
     private void history(long id, String action, String from, String to) {
-        db.update(
-                "INSERT INTO task_histories(task_id,actor_id,action,from_value,to_value,created_at) VALUES(:id,:actor,:action,:from,:to,:now)",
-                map("id", id, "actor", projects.actor(), "action", action, "from", from, "to", to,
-                        "now", LocalDateTime.now(clock)));
+        store.insertHistory(id, projects.actor(), action, from, to, LocalDateTime.now(clock));
     }
 
     private Set<Long> validateAssignees(long project, List<Long> ids) {
         Set<Long> unique = new LinkedHashSet<>(ids == null ? List.of() : ids);
-        if (!unique.isEmpty()
-                && db.count("SELECT COUNT(*) FROM project_members WHERE project_id=:p AND user_id IN (:ids)",
-                        map("p", project, "ids", unique)) != unique.size()) {
+        if (!unique.isEmpty() && queries.countMembers(project, unique) != unique.size()) {
             throw new BusinessException(ErrorCode.TASK_ASSIGNEE_NOT_MEMBER);
         }
         return unique;
     }
 
     private void assign(long task, long project, String title, Set<Long> selected) {
-        var old = db.rows("SELECT user_id FROM task_assignments WHERE task_id=:id", map("id", task))
-                .stream()
-                .map(r -> number(r, "user_id"))
-                .toList();
+        var old = queries.findAssigneeIds(task).stream().map(r -> number(r, "user_id")).toList();
         for (long user : old) {
             if (!selected.contains(user)) {
-                db.update("DELETE FROM task_assignments WHERE task_id=:id AND user_id=:user",
-                        map("id", task, "user", user));
+                store.deleteAssignment(task, user);
                 history(task, "UNASSIGNED", Long.toString(user), null);
             }
         }
         for (long user : selected) {
             if (!old.contains(user)) {
-                db.update("INSERT INTO task_assignments(task_id,user_id,created_at) VALUES(:id,:user,:now)",
-                        map("id", task, "user", user, "now", LocalDateTime.now(clock)));
+                store.insertAssignment(task, user, LocalDateTime.now(clock));
                 history(task, "ASSIGNED", null, Long.toString(user));
                 notifications.storeTask(user, task, title, "/projects/" + project + "/board?taskId=" + task);
             }
@@ -174,13 +153,10 @@ public class BoardTaskService {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         long position = position(project, status, 0, null, true);
-        long id = db.insert(
-                "INSERT INTO tasks(project_id,task_no,position,version,created_by,task_title,task_content,end_date,priority,task_status,created_at) VALUES(:p,:seq,:pos,0,:actor,:title,:content,:end,:priority,:status,:now)",
-                map("p", project, "seq", seq, "pos", position, "actor", projects.actor(), "title", r.title(),
-                        "content", r.content() == null ? "" : r.content(), "end", end,
-                        "priority", r.priority() == null ? "MEDIUM" : r.priority().name(), "status", status,
-                        "now", LocalDateTime.now(clock)));
-        db.update("UPDATE projects SET last_task_seq=:seq WHERE id=:id", map("seq", seq, "id", project));
+        long id = store.insertTask(project, seq, position, projects.actor(), r.title(),
+                r.content() == null ? "" : r.content(), end,
+                r.priority() == null ? "MEDIUM" : r.priority().name(), status, LocalDateTime.now(clock));
+        store.updateLastSequence(seq, project);
         history(id, "CREATED", null, r.title());
         assign(id, project, p.get("project_key") + "-" + seq + " " + r.title(), assigned);
         states.recalculate(project);
@@ -197,11 +173,8 @@ public class BoardTaskService {
         if (r.title() != null && r.title().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        db.update(
-                "UPDATE tasks SET task_title=COALESCE(:title,task_title),task_content=COALESCE(:content,task_content),end_date=COALESCE(:end,end_date),priority=COALESCE(:priority,priority),version=version+1,updated_at=:now WHERE id=:id",
-                map("id", id, "title", r.title(), "content", r.content(), "end", r.endDate(),
-                        "priority", r.priority() == null ? null : r.priority().name(),
-                        "now", LocalDateTime.now(clock)));
+        store.updateTask(id, r.title(), r.content(), r.endDate(), r.priority() == null ? null : r.priority().name(),
+                LocalDateTime.now(clock));
         if (selected != null) {
             assign(id, project,
                     p.get("project_key") + "-" + task.get("task_no") + " "
@@ -241,8 +214,7 @@ public class BoardTaskService {
         }
         String status = r.status().name();
         long pos = position(project, status, id, r.afterTaskId(), false);
-        db.update("UPDATE tasks SET task_status=:status,position=:pos,version=version+1,updated_at=:now WHERE id=:id",
-                map("id", id, "status", status, "pos", pos, "now", LocalDateTime.now(clock)));
+        store.updatePosition(id, status, pos, LocalDateTime.now(clock));
         boolean changed = !status.equals(task.get("task_status"));
         history(id, changed ? "STATUS" : "MOVED",
                 changed ? (String) task.get("task_status") : task.get("position").toString(),
@@ -253,32 +225,21 @@ public class BoardTaskService {
 
     /** Requires the project lock. Only the destination column is rebalanced, excluding the moving card. */
     private long position(long project, String status, long moving, Long after, boolean append) {
-        var args = map("p", project, "status", status, "moving", moving);
         if (after != null) {
-            args.put("after", after);
-            if (after == moving
-                    || db.count("SELECT COUNT(*) FROM tasks WHERE id=:after AND project_id=:p AND task_status=:status",
-                            args) == 0) {
+            if (after == moving || queries.countValidPredecessor(project, status, after) == 0) {
                 throw new BusinessException(ErrorCode.INVALID_TASK_POSITION);
             }
         }
         for (int attempt = 0; attempt < 2; attempt++) {
             long lower = 0;
             if (append) {
-                lower = db.count(
-                        "SELECT COALESCE(MAX(position),0) FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving",
-                        args);
+                lower = queries.countMaxPosition(project, status, moving);
             } else if (after != null) {
-                lower = number(
-                        db.one("SELECT position FROM tasks WHERE id=:after", args, ErrorCode.INVALID_TASK_POSITION),
-                        "position");
+                lower = number(queries.findPredecessorPosition(after), "position");
             }
-            args.put("lower", lower);
             var next = append
                     ? List.< Map<String, Object>> of()
-                    : db.rows(
-                            "SELECT position FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving AND position>:lower ORDER BY position,id LIMIT 1",
-                            args);
+                    : queries.findNextPosition(project, status, moving, lower);
             if (next.isEmpty() && lower <= Long.MAX_VALUE - 1024) {
                 return lower + 1024;
             }
@@ -288,10 +249,7 @@ public class BoardTaskService {
                     return lower + (upper - lower) / 2;
                 }
             }
-            db.update("""
-    UPDATE tasks t JOIN (SELECT id,ROW_NUMBER() OVER(ORDER BY position,id)*1024 AS new_position FROM tasks
-      WHERE project_id=:p AND task_status=:status AND id<>:moving) ranked ON ranked.id=t.id SET t.position=ranked.new_position
-    """, args);
+            store.updateRebalancedPositions(project, status, moving);
         }
         throw new IllegalStateException("Cannot allocate board position after rebalance");
     }
