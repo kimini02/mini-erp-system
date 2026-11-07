@@ -130,6 +130,7 @@ def scan(root):
 
 def summarize(records):
     outside = []
+    fragments = []
     false_positives = []
     literals = [r for r in records if r['kind'] == 'L']
     for record in literals:
@@ -139,6 +140,10 @@ def summarize(records):
         if (file, record['value']) in FALSE_POSITIVES:
             false_positives.append({**record, 'reason': FALSE_POSITIVES[(file, record['value'])]})
             continue
+        if (not allowed and not SQL.search(record['value'])
+                and re.search(r'/domain/(?:attendance|home|notification|project|task)/(?:service|handler)/', file)
+                and (re.search(r'(?<![\w:]):[A-Za-z_]\w*', record['value']) or re.fullmatch(r'\s*\w+(?:\.\w+)?\s*(?:=|<>|<=|>=|<|>)\s*\w+\s*', record['value']))):
+            fragments.append(record)
         if SQL.search(record['value']) and not allowed:
             item = dict(record)
             item['domain'] = file.split('/domain/')[1].split('/')[0] if '/domain/' in file else 'global'
@@ -150,12 +155,13 @@ def summarize(records):
         domains[domain] = {'sqlValues': len(items), 'files': len(files), 'byFile': dict(sorted(files.items()))}
     return {'literalCount': len(literals), 'uniqueLiteralValues': len({r['value'] for r in literals}),
             'outsideSqlValues': len(outside), 'outsideSqlFiles': len({r['file'] for r in outside}),
-            'domains': domains, 'outside': outside, 'falsePositives': false_positives,
+            'domains': domains, 'outside': outside, 'falsePositives': false_positives, 'keywordFreeFragments': fragments,
             'transactions': sorted(({'owner': r['owner'], 'annotation': r['value']}
                                    for r in records if r['kind'] == 'T'), key=lambda r: (r['owner'], r['annotation']))}
 
 
-def compare(before, after, allowed_reductions):
+def compare(before, after, allowed_reductions, rename_classes=None):
+    rename_classes = rename_classes or {}
     old = collections.Counter(r['value'] for r in before if r['kind'] == 'L')
     new = collections.Counter(r['value'] for r in after if r['kind'] == 'L')
     reduced = {value: count - new[value] for value, count in old.items() if new[value] < count}
@@ -163,6 +169,10 @@ def compare(before, after, allowed_reductions):
     added = sorted(new.keys() - old.keys())
     removed = sorted(old.keys() - new.keys())
     old_tx = summarize(before)['transactions']
+    for item in old_tx:
+        cls, method = item['owner'].split('#', 1)
+        item['owner'] = rename_classes.get(cls, cls) + '#' + method
+    old_tx.sort(key=lambda r: (r['owner'], r['annotation']))
     new_tx = summarize(after)['transactions']
     unapproved = {v: count for v, count in reduced.items() if allowed_reductions.get(v) != count}
     unused = {v: count for v, count in allowed_reductions.items() if reduced.get(v) != count}
@@ -181,6 +191,8 @@ def main():
                         help='JSON object: literal value -> exact reduction justified by merged identical SQL')
     parser.add_argument('--check-repository', action='append', default=[],
                         help='Changed repository source path, relative to root; repeat for each file')
+    parser.add_argument('--rename-class', action='append', default=[], help='old fully qualified class=new class')
+    parser.add_argument('--preserve-repository', action='append', default=[], help='old source path=new repository path; exact existing exceptions only')
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
     missing = [p for p in args.check_repository if not (args.root / p).is_file()]
@@ -189,11 +201,27 @@ def main():
     records = scan(args.root.resolve())
     result = summarize(records)
     violations = [r for r in records if r['file'] in args.check_repository and r['kind'] in ('T', 'X', 'P', 'V')]
+    baseline_records = scan(args.baseline.resolve()) if args.baseline else []
+    moves = dict(x.split('=', 1) for x in args.preserve_repository)
+    existing = []
+    allowed = {
+        ('AttendanceStore.java', 'time(Object)', 'P', 'LocalTime.parse'),
+        ('ProjectStateStore.java', 'recalculate(long)', 'T', '@Transactional(propagation = Propagation.MANDATORY)'),
+        ('ProjectStateStore.java', 'recalculate(long)', 'V', 'LocalDateTime.now'),
+    }
+    for row in violations[:]:
+        key = (Path(row['file']).name, row['owner'].split('#', 1)[1], row['kind'], row['value'])
+        originals = [old for old, new in moves.items() if new == row['file']]
+        if key in allowed and any(old['file'] in originals and old['kind'] == row['kind']
+                and old['value'] == row['value'] and old['owner'].split('#', 1)[1] == key[1] for old in baseline_records):
+            existing.append(row)
+            violations.remove(row)
+    result['preservedRepositoryViolations'] = existing
     result['repositoryViolations'] = violations
     failed = bool(violations)
     if args.baseline:
         allowed = json.loads(args.allow_count_reductions.read_text()) if args.allow_count_reductions else {}
-        comparison = compare(scan(args.baseline.resolve()), records, allowed)
+        comparison = compare(baseline_records, records, allowed, dict(x.split("=", 1) for x in args.rename_class))
         result['comparison'] = comparison
         failed |= (not comparison['sameValueSet'] or not comparison['sameTransactions']
                    or bool(comparison['unapprovedReductions']) or bool(comparison['unusedReductionApprovals']))

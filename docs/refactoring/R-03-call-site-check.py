@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only SQL call pairing: raw tokens, map keys/value order and javac attributed types.
+"""Read-only SQL call pairing: raw tokens, map keys/value order, trailing ErrorCode arguments and javac attributed types.
 
 Roots must have compiled target/classes (compile copies outside the worktree if needed).
 --classpath is the recording's classpath.txt; its project target directories are replaced
@@ -8,6 +8,8 @@ or indirect map/helper cases are explicit manual-review items, never automatic p
 """
 import argparse,base64,collections,importlib.util,json,os,re,subprocess,tempfile
 from pathlib import Path
+import sys
+sys.dont_write_bytecode = True
 SCANNER=r'''
 import com.sun.source.tree.*;
 import com.sun.source.util.*;
@@ -93,11 +95,12 @@ def collect(root,classpath,files):
   records.append(row)
  return records
 
-def check(before,after,cp,files):
+def check(before,after,cp,files,moved=None):
+ moved=moved or {}
  spec=importlib.util.spec_from_file_location('lex',after/'docs/refactoring/R-02-format-measure.py');lex=importlib.util.module_from_spec(spec);spec.loader.exec_module(lex)
  def tokens(s):return tuple(t[1] for t in lex.tokenize(s))
  repos=sorted(str(p.relative_to(after)) for d in {f.split('/domain/')[1].split('/')[0] for f in files} for p in (after/f'backend/src/main/java/com/minierp/backend/domain/{d}/repository').glob('*.java'))
- old=collect(before,cp,files);new=collect(after,cp,files+repos)
+ old=collect(before,cp,files);new=collect(after,cp,list(dict.fromkeys([moved.get(f,f) for f in files]+repos)))
  sql=lambda r:r['kind']=='C' and r['select'].split('.')[-1] in ['one','rows','count','update','insert','queryForList'] and r['select'].split('.')[0] in ['db','jdbc']
  originals=[r for r in old if sql(r)];targets=[r for r in new if sql(r) and r['file'] in repos]
  def params(call,records):
@@ -118,18 +121,35 @@ def check(before,after,cp,files):
  for o in originals:
   matching=[t for t in targets if tokens(t['args'][0]['raw'])==tokens(o['args'][0]['raw']) and t['select']==o['select']]
   pairs=[]
+  direct=[t for t in matching if o['file'] in moved and t['file']==moved[o['file']] and t['method']==o['method']]
+  for t in direct:pairs.append((t,None))
   for t in matching:
-   cs=[c for c in new if c['kind']=='C' and c['file']==o['file'] and c['method']==o['method'] and c['owner'].endswith('.'+Path(t['file']).stem) and c['select'].endswith('.'+t['method'])]
+   cs=[c for c in new if c['kind']=='C' and c['file']==moved.get(o['file'],o['file']) and c['method']==o['method'] and c['owner'].endswith('.'+Path(t['file']).stem) and c['select'].endswith('.'+t['method'])]
    for c in cs:pairs.append((t,c))
   entry={'origin':o['file']+':'+str(o['line']),'sourceMethod':o['method'],'sql':o['args'][0]['raw']}
   ok,ov=params(o,old)
   # Multiple identical SQL calls can occur in the same service method. Their value expressions disambiguate.
-  if len(pairs)>1 and ov is not None:
+  if len(pairs)>1 and ov is not None and all(c is not None for t,c in pairs):
    precise=[(t,c) for t,c in pairs if [tokens(x['raw']) for x in c['args']]==[tokens(x['raw']) for x in ov]]
    if precise:pairs=precise
   if len(pairs)!=1:
    entry['manualReason']='unpaired/ambiguous SQL call; explicit SQL helper flow review required';entry['candidates']=[t['file']+'#'+t['method'] for t in matching];manual.append(entry);continue
   t,c=pairs[0];entry['target']=t['file']+'#'+t['method'];entry['returnType']=t['type'];entry['sqlTokensEqual']=True
+  trailing_old=[tokens(a['raw']) for a in o['args'][2:]]
+  trailing_new=[tokens(a['raw']) for a in t['args'][2:]]
+  entry['trailingArgumentsBefore']=[a['raw'] for a in o['args'][2:]]
+  entry['trailingArgumentsAfter']=[a['raw'] for a in t['args'][2:]]
+  trailing_problems=[] if trailing_old==trailing_new else ['SQL arguments after map mismatch (including ErrorCode)']
+  if c is None:
+   entry['directMovedCall']=True
+   entry['problems']=trailing_problems[:]
+   if [tokens(a['raw']) for a in o['args']]!=[tokens(a['raw']) for a in t['args']]:
+    entry['problems'].append('moved SQL argument token/order mismatch')
+   if [a['type'] for a in o['args']]!=[a['type'] for a in t['args']]:
+    entry['problems'].append('moved SQL argument type mismatch')
+   result.append(entry)
+   if entry['problems']:failures.append(entry)
+   continue
   tk,tv=params(t,new);entry['mapKeysBefore']=ok;entry['mapKeysAfter']=tk
   if len(o['args'])>1 and re.fullmatch(r'\w+',o['args'][1]['raw']):
    variable=o['args'][1]['raw']
@@ -155,8 +175,10 @@ def check(before,after,cp,files):
 
   methods=[m for m in new if m['kind']=='M' and m['file']==t['file'] and m['method']==t['method']]
   if ok is None or tk is None or len(methods)!=1:
-   entry['manualReason']='indirect parameter map or overload';manual.append(entry);continue
-  ps=methods[0]['params'];problems=[]
+   entry['manualReason']='indirect parameter map or overload';manual.append(entry)
+   if trailing_problems:failures.append({**entry,'problems':trailing_problems})
+   continue
+  ps=methods[0]['params'];problems=trailing_problems[:]
   if ok!=tk:problems.append('map key/order mismatch')
   if [tokens(x['raw']) for x in ov]!=[tokens(x['raw']) for x in c['args']]:problems.append('call argument expression/order mismatch')
   if [x['raw'] for x in tv]!=[x['name'] for x in ps]:problems.append('repository map value/parameter order mismatch')
@@ -168,5 +190,5 @@ def check(before,after,cp,files):
   if problems:failures.append(entry)
  return {'originalSqlCalls':len(originals),'automaticallyPaired':len(result),'differences':len(failures),'manualReviewCount':len(manual),'results':result,'differencesDetail':failures,'manualReview':manual,'putChecks':put_results,'putManualReview':put_manual}
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',type=Path,required=True);p.add_argument('--after',type=Path,required=True);p.add_argument('--classpath',type=Path,required=True);p.add_argument('--file',action='append',required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();r=check(a.before.resolve(),a.after.resolve(),a.classpath.read_text().strip(),a.file);a.output.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n');print(json.dumps({k:v for k,v in r.items() if not isinstance(v,list)}));raise SystemExit(bool(r['differences']))
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',type=Path,required=True);p.add_argument('--after',type=Path,required=True);p.add_argument('--classpath',type=Path,required=True);p.add_argument('--file',action='append',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--moved',action='append',default=[],help='old source path=new source path');a=p.parse_args();r=check(a.before.resolve(),a.after.resolve(),a.classpath.read_text().strip(),a.file,dict(x.split('=',1) for x in a.moved));a.output.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n');print(json.dumps({k:v for k,v in r.items() if not isinstance(v,list)}));raise SystemExit(bool(r['differences']))
 if __name__=='__main__':main()
