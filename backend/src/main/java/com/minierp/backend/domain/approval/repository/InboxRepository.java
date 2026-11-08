@@ -1,7 +1,5 @@
 package com.minierp.backend.domain.approval.repository;
 
-import com.minierp.backend.domain.approval.service.FormService;
-import com.minierp.backend.domain.user.service.EmployeeService;
 import com.minierp.backend.global.exception.*;
 import com.minierp.backend.global.persistence.SqlStore;
 import lombok.RequiredArgsConstructor;
@@ -53,50 +51,21 @@ public class InboxRepository {
     }
 
     public Map<String, Object> search(long actor, String box, String formCode, String q, int page, int size) {
-        if (page < 0 || size < 1 || size > 100) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
-        }
         var args = map("actor", actor, "form", formCode,
                 "q", q == null ? null : "%" + q.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%",
                 "size", size, "offset", (long) page * size);
         long total = db.count("SELECT COUNT(*)" + selectionSql(box, formCode, q), args);
         var documents = db.rows(pageSql(box, formCode, q), args);
         if (documents.isEmpty()) {
-            return EmployeeService.page(List.of(), page, size, total);
+            return map("total", total, "content", documents, "lines", Map.of());
         }
-        var ids = documents.stream().map(d -> number(d, "id")).toList();
+        var ids = documents.stream().map(document -> number(document, "id")).toList();
         var lines = db.rows(
                 "SELECT document_id,approver_name,approver_title,status FROM approval_lines WHERE document_id IN (:ids) AND line_kind='APPROVER' ORDER BY document_id,step_order",
                 map("ids", ids))
                 .stream()
-                .collect(Collectors.groupingBy(l -> number(l, "document_id")));
-        var content = documents.stream().map(d -> {
-            var progress = new ArrayList<String>();
-            String status = (String) d.get("status");
-            progress.add(status.equals("DRAFT") ? "CURRENT" : status.equals("WITHDRAWN") ? "WITHDRAWN" : "DONE");
-            Object current = null;
-            for (var l : lines.getOrDefault(number(d, "id"), List.of())) {
-                String state = (String) l.get("status");
-                progress.add(switch (state) {
-                    case "APPROVED" -> "DONE";
-                    case "PENDING" -> status.equals("IN_PROGRESS")
-                            ? "CURRENT"
-                            : status.equals("WITHDRAWN") ? "WITHDRAWN" : "TODO";
-                    case "REJECTED" -> "REJECTED";
-                    case "SKIPPED" -> "SKIPPED";
-                    default -> "TODO";
-                });
-                if (state.equals("PENDING") && status.equals("IN_PROGRESS")) {
-                    current = map("name", l.get("approver_name"), "title", l.get("approver_title"));
-                }
-            }
-            return map("id", d.get("id"), "docNo", d.get("doc_no"), "formCode", d.get("code"),
-                    "formName", FormService.shortName((String) d.get("code")), "title", d.get("title"),
-                    "drafter", map("name", d.get("user_name"), "title", d.get("position_name"),
-                            "department", d.get("department_name")), "submittedAt", d.get("submitted_at"),
-                    "updatedAt", d.get("updated_at"), "status", status, "steps", progress, "currentApprover", current);
-        }).toList();
-        return EmployeeService.page(content, page, size, total);
+                .collect(Collectors.groupingBy(line -> number(line, "document_id")));
+        return map("total", total, "content", documents, "lines", lines);
     }
 
     public Map<String, Object> counts(long actor) {
