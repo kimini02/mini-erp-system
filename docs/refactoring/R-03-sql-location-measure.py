@@ -165,8 +165,9 @@ def summarize(records):
                                    for r in records if r['kind'] == 'T'), key=lambda r: (r['owner'], r['annotation']))}
 
 
-def compare(before, after, allowed_reductions, rename_classes=None):
+def compare(before, after, allowed_reductions, rename_classes=None, rename_methods=None):
     rename_classes = rename_classes or {}
+    rename_methods = rename_methods or {}
     old = collections.Counter(r['value'] for r in before if r['kind'] == 'L')
     new = collections.Counter(r['value'] for r in after if r['kind'] == 'L')
     reduced = {value: count - new[value] for value, count in old.items() if new[value] < count}
@@ -176,7 +177,9 @@ def compare(before, after, allowed_reductions, rename_classes=None):
     old_tx = summarize(before)['transactions']
     for item in old_tx:
         cls, method = item['owner'].split('#', 1)
-        item['owner'] = rename_classes.get(cls, cls) + '#' + method
+        owner = rename_classes.get(cls, cls) + '#' + method
+        short = owner.split('(', 1)[0]
+        item['owner'] = rename_methods.get(owner, rename_methods.get(short, short) + owner[len(short):])
     old_tx.sort(key=lambda r: (r['owner'], r['annotation']))
     new_tx = summarize(after)['transactions']
     unapproved = {v: count for v, count in reduced.items() if allowed_reductions.get(v) != count}
@@ -196,6 +199,7 @@ def main():
                         help='JSON object: literal value -> exact reduction justified by merged identical SQL')
     parser.add_argument('--check-repository', action='append', default=[],
                         help='Changed repository source path, relative to root; repeat for each file')
+    parser.add_argument('--rename-method', action='append', default=[], help='Class#old=Class#new; signatures allowed for overloads')
     parser.add_argument('--rename-class', action='append', default=[], help='old fully qualified class=new class')
     parser.add_argument('--preserve-repository', action='append', default=[], help='old source path=new repository path; exact existing exceptions only')
     parser.add_argument('--output', type=Path)
@@ -226,7 +230,8 @@ def main():
     failed = bool(violations)
     if args.baseline:
         allowed = json.loads(args.allow_count_reductions.read_text()) if args.allow_count_reductions else {}
-        comparison = compare(baseline_records, records, allowed, dict(x.split("=", 1) for x in args.rename_class))
+        comparison = compare(baseline_records, records, allowed, dict(x.split("=", 1) for x in args.rename_class),
+                             dict(x.split("=", 1) for x in args.rename_method))
         result['comparison'] = comparison
         failed |= (not comparison['sameValueSet'] or not comparison['sameTransactions']
                    or bool(comparison['unapprovedReductions']) or bool(comparison['unusedReductionApprovals']))
