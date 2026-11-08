@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
-"""Read-only exact javac string multiset audit, with the spec's Inbox movement exception.
+"""Read-only exact javac string multiset audit, with the user-confirmed Inbox occurrence movement exception.
 
-Every file reports removed/added literals. Only InboxRepository's original response
-construction region may lose literals; each removed occurrence must be newly present
-with the identical value in InboxService. Only total/content/lines may be added to
-that repository. SQL and parameter literals outside that region remain exact.
+Every file reports removed/added literals. Inbox's original response literals are
+classified by their attributed AST occurrence: map key, row lookup, or state value.
+The 16 map keys must match the item's nested record components. Row keys and state
+values must increase by the same counts across InboxService and the item record.
+Outside that region all literals (including SQL/parameters) remain exact. Only
+total/content/lines may be added to InboxRepository. No unknown category is allowed.
 """
-import argparse,collections,importlib.util,json
+import argparse,collections,importlib.util,json,os
 from pathlib import Path
 s=importlib.util.spec_from_file_location('sql',Path(__file__).with_name('R-03-sql-location-measure.py'));m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
 ALLOWED={'PermissionAccess','BatchRunRecorder','InvitationTokenStore'}
 INBOX='backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java'
 SERVICE='backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java'
+
+s=importlib.util.spec_from_file_location('ast',Path(__file__).with_name('R-04-java-analysis.py'));a=importlib.util.module_from_spec(s);s.loader.exec_module(a)
+s=importlib.util.spec_from_file_location('response',Path(__file__).with_name('R-04-response-check.py'));response=importlib.util.module_from_spec(s);s.loader.exec_module(response)
+ITEM='backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalInboxItemResponseDto.java'
+STATES={'DRAFT','CURRENT','WITHDRAWN','DONE','APPROVED','PENDING','IN_PROGRESS','REJECTED','SKIPPED','TODO'}
+
 def values(root,records=None):
  out={}
  for row in records if records is not None else m.scan(root):
@@ -19,30 +27,74 @@ def values(root,records=None):
   if row['kind']=='L' and ('/repository/' in f or '/global/persistence/' in f or '/global/' in f and Path(f).stem in ALLOWED):out.setdefault(f,collections.Counter())[row['value']]+=1
  return out
 
-def inbox_exception(before,old_rows,new_rows,removed,added):
+def inbox_exception(before,after,old_rows,new_rows,removed,added,classpath):
  source=(before/INBOX).read_text();start=source.find('        var content = documents.stream().map(')
  if start<0:return {'allowed':False,'reason':'Original response region not found; no broad fallback'}
  end=source.index('        return EmployeeService.page(content, page, size, total);',start)
- first=source.count('\n',0,start)+1;last=source.count('\n',0,end)+1
- movable=collections.Counter(r['value'] for r in old_rows if r['kind']=='L' and r['file']==INBOX and first<=r['line']<last)
- service_old=collections.Counter(r['value'] for r in old_rows if r['kind']=='L' and r['file']==SERVICE)
- service_new=collections.Counter(r['value'] for r in new_rows if r['kind']=='L' and r['file']==SERVICE)
- not_response=removed-movable;not_moved=removed-(service_new-service_old)
  invalid_added={k:v for k,v in added.items() if k not in {'total','content','lines'}}
- return {'allowed':not not_response and not not_moved and not invalid_added,'originalResponseLines':[first,last-1],
-         'removedOutsideResponse':dict(not_response),'missingNewServiceOccurrences':dict(not_moved),
-         'invalidAdded':invalid_added,'movedServiceOccurrences':dict((service_new-service_old)&removed)}
+ if not classpath:return {'allowed':False,'reason':'--classpath is required to verify Inbox movement by attributed occurrence','invalidAdded':invalid_added}
+ if not (after/ITEM).is_file():return {'allowed':False,'reason':'Expected Inbox item record missing'}
+ old=a.analyze(before,classpath,[INBOX]);new=a.analyze(after,classpath,[ITEM]);nodes=list(a.walk(old));classified={};maps=[]
+ for n in nodes:
+  if n.get('kind')!='METHOD_INVOCATION':continue
+  if response.map_call(n):
+   maps.append(n)
+   for key in n['args'][::2]:
+    if key.get('kind')=='STRING_LITERAL':classified[key['start']]='responseKey'
+  elif n.get('select',{}).get('name')=='get' and n.get('owner','').startswith('java.util.'):
+   if n['args'] and n['args'][0].get('kind')=='STRING_LITERAL':classified[n['args'][0]['start']]='rowKey'
+  elif n.get('owner')=='com.minierp.backend.global.persistence.SqlStore' and n.get('select',{}).get('name')=='number':
+   if len(n['args'])==2 and n['args'][1].get('kind')=='STRING_LITERAL':classified[n['args'][1]['start']]='rowKey'
+ literals=[n for n in nodes if n.get('kind')=='STRING_LITERAL' and start<=n['start']<end];occurrences=[]
+ for n in literals:
+  category=classified.get(n['start']) or ('stateValue' if n['value'] in STATES else 'UNKNOWN')
+  occurrences.append({'line':n['line'],'start':n['start'],'end':n['end'],'value':n['value'],'category':category})
+ movable=collections.Counter(n['value'] for n in literals)
+ # Exact subtraction also prevents a parameter elsewhere with the same value from disappearing.
+ protected_old=collections.Counter(r['value'] for r in old_rows if r['kind']=='L' and r['file']==INBOX);protected_old.subtract(movable)
+ protected_new=collections.Counter(r['value'] for r in new_rows if r['kind']=='L' and r['file']==INBOX);protected_new.subtract(added)
+ protected_diff={v:{'before':protected_old[v],'after':protected_new[v]} for v in protected_old.keys()|protected_new.keys() if protected_old[v]!=protected_new[v]}
+ response_keys=[r for r in occurrences if r['category']=='responseKey']
+ roots=[n for n in maps if start<=n['start']<end and 'docNo' in [x.get('value') for x in n['args'][::2]]]
+ def nested_map(value):
+  if response.map_call(value):return value
+  if value.get('kind')=='IDENTIFIER':
+   matches=[n['right'] for n in nodes if n.get('kind')=='ASSIGNMENT' and n.get('left',{}).get('name')==value['name'] and response.map_call(n.get('right',{})) and start<=n['start']<end]
+   if len(matches)==1:return matches[0]
+  return None
+ def map_paths(node,prefix=''):
+  paths=[]
+  for key,value in zip(node['args'][::2],node['args'][1::2]):
+   path=prefix+str(key.get('value'));paths.append(path);child=nested_map(value)
+   if child:paths.extend(map_paths(child,path+'.'))
+  return paths
+ rec=response.records(new)
+ def record_paths(owner,prefix=''):
+  paths=[]
+  for field in rec.get(owner,[]):
+   path=prefix+field['key'];paths.append(path)
+   if field['type'] in rec:paths.extend(record_paths(field['type'],path+'.'))
+  return paths
+ source_paths=map_paths(roots[0]) if len(roots)==1 else []
+ target_paths=record_paths('com.minierp.backend.domain.approval.dto.ApprovalInboxItemResponseDto')
+ expected=collections.Counter(r['value'] for r in occurrences if r['category'] in {'rowKey','stateValue'})
+ old_target=collections.Counter(r['value'] for r in old_rows if r['kind']=='L' and r['file'] in {SERVICE,ITEM});new_target=collections.Counter(r['value'] for r in new_rows if r['kind']=='L' and r['file'] in {SERVICE,ITEM})
+ delta=new_target.copy();delta.subtract(old_target)
+ count_diff={v:{'expectedIncrease':count,'actualIncrease':delta[v]} for v,count in expected.items() if delta[v]!=count}
+ unknown=[r for r in occurrences if r['category']=='UNKNOWN'];counts=collections.Counter(r['category'] for r in occurrences)
+ allowed=not invalid_added and not protected_diff and removed==movable and not unknown and len(response_keys)==16 and len(source_paths)==16 and source_paths==target_paths and not count_diff
+ return {'allowed':allowed,'classificationCounts':dict(counts),'classifiedTotal':len(occurrences),'removedTotal':sum(removed.values()),'occurrences':occurrences,'unknownOccurrences':unknown,'protectedLiteralDifferences':protected_diff,'removedMatchesClassified':removed==movable,'responsePathsBefore':source_paths,'responsePathsAfter':target_paths,'expectedMovedOccurrences':dict(expected),'actualNewOccurrences':{v:delta[v] for v in expected},'movedOccurrenceDifferences':count_diff,'invalidAdded':invalid_added}
 
-def compare(before,after):
+def compare(before,after,classpath=None):
  old_rows=m.scan(before);new_rows=m.scan(after);x=values(before,old_rows);y=values(after,new_rows);d=[];changes=[]
  for f in sorted(x.keys()|y.keys()):
   old=x.get(f,collections.Counter());new=y.get(f,collections.Counter());removed=old-new;added=new-old
   row={'file':f,'removed':dict(removed),'added':dict(added)}
   if removed or added:
-   if f==INBOX:row['exception']=inbox_exception(before,old_rows,new_rows,removed,added)
+   if f==INBOX:row['exception']=inbox_exception(before,after,old_rows,new_rows,removed,added,classpath)
    if not row.get('exception',{}).get('allowed'):d.append(row)
   changes.append(row)
  return {'filesBefore':len(x),'filesAfter':len(y),'occurrencesBefore':sum(sum(v.values()) for v in x.values()),'occurrencesAfter':sum(sum(v.values()) for v in y.values()),'differences':len(d),'differencesDetail':d,'fileChanges':changes}
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',type=Path,required=True);p.add_argument('--after',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();r=compare(a.before,a.after);a.output.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n');print(json.dumps(r,ensure_ascii=False));raise SystemExit(bool(r['differences']))
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',type=Path,required=True);p.add_argument('--after',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--classpath',type=Path);v=p.parse_args();r=compare(v.before,v.after,v.classpath);v.output.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n');print(json.dumps(r,ensure_ascii=False));raise SystemExit(bool(r['differences']))
 if __name__=='__main__':main()

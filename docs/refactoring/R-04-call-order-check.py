@@ -94,10 +94,32 @@ def audit(units,renames=None,extra_owners=()):
    frames[canonical(owner,sig)]={'file':unit['file'],'line':m['line'],'events':expand(sig,[])}
  return {'frames':frames,'manualReview':list({json.dumps(x,sort_keys=True):x for x in manual}.values())}
 
+INBOX_OWNER='com.minierp.backend.domain.approval.repository.InboxRepository'
+INBOX_SEARCH=INBOX_OWNER+'#search(long,java.lang.String,java.lang.String,java.lang.String,int,int)'
+def expand_inbox_search(units,result,renames=None):
+ # The specification moves search's page guard across this one bean boundary.
+ # Expand that exact method on both sides, preserving its throw/control regions
+ # and SqlStore call order. No other repository call is relaxed or hidden.
+ repository=audit(units,renames,extra_owners={INBOX_OWNER})
+ search=repository['frames'].get(INBOX_SEARCH)
+ if search is None:return result
+ def expand(value):
+  if isinstance(value,list):
+   out=[]
+   for item in value:
+    if item=={'bean':INBOX_SEARCH}:out.extend(search['events'])
+    else:out.append(expand(item))
+   return out
+  if isinstance(value,dict):return {k:expand(v) for k,v in value.items()}
+  return value
+ for frame in result['frames'].values():frame['events']=expand(frame['events'])
+ result['manualReview']+=repository['manualReview']
+ return result
+
 def compare(before,after,renames):
  # Only explicitly renamed pure converters can be audited at their new DTO owner.
  moved_owners={v.split('#')[0] for v in renames.values() if '.dto.' in v.split('#')[0]}
- left=audit(before,renames);right=audit(after,extra_owners=moved_owners);diff=[]
+ left=expand_inbox_search(before,audit(before,renames),renames);right=expand_inbox_search(after,audit(after,extra_owners=moved_owners));diff=[]
  allowed={v for v in renames.values() if '.dto.' in v.split('#')[0]}
  right['frames']={k:v for k,v in right['frames'].items() if k.split('#')[0] not in moved_owners or any(k==target or k.startswith(target+'(') for target in allowed)}
  for key in sorted(left['frames'].keys()|right['frames'].keys()):
@@ -108,7 +130,7 @@ def compare(before,after,renames):
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',type=Path,required=True);p.add_argument('--after',type=Path,required=True);p.add_argument('--classpath',type=Path,required=True);p.add_argument('--rename',action='append',default=[]);p.add_argument('--domain',action='append');p.add_argument('--cache',type=Path);p.add_argument('--output',type=Path,required=True);v=p.parse_args()
  def collect(root):
-  files=[str(f.relative_to(root)) for f in (root/'backend/src/main/java').rglob('*.java') if (not v.domain or any('/domain/'+d+'/' in str(f) for d in v.domain)) and (re.search(r'/(?:controller|service|handler|batch|scheduler)/|FormHandler\.java$',str(f)) or '/dto/' in str(f))]
+  files=[str(f.relative_to(root)) for f in (root/'backend/src/main/java').rglob('*.java') if (not v.domain or any('/domain/'+d+'/' in str(f) for d in v.domain)) and (re.search(r'/(?:controller|service|handler|batch|scheduler)/|FormHandler\.java$',str(f)) or '/dto/' in str(f) or f.name=='InboxRepository.java')]
   return a.analyze(root,v.classpath,files,v.cache)
  result=compare(collect(v.before),collect(v.after),dict(x.split('=',1) for x in v.rename));a.output(result,v.output);raise SystemExit(bool(result['differences']))
 if __name__=='__main__':main()
