@@ -1,6 +1,9 @@
 package com.minierp.backend.domain.permission.service;
 
 import com.minierp.backend.domain.permission.dto.RoleRequests.*;
+import com.minierp.backend.domain.permission.dto.*;
+import com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto;
+import com.minierp.backend.global.response.PageResponseDto;
 import com.minierp.backend.domain.user.service.EmployeeService;
 import com.minierp.backend.domain.permission.repository.RoleQueries;
 import com.minierp.backend.global.exception.*;
@@ -22,36 +25,36 @@ public class RoleService {
         return queries.findRole(id);
     }
 
-    public List<Map<String, Object>> menus() {
-        return queries.findMenus();
+    public List<RoleMenuResponseDto> getMenus() {
+        return queries.findMenus().stream().map(RoleMenuResponseDto::from).toList();
     }
 
-    public List<Map<String, Object>> roles() {
-        return queries.findRoles();
+    public List<RoleSummaryResponseDto> getRoles() {
+        return queries.findRoles().stream().map(RoleSummaryResponseDto::from).toList();
     }
 
     @Transactional
-    public Map<String, Object> create(Create r) {
-        long id = store.insertRole(UUID.randomUUID().toString(), r.name(), r.description());
+    public RoleDetailResponseDto createRole(Create request) {
+        long id = store.insertRole(UUID.randomUUID().toString(), request.name(), request.description());
         store.updateRoleCode(id, String.format("R-%04d", id));
-        return role(id);
+        return RoleDetailResponseDto.from(role(id));
     }
 
     @Transactional
-    public Map<String, Object> patch(long id, Patch r) {
+    public RoleDetailResponseDto updateRole(long id, Patch request) {
         var role = role(id);
         if (bool(role, "system")) {
             throw new BusinessException(ErrorCode.SYSTEM_ROLE_LOCKED);
         }
-        if (r.name() != null && r.name().isBlank()) {
+        if (request.name() != null && request.name().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        store.updateRole(id, r.name(), r.description());
-        return role(id);
+        store.updateRole(id, request.name(), request.description());
+        return RoleDetailResponseDto.from(role(id));
     }
 
     @Transactional
-    public void delete(long id) {
+    public void deleteRole(long id) {
         var role = role(id);
         if (bool(role, "system")) {
             throw new BusinessException(ErrorCode.SYSTEM_ROLE_LOCKED);
@@ -64,63 +67,72 @@ public class RoleService {
         store.deleteRole(id);
     }
 
-    public Map<String, Object> permissions(long id) {
+    public RolePermissionsResponseDto getRolePermissions(long id) {
         var role = role(id);
-        role.put("locked", "CHIEF".equals(role.get("code")));
+        boolean locked = "CHIEF".equals(role.get("code"));
         var rows = queries.findPermissions(id);
-        return map("role", role,
-                "permissions", rows.stream()
-                        .map(
-                                r -> map("menu", r.get("menu"), "view", bool(r, "can_view"),
-                                        "create", bool(r, "can_create"), "update", bool(r, "can_update"),
-                                        "delete", bool(r, "can_delete"), "scope", r.get("data_scope")))
-                        .toList());
+        return new RolePermissionsResponseDto(
+                new RolePermissionsResponseDto.LockedRole(number(role, "id"), (String) role.get("code"),
+                        (String) role.get("name"),
+                        (String) role.get("description"), (Boolean) role.get("system"), locked),
+                rows.stream().map(RolePermissionsResponseDto.Permission::from).toList());
     }
 
     @Transactional
-    public Map<String, Object> permissions(long id, List<Permission> permissions) {
+    public RolePermissionsResponseDto updateRolePermissions(long id, List<Permission> permissions) {
         var role = role(id);
         if ("CHIEF".equals(role.get("code"))) {
             throw new BusinessException(ErrorCode.SYSTEM_ROLE_LOCKED);
         }
-        Map<String, Map<String, Object>> menus = new HashMap<>();
-        for (var m : menus()) {
-            menus.put((String) m.get("code"), m);
-        }
-        Set<String> seen = new HashSet<>();
-        for (var p : permissions) {
-            var m = menus.get(p.menu());
-            if (m == null || !seen.add(p.menu())) {
-                throw new BusinessException(ErrorCode.INVALID_PERMISSION);
-            }
-            String allowed = (String) m.get("allowedActions");
-            boolean any = p.view() || p.create() || p.update() || p.deleteAction();
-            if (p.view() && !allowed.contains("V") || p.create() && !allowed.contains("C")
-                    || p.update() && !allowed.contains("U") || p.deleteAction() && !allowed.contains("D")
-                    || !bool(m, "scopeApplicable") && p.scope() != null
-                    || bool(m, "scopeApplicable") && any && p.scope() == null) {
-                throw new BusinessException(ErrorCode.INVALID_PERMISSION);
-            }
-        }
+        var menus = permissionMenus();
+        validatePermissions(menus, permissions);
         store.deleteRolePermissions(id);
-        for (var p : permissions) {
-            store.insertPermission(id, menus.get(p.menu()).get("id"), p.view(), p.create(), p.update(),
-                    p.deleteAction(), p.scope() == null ? null : p.scope().name());
+        for (var permission : permissions) {
+            store.insertPermission(id, menus.get(permission.menu()).get("id"),
+                    permission.view(), permission.create(), permission.update(), permission.deleteAction(),
+                    permission.scope() == null ? null : permission.scope().name());
         }
-        return permissions(id);
+        return getRolePermissions(id);
     }
 
-    public Map<String, Object> members(long id, int page, int size) {
+    private Map<String, Map<String, Object>> permissionMenus() {
+        Map<String, Map<String, Object>> menus = new HashMap<>();
+        for (var menu : queries.findMenus()) {
+            menus.put((String) menu.get("code"), menu);
+        }
+        return menus;
+    }
+
+    private void validatePermissions(Map<String, Map<String, Object>> menus, List<Permission> permissions) {
+        Set<String> seen = new HashSet<>();
+        for (var permission : permissions) {
+            var menu = menus.get(permission.menu());
+            if (menu == null || !seen.add(permission.menu())) {
+                throw new BusinessException(ErrorCode.INVALID_PERMISSION);
+            }
+            String allowed = (String) menu.get("allowedActions");
+            boolean any = permission.view() || permission.create() || permission.update() || permission.deleteAction();
+            if (permission.view() && !allowed.contains("V") || permission.create() && !allowed.contains("C")
+                    || permission.update() && !allowed.contains("U")
+                    || permission.deleteAction() && !allowed.contains("D")
+                    || !bool(menu, "scopeApplicable") && permission.scope() != null
+                    || bool(menu, "scopeApplicable") && any && permission.scope() == null) {
+                throw new BusinessException(ErrorCode.INVALID_PERMISSION);
+            }
+        }
+    }
+
+    public PageResponseDto<EmployeeDetailResponseDto> getRoleMembers(long id, int page, int size) {
         role(id);
         if (page < 0 || size < 1 || size > 200) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        var ids = queries.findMemberIds(id, size, page * size).stream().map(r -> number(r, "user_id")).toList();
-        return EmployeeService.page(employees.getEmployeeViews(ids), page, size, queries.countRoleMembers(id));
+        var ids = queries.findMemberIds(id, size, page * size).stream().map(row -> number(row, "user_id")).toList();
+        return PageResponseDto.of(employees.getEmployeeViews(ids), page, size, queries.countRoleMembers(id));
     }
 
     @Transactional
-    public void addMembers(long id, List<Long> users) {
+    public void createRoleMembers(long id, List<Long> users) {
         employees.lockChief();
         role(id);
         for (long user : users) {
@@ -132,7 +144,7 @@ public class RoleService {
     }
 
     @Transactional
-    public void removeMember(long id, long userId) {
+    public void deleteRoleMember(long id, long userId) {
         employees.lockChief();
         var role = role(id);
         employees.raw(userId);

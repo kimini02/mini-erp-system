@@ -38,10 +38,18 @@ public class RoleStore {
         return db.update("DELETE FROM roles WHERE id=:id", map("id", id));
     }
 
-    public int insertPermission(long role, Object menu, boolean v, boolean c, boolean u, boolean d, String scope) {
+    public int insertPermission(
+            long role,
+            Object menu,
+            boolean canView,
+            boolean canCreate,
+            boolean canUpdate,
+            boolean canDelete,
+            String scope) {
         return db.update(
                 "INSERT INTO role_permissions(role_id,menu_id,can_view,can_create,can_update,can_delete,data_scope) VALUES(:role,:menu,:v,:c,:u,:d,:scope)",
-                map("role", role, "menu", menu, "v", v, "c", c, "u", u, "d", d, "scope", scope));
+                map("role", role, "menu", menu, "v", canView, "c", canCreate,
+                        "u", canUpdate, "d", canDelete, "scope", scope));
     }
 
     public int insertMembership(long user, long role) {
