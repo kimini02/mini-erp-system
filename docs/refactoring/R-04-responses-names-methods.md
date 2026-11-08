@@ -193,247 +193,248 @@ R-02: 새 120자 초과·여러 문장·여러 선언자 0. 기존 문자열 예
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| code | code | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| parentId | parentId | Long | departments.parent_id NULL 허용; null 또는 Number.longValue() |
-| path | path | List&lt;OrgDepartmentResponseDto.Path&gt; | 원래 배열 순서·빈 배열 유지; 대응표에서 요소 record 연결 |
-| head | head | OrgDepartmentResponseDto.Head | 원래 중첩 키 구조와 조건부 null 유지; from은 행 값만 사용 |
-| fallbackHead | fallbackHead | OrgDepartmentResponseDto.FallbackHead | 원래 중첩 키 구조와 조건부 null 유지; from은 행 값만 사용 |
-| workSchedule | workSchedule | OrgDepartmentResponseDto.WorkSchedule | 원래 중첩 키 구조와 조건부 null 유지; from은 행 값만 사용 |
-| directMemberCount | directMemberCount | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| childCount | childCount | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
+| id | id | long | departments.id BIGINT NOT NULL → number(row,"id") |
+| name | name | String | departments.name VARCHAR NOT NULL |
+| code | code | String | departments.code VARCHAR NOT NULL |
+| parentId | parentId | Long | departments.parent_id BIGINT NULL; null 또는 Number.longValue() |
+| path | path | List&lt;OrgDepartmentResponseDto.Path&gt; | 상위 부서 행을 순서대로 Path.from으로 변환한 List |
+| head | head | OrgDepartmentResponseDto.Head | head_user_id가 null이면 null, 아니면 findHead 행의 id/name/position |
+| fallbackHead | fallbackHead | OrgDepartmentResponseDto.FallbackHead | 상위 부서장 탐색 결과 행 또는 null; id/name/position/departmentName |
+| workSchedule | workSchedule | OrgDepartmentResponseDto.WorkSchedule | findSchedule 행 + work_schedule_id == null 계산값 |
+| directMemberCount | directMemberCount | long | countDepartmentMembers(id)의 COUNT(*) → long |
+| childCount | childCount | long | countChildDepartments(id)의 COUNT(*) → long |
 
 `OrgDepartmentResponseDto.FallbackHead`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| position | position | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| departmentName | departmentName | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
+| id | id | long | users.id BIGINT NOT NULL; 트리에서는 departments.head_user_id BIGINT NULL을 null 검사 후 number |
+| name | name | String | users.user_name VARCHAR NOT NULL (head_name 별칭 포함) |
+| position | position | String | positions.name VARCHAR NOT NULL (head_position 별칭 포함) |
+| departmentName | departmentName | String | departments.name VARCHAR NOT NULL, findHead SELECT 별칭 |
 
 `OrgDepartmentResponseDto.Head`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| position | position | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
+| id | id | long | users.id BIGINT NOT NULL; 트리에서는 departments.head_user_id BIGINT NULL을 null 검사 후 number |
+| name | name | String | users.user_name VARCHAR NOT NULL (head_name 별칭 포함) |
+| position | position | String | positions.name VARCHAR NOT NULL (head_position 별칭 포함) |
 
 `OrgDepartmentResponseDto.Path`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
+| id | id | long | departments.id BIGINT NOT NULL → number(ancestor,"id") |
+| name | name | String | departments.name VARCHAR NOT NULL |
 
 `OrgDepartmentResponseDto.WorkSchedule`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| startTime | startTime | String | findSchedule의 TIME_FORMAT('%H:%i') 결과 문자열 |
-| endTime | endTime | String | findSchedule의 TIME_FORMAT('%H:%i') 결과 문자열 |
-| lateGraceMin | lateGraceMin | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| useDefault | useDefault | boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
+| id | id | long | work_schedules.id BIGINT NOT NULL → number(row,"id") |
+| name | name | String | work_schedules.name VARCHAR NOT NULL |
+| startTime | startTime | String | TIME_FORMAT(start_time,'%H:%i') 문자열 |
+| endTime | endTime | String | TIME_FORMAT(end_time,'%H:%i') 문자열 |
+| lateGraceMin | lateGraceMin | long | work_schedules.late_grace_min INT NOT NULL → number(row,"lateGraceMin") |
+| useDefault | useDefault | boolean | departmentRow.get("work_schedule_id") == null 계산값(boolean) |
 
 `OrgDepartmentTreeResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| code | code | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| head | head | OrgDepartmentResponseDto.Head | 원래 중첩 키 구조와 조건부 null 유지; from은 행 값만 사용 |
-| directMemberCount | directMemberCount | Long | 원래 Map&lt;Long,Long&gt;.getOrDefault(id,0L)의 Long |
-| totalMemberCount | totalMemberCount | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| children | children | List&lt;OrgDepartmentTreeResponseDto&gt; | 원래 배열 순서·빈 배열 유지; 대응표에서 요소 record 연결 |
+| id | id | long | departments.id BIGINT NOT NULL → number(row,"id") |
+| name | name | String | departments.name VARCHAR NOT NULL |
+| code | code | String | departments.code VARCHAR NOT NULL |
+| head | head | OrgDepartmentResponseDto.Head | head_user_id가 null이면 null, 아니면 findHead 행의 id/name/position |
+| directMemberCount | directMemberCount | Long | counts.getOrDefault(id,0L)의 Long |
+| totalMemberCount | totalMemberCount | long | aggregate(id, counts, children)의 long 합계 |
+| children | children | List&lt;OrgDepartmentTreeResponseDto&gt; | children.getOrDefault(id,List.of())를 재귀 departmentTree로 변환한 List |
 
 `OrgHolidayResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| date | date | LocalDate | 원래 중첩 키 구조와 조건부 null 유지; from은 행 값만 사용 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| substitute | substitute | Boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
+| id | id | long | holidays.id BIGINT NOT NULL → number(row,"id") |
+| date | date | LocalDate | holidays.holiday_date DATE NOT NULL → SqlStore LocalDate |
+| name | name | String | holidays.name VARCHAR NOT NULL |
+| substitute | substitute | Boolean | holidays.substitute BIT NOT NULL → 드라이버 Boolean |
 
 `OrgPositionCreateResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| rankOrder | rankOrder | int | 원래 리터럴 0의 int 그대로 |
+| id | id | long | insertPosition 반환 long |
+| name | name | String | request.name() String |
+| rankOrder | rankOrder | int | 리터럴 0(int) |
 
 `OrgPositionResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| rankOrder | rankOrder | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
+| id | id | long | positions.id BIGINT NOT NULL → number(row,"id") |
+| name | name | String | positions.name VARCHAR NOT NULL |
+| rankOrder | rankOrder | long | positions.rank_order INT NOT NULL → number(row,"rankOrder") |
 
 `OrgPositionUpdateResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
+| id | id | long | 요청 id(long) |
+| name | name | String | request.name() String |
 
 `OrgWorkScheduleResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| startTime | startTime | String | findSchedule의 TIME_FORMAT('%H:%i') 결과 문자열 |
-| endTime | endTime | String | findSchedule의 TIME_FORMAT('%H:%i') 결과 문자열 |
-| lateGraceMin | lateGraceMin | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
+| id | id | long | work_schedules.id BIGINT NOT NULL → number(row,"id") |
+| name | name | String | work_schedules.name VARCHAR NOT NULL |
+| startTime | startTime | String | TIME_FORMAT(start_time,'%H:%i') 문자열 |
+| endTime | endTime | String | TIME_FORMAT(end_time,'%H:%i') 문자열 |
+| lateGraceMin | lateGraceMin | long | work_schedules.late_grace_min INT NOT NULL → number(row,"lateGraceMin") |
 
 `RoleDetailResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| code | code | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| description | description | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| system | system | Boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
+| id | id | long | roles.id BIGINT NOT NULL → number(row,"id") |
+| code | code | String | roles.code VARCHAR NOT NULL |
+| name | name | String | roles.name VARCHAR NOT NULL |
+| description | description | String | roles.description VARCHAR NULL |
+| system | system | Boolean | roles.is_system BIT NOT NULL → 드라이버 Boolean |
 
 `RoleMenuResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| code | code | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| menuGroup | menuGroup | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| sortOrder | sortOrder | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| allowedActions | allowedActions | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| scopeApplicable | scopeApplicable | Boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
+| id | id | long | menus.id BIGINT NOT NULL → number(row,"id") |
+| code | code | String | menus.code VARCHAR NOT NULL |
+| name | name | String | menus.name VARCHAR NOT NULL |
+| menuGroup | menuGroup | String | menus.menu_group VARCHAR NOT NULL |
+| sortOrder | sortOrder | long | menus.sort_order INT NOT NULL → number(row,"sortOrder") |
+| allowedActions | allowedActions | String | menus.allowed_actions VARCHAR NOT NULL |
+| scopeApplicable | scopeApplicable | Boolean | menus.scope_applicable BIT NOT NULL → 드라이버 Boolean |
 
 `RolePermissionsResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| role | role | RolePermissionsResponseDto.LockedRole | 원래 중첩 키 구조와 조건부 null 유지; from은 행 값만 사용 |
-| permissions | permissions | List&lt;RolePermissionsResponseDto.Permission&gt; | 원래 배열 순서·빈 배열 유지; 대응표에서 요소 record 연결 |
+| role | role | RolePermissionsResponseDto.LockedRole | findRole 행 + "CHIEF".equals(role.get("code")) boolean |
+| permissions | permissions | List&lt;RolePermissionsResponseDto.Permission&gt; | findPermissions의 menus.sort_order,id 순 행을 Permission.from으로 변환 |
 
 `RolePermissionsResponseDto.LockedRole`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| code | code | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| description | description | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| system | system | Boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
-| locked | locked | boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
+| id | id | long | roles.id BIGINT NOT NULL → number(row,"id") |
+| code | code | String | roles.code VARCHAR NOT NULL |
+| name | name | String | roles.name VARCHAR NOT NULL |
+| description | description | String | roles.description VARCHAR NULL |
+| system | system | Boolean | roles.is_system BIT NOT NULL → 드라이버 Boolean |
+| locked | locked | boolean | "CHIEF".equals(role.get("code")) 계산값(boolean) |
 
 `RolePermissionsResponseDto.Permission`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| menu | menu | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| view | view | boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
-| create | create | boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
-| update | update | boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
-| delete | delete | boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
-| scope | scope | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
+| menu | menu | String | menus.code VARCHAR NOT NULL AS menu |
+| view | view | boolean | bool(row,"can_view")의 기본형 boolean; SELECT COALESCE(p.can_view,0) |
+| create | create | boolean | bool(row,"can_create")의 기본형 boolean; SELECT COALESCE(p.can_create,0) |
+| update | update | boolean | bool(row,"can_update")의 기본형 boolean; SELECT COALESCE(p.can_update,0) |
+| delete | delete | boolean | bool(row,"can_delete")의 기본형 boolean; SELECT COALESCE(p.can_delete,0) |
+| scope | scope | String | role_permissions.data_scope ENUM NULL (LEFT JOIN) |
 
 `RoleSummaryResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| code | code | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| description | description | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| system | system | Boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
-| memberCount | memberCount | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
+| id | id | long | roles.id BIGINT NOT NULL → number(row,"id") |
+| code | code | String | roles.code VARCHAR NOT NULL |
+| name | name | String | roles.name VARCHAR NOT NULL |
+| description | description | String | roles.description VARCHAR NULL |
+| system | system | Boolean | roles.is_system BIT NOT NULL → 드라이버 Boolean |
+| memberCount | memberCount | long | COUNT(ur.user_id) AS memberCount → long |
 
 `EmployeeDetailResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| loginId | loginId | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| email | email | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| department | department | EmployeeDetailResponseDto.Department | 원래 중첩 키 구조와 조건부 null 유지; from은 행 값만 사용 |
-| positionId | positionId | long | V2 users.department_id/position_id NOT NULL + INNER JOIN; number(row,...) |
-| position | position | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| departmentCode | departmentCode | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| departmentName | departmentName | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| role | role | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| roles | roles | List&lt;EmployeeDetailResponseDto.Role&gt; | 원래 배열 순서·빈 배열 유지; 대응표에서 요소 record 연결 |
-| hireDate | hireDate | LocalDate | V2 hire_date DATE NULL; 이관 사원 NULL 보존 |
-| retiredDate | retiredDate | LocalDate | V5 users.retired_date DATE NULL; LocalDate, 값 있는 probe 포함 |
-| status | status | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| invitationPending | invitationPending | boolean | 기존 boolean 식/bool 또는 BIT 행 Boolean; 원래 nullable 요청 타입 보존 |
-| remainingAnnualLeave | remainingAnnualLeave | BigDecimal | V3 leave_ledger.days DECIMAL의 COALESCE(SUM,0): BigDecimal 및 scale 유지 |
-| createdAt | createdAt | LocalDateTime | DATETIME → SqlStore LocalDateTime; 시간대 없는 기존 문자열 |
-| updatedAt | updatedAt | LocalDateTime | DATETIME → SqlStore LocalDateTime; 시간대 없는 기존 문자열 |
+| id | id | long | users.id BIGINT NOT NULL → number(row,"id") |
+| loginId | loginId | String | users.login_id VARCHAR NOT NULL |
+| name | name | String | users.user_name VARCHAR NOT NULL |
+| email | email | String | users.user_email VARCHAR NOT NULL |
+| department | department | EmployeeDetailResponseDto.Department | users.department_id BIGINT NOT NULL + departments.name VARCHAR INNER JOIN |
+| positionId | positionId | long | users.position_id BIGINT NOT NULL → number(row,"position_id") |
+| position | position | String | positions.name VARCHAR NOT NULL AS position_name |
+| departmentCode | departmentCode | String | legacyDepartmentCode(department_code) String switch |
+| departmentName | departmentName | String | departments.name VARCHAR NOT NULL AS department_name |
+| role | role | String | legacyRole(userRoles) String: ADMIN / TEAM_LEADER / USER |
+| roles | roles | List&lt;EmployeeDetailResponseDto.Role&gt; | findEmployeeRoles의 roles.id 순 행을 Role.from으로 변환한 List |
+| hireDate | hireDate | LocalDate | users.hire_date DATE NULL → LocalDate |
+| retiredDate | retiredDate | LocalDate | users.retired_date DATE NULL → LocalDate |
+| status | status | String | users.status ENUM NOT NULL → String |
+| invitationPending | invitationPending | boolean | row.get("user_pw") == null(boolean) |
+| remainingAnnualLeave | remainingAnnualLeave | BigDecimal | COALESCE(SUM(leave_ledger.days DECIMAL(8,1)),0) → BigDecimal |
+| createdAt | createdAt | LocalDateTime | users.created_at DATETIME → SqlStore LocalDateTime |
+| updatedAt | updatedAt | LocalDateTime | users.updated_at DATETIME → SqlStore LocalDateTime |
 
 `EmployeeDetailResponseDto.Department`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | V2 users.department_id/position_id NOT NULL + INNER JOIN; number(row,...) |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
+| id | id | long | users.department_id BIGINT NOT NULL → number(row,"department_id") |
+| name | name | String | departments.name VARCHAR NOT NULL AS department_name |
 
 `EmployeeDetailResponseDto.Role`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| code | code | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
+| code | code | String | roles.code VARCHAR NOT NULL |
+| name | name | String | roles.name VARCHAR NOT NULL |
 
 `EmployeeListResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| content | content | List&lt;EmployeeDetailResponseDto&gt; | 원래 배열 순서·빈 배열 유지; 대응표에서 요소 record 연결 |
-| page | page | PageResponseDto.Page | 원래 중첩 키 구조와 조건부 null 유지; from은 행 값만 사용 |
-| statusCounts | statusCounts | Map&lt;String,Long&gt; | EmployeeRepository.SearchResult.counts Map&lt;String,Long&gt; 유지 |
+| content | content | List&lt;EmployeeDetailResponseDto&gt; | PageResponseDto.content() (getEmployeeViews(ids)의 List) |
+| page | page | PageResponseDto.Page | PageResponseDto.page() (Page.of(page,size,total,content.size())) |
+| statusCounts | statusCounts | Map&lt;String,Long&gt; | EmployeeRepository.SearchResult.counts Map&lt;String,Long&gt;; users.status별 COUNT(*) |
 
 `EmployeeLoginIdPreviewResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| loginId | loginId | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
+| loginId | loginId | String | String.format("%d%03d", hireDate.getYear(), next) 문자열 (기존 아이디 미리보기 식) |
 
 `EmployeeLookupResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
-| name | name | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| title | title | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| department | department | String | 기존 문자열 식 또는 VARCHAR/SELECT 문자열; NULL을 새로 생략하지 않음 |
-| departmentId | departmentId | long | 기존 long 식 또는 NOT NULL 정수/COUNT를 SqlStore.number로 읽음 |
+| id | id | long | users.id BIGINT NOT NULL → number(row,"id") |
+| name | name | String | users.user_name VARCHAR NOT NULL AS name |
+| title | title | String | positions.name VARCHAR NOT NULL AS title |
+| department | department | String | departments.name VARCHAR NOT NULL AS department |
+| departmentId | departmentId | long | departments.id BIGINT NOT NULL AS departmentId → number(row,"departmentId") |
 
 `PageResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| content | content | List&lt;T&gt; | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
-| page | page | PageResponseDto.Page | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
+| content | content | List&lt;T&gt; | of의 List&lt;T&gt; content 인자 그대로 |
+| page | page | PageResponseDto.Page | Page.of(page,size,total,content.size()) |
 
 `PageResponseDto.Page`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| number | number | int | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
-| size | size | int | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
-| totalElements | totalElements | long | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
-| totalPages | totalPages | long | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
-| first | first | boolean | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
-| last | last | boolean | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
-| numberOfElements | numberOfElements | int | EmployeeService.page 식/인자 타입 그대로; content.size()는 int |
+| number | number | int | page 인자(int) |
+| size | size | int | size 인자(int) |
+| totalElements | totalElements | long | total 인자(long) |
+| totalPages | totalPages | long | long pages = (total + size - 1) / size |
+| first | first | boolean | page == 0(boolean) |
+| last | last | boolean | page + 1 &gt;= pages(boolean) |
+| numberOfElements | numberOfElements | int | content.size()의 int를 numberOfElements로 전달 |
+
 
 ### 조건부 키를 나눈 곳
 
@@ -655,7 +656,7 @@ MeController의 repository·권한 빈 직접 호출, 사용하지 않는 UserLi
 | OrgService#setHead(long,Long) | user | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 | OrgService#tree() | children, counts, departments, root, row | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 | OrgService#updateDepartmentParent(long,Long) | departmentRow | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
-| OrgService#updateDepartmentSchedule(long,OrgRequests.Schedule) | departmentRow | 행→record 변환 입력 |
+| OrgService#updateDepartmentSchedule(long,OrgRequests.Schedule) | departmentRow | work_schedule_id로 근무시간 생성/수정 경로와 SQL 값을 정하는 부서 행 |
 | WorkingDays#count(LocalDate,LocalDate) | row | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 
 ### user 남은 행 Map
@@ -669,9 +670,9 @@ MeController의 repository·권한 빈 직접 호출, 사용하지 않는 UserLi
 | EmployeeService#getEmployeeViews(List&lt;Long&gt;) | row, rows | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 | EmployeeService#getLoginIdPreview(LocalDate) | rows | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 | EmployeeService#invitation(long) | user | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
-| EmployeeService#patch(long,EmployeeRequests.Patch) | old | 행→record 변환 입력 |
+| EmployeeService#patch(long,EmployeeRequests.Patch) | old | 이메일 변경·부서 이동 검사 및 변경 전 SQL 값에 쓰는 사원 행 |
 | EmployeeService#protectLastChief(long) | chiefs, row | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
-| EmployeeService#register(EmployeeRequests.Create) | position | 행→record 변환 입력 |
+| EmployeeService#register(EmployeeRequests.Create) | position | 직급 존재 확인에만 쓰며 응답 변환 입력이 아님 |
 | EmployeeService#roleIds(List&lt;String&gt;) | row, rows | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 | EmployeeService#status(long,com.minierp.backend.domain.user.entity.UserStatus) | user | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 
@@ -688,9 +689,9 @@ MeController의 repository·권한 빈 직접 호출, 사용하지 않는 UserLi
 | RoleService#getRoleMembers(long,int,int) | row | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 | RoleService#getRolePermissions(long) | role, rows | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
 | RoleService#permissionMenus() | menu, menus | 조회·검사·SQL 값/트리 구성용 내부 행; HTTP 응답 map 아님 |
-| RoleService#updateRole(long,RoleRequests.Patch) | role | 행→record 변환 입력 |
-| RoleService#updateRolePermissions(long,List&lt;RoleRequests.Permission&gt;) | menus, role | 행→record 변환 입력 |
-| RoleService#validatePermissions(Map&lt;String,Map&lt;String,Object&gt;&gt;,List&lt;RoleRequests.Permission&gt;) | menu, menus | 행→record 변환 입력 |
+| RoleService#updateRole(long,RoleRequests.Patch) | role | system 역할 수정 금지 검사에 쓰는 역할 행 |
+| RoleService#updateRolePermissions(long,List&lt;RoleRequests.Permission&gt;) | menus, role | system 역할 수정 금지 검사에 쓰는 역할 행 |
+| RoleService#validatePermissions(Map&lt;String,Map&lt;String,Object&gt;&gt;,List&lt;RoleRequests.Permission&gt;) | menu, menus | allowedActions·scopeApplicable 검사에 쓰는 메뉴 행 |
 
 ## 재실행 명령
 
@@ -732,3 +733,7 @@ python3 docs/refactoring/R-04-verify-tools.py --start "$BASE" --original "$ORIGI
 
 
 마지막 문서 커밋도 별도 Git archive에서 Java 17/UTC `test-compile`을 확인했다(exit 0). 실행 결과는 작업 트리의 `backend/target/r04-group1-validation/docs/result.json`에 남긴다.
+
+### 묶음 2 준비에서 반영한 리뷰 보완
+
+구성요소 근거를 실제 SELECT 열·스키마 타입·원래 식으로 바로잡았다. LockedRole.from에는 행과 서비스에서 계산한 locked만 넘긴다. OrgService.updateDepartmentSchedule은 updateDepartmentWorkSchedule로, 사용자 조회 두 메서드는 getLookupUsers로 맞췄다. 순서 경고 목록은 승인된 M4LegacyExperimentTest#unlockedWholeListRecalculationReproducesWriteSkewTenTimes()를 더해 14개로 적용한다. barrier가 UPDATE 뒤에 있어 격리수준 조회와 UPDATE의 순서가 섞이는 근거는 기존 new-warning-analysis.json에 있다.

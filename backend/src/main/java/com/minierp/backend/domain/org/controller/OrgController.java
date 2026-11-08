@@ -72,7 +72,7 @@ public class OrgController {
     public ApiResponse<OrgDepartmentResponseDto> updateDepartmentWorkSchedule(
             @PathVariable long id,
             @RequestBody Schedule request) {
-        return ApiResponse.success(clock, service.updateDepartmentSchedule(id, request));
+        return ApiResponse.success(clock, service.updateDepartmentWorkSchedule(id, request));
     }
 
     @DeleteMapping("/departments/{id}")

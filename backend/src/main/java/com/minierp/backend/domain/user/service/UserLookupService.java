@@ -13,7 +13,7 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class UserLookupService {
     private final EmployeeQueries queries;
-    public List<EmployeeLookupResponseDto> getUsers(String query, Long departmentId, int size) {
+    public List<EmployeeLookupResponseDto> getLookupUsers(String query, Long departmentId, int size) {
         if (size < 1 || size > 100) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }

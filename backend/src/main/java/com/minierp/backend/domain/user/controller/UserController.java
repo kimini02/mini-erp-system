@@ -40,11 +40,11 @@ public class UserController {
     }
 
     @GetMapping("/lookup")
-    public ApiResponse<List<EmployeeLookupResponseDto>> getUserLookup(
+    public ApiResponse<List<EmployeeLookupResponseDto>> getLookupUsers(
             @RequestParam(name = "q", required = false) String query,
             @RequestParam(required = false) Long departmentId,
             @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.success(clock, lookup.getUsers(query, departmentId, size));
+        return ApiResponse.success(clock, lookup.getLookupUsers(query, departmentId, size));
     }
 
     @GetMapping("/login-id-preview")

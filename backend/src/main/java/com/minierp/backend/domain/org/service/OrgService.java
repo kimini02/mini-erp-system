@@ -189,7 +189,7 @@ public class OrgService {
     }
 
     @Transactional
-    public OrgDepartmentResponseDto updateDepartmentSchedule(long id, Schedule request) {
+    public OrgDepartmentResponseDto updateDepartmentWorkSchedule(long id, Schedule request) {
         lockTree();
         var departmentRow = department(id);
         if (Boolean.TRUE.equals(request.useDefault())) {

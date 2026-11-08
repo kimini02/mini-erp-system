@@ -72,9 +72,7 @@ public class RoleService {
         boolean locked = "CHIEF".equals(role.get("code"));
         var rows = queries.findPermissions(id);
         return new RolePermissionsResponseDto(
-                new RolePermissionsResponseDto.LockedRole(number(role, "id"), (String) role.get("code"),
-                        (String) role.get("name"),
-                        (String) role.get("description"), (Boolean) role.get("system"), locked),
+                RolePermissionsResponseDto.LockedRole.from(role, locked),
                 rows.stream().map(RolePermissionsResponseDto.Permission::from).toList());
     }
 
