@@ -3,6 +3,8 @@ package com.minierp.backend.domain.user.controller;
 import com.minierp.backend.domain.user.service.AuthService;
 import com.minierp.backend.domain.user.repository.UserRepository;
 import com.minierp.backend.domain.user.dto.UserResponseDto;
+import com.minierp.backend.domain.user.dto.LoginResponseDto;
+import java.util.List;
 import com.minierp.backend.global.permission.PermissionAccess;
 import com.minierp.backend.global.exception.*;
 import com.minierp.backend.global.response.ApiResponse;
@@ -24,21 +26,23 @@ public class MeController {
     }
 
     @GetMapping
-    public ApiResponse<?> me() {
+    public ApiResponse<UserResponseDto> getMe() {
         return ApiResponse.success(clock,
                 UserResponseDto.from(users.findById(permissions.actor())
                         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND))));
     }
 
     @GetMapping("/permissions")
-    public ApiResponse<?> permissions() {
+    public ApiResponse<List<PermissionAccess.Grant>> getPermissions() {
         return ApiResponse.success(clock,
-                permissions.grants(permissions.actor()).values().stream().filter(g -> !g.actions().isEmpty()).toList());
+                permissions.grants(permissions.actor()).values().stream()
+                        .filter(grant -> !grant.actions().isEmpty())
+                        .toList());
     }
 
     @PatchMapping("/password")
-    public ApiResponse<?> password(@Valid @RequestBody PasswordChange r) {
+    public ApiResponse<LoginResponseDto> updatePassword(@Valid @RequestBody PasswordChange request) {
         return ApiResponse.success(clock,
-                auth.changePassword(permissions.actor(), r.currentPassword(), r.newPassword()));
+                auth.changePassword(permissions.actor(), request.currentPassword(), request.newPassword()));
     }
 }

@@ -34,8 +34,8 @@ public class AuthController {
     }
 
     @PostMapping("/password/setup")
-    public ResponseEntity<ApiResponse<Void>> setup(@Valid @RequestBody SetupRequest r) {
-        invitations.setup(r.setupToken(), r.newPassword());
+    public ResponseEntity<ApiResponse<Void>> setupPassword(@Valid @RequestBody SetupRequest request) {
+        invitations.setup(request.setupToken(), request.newPassword());
         return ResponseEntity.ok(ApiResponse.successMessage(clock, "비밀번호 설정이 완료되었습니다."));
     }
 

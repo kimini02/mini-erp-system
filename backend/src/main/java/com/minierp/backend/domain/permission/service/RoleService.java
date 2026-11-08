@@ -116,7 +116,7 @@ public class RoleService {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         var ids = queries.findMemberIds(id, size, page * size).stream().map(r -> number(r, "user_id")).toList();
-        return EmployeeService.page(employees.views(ids), page, size, queries.countRoleMembers(id));
+        return EmployeeService.page(employees.getEmployeeViews(ids), page, size, queries.countRoleMembers(id));
     }
 
     @Transactional

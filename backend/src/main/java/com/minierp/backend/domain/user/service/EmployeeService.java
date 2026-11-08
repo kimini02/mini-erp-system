@@ -2,6 +2,10 @@ package com.minierp.backend.domain.user.service;
 
 import com.minierp.backend.domain.user.dto.EmployeeRequests.*;
 import com.minierp.backend.domain.user.dto.RegistrationResult;
+import com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto;
+import com.minierp.backend.domain.user.dto.EmployeeListResponseDto;
+import com.minierp.backend.global.response.PageResponseDto;
+import java.math.BigDecimal;
 import com.minierp.backend.domain.user.repository.EmployeeRepository;
 import com.minierp.backend.domain.user.repository.EmployeeQueries;
 import com.minierp.backend.global.permission.*;
@@ -43,7 +47,7 @@ public class EmployeeService {
 
     public void protectLastChief(long id) {
         var chiefs = store.lockActiveChiefs();
-        if (chiefs.size() <= 1 && chiefs.stream().anyMatch(r -> number(r, "id") == id)) {
+        if (chiefs.size() <= 1 && chiefs.stream().anyMatch(row -> number(row, "id") == id)) {
             throw new BusinessException(ErrorCode.LAST_CHIEF);
         }
     }
@@ -60,44 +64,54 @@ public class EmployeeService {
         }
     }
 
-    public List<Map<String, Object>> views(List<Long> ids) {
+    public List<EmployeeDetailResponseDto> getEmployeeViews(List<Long> ids) {
         if (ids.isEmpty()) {
             return List.of();
         }
         var rows = queries.findEmployeeViews(ids);
-        Map<Long, List<Map<String, Object>>> roles = new HashMap<>();
+        Map<Long, List<EmployeeDetailResponseDto.Role>> roles = new HashMap<>();
         for (var row : queries.findEmployeeRoles(ids)) {
-            roles.computeIfAbsent(number(row, "user_id"), k -> new ArrayList<>())
-                    .add(map("code", row.get("code"), "name", row.get("name")));
+            roles.computeIfAbsent(number(row, "user_id"), userId -> new ArrayList<>())
+                    .add(EmployeeDetailResponseDto.Role.from(row));
         }
-        Map<Long, Map<String, Object>> byId = new HashMap<>();
+        Map<Long, EmployeeDetailResponseDto> byId = new HashMap<>();
         for (var row : rows) {
             long id = number(row, "id");
             var userRoles = roles.getOrDefault(id, List.of());
-            String legacy = userRoles.stream().anyMatch(r -> "CHIEF".equals(r.get("code")))
-                    ? "ADMIN"
-                    : userRoles.stream().anyMatch(r -> "LEADER".equals(r.get("code"))) ? "TEAM_LEADER" : "USER";
-            String code = (String) row.get("department_code");
-            code = switch (code) {
-                case "D-0002" -> "01";
-                case "D-0003" -> "02";
-                case "D-0004" -> "03";
-                default -> code;
-            };
-            // M1 프론트 작업 후 제거: departmentCode, departmentName, position, role aliases.
-            byId.put(id,
-                    map("id", id, "loginId", row.get("login_id"), "name", row.get("user_name"),
-                            "email", row.get("user_email"),
-                            "department", map("id", row.get("department_id"), "name", row.get("department_name")),
-                            "positionId", row.get("position_id"), "position", row.get("position_name"),
-                            "departmentCode", code, "departmentName", row.get("department_name"), "role", legacy,
-                            "roles", userRoles, "hireDate", row.get("hire_date"),
-                            "retiredDate", row.get("retired_date"), "status", row.get("status"),
-                            "invitationPending", row.get("user_pw") == null,
-                            "remainingAnnualLeave", row.get("remaining_annual_leave"),
-                            "createdAt", row.get("created_at"), "updatedAt", row.get("updated_at")));
+            byId.put(id, employeeView(row, id, userRoles));
         }
         return ids.stream().map(byId::get).toList();
+    }
+
+    private EmployeeDetailResponseDto employeeView(
+            Map<String, Object> row,
+            long id,
+            List<EmployeeDetailResponseDto.Role> userRoles) {
+        String legacy = legacyRole(userRoles);
+        String code = legacyDepartmentCode((String) row.get("department_code"));
+        // M1 프론트 작업 후 제거: departmentCode, departmentName, position, role aliases.
+        return new EmployeeDetailResponseDto(id, (String) row.get("login_id"), (String) row.get("user_name"),
+                (String) row.get("user_email"), EmployeeDetailResponseDto.Department.from(row),
+                number(row, "position_id"), (String) row.get("position_name"), code,
+                (String) row.get("department_name"), legacy, userRoles, (LocalDate) row.get("hire_date"),
+                (LocalDate) row.get("retired_date"), (String) row.get("status"), row.get("user_pw") == null,
+                (BigDecimal) row.get("remaining_annual_leave"), (LocalDateTime) row.get("created_at"),
+                (LocalDateTime) row.get("updated_at"));
+    }
+
+    private String legacyRole(List<EmployeeDetailResponseDto.Role> roles) {
+        return roles.stream().anyMatch(role -> "CHIEF".equals(role.code()))
+                ? "ADMIN"
+                : roles.stream().anyMatch(role -> "LEADER".equals(role.code())) ? "TEAM_LEADER" : "USER";
+    }
+
+    private String legacyDepartmentCode(String code) {
+        return switch (code) {
+            case "D-0002" -> "01";
+            case "D-0003" -> "02";
+            case "D-0004" -> "03";
+            default -> code;
+        };
     }
 
     public static Map<String, Object> page(List<?> content, int page, int size, long total) {
@@ -107,8 +121,8 @@ public class EmployeeService {
                         "first", page == 0, "last", page + 1 >= pages, "numberOfElements", content.size()));
     }
 
-    public Map<String, Object> list(
-            String q,
+    public EmployeeListResponseDto getEmployees(
+            String query,
             Long departmentId,
             boolean includeSub,
             String status,
@@ -141,22 +155,22 @@ public class EmployeeService {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         String order = queries.orderBy(columns, parts);
-        var selected = repository.search(scope, q, departments, status, page, size, order);
-        var result = page(views(selected.ids()), page, size, selected.total());
-        result.put("statusCounts", selected.counts());
-        return result;
+        var selected = repository.search(scope, query, departments, status, page, size, order);
+        var content = getEmployeeViews(selected.ids());
+        var pagination = PageResponseDto.Page.of(page, size, selected.total(), content.size());
+        return new EmployeeListResponseDto(content, pagination, selected.counts());
     }
 
-    public Map<String, Object> detail(long id) {
+    public EmployeeDetailResponseDto getEmployee(long id) {
         if (id != access.actor()) {
             access.require("EMPLOYEE", Action.VIEW);
             access.assertUserInScope("EMPLOYEE", id);
         }
         raw(id);
-        return views(List.of(id)).get(0);
+        return getEmployeeViews(List.of(id)).get(0);
     }
 
-    public String preview(LocalDate hireDate) {
+    public String getLoginIdPreview(LocalDate hireDate) {
         var rows = queries.findLoginSequence(hireDate.getYear());
         long next = rows.isEmpty() ? 1 : number(rows.get(0), "last_seq") + 1;
         return String.format("%d%03d", hireDate.getYear(), next);
@@ -171,30 +185,30 @@ public class EmployeeService {
         if (rows.size() != unique.size()) {
             throw new BusinessException(ErrorCode.ROLE_NOT_FOUND);
         }
-        return rows.stream().map(r -> number(r, "id")).toList();
+        return rows.stream().map(row -> number(row, "id")).toList();
     }
 
     @Transactional
-    public RegistrationResult register(Create r) {
+    public RegistrationResult register(Create request) {
         // Creating an account must not bypass the separate permission to assign roles.
-        if (r.roleCodes() != null && r.roleCodes().stream().anyMatch(code -> !"EMPLOYEE".equals(code))) {
+        if (request.roleCodes() != null && request.roleCodes().stream().anyMatch(code -> !"EMPLOYEE".equals(code))) {
             access.require("ROLE", Action.UPDATE);
         }
-        var roles = roleIds(r.roleCodes());
-        queries.findDepartment(r.departmentId());
-        var position = queries.findPositionName(r.positionId());
-        if (queries.countEmail(r.email()) > 0) {
+        var roles = roleIds(request.roleCodes());
+        queries.findDepartment(request.departmentId());
+        var position = queries.findPositionName(request.positionId());
+        if (queries.countEmail(request.email()) > 0) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
-        int year = r.hireDate().getYear();
+        int year = request.hireDate().getYear();
         store.insertLoginSequence(year);
         long next = number(store.lockLoginSequence(year), "last_seq") + 1;
         store.updateLoginSequence(year, next);
         String loginId = String.format("%d%03d", year, next);
         long id;
         try {
-            id = store.insertEmployee(loginId, r.name(), r.email(), r.departmentId(), r.positionId(),
-                    r.hireDate(), LocalDateTime.now(clock));
+            id = store.insertEmployee(loginId, request.name(), request.email(), request.departmentId(),
+                    request.positionId(), request.hireDate(), LocalDateTime.now(clock));
         } catch (org.springframework.dao.DuplicateKeyException ex) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
@@ -202,47 +216,48 @@ public class EmployeeService {
             store.insertUserRole(id, role);
         }
         var result = new RegistrationResult(id, loginId);
-        events.publishEvent(new InvitationRequested(id, r.email(), result));
+        events.publishEvent(new InvitationRequested(id, request.email(), result));
         return result;
     }
 
     @Transactional
-    public Map<String, Object> patch(long id, Patch r) {
+    public EmployeeDetailResponseDto patch(long id, Patch request) {
         // Same order as OrgService.setHead: tree first, then user/current head reads.
-        if (r.departmentId() != null) {
+        if (request.departmentId() != null) {
             treeLock.lock();
         }
         access.assertUserInScope("EMPLOYEE", id);
-        var old = r.email() == null && r.departmentId() == null ? raw(id) : store.lockUser(id);
-        if (r.email() != null && !r.email().equals(old.get("user_email"))) {
+        var old = request.email() == null && request.departmentId() == null ? raw(id) : store.lockUser(id);
+        if (request.email() != null && !request.email().equals(old.get("user_email"))) {
             requireRoleUpdateForPrivilegedTarget(id);
         }
-        if (r.departmentId() != null) {
-            if (number(old, "department_id") != r.departmentId()) {
+        if (request.departmentId() != null) {
+            if (number(old, "department_id") != request.departmentId()) {
                 notHead(id);
             }
-            queries.findDepartment(r.departmentId());
+            queries.findDepartment(request.departmentId());
         }
-        if (r.positionId() != null) {
-            queries.findPosition(r.positionId());
+        if (request.positionId() != null) {
+            queries.findPosition(request.positionId());
         }
-        if (r.name() != null && r.name().isBlank() || r.email() != null && r.email().isBlank()) {
+        if (request.name() != null && request.name().isBlank()
+                || request.email() != null && request.email().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         try {
-            store.updateEmployee(id, r.name(), r.email(), r.departmentId(), r.positionId(), r.hireDate(),
-                    LocalDateTime.now(clock));
+            store.updateEmployee(id, request.name(), request.email(), request.departmentId(),
+                    request.positionId(), request.hireDate(), LocalDateTime.now(clock));
         } catch (org.springframework.dao.DuplicateKeyException ex) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
-        if (r.email() != null && !r.email().equals(old.get("user_email"))) {
+        if (request.email() != null && !request.email().equals(old.get("user_email"))) {
             events.publishEvent(new InvitationEmailChanged(id, (String) old.get("user_email")));
         }
-        return views(List.of(id)).get(0);
+        return getEmployeeViews(List.of(id)).get(0);
     }
 
     @Transactional
-    public Map<String, Object> status(long id, com.minierp.backend.domain.user.entity.UserStatus status) {
+    public EmployeeDetailResponseDto status(long id, com.minierp.backend.domain.user.entity.UserStatus status) {
         if (status != com.minierp.backend.domain.user.entity.UserStatus.ACTIVE) {
             treeLock.lock();
         }
@@ -258,11 +273,11 @@ public class EmployeeService {
                     status == com.minierp.backend.domain.user.entity.UserStatus.ACTIVE ? 0 : 1,
                     LocalDateTime.now(clock));
         }
-        return views(List.of(id)).get(0);
+        return getEmployeeViews(List.of(id)).get(0);
     }
 
     @Transactional
-    public void replaceRoles(long id, List<String> codes) {
+    public void updateEmployeeRoles(long id, List<String> codes) {
         lockChief();
         raw(id);
         var ids = roleIds(codes);

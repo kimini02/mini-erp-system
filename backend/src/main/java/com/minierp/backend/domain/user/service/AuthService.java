@@ -52,7 +52,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public FindIdResponseDto findId(FindIdRequestDto requestDto) {
         User user = userRepository.findByUserEmail(requestDto.getEmail())
-                .filter(u -> u.getUserName().equals(requestDto.getName()))
+                .filter(matchedUser -> matchedUser.getUserName().equals(requestDto.getName()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "해당하는 사용자를 찾을 수 없습니다."));
         return FindIdResponseDto.of(user.getLoginId());
     }

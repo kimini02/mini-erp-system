@@ -16,7 +16,7 @@ public class EmployeeRepository {
 
     public Selection search(
             ScopeFilter scope,
-            String q,
+            String query,
             List<Long> departments,
             String status,
             int page,
@@ -24,8 +24,8 @@ public class EmployeeRepository {
             String sort) {
         Map<String, Object> args = new HashMap<>();
         String where = scope.predicate("u", args);
-        if (q != null && !q.isBlank()) {
-            args.put("q", q.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%");
+        if (query != null && !query.isBlank()) {
+            args.put("q", query.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%");
             where += " AND (u.user_name LIKE :q ESCAPE '!' OR u.login_id LIKE :q ESCAPE '!')";
         }
         if (departments != null) {
@@ -48,7 +48,7 @@ public class EmployeeRepository {
                 "SELECT u.id FROM users u WHERE " + where + " ORDER BY " + sort + ",u.id LIMIT :size OFFSET :offset",
                 args)
                 .stream()
-                .map(r -> number(r, "id"))
+                .map(row -> number(row, "id"))
                 .toList();
         return new Selection(ids, total, counts);
     }
