@@ -58,7 +58,7 @@ public class FormService {
     }
 
     public Map<String, Object> detail(String code) {
-        var f = resolver.form(code);
+        var f = resolver.getForm(code);
         var out = presentation(f);
         out.put("options",
                 map("dedupeApprover", bool(f, "dedupe_approver"), "fallbackToUpper", bool(f, "fallback_to_upper"),
@@ -80,14 +80,14 @@ public class FormService {
 
     @Transactional
     public Map<String, Object> patch(String code, Options o) {
-        var f = resolver.form(code);
+        var f = resolver.getForm(code);
         store.updateOptions(f.get("id"), o.dedupeApprover(), o.fallbackToUpper(), o.skipSelf(), o.allowLineEdit());
         return detail(code);
     }
 
     @Transactional
     public Map<String, Object> steps(String code, List<Step> steps) {
-        var f = resolver.form(code);
+        var f = resolver.getForm(code);
         if (steps == null || steps.isEmpty()
                 || steps.stream()
                         .anyMatch(s -> s == null || s.lineKind() == null

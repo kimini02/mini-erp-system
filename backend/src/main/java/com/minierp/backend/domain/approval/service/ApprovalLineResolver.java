@@ -1,6 +1,8 @@
 package com.minierp.backend.domain.approval.service;
 
 import com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep;
+import com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto;
+import com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto;
 import com.minierp.backend.domain.approval.repository.ApprovalLineQueries;
 import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +14,11 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 @RequiredArgsConstructor
 public class ApprovalLineResolver {
     private final ApprovalLineQueries queries;
-    public Map<String, Object> form(String code) {
+    public Map<String, Object> getForm(String code) {
         return queries.findForm(code);
     }
 
-    public Map<String, Object> person(long id) {
+    public Map<String, Object> getPerson(long id) {
         return queries.findPerson(id);
     }
 
@@ -31,7 +33,7 @@ public class ApprovalLineResolver {
             String note) {
     }
 
-    public List<Resolved> resolve(
+    public List<Resolved> resolveLine(
             Map<String, Object> form,
             long drafter,
             long draftDepartment,
@@ -39,27 +41,7 @@ public class ApprovalLineResolver {
         if (manual != null && !bool(form, "allow_line_edit")) {
             throw new BusinessException(ErrorCode.LINE_EDIT_NOT_ALLOWED);
         }
-        List<Map<String, Object>> steps;
-        if (manual != null) {
-            if (manual.stream()
-                    .anyMatch(s -> s == null || s.userId() == null || s.lineKind() == null
-                            || !Set.of("APPROVER", "REFERENCE").contains(s.lineKind()))
-                    || manual.stream().noneMatch(s -> "APPROVER".equals(s.lineKind()))) {
-                throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
-            }
-            steps = new ArrayList<>();
-            int n = 0;
-            for (var s : manual) {
-                steps.add(
-                        map("step_order", ++n, "line_kind", s.lineKind(), "approver_type", "USER",
-                                "user_id", s.userId()));
-            }
-        } else {
-            steps = queries.findSteps(form.get("id"));
-        }
-        if (steps.stream().noneMatch(s -> "APPROVER".equals(s.get("line_kind")))) {
-            throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
-        }
+        List<Map<String, Object>> steps = resolveSteps(form, manual);
         List<Resolved> resolved = new ArrayList<>();
         Set<Long> seen = new HashSet<>();
         for (var step : steps) {
@@ -70,13 +52,13 @@ public class ApprovalLineResolver {
                 boolean fallback = false;
                 String note = null;
                 switch (type) {
-                    case "USER" -> person = person(number(step, "user_id"));
+                    case "USER" -> person = getPerson(number(step, "user_id"));
                     case "ROLE" -> {
                         var rows = queries.findRoleHolder(step.get("role_id"));
                         if (rows.isEmpty()) {
                             throw new BusinessException(ErrorCode.APPROVER_NOT_FOUND);
                         }
-                        person = person(number(rows.get(0), "id"));
+                        person = getPerson(number(rows.get(0), "id"));
                     }
                     case "DEPT_HEAD", "UPPER_DEPT_HEAD" -> {
                         Long department = draftDepartment;
@@ -89,9 +71,9 @@ public class ApprovalLineResolver {
                         person = null;
                         Set<Long> visited = new HashSet<>();
                         while (department != null && visited.add(department)) {
-                            var d = queries.findDepartmentHead(department);
-                            if (d.get("head_user_id") != null) {
-                                var candidate = person(number(d, "head_user_id"));
+                            var departmentRow = queries.findDepartmentHead(department);
+                            if (departmentRow.get("head_user_id") != null) {
+                                var candidate = getPerson(number(departmentRow, "head_user_id"));
                                 if ("ACTIVE".equals(candidate.get("status"))) {
                                     person = candidate;
                                     break;
@@ -100,7 +82,9 @@ public class ApprovalLineResolver {
                             if (!bool(form, "fallback_to_upper")) {
                                 break;
                             }
-                            department = d.get("parent_id") == null ? null : number(d, "parent_id");
+                            department = departmentRow.get("parent_id") == null
+                                    ? null
+                                    : number(departmentRow, "parent_id");
                             fallback = true;
                         }
                         if (person == null) {
@@ -153,21 +137,55 @@ public class ApprovalLineResolver {
         return resolved;
     }
 
+    private List<Map<String, Object>> resolveSteps(Map<String, Object> form, List<ManualStep> manual) {
+        List<Map<String, Object>> steps;
+        if (manual != null) {
+            if (manual.stream()
+                    .anyMatch(manualStep -> manualStep == null || manualStep.userId() == null
+                            || manualStep.lineKind() == null
+                            || !Set.of("APPROVER", "REFERENCE").contains(manualStep.lineKind()))
+                    || manual.stream().noneMatch(manualStep -> "APPROVER".equals(manualStep.lineKind()))) {
+                throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
+            }
+            steps = new ArrayList<>();
+            int stepOrder = 0;
+            for (var manualStep : manual) {
+                steps.add(manualStepRow(++stepOrder, manualStep));
+            }
+        } else {
+            steps = queries.findSteps(form.get("id"));
+        }
+        if (steps.stream().noneMatch(manualStep -> "APPROVER".equals(manualStep.get("line_kind")))) {
+            throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
+        }
+        return steps;
+    }
+
+    private Map<String, Object> manualStepRow(int order, ManualStep step) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("step_order", order);
+        row.put("line_kind", step.lineKind());
+        row.put("approver_type", "USER");
+        row.put("user_id", step.userId());
+        return row;
+    }
+
     private Long parent(long department) {
         var row = queries.findParent(department);
         return row.get("parent_id") == null ? null : number(row, "parent_id");
     }
 
-    public Map<String, Object> preview(String code, long drafter, List<ManualStep> manual) {
-        var form = form(code);
-        var user = person(drafter);
+    public ApprovalLinePreviewResponseDto getLinePreview(String code, long drafter, List<ManualStep> manual) {
+        var form = getForm(code);
+        var user = getPerson(drafter);
         try {
-            var resolved = resolve(form, drafter, number(user, "department_id"), manual);
-            return map("rows", resolved.stream().map(this::previewRow).toList(),
-                    "finalLine", resolved.stream()
-                            .filter(r -> r.kind().equals("APPROVER") && r.skipReason() == null)
-                            .map(r -> publicPerson(r.person()))
-                            .toList(), "references", references(resolved), "error", null);
+            var resolved = resolveLine(form, drafter, number(user, "department_id"), manual);
+            return new ApprovalLinePreviewResponseDto(resolved.stream().map(this::previewRow).toList(),
+                    resolved.stream()
+                            .filter(resolvedStep -> resolvedStep.kind().equals("APPROVER")
+                                    && resolvedStep.skipReason() == null)
+                            .map(resolvedStep -> ApprovalPersonResponseDto.from(resolvedStep.person()))
+                            .toList(), references(resolved), null);
         } catch (ResolutionFailure ex) {
             var rows = new ArrayList<>(ex.resolved.stream().map(this::previewRow).toList());
             String label = switch (ex.rule) {
@@ -176,11 +194,8 @@ public class ApprovalLineResolver {
                 case "ROLE" -> "역할 담당자";
                 default -> "지정 사원";
             };
-            rows.add(
-                    map("order", ex.order, "kind", ex.kind, "rule", label, "result", null, "status", "ERROR",
-                            "note", ex.getMessage()));
-            return map("rows", rows, "finalLine", List.of(), "references", references(ex.resolved),
-                    "error", ex.getMessage());
+            rows.add(new ApprovalLinePreviewResponseDto.Row(ex.order, ex.kind, label, null, "ERROR", ex.getMessage()));
+            return new ApprovalLinePreviewResponseDto(rows, List.of(), references(ex.resolved), ex.getMessage());
         }
     }
 
@@ -193,24 +208,24 @@ public class ApprovalLineResolver {
         };
     }
 
-    private List<Map<String, Object>> references(List<Resolved> resolved) {
+    private List<ApprovalPersonResponseDto> references(List<Resolved> resolved) {
         return resolved.stream()
-                .filter(r -> r.kind().equals("REFERENCE") && r.skipReason() == null)
-                .map(r -> publicPerson(r.person()))
+                .filter(resolvedStep -> resolvedStep.kind().equals("REFERENCE") && resolvedStep.skipReason() == null)
+                .map(resolvedStep -> ApprovalPersonResponseDto.from(resolvedStep.person()))
                 .toList();
     }
 
-    private Map<String, Object> previewRow(Resolved r) {
-        String note = r.note();
-        if ("SELF".equals(r.skipReason())) {
+    private ApprovalLinePreviewResponseDto.Row previewRow(Resolved resolvedStep) {
+        String note = resolvedStep.note();
+        if ("SELF".equals(resolvedStep.skipReason())) {
             note = "기안자 본인이라 이 단계는 건너뜁니다.";
         }
-        if ("DUPLICATE".equals(r.skipReason())) {
+        if ("DUPLICATE".equals(resolvedStep.skipReason())) {
             note = "앞 단계와 같은 결재자라 건너뜁니다.";
         }
-        return map("order", r.order(), "kind", r.kind(), "rule", r.rule(),
-                "result", r.person() == null ? null : publicPerson(r.person()),
-                "status", r.skipReason() != null ? "SKIPPED" : r.fallback() ? "FALLBACK" : "OK", "note", note);
+        return new ApprovalLinePreviewResponseDto.Row(resolvedStep.order(), resolvedStep.kind(), resolvedStep.rule(),
+                resolvedStep.person() == null ? null : ApprovalPersonResponseDto.from(resolvedStep.person()),
+                resolvedStep.skipReason() != null ? "SKIPPED" : resolvedStep.fallback() ? "FALLBACK" : "OK", note);
     }
 
     private static final class ResolutionFailure extends BusinessException {
@@ -227,8 +242,4 @@ public class ApprovalLineResolver {
         }
     }
 
-    public static Map<String, Object> publicPerson(Map<String, Object> p) {
-        return map("id", p.get("id"), "name", p.get("name"), "title", p.get("title"),
-                "department", p.get("department"));
-    }
 }

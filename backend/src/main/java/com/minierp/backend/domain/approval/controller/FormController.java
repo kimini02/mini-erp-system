@@ -50,6 +50,6 @@ public class FormController {
     @PostMapping("/{code}/line-preview")
     @RequirePermission(menu = "APPROVAL_FORM", action = Action.VIEW)
     public ApiResponse<?> preview(@PathVariable String code, @Valid @RequestBody Preview body) {
-        return ok(resolver.preview(code, body.drafterId(), null));
+        return ok(resolver.getLinePreview(code, body.drafterId(), null));
     }
 }
