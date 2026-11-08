@@ -1,6 +1,7 @@
 package com.minierp.backend.domain.org.service;
 
 import com.minierp.backend.domain.org.dto.OrgRequests.*;
+import com.minierp.backend.domain.org.dto.*;
 import com.minierp.backend.domain.org.repository.OrgQueries;
 import com.minierp.backend.global.permission.PermissionAccess;
 import com.minierp.backend.global.exception.*;
@@ -28,7 +29,7 @@ public class OrgService {
         treeLock.lock();
     }
 
-    public Map<String, Object> tree() {
+    public OrgDepartmentTreeResponseDto tree() {
         // Exactly two queries regardless of department count, including heads/positions.
         var departments = queries.findDepartments();
         var counts = queries.findDepartmentMemberCounts();
@@ -36,116 +37,105 @@ public class OrgService {
         for (var row : counts) {
             members.put(number(row, "department_id"), number(row, "members"));
         }
-        Map<Long, Map<String, Object>> nodes = new LinkedHashMap<>();
-        for (var row : departments) {
-            long id = number(row, "id");
-            Object head = row.get("head_user_id") == null
-                    ? null
-                    : map("id", row.get("head_user_id"), "name", row.get("head_name"),
-                            "position", row.get("head_position"));
-            nodes.put(id,
-                    map("id", id, "name", row.get("name"), "code", row.get("code"), "head", head,
-                            "directMemberCount", members.getOrDefault(id, 0L), "totalMemberCount", 0L,
-                            "children", new ArrayList<Map<String, Object>>()));
-        }
+        Map<Long, List<Map<String, Object>>> children = new LinkedHashMap<>();
         Map<String, Object> root = null;
         for (var row : departments) {
-            var node = nodes.get(number(row, "id"));
             if (row.get("parent_id") == null) {
-                root = node;
+                root = row;
             } else {
-                children(nodes.get(number(row, "parent_id"))).add(node);
+                children.computeIfAbsent(number(row, "parent_id"), parent -> new ArrayList<>()).add(row);
             }
         }
-        if (root != null) {
-            aggregate(root);
+        return root == null ? null : departmentTree(root, children, members);
+    }
+
+    private OrgDepartmentTreeResponseDto departmentTree(
+            Map<String, Object> row,
+            Map<Long, List<Map<String, Object>>> children,
+            Map<Long, Long> members) {
+        long id = number(row, "id");
+        List<OrgDepartmentTreeResponseDto> descendants = new ArrayList<>();
+        Long directMembers = members.getOrDefault(id, 0L);
+        long total = directMembers;
+        for (var child : children.getOrDefault(id, List.of())) {
+            var descendant = departmentTree(child, children, members);
+            descendants.add(descendant);
+            total += descendant.totalMemberCount();
         }
-        return root;
+        return new OrgDepartmentTreeResponseDto(id, (String) row.get("name"), (String) row.get("code"),
+                OrgDepartmentResponseDto.Head.fromDepartment(row), directMembers, total, descendants);
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> children(Map<String, Object> n) {
-        return (List<Map<String, Object>>) n.get("children");
-    }
-
-    private long aggregate(Map<String, Object> node) {
-        long total = number(node, "directMemberCount");
-        for (var child : children(node)) {
-            total += aggregate(child);
-        }
-        node.put("totalMemberCount", total);
-        return total;
-    }
-
-    private Object head(Object userId, boolean includeDepartment) {
+    private Map<String, Object> head(Object userId) {
         if (userId == null) {
             return null;
         }
-        var h = queries.findHead(userId);
-        if (!includeDepartment) {
-            h.remove("departmentName");
-        }
-        return h;
+        return queries.findHead(userId);
     }
 
-    public Map<String, Object> detail(long id) {
-        var d = department(id);
-        List<Map<String, Object>> path = new ArrayList<>();
-        Object fallback = null;
-        Object parent = d.get("parent_id");
+    public OrgDepartmentResponseDto getDepartment(long id) {
+        var departmentRow = department(id);
+        List<OrgDepartmentResponseDto.Path> path = new ArrayList<>();
+        OrgDepartmentResponseDto.FallbackHead fallback = null;
+        Object parent = departmentRow.get("parent_id");
         while (parent != null) {
             var ancestor = department(((Number) parent).longValue());
-            path.add(0, map("id", ancestor.get("id"), "name", ancestor.get("name")));
+            path.add(0, OrgDepartmentResponseDto.Path.from(ancestor));
             if (fallback == null && ancestor.get("head_user_id") != null) {
-                fallback = head(ancestor.get("head_user_id"), true);
+                fallback = OrgDepartmentResponseDto.FallbackHead.from(head(ancestor.get("head_user_id")));
             }
             parent = ancestor.get("parent_id");
         }
-        var schedule = d.get("work_schedule_id") == null
-                ? defaultSchedule()
-                : schedule(((Number) d.get("work_schedule_id")).longValue());
-        schedule.put("useDefault", d.get("work_schedule_id") == null);
-        return map("id", id, "name", d.get("name"), "code", d.get("code"), "parentId", d.get("parent_id"), "path", path,
-                "head", head(d.get("head_user_id"), false),
-                "fallbackHead", d.get("head_user_id") == null ? fallback : null, "workSchedule", schedule,
-                "directMemberCount", queries.countDepartmentMembers(id),
-                "childCount", queries.countChildDepartments(id));
+        var schedule = departmentRow.get("work_schedule_id") == null
+                ? defaultScheduleRow()
+                : schedule(((Number) departmentRow.get("work_schedule_id")).longValue());
+        var workSchedule = OrgDepartmentResponseDto.WorkSchedule.from(schedule,
+                departmentRow.get("work_schedule_id") == null);
+        Long parentId = departmentRow.get("parent_id") == null
+                ? null
+                : ((Number) departmentRow.get("parent_id")).longValue();
+        return new OrgDepartmentResponseDto(id, (String) departmentRow.get("name"), (String) departmentRow.get("code"),
+                parentId, path, OrgDepartmentResponseDto.Head.from(head(departmentRow.get("head_user_id"))),
+                departmentRow.get("head_user_id") == null ? fallback : null, workSchedule,
+                queries.countDepartmentMembers(id), queries.countChildDepartments(id));
     }
 
     @Transactional
-    public Map<String, Object> createDepartment(DepartmentCreate r) {
+    public OrgDepartmentResponseDto createDepartment(DepartmentCreate request) {
         lockTree();
-        department(r.parentId());
-        long id = store.insertDepartment(r.name(), UUID.randomUUID().toString(), r.parentId(), r.sortOrder());
+        department(request.parentId());
+        long id = store.insertDepartment(request.name(), UUID.randomUUID().toString(), request.parentId(),
+                request.sortOrder());
         store.updateDepartmentCode(id, String.format("D-%04d", id));
-        return detail(id);
+        return getDepartment(id);
     }
 
     @Transactional
-    public Map<String, Object> patchDepartment(long id, DepartmentPatch r) {
+    public OrgDepartmentResponseDto updateDepartment(long id, DepartmentPatch request) {
         lockTree();
         department(id);
-        if (r.name() != null && r.name().isBlank()) {
+        if (request.name() != null && request.name().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        store.updateDepartment(id, r.name(), r.sortOrder());
-        return detail(id);
+        store.updateDepartment(id, request.name(), request.sortOrder());
+        return getDepartment(id);
     }
 
     @Transactional
-    public Map<String, Object> move(long id, Long parentId) {
+    public OrgDepartmentResponseDto updateDepartmentParent(long id, Long parentId) {
         lockTree();
-        var d = department(id);
-        if (parentId == null || d.get("parent_id") == null || permissions.descendants(id).contains(parentId)) {
+        var departmentRow = department(id);
+        if (parentId == null || departmentRow.get("parent_id") == null
+                || permissions.descendants(id).contains(parentId)) {
             throw new BusinessException(ErrorCode.INVALID_DEPARTMENT_MOVE);
         }
         department(parentId);
         store.updateDepartmentParent(id, parentId);
-        return detail(id);
+        return getDepartment(id);
     }
 
     @Transactional
-    public Map<String, Object> setHead(long id, Long userId) {
+    public OrgDepartmentResponseDto setHead(long id, Long userId) {
         lockTree();
         department(id);
         if (userId != null) {
@@ -159,7 +149,7 @@ public class OrgService {
             }
         }
         store.updateDepartmentHead(id, userId);
-        return detail(id);
+        return getDepartment(id);
     }
 
     @Transactional
@@ -176,38 +166,42 @@ public class OrgService {
         return queries.findSchedule(id);
     }
 
-    public Map<String, Object> defaultSchedule() {
+    private Map<String, Object> defaultScheduleRow() {
         return schedule(number(queries.findDefaultSchedule(), "id"));
     }
 
-    private void validateSchedule(Schedule r) {
-        if (r.startTime() == null || r.endTime() == null || !r.endTime().isAfter(r.startTime())
-                || r.lateGraceMin() == null || r.lateGraceMin() < 0 || r.lateGraceMin() > 60) {
+    public OrgWorkScheduleResponseDto getDefaultWorkSchedule() {
+        return OrgWorkScheduleResponseDto.from(defaultScheduleRow());
+    }
+
+    private void validateSchedule(Schedule request) {
+        if (request.startTime() == null || request.endTime() == null || !request.endTime().isAfter(request.startTime())
+                || request.lateGraceMin() == null || request.lateGraceMin() < 0 || request.lateGraceMin() > 60) {
             throw new BusinessException(ErrorCode.INVALID_WORK_SCHEDULE);
         }
     }
 
     @Transactional
-    public Map<String, Object> defaultSchedule(Schedule r) {
-        validateSchedule(r);
-        store.updateDefaultSchedule(r.startTime(), r.endTime(), r.lateGraceMin());
-        return defaultSchedule();
+    public OrgWorkScheduleResponseDto updateDefaultWorkSchedule(Schedule request) {
+        validateSchedule(request);
+        store.updateDefaultSchedule(request.startTime(), request.endTime(), request.lateGraceMin());
+        return getDefaultWorkSchedule();
     }
 
     @Transactional
-    public Map<String, Object> departmentSchedule(long id, Schedule r) {
+    public OrgDepartmentResponseDto updateDepartmentSchedule(long id, Schedule request) {
         lockTree();
-        var d = department(id);
-        if (Boolean.TRUE.equals(r.useDefault())) {
+        var departmentRow = department(id);
+        if (Boolean.TRUE.equals(request.useDefault())) {
             store.updateDepartmentToDefaultSchedule(id);
         } else {
-            validateSchedule(r);
-            Long scheduleId = d.get("work_schedule_id") == null
+            validateSchedule(request);
+            Long scheduleId = departmentRow.get("work_schedule_id") == null
                     ? null
-                    : ((Number) d.get("work_schedule_id")).longValue();
-            var start = r.startTime();
-            var end = r.endTime();
-            var grace = r.lateGraceMin();
+                    : ((Number) departmentRow.get("work_schedule_id")).longValue();
+            var start = request.startTime();
+            var end = request.endTime();
+            var grace = request.lateGraceMin();
             var name = "부서 근무시간";
             if (scheduleId == null) {
                 scheduleId = store.insertWorkSchedule(start, end, grace, name);
@@ -216,28 +210,28 @@ public class OrgService {
             }
             store.updateDepartmentSchedule(id, scheduleId);
         }
-        return detail(id);
+        return getDepartment(id);
     }
 
-    public List<Map<String, Object>> positions() {
-        return queries.findPositions();
+    public List<OrgPositionResponseDto> getPositions() {
+        return queries.findPositions().stream().map(OrgPositionResponseDto::from).toList();
     }
 
     @Transactional
-    public Map<String, Object> createPosition(String name) {
+    public OrgPositionCreateResponseDto createPosition(String name) {
         long id = store.insertPosition(name);
-        return map("id", id, "name", name, "rankOrder", 0);
+        return new OrgPositionCreateResponseDto(id, name, 0);
     }
 
     @Transactional
-    public Map<String, Object> renamePosition(long id, String name) {
+    public OrgPositionUpdateResponseDto updatePosition(long id, String name) {
         queries.findPosition(id);
         store.updatePositionName(id, name);
-        return map("id", id, "name", name);
+        return new OrgPositionUpdateResponseDto(id, name);
     }
 
     @Transactional
-    public List<Map<String, Object>> orderPositions(List<PositionOrder> order) {
+    public List<OrgPositionResponseDto> updatePositionOrder(List<PositionOrder> order) {
         Set<Long> ids = new HashSet<>();
         for (var item : order) {
             if (!ids.add(item.id())) {
@@ -247,7 +241,7 @@ public class OrgService {
                 throw new BusinessException(ErrorCode.POSITION_NOT_FOUND);
             }
         }
-        return positions();
+        return getPositions();
     }
 
     @Transactional
@@ -259,28 +253,30 @@ public class OrgService {
         store.deletePosition(id);
     }
 
-    public List<Map<String, Object>> holidays(int year) {
-        return queries.findHolidays(LocalDate.of(year, 1, 1), LocalDate.of(year + 1, 1, 1));
+    public List<OrgHolidayResponseDto> getHolidays(int year) {
+        return queries.findHolidays(LocalDate.of(year, 1, 1), LocalDate.of(year + 1, 1, 1)).stream()
+                .map(OrgHolidayResponseDto::from)
+                .toList();
     }
 
     @Transactional
-    public Map<String, Object> createHoliday(HolidayCreate r) {
-        if (queries.countHolidaysOnDate(r.date()) > 0) {
+    public OrgHolidayResponseDto createHoliday(HolidayCreate request) {
+        if (queries.countHolidaysOnDate(request.date()) > 0) {
             throw new BusinessException(ErrorCode.HOLIDAY_ALREADY_EXISTS);
         }
         try {
-            long id = store.insertHoliday(r.date(), r.name(), r.substitute());
-            return map("id", id, "date", r.date(), "name", r.name(), "substitute", r.substitute());
+            long id = store.insertHoliday(request.date(), request.name(), request.substitute());
+            return new OrgHolidayResponseDto(id, request.date(), request.name(), request.substitute());
         } catch (org.springframework.dao.DuplicateKeyException ex) {
             throw new BusinessException(ErrorCode.HOLIDAY_ALREADY_EXISTS);
         }
     }
 
     @Transactional
-    public Map<String, Object> patchHoliday(long id, HolidayPatch r) {
+    public OrgHolidayResponseDto updateHoliday(long id, HolidayPatch request) {
         queries.findHolidayIdentity(id);
-        store.updateHoliday(id, r.name(), r.substitute());
-        return queries.findHoliday(id);
+        store.updateHoliday(id, request.name(), request.substitute());
+        return OrgHolidayResponseDto.from(queries.findHoliday(id));
     }
 
     @Transactional

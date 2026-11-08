@@ -2,6 +2,7 @@ package com.minierp.backend.domain.org.controller;
 
 import com.minierp.backend.domain.org.service.OrgService;
 import com.minierp.backend.domain.org.dto.OrgRequests.*;
+import com.minierp.backend.domain.org.dto.*;
 import com.minierp.backend.global.permission.*;
 import com.minierp.backend.global.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -18,128 +19,138 @@ import static com.minierp.backend.global.permission.Action.*;
 public class OrgController {
     private final OrgService service;
     private final Clock clock;
-    private ApiResponse<?> ok(Object value) {
-        return ApiResponse.success(clock, value);
-    }
 
     @GetMapping("/departments/tree")
-    public ApiResponse<?> tree() {
-        return ok(service.tree());
+    public ApiResponse<OrgDepartmentTreeResponseDto> getDepartmentTree() {
+        return ApiResponse.success(clock, service.tree());
     }
 
     @GetMapping("/departments/{id}")
-    public ApiResponse<?> department(@PathVariable long id) {
-        return ok(service.detail(id));
+    public ApiResponse<OrgDepartmentResponseDto> getDepartment(@PathVariable long id) {
+        return ApiResponse.success(clock, service.getDepartment(id));
     }
 
     @PostMapping("/departments")
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission(menu = "DEPARTMENT", action = CREATE)
-    public ApiResponse<?> create(@Valid @RequestBody DepartmentCreate r) {
-        return ok(service.createDepartment(r));
+    public ApiResponse<OrgDepartmentResponseDto> createDepartment(@Valid @RequestBody DepartmentCreate request) {
+        return ApiResponse.success(clock, service.createDepartment(request));
     }
 
     @PatchMapping("/departments/{id}")
     @RequirePermission(menu = "DEPARTMENT", action = UPDATE)
-    public ApiResponse<?> patch(@PathVariable long id, @Valid @RequestBody DepartmentPatch r) {
-        return ok(service.patchDepartment(id, r));
+    public ApiResponse<OrgDepartmentResponseDto> updateDepartment(
+            @PathVariable long id,
+            @Valid @RequestBody DepartmentPatch request) {
+        return ApiResponse.success(clock, service.updateDepartment(id, request));
     }
 
     @PatchMapping("/departments/{id}/parent")
     @RequirePermission(menu = "DEPARTMENT", action = UPDATE)
-    public ApiResponse<?> move(@PathVariable long id, @RequestBody Parent r) {
-        return ok(service.move(id, r.parentId()));
+    public ApiResponse<OrgDepartmentResponseDto> updateDepartmentParent(
+            @PathVariable long id,
+            @RequestBody Parent request) {
+        return ApiResponse.success(clock, service.updateDepartmentParent(id, request.parentId()));
     }
 
     @PutMapping("/departments/{id}/head")
     @RequirePermission(menu = "DEPARTMENT", action = UPDATE)
-    public ApiResponse<?> head(@PathVariable long id, @Valid @RequestBody Head r) {
-        return ok(service.setHead(id, r.userId()));
+    public ApiResponse<OrgDepartmentResponseDto> updateDepartmentHead(
+            @PathVariable long id,
+            @Valid @RequestBody Head request) {
+        return ApiResponse.success(clock, service.setHead(id, request.userId()));
     }
 
     @DeleteMapping("/departments/{id}/head")
     @RequirePermission(menu = "DEPARTMENT", action = UPDATE)
-    public ApiResponse<?> clearHead(@PathVariable long id) {
-        return ok(service.setHead(id, null));
+    public ApiResponse<OrgDepartmentResponseDto> deleteDepartmentHead(@PathVariable long id) {
+        return ApiResponse.success(clock, service.setHead(id, null));
     }
 
     @PutMapping("/departments/{id}/work-schedule")
     @RequirePermission(menu = "DEPARTMENT", action = UPDATE)
-    public ApiResponse<?> schedule(@PathVariable long id, @RequestBody Schedule r) {
-        return ok(service.departmentSchedule(id, r));
+    public ApiResponse<OrgDepartmentResponseDto> updateDepartmentWorkSchedule(
+            @PathVariable long id,
+            @RequestBody Schedule request) {
+        return ApiResponse.success(clock, service.updateDepartmentSchedule(id, request));
     }
 
     @DeleteMapping("/departments/{id}")
     @RequirePermission(menu = "DEPARTMENT", action = DELETE)
-    public ApiResponse<?> deleteDepartment(@PathVariable long id) {
+    public ApiResponse<Void> deleteDepartment(@PathVariable long id) {
         service.deleteDepartment(id);
-        return ok(null);
+        return ApiResponse.success(clock, null);
     }
 
     @GetMapping("/work-schedules/default")
-    public ApiResponse<?> schedule() {
-        return ok(service.defaultSchedule());
+    public ApiResponse<OrgWorkScheduleResponseDto> getDefaultWorkSchedule() {
+        return ApiResponse.success(clock, service.getDefaultWorkSchedule());
     }
 
     @PutMapping("/work-schedules/default")
     @RequirePermission(menu = "DEPARTMENT", action = UPDATE)
-    public ApiResponse<?> schedule(@RequestBody Schedule r) {
-        return ok(service.defaultSchedule(r));
+    public ApiResponse<OrgWorkScheduleResponseDto> updateDefaultWorkSchedule(@RequestBody Schedule request) {
+        return ApiResponse.success(clock, service.updateDefaultWorkSchedule(request));
     }
 
     @GetMapping("/positions")
-    public ApiResponse<?> positions() {
-        return ok(service.positions());
+    public ApiResponse<List<OrgPositionResponseDto>> getPositions() {
+        return ApiResponse.success(clock, service.getPositions());
     }
 
     @PostMapping("/positions")
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission(menu = "DEPARTMENT", action = CREATE)
-    public ApiResponse<?> position(@Valid @RequestBody PositionName r) {
-        return ok(service.createPosition(r.name()));
+    public ApiResponse<OrgPositionCreateResponseDto> createPosition(@Valid @RequestBody PositionName request) {
+        return ApiResponse.success(clock, service.createPosition(request.name()));
     }
 
     @PatchMapping("/positions/{id}")
     @RequirePermission(menu = "DEPARTMENT", action = UPDATE)
-    public ApiResponse<?> position(@PathVariable long id, @Valid @RequestBody PositionName r) {
-        return ok(service.renamePosition(id, r.name()));
+    public ApiResponse<OrgPositionUpdateResponseDto> updatePosition(
+            @PathVariable long id,
+            @Valid @RequestBody PositionName request) {
+        return ApiResponse.success(clock, service.updatePosition(id, request.name()));
     }
 
     @PutMapping("/positions/order")
     @RequirePermission(menu = "DEPARTMENT", action = UPDATE)
-    public ApiResponse<?> order(@Valid @RequestBody List<@Valid PositionOrder> r) {
-        return ok(service.orderPositions(r));
+    public ApiResponse<List<OrgPositionResponseDto>> updatePositionOrder(
+            @Valid @RequestBody List<@Valid PositionOrder> request) {
+        return ApiResponse.success(clock, service.updatePositionOrder(request));
     }
 
     @DeleteMapping("/positions/{id}")
     @RequirePermission(menu = "DEPARTMENT", action = DELETE)
-    public ApiResponse<?> deletePosition(@PathVariable long id) {
+    public ApiResponse<Void> deletePosition(@PathVariable long id) {
         service.deletePosition(id);
-        return ok(null);
+        return ApiResponse.success(clock, null);
     }
 
     @GetMapping("/holidays")
-    public ApiResponse<?> holidays(@RequestParam int year) {
-        return ok(service.holidays(year));
+    public ApiResponse<List<OrgHolidayResponseDto>> getHolidays(@RequestParam int year) {
+        return ApiResponse.success(clock, service.getHolidays(year));
     }
 
     @PostMapping("/holidays")
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission(menu = "HOLIDAY", action = CREATE)
-    public ApiResponse<?> holiday(@Valid @RequestBody HolidayCreate r) {
-        return ok(service.createHoliday(r));
+    public ApiResponse<OrgHolidayResponseDto> createHoliday(@Valid @RequestBody HolidayCreate request) {
+        return ApiResponse.success(clock, service.createHoliday(request));
     }
 
     @PatchMapping("/holidays/{id}")
     @RequirePermission(menu = "HOLIDAY", action = UPDATE)
-    public ApiResponse<?> holiday(@PathVariable long id, @Valid @RequestBody HolidayPatch r) {
-        return ok(service.patchHoliday(id, r));
+    public ApiResponse<OrgHolidayResponseDto> updateHoliday(
+            @PathVariable long id,
+            @Valid @RequestBody HolidayPatch request) {
+        return ApiResponse.success(clock, service.updateHoliday(id, request));
     }
 
     @DeleteMapping("/holidays/{id}")
     @RequirePermission(menu = "HOLIDAY", action = DELETE)
-    public ApiResponse<?> deleteHoliday(@PathVariable long id) {
+    public ApiResponse<Void> deleteHoliday(@PathVariable long id) {
         service.deleteHoliday(id);
-        return ok(null);
+        return ApiResponse.success(clock, null);
     }
 }
