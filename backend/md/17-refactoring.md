@@ -13,6 +13,7 @@
 > 개정(2026-11-07, 7차): 2.2·5장 — 권한 범위 조건 조각(`ScopeFilter`) 예외, 측정 오탐 목록, 매개변수 타입, SQL을 실행하지 않는 보조 메서드 이름, 옮긴 뒤 형식(짧아진 문장, 텍스트 블록 닫는 줄), 다시 돌릴 수 있는 검증(R-03 묶음 1 리뷰 결과).
 > 개정(2026-11-07, 8차): 2.2·5장 — 기존 쿼리 클래스 옮기기, 다른 도메인이 쓰는 조건 조각, 키워드 없는 SQL 조각, 매개변수 타입의 뜻(식 자체의 타입), 여러 쿼리가 함께 쓰는 파라미터 map, 호출 지점·닫는 줄·패키지 이동 검증(R-03 묶음 2 리뷰 결과와 묶음 3 준비).
 > 개정(2026-11-08, 9차): 2.3·5장 — 4단계 시작 전 보완. 응답 record의 범위(공통 쪽 응답, 양식 본문, 키가 데이터인 map), JSON 모양과 필드 타입, 테스트가 부르는 이름, 메서드 나누기에서 지킬 실행 순서, 3단계에서 남긴 SQL 외 코드, 커밋마다 검증(테스트 소스 변경 0, SQL 값, 실행 순서 대조, 응답 대조, 안 쓰는 import)(R-03 묶음 3 리뷰 결과).
+> 개정(2026-11-08, 10차): 2.3 — 4단계 묶음 2 시작 전 보완. 테스트가 직접 부르는 `InboxRepository.search`·`pageSql`과 그에 맞춘 SQL 문자열 비교 예외, TIME 열 예시 바로잡음(기준선의 시각 값은 모두 문자열), 주입된 목록에서 꺼낸 빈(양식 처리기)의 호출도 실행 순서 대조에 넣음(R-04 묶음 1 리뷰 결과).
 
 ---
 
@@ -245,6 +246,9 @@
   - 지금 `EmployeeService.page(...)`의 계산식을 그대로 옮깁니다. 여러 도메인이 같은 모양을 쓰므로 `ApiResponse` 옆에 둡니다.
   - `EmployeeService.page`는 마지막 사용처를 바꾸는 묶음에서 지웁니다.
 - repository는 응답을 만들지 않습니다. `InboxRepository`가 쪽 검사·응답 map·쪽 응답을 만드는 부분은 서비스로 옮기고, repository는 행과 개수만 돌려줍니다. 검사와 SQL 실행의 순서·여부는 그대로입니다.
+  - 예외: `M2InboxPerformanceTest`가 `InboxRepository.search`와 `pageSql`을 직접 부릅니다. `search`가 돌려준 map의 `content` 개수와, 그동안 실행된 SQL 수(개수·목록·결재선 3개)를 확인합니다.
+  - 그래서 두 메서드의 이름·매개변수와 `search`의 `Map` 반환은 그대로 둡니다. `search`는 지금처럼 SQL 3개를 실행하되(목록이 비면 결재선 조회 없음), 응답 대신 행과 개수만 담은 map(`total`, `content`=문서 행, `lines`=문서별 결재선 행)을 돌려줍니다.
+  - 왜: 테스트 소스를 바꾸지 않는다는 원칙(아래 검증)과 응답을 repository 밖에서 만든다는 목표를 함께 지키는 방법입니다. 키가 정해진 map을 repository가 돌려주는 것은 이 메서드 하나뿐인 예외로 R-04에 적습니다.
 - 결재 양식 본문(`ApprovalFormHandler.body`)은 양식마다 모양이 다릅니다.
   - 양식마다 본문 record를 만듭니다. `approval/dto`에 메서드 없는 인터페이스 `ApprovalFormBodyDto`를 두고 각 본문 record가 구현합니다. `body`는 반환 타입만 이 인터페이스로 바꿉니다.
   - 0장의 "새 인터페이스를 더하지 않음"의 예외입니다. `Object`로 두면 응답 타입만 보고 본문이 무엇인지 알 수 없고, `Map`으로 두면 이 단계의 목적과 어긋납니다. Jackson은 실제 객체의 타입으로 직렬화하므로 JSON은 같습니다.
@@ -270,7 +274,7 @@
     | 정수(INT, BIGINT, `COUNT(*)`, `CAST(… AS UNSIGNED)`) | null이 없으면 `long`(`SqlStore.number`), 있으면 `Long`. JDBC 클래스(`Integer`·`Long`·`BigInteger`)가 달라도 정수 JSON은 같으므로 `long`·`Long`으로 맞춥니다. 캐스트(`(Long) row.get(...)`)는 `Integer` 열에서 예외가 나므로 쓰지 않습니다 |
     | DECIMAL, `SUM`·`AVG` 결과 | `BigDecimal` 그대로(소수 자릿수 유지). MariaDB는 정수 열의 `SUM`도 DECIMAL로 줍니다 |
     | DATE, DATETIME | `LocalDate`, `LocalDateTime`(`SqlStore`가 이미 바꿈) |
-    | TIME | `SqlStore`가 바꾸지 않아 `java.sql.Time`이 `"18:00:00"`으로 나갑니다. `LocalTime`으로 바꾸면 초가 0일 때 `"18:00"`이 되므로 바꾸지 않습니다(기준선의 연장근무 본문 `startTime`·`endTime`) |
+    | TIME | 열 값을 그대로 내보내면 `SqlStore`가 바꾸지 않아 `java.sql.Time`이 `"18:00:00"`으로 나갑니다. `LocalTime`으로 바꾸면 초가 0일 때 `"18:00"`이 되므로 바꾸지 않습니다. 지금 기준선의 시각 값은 모두 SQL `TIME_FORMAT`이나 코드에서 만든 문자열(근무시간 `"09:00"`, 특근 본문 `"09:00:00"`, 근태 정정 `"09:02"`)이므로 `String`입니다 |
     | TINYINT(1), BOOLEAN | 드라이버가 주는 `Boolean`. 다른 크기의 TINYINT는 정수 |
     | 문자, ENUM | `String` |
 
@@ -284,8 +288,8 @@
 - 한 글자 변수(`r`, `l`, `x`, `u`, `d`, 람다 매개변수 포함)를 뜻이 드러나는 이름으로 바꿉니다. 루프 인덱스(`i`, `j`)와 catch 매개변수는 그대로 둡니다. SQL 안의 별칭은 바꾸지 않습니다.
   - 두 글자 이름은 목록으로 뽑아 뜻이 드러나는 것(`id`, `in`, `to`)만 남깁니다.
 - 컨트롤러·서비스의 public 메서드는 규칙 문서 10.2를 따릅니다(예: `in()` → `clockIn()`). URL은 그대로입니다.
-  - 예외: 테스트가 직접 부르는 메서드는 이름과 매개변수를 그대로 둡니다. 테스트가 반환값을 쓰는 곳(`EmployeeService.raw`, `AuthService.login`)은 반환 타입도 그대로 둡니다.
-  - 지금 테스트가 부르는 것: `EmployeeService`(`register`, `invitation`, `raw`, `patch`, `status`), `OrgService`(`setHead`, `tree`), `InvitationService`(`send`, `setup`), `AuthService.login`, `AbsenceBatchService`(`run`, `runPreviousDay`), `LeaveGrantService`(`run`, `runToday`), `TaskOverdueService.runToday`. 테스트 소스를 바꾸지 않으므로(아래 검증) 테스트 컴파일이 마지막 확인입니다.
+  - 예외: 테스트가 직접 부르는 메서드는 이름과 매개변수를 그대로 둡니다. 테스트가 반환값을 쓰는 곳(`EmployeeService.raw`, `AuthService.login`, `InboxRepository.search`)은 반환 타입도 그대로 둡니다.
+  - 지금 테스트가 부르는 것: `EmployeeService`(`register`, `invitation`, `raw`, `patch`, `status`), `OrgService`(`setHead`, `tree`), `InvitationService`(`send`, `setup`), `AuthService.login`, `AbsenceBatchService`(`run`, `runPreviousDay`), `LeaveGrantService`(`run`, `runToday`), `TaskOverdueService.runToday`, `InboxRepository`(`search`, `pageSql`). 테스트 소스를 바꾸지 않으므로(아래 검증) 테스트 컴파일이 마지막 확인입니다.
   - 테스트가 감싸는 빈(2.2)의 public 메서드, 다른 도메인이 쓰는 `BoardProjectService.visibilityPredicate`, `ApprovalFormHandler`의 메서드 이름도 그대로 둡니다.
 - repository의 쿼리 메서드 이름과 SQL은 이 단계에서 바꾸지 않습니다. 바꾸는 것은 위 `InboxRepository`의 응답 만들기뿐입니다.
 
@@ -308,9 +312,10 @@
 - 2단계의 바이트코드 비교는 구조가 바뀌므로 쓸 수 없습니다. 대신 아래를 봅니다.
 - 테스트 소스(`src/test`) 변경 0. 테스트를 고쳐 맞추면 안전망이 의미를 잃습니다.
 - SQL: repository 패키지와 `global/` 공통 쿼리 클래스의 문자열 리터럴·텍스트 블록 값과 출현 수가 시작 커밋과 같아야 합니다. 2.2의 SQL 위치 측정(repository 밖 0)도 그대로 통과해야 합니다.
+  - 예외는 `InboxRepository`에서 서비스로 옮긴 응답 만들기 코드의 문자열과, `search`가 돌려주는 map의 키 3개(`total`·`content`·`lines`)뿐입니다. 도구가 빠진 문자열과 더해진 문자열 목록을 내고, 빠진 문자열은 모두 같은 값으로 서비스에 있어야 합니다. SQL 문장·조각과 SQL 파라미터 이름은 바뀌지 않아야 합니다.
 - `@Transactional` 메서드 목록이 시작 커밋과 같아야 합니다. 이름이 바뀐 메서드는 대응표로 맞춥니다.
 - 실행 순서 대조: 컨트롤러·서비스·handler·batch의 public 메서드마다, 그 메서드와 거기서 부르는 같은 클래스의 private 메서드를 펼쳐 효과가 있는 호출을 소스 순서대로 뽑고 시작 커밋과 비교합니다. 차이가 0이어야 합니다.
-  - 효과가 있는 호출: 주입된 빈의 메서드 호출, 시계를 읽는 호출, `throw`(예외 타입과 `ErrorCode`)
+  - 효과가 있는 호출: 주입된 빈의 메서드 호출(주입된 목록에서 꺼낸 빈 포함. 예: `DocumentService`가 `handlers`에서 고른 `ApprovalFormHandler`의 `body`·`validate`·`onSubmitted`), 시계를 읽는 호출, `throw`(예외 타입과 `ErrorCode`)
   - 응답 record의 생성자·`from`·접근자 호출과 지역 변수 이름은 비교에서 뺍니다. 이름이 바뀐 메서드는 대응표로 맞춥니다.
   - 기계로 펼치지 못한 곳(재귀, 람다 안의 빈 호출)은 손으로 대조한 결과를 적습니다.
   - 왜: SQL 지문은 직렬 테스트의 SQL 순서만 봅니다. 시계 읽기, 권한 호출 순서, 테스트가 지나가지 않는 오류 경로는 보지 못합니다.
