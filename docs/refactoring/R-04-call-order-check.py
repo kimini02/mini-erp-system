@@ -5,7 +5,7 @@ Receiver and arguments precede each call. Same-class calls/references are expand
 before comparison (including public helpers); recursion is listed for review.
 Empty control-flow regions are omitted, but regions with effects retain if/else,
 short-circuit, conditional, loop, try/catch/finally and lambda boundaries.
-Only bean-field calls, clock reads and throws are effects. DTO/record operations,
+Bean-field calls and statically typed injected-bean receivers (including List elements), clock reads and throws are effects. DTO/record operations,
 streams, SqlStore value helpers and value-object methods are not effects.
 --rename accepts Class#name or Class#name(parameter.types) for overloads.
 """
@@ -13,7 +13,7 @@ import argparse,importlib.util,json,re
 from pathlib import Path
 s=importlib.util.spec_from_file_location('analysis',Path(__file__).with_name('R-04-java-analysis.py'));a=importlib.util.module_from_spec(s);s.loader.exec_module(a)
 
-def audit(units,renames=None):
+def audit(units,renames=None,extra_owners=()):
  renames=renames or {};frames={};manual=[]
  def canonical(owner,sig):
   full=owner+'#'+sig;simple=owner+'#'+sig.split('(')[0]
@@ -21,8 +21,12 @@ def audit(units,renames=None):
   if simple in renames:return renames[simple]+sig[sig.index('('):]
   return full
  for unit,cls in a.classes(units):
-  if not re.search(r'/(?:controller|service|handler|batch|scheduler)/',unit['file']):continue
+  if not re.search(r'/(?:controller|service|handler|batch|scheduler)/|FormHandler\.java$',unit['file']) and cls['qualified'] not in extra_owners:continue
   owner=cls['qualified'];methods={m['signature']:m for m in cls['members'] if m['kind']=='METHOD' and m['name']!='<init>'};fields={m['name']:m.get('type',m.get('declaredType')) for m in cls['members'] if m['kind']=='VARIABLE' and 'static' not in m['modifiers']}
+  bean_types=set(fields.values())
+  for typ in fields.values():
+   match=re.fullmatch(r'java.util.List<(.+)>',typ or '')
+   if match:bean_types.add(match.group(1))
   def sequence(nodes,stack):
    out=[]
    for n in nodes or []:out+=visit(n,stack)
@@ -39,6 +43,8 @@ def audit(units,renames=None):
    if not n:return None
    if n['kind']=='IDENTIFIER' and n.get('symbolKind')=='FIELD' and n.get('name') in fields:return fields[n['name']]
    if n['kind']=='MEMBER_SELECT' and n.get('name') in fields and n.get('receiver',{}).get('name')=='this':return fields[n['name']]
+   typ=n.get('type','')
+   if typ in bean_types and typ!='java.time.Clock':return typ
    return None
   def visit(n,stack):
    if n is None:return []
@@ -89,7 +95,11 @@ def audit(units,renames=None):
  return {'frames':frames,'manualReview':list({json.dumps(x,sort_keys=True):x for x in manual}.values())}
 
 def compare(before,after,renames):
- left=audit(before,renames);right=audit(after);diff=[]
+ # Only explicitly renamed pure converters can be audited at their new DTO owner.
+ moved_owners={v.split('#')[0] for v in renames.values() if '.dto.' in v.split('#')[0]}
+ left=audit(before,renames);right=audit(after,extra_owners=moved_owners);diff=[]
+ allowed={v for v in renames.values() if '.dto.' in v.split('#')[0]}
+ right['frames']={k:v for k,v in right['frames'].items() if k.split('#')[0] not in moved_owners or any(k==target or k.startswith(target+'(') for target in allowed)}
  for key in sorted(left['frames'].keys()|right['frames'].keys()):
   x=left['frames'].get(key);y=right['frames'].get(key)
   if x is None or y is None or x['events']!=y['events']:diff.append({'method':key,'before':x,'after':y})
@@ -98,7 +108,7 @@ def compare(before,after,renames):
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--before',type=Path,required=True);p.add_argument('--after',type=Path,required=True);p.add_argument('--classpath',type=Path,required=True);p.add_argument('--rename',action='append',default=[]);p.add_argument('--domain',action='append');p.add_argument('--cache',type=Path);p.add_argument('--output',type=Path,required=True);v=p.parse_args()
  def collect(root):
-  files=[str(f.relative_to(root)) for f in (root/'backend/src/main/java').rglob('*.java') if (not v.domain or any('/domain/'+d+'/' in str(f) for d in v.domain)) and re.search(r'/(?:controller|service|handler|batch|scheduler)/',str(f))]
+  files=[str(f.relative_to(root)) for f in (root/'backend/src/main/java').rglob('*.java') if (not v.domain or any('/domain/'+d+'/' in str(f) for d in v.domain)) and (re.search(r'/(?:controller|service|handler|batch|scheduler)/|FormHandler\.java$',str(f)) or '/dto/' in str(f))]
   return a.analyze(root,v.classpath,files,v.cache)
  result=compare(collect(v.before),collect(v.after),dict(x.split('=',1) for x in v.rename));a.output(result,v.output);raise SystemExit(bool(result['differences']))
 if __name__=='__main__':main()

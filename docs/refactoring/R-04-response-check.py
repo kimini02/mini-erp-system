@@ -19,10 +19,10 @@ def shape(n):
   pairs.append({'key':key.get('value'), 'type':value.get('type',''), 'nested':shape(value) if map_call(value) else None})
  return pairs
 
-def inventory(units):
+def inventory(units,include_repository=False):
  maps=[];puts=[];variables=[];public_maps=[];wildcards=[];apis=[]
  for unit,cls in a.classes(units):
-  if '/repository/' in unit['file']:continue
+  if '/repository/' in unit['file'] and not include_repository:continue
   prefix=''
   for ann in cls.get('annotations',[]):
    if ann['name'].endswith('RequestMapping'):
@@ -92,15 +92,30 @@ def records(units):
  return out
 
 def check(before,after,mapping):
- inv=inventory(before);rec=records(after);diff=[];rows=[]
+ inv=inventory(before,include_repository=True);rec=records(after);diff=[];rows=[]
  def check_entry(entry,label):
-  if 'sql' in entry:fields=sql_keys(before,entry['sql'])
+  if 'constant' in entry:
+   owner,field=entry['constant'].split('#',1)
+   initializers=[v['initializer'] for _,c in a.classes(before) if c['qualified']==owner for v in c['members'] if v['kind']=='VARIABLE' and v['name']==field]
+   if len(initializers)!=1:raise ValueError('Literal-key list not unique: '+entry['constant'])
+   fields=[{'key':n['value'],'type':'COUNT alias from original literal key list','nested':None} for n in a.walk(initializers[0]) if n['kind']=='STRING_LITERAL']
+  elif 'sql' in entry:fields=sql_keys(before,entry['sql'])
   else:
    matches=[m for m in inv['maps'] if m['method']==entry['method'] and m['index']==entry['index']]
    if len(matches)!=1:raise ValueError('Original map not unique: '+str(entry))
    fields=matches[0]['keys']
   fields=[f for f in fields if f['key'] not in entry.get('omit',[])]
   fields+= [{'key':k,'type':'put (source rationale in mapping)','nested':None} for k in entry.get('append',[])]
+  if 'putsFrom' in entry:
+   origin=entry['putsFrom']
+   found=[p for p in inv['puts'] if p['method']==origin['method'] and p['receiver']==origin['receiver']]
+   if not found:raise ValueError('No put operations found: '+str(origin))
+   origin_owner,origin_method=origin['method'].split('#',1)
+   initializers=[n['initializer'] for _,c in a.classes(before) if c['qualified']==origin_owner for method in c['members'] if method['kind']=='METHOD' and method['signature']==origin_method for n in a.walk(method['body']) if n['kind']=='VARIABLE' and n['name']==origin['receiver']]
+   expected=entry.get('method',entry.get('sql',''))
+   calls=[n.get('owner','')+'#'+n.get('signature','') for initializer in initializers for n in a.walk(initializer) if n['kind']=='METHOD_INVOCATION']
+   if not any(call==expected or call.startswith(expected+'(') for call in calls):raise ValueError('put receiver does not originate from mapped map/SELECT: '+str(origin))
+   fields += [{'key':p['key'],'type':p['valueType'],'nested':None} for p in found]
   target=rec.get(entry['record']);source_keys=[f['key'] for f in fields];target_keys=[f['key'] for f in target] if target else None
   rows.append({'origin':label,'record':entry['record'],'before':fields,'after':target,'reason':entry.get('reason','')})
   if source_keys!=target_keys:diff.append({'origin':label,'record':entry['record'],'expected':source_keys,'actual':target_keys})
@@ -112,7 +127,7 @@ def check(before,after,mapping):
    component=next((x for x in target or [] if x['key']==key),None)
    if component is None or nested['record'] not in component['type']:diff.append({'origin':label+'.'+key,'reason':'nested component type differs','component':component})
    check_entry(nested,label+'.'+key)
- for i,e in enumerate(mapping):check_entry(e,e.get('method',e.get('sql',''))+':'+str(e.get('index','row')))
+ for i,e in enumerate(mapping):check_entry(e,e.get('method',e.get('sql',e.get('constant','')))+':'+str(e.get('index','row')))
  return {'mappings':len(rows),'differences':len(diff),'differencesDetail':diff,'rows':rows}
 
 def coverage(apis,baseline):
