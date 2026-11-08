@@ -1,0 +1,2638 @@
+{
+  "domains": {
+    "approval": {
+      "oneLetter": [
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+          "line": 32,
+          "method": "selectionSql",
+          "name": "q"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+          "line": 45,
+          "method": "pageSql",
+          "name": "q"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+          "line": 53,
+          "method": "search",
+          "name": "q"
+        }
+      ],
+      "twoLetters": [
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+          "line": 52,
+          "method": "updateDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+          "line": 58,
+          "method": "deleteDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+          "line": 64,
+          "method": "getDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+          "line": 69,
+          "method": "submitDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+          "line": 75,
+          "method": "approveDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+          "line": 82,
+          "method": "rejectDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+          "line": 88,
+          "method": "withdrawDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+          "line": 94,
+          "method": "resubmitDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+          "line": 29,
+          "method": "body",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+          "line": 37,
+          "method": "deleteBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+          "line": 19,
+          "method": "findPerson",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+          "line": 26,
+          "method": "findSteps",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+          "line": 36,
+          "method": "findDepartmentName",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+          "line": 40,
+          "method": "findDepartmentHead",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+          "line": 45,
+          "method": "findParent",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+          "line": 15,
+          "method": "findDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+          "line": 21,
+          "method": "countReadableDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+          "line": 29,
+          "method": "findLines",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+          "line": 33,
+          "method": "countApprover",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+          "line": 39,
+          "method": "findHistory",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 16,
+          "method": "lockUser",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 20,
+          "method": "lockDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 26,
+          "method": "insertLine",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 61,
+          "method": "deleteLines",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 65,
+          "method": "updateDraft",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 71,
+          "method": "deleteDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 91,
+          "method": "insertHistory",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 98,
+          "method": "updateTransition",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 109,
+          "method": "updateSubmission",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 109,
+          "method": "updateSubmission",
+          "name": "no"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 114,
+          "method": "updateAction",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+          "line": 120,
+          "method": "updatePendingLine",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java",
+          "line": 23,
+          "method": "findSteps",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java",
+          "line": 33,
+          "method": "findUser",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java",
+          "line": 15,
+          "method": "updateOptions",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java",
+          "line": 21,
+          "method": "lockForm",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java",
+          "line": 25,
+          "method": "deleteSteps",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java",
+          "line": 15,
+          "method": "upsertBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java",
+          "line": 21,
+          "method": "findBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java",
+          "line": 32,
+          "method": "deleteBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+          "line": 21,
+          "method": "getPerson",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 40,
+          "method": "raw",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 62,
+          "method": "canRead",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 66,
+          "method": "lockUser",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 70,
+          "method": "lockDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 75,
+          "method": "lines",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 79,
+          "method": "manual",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 86,
+          "method": "storeLines",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 137,
+          "method": "createDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 146,
+          "method": "updateDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 168,
+          "method": "deleteDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 186,
+          "method": "history",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 198,
+          "method": "submitDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 230,
+          "method": "notifySubmission",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 249,
+          "method": "decideDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 287,
+          "method": "completeDecision",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 306,
+          "method": "withdrawDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 327,
+          "method": "resubmitDocument",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+          "line": 349,
+          "method": "getDocument",
+          "name": "id"
+        }
+      ],
+      "oneLetterCount": 3,
+      "twoLetterCount": 59
+    },
+    "attendance": {
+      "oneLetter": [
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 33,
+          "method": "optionalTime",
+          "name": "v"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 44,
+          "method": "checkFormat",
+          "name": "b"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 57,
+          "method": "saveBody",
+          "name": "d"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 57,
+          "method": "saveBody",
+          "name": "b"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 80,
+          "method": "body",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 94,
+          "method": "validate",
+          "name": "d"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 95,
+          "method": "validate",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 111,
+          "method": "onSubmitted",
+          "name": "d"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 112,
+          "method": "onSubmitted",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 152,
+          "method": "onApproved",
+          "name": "d"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 153,
+          "method": "onApproved",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 169,
+          "method": "onRejected",
+          "name": "d"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 172,
+          "method": "onWithdrawn",
+          "name": "d"
+        }
+      ],
+      "twoLetters": [
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 47,
+          "method": "checkFormat",
+          "name": "in"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 63,
+          "method": "raw",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 79,
+          "method": "body",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 85,
+          "method": "copyBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 89,
+          "method": "deleteBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 116,
+          "method": "onSubmitted",
+          "name": "in"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 137,
+          "method": "mergedTimes",
+          "name": "in"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+          "line": 159,
+          "method": "onApproved",
+          "name": "in"
+        }
+      ],
+      "oneLetterCount": 13,
+      "twoLetterCount": 8
+    },
+    "home": {
+      "oneLetter": [
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 45,
+          "method": "view",
+          "name": "g"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 49,
+          "method": "form",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 58,
+          "method": "approvals",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 64,
+          "method": "approvals",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 84,
+          "method": "teamWeek",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 109,
+          "method": "teamWeek",
+          "name": "e"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 116,
+          "method": "myTasks",
+          "name": "p"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 125,
+          "method": "myTasks",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 138,
+          "method": "notifications",
+          "name": "r"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 139,
+          "method": "notifications",
+          "name": "r"
+        }
+      ],
+      "twoLetters": [
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 35,
+          "method": "home",
+          "name": "to"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+          "line": 79,
+          "method": "teamWeek",
+          "name": "to"
+        }
+      ],
+      "oneLetterCount": 10,
+      "twoLetterCount": 2
+    },
+    "leave": {
+      "oneLetter": [],
+      "twoLetters": [
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+          "line": 49,
+          "method": "raw",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+          "line": 53,
+          "method": "body",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+          "line": 66,
+          "method": "deleteBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+          "line": 135,
+          "method": "leaveMemo",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+          "line": 37,
+          "method": "countLegacyGrants",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+          "line": 43,
+          "method": "findGrantKeys",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+          "line": 47,
+          "method": "findHandoverUser",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+          "line": 51,
+          "method": "findRequest",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+          "line": 56,
+          "method": "findHandoverName",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+          "line": 66,
+          "method": "countOverlap",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+          "line": 74,
+          "method": "findReservations",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+          "line": 108,
+          "method": "findAdjustmentBalance",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+          "line": 17,
+          "method": "lockUser",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+          "line": 27,
+          "method": "lockGrantUser",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+          "line": 32,
+          "method": "insertGrant",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+          "line": 39,
+          "method": "upsertBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+          "line": 60,
+          "method": "deleteBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+          "line": 69,
+          "method": "insertLedger",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+          "line": 77,
+          "method": "updateUsedDays",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+          "line": 81,
+          "method": "createAdjustment",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantWork.java",
+          "line": 28,
+          "method": "run",
+          "name": "id"
+        }
+      ],
+      "oneLetterCount": 0,
+      "twoLetterCount": 21
+    },
+    "overtime": {
+      "oneLetter": [],
+      "twoLetters": [
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+          "line": 35,
+          "method": "body",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+          "line": 43,
+          "method": "deleteBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+          "line": 16,
+          "method": "upsertBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+          "line": 24,
+          "method": "findBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+          "line": 36,
+          "method": "deleteBody",
+          "name": "id"
+        },
+        {
+          "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+          "line": 40,
+          "method": "countValidTime",
+          "name": "id"
+        }
+      ],
+      "oneLetterCount": 0,
+      "twoLetterCount": 6
+    }
+  },
+  "longest20": [
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 36,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolveLine(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+      "lines": 103
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantWork.java",
+      "line": 21,
+      "method": "com.minierp.backend.domain.leave.service.LeaveGrantWork#run(java.time.LocalDate)",
+      "lines": 40
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 75,
+      "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+      "lines": 36
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 349,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#getDocument(long)",
+      "lines": 34
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 248,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#decideDocument(long,boolean,java.lang.String)",
+      "lines": 33
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 197,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#submitDocument(long)",
+      "lines": 31
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+      "line": 67,
+      "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#getDaysPreview(com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 28
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 37,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#getBalances(java.lang.Integer,java.lang.Long,java.lang.String,int,int)",
+      "lines": 27
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantRules.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.leave.service.LeaveGrantRules#due(long,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 25
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 178,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#getLinePreview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+      "lines": 23
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 140,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolveSteps(java.util.Map<java.lang.String,java.lang.Object>,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+      "lines": 23
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 86,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#storeLines(long,java.util.List<com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved>,boolean)",
+      "lines": 23
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 107,
+      "method": "com.minierp.backend.domain.approval.service.FormService#resolveStepValues(java.util.Map<java.lang.String,java.lang.Object>,java.util.List<com.minierp.backend.domain.approval.service.FormService.Step>)",
+      "lines": 23
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 282,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#completeDecision(java.util.Map<java.lang.String,java.lang.Object>,java.util.Optional<java.util.Map<java.lang.String,java.lang.Object>>,com.minierp.backend.domain.approval.handler.ApprovalFormHandler,boolean,long)",
+      "lines": 22
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 326,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#resubmitDocument(long)",
+      "lines": 22
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 57,
+      "method": "com.minierp.backend.domain.approval.service.InboxService#progress(java.util.Map<java.lang.String,java.lang.Object>,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>)",
+      "lines": 22
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 145,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#updateDocument(long,com.minierp.backend.domain.approval.dto.DocumentRequest)",
+      "lines": 21
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 86,
+      "method": "com.minierp.backend.domain.approval.service.FormService#updateFormSteps(java.lang.String,java.util.List<com.minierp.backend.domain.approval.service.FormService.Step>)",
+      "lines": 21
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 111,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 21
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 112,
+      "method": "com.minierp.backend.domain.home.service.HomeService#myTasks(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.time.LocalDate)",
+      "lines": 21
+    }
+  ],
+  "methods": [
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 33,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#ok(T)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 37,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#getLinePreview(@jakarta.validation.Valid com.minierp.backend.domain.approval.controller.DocumentController.Preview)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 43,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#createDocument(@jakarta.validation.Valid com.minierp.backend.domain.approval.dto.DocumentRequest)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 50,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#updateDocument(long,@jakarta.validation.Valid com.minierp.backend.domain.approval.dto.DocumentRequest)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 57,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#deleteDocument(long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 63,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#getDocument(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 68,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#submitDocument(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 73,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#approveDocument(long,com.minierp.backend.domain.approval.controller.DocumentController.Comment)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 80,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#rejectDocument(long,com.minierp.backend.domain.approval.controller.DocumentController.Comment)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 87,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#withdrawDocument(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+      "line": 92,
+      "method": "com.minierp.backend.domain.approval.controller.DocumentController#resubmitDocument(long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/FormController.java",
+      "line": 26,
+      "method": "com.minierp.backend.domain.approval.controller.FormController#ok(T)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/FormController.java",
+      "line": 30,
+      "method": "com.minierp.backend.domain.approval.controller.FormController#getForms()",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/FormController.java",
+      "line": 35,
+      "method": "com.minierp.backend.domain.approval.controller.FormController#getForm(java.lang.String)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/FormController.java",
+      "line": 41,
+      "method": "com.minierp.backend.domain.approval.controller.FormController#updateFormOptions(java.lang.String,com.minierp.backend.domain.approval.service.FormService.Options)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/FormController.java",
+      "line": 49,
+      "method": "com.minierp.backend.domain.approval.controller.FormController#updateFormSteps(java.lang.String,java.util.List<com.minierp.backend.domain.approval.service.FormService.Step>)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/FormController.java",
+      "line": 57,
+      "method": "com.minierp.backend.domain.approval.controller.FormController#getFormLinePreview(java.lang.String,@jakarta.validation.Valid com.minierp.backend.domain.approval.controller.FormController.Preview)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/InboxController.java",
+      "line": 19,
+      "method": "com.minierp.backend.domain.approval.controller.InboxController#getInboxDocuments(java.lang.String,java.lang.String,java.lang.String,int,int)",
+      "lines": 10
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/controller/InboxController.java",
+      "line": 30,
+      "method": "com.minierp.backend.domain.approval.controller.InboxController#getInboxCounts()",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalDocumentResponseDto.java",
+      "line": 24,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Form#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalDocumentResponseDto.java",
+      "line": 39,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Line#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalDocumentResponseDto.java",
+      "line": 48,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.History#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalDocumentResponseDto.java",
+      "line": 56,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Actor#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalFormResponseDto.java",
+      "line": 17,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto.Options#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalFormResponseDto.java",
+      "line": 24,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto.Step#from(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalGeneralBodyResponseDto.java",
+      "line": 6,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalGeneralBodyResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalInboxCountsResponseDto.java",
+      "line": 14,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalInboxCountsResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalInboxItemResponseDto.java",
+      "line": 20,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalInboxItemResponseDto.Drafter#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalInboxItemResponseDto.java",
+      "line": 27,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalInboxItemResponseDto.CurrentApprover#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalPersonResponseDto.java",
+      "line": 7,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalPersonResponseDto.java",
+      "line": 12,
+      "method": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto#fromSnapshot(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#formCode()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 19,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 24,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 29,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#body(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 33,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#copyBody(long,com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 37,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#deleteBody(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 41,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#validate(com.minierp.backend.domain.approval.model.ApprovalDraft)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 44,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 47,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 50,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#onRejected(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+      "line": 53,
+      "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#onWithdrawn(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 8,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 9,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 10,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 11,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 12,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#copyBody(long,com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 13,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#deleteBody(long)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 14,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#validate(com.minierp.backend.domain.approval.model.ApprovalDraft)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 17,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onRejected(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/ApprovalFormHandler.java",
+      "line": 18,
+      "method": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onWithdrawn(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/BodyValues.java",
+      "line": 11,
+      "method": "com.minierp.backend.domain.approval.handler.BodyValues#text(com.fasterxml.jackson.databind.JsonNode,java.lang.String,int)",
+      "lines": 10
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/BodyValues.java",
+      "line": 22,
+      "method": "com.minierp.backend.domain.approval.handler.BodyValues#date(com.fasterxml.jackson.databind.JsonNode,java.lang.String)",
+      "lines": 11
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/BodyValues.java",
+      "line": 34,
+      "method": "com.minierp.backend.domain.approval.handler.BodyValues#time(com.fasterxml.jackson.databind.JsonNode,java.lang.String)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/BodyValues.java",
+      "line": 42,
+      "method": "com.minierp.backend.domain.approval.handler.BodyValues#optionalLong(com.fasterxml.jackson.databind.JsonNode,java.lang.String)",
+      "lines": 10
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/handler/BodyValues.java",
+      "line": 53,
+      "method": "com.minierp.backend.domain.approval.handler.BodyValues#invalid()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.approval.repository.ApprovalLineQueries#findForm(java.lang.String)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+      "line": 19,
+      "method": "com.minierp.backend.domain.approval.repository.ApprovalLineQueries#findPerson(long)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+      "line": 26,
+      "method": "com.minierp.backend.domain.approval.repository.ApprovalLineQueries#findSteps(java.lang.Object)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+      "line": 30,
+      "method": "com.minierp.backend.domain.approval.repository.ApprovalLineQueries#findRoleHolder(java.lang.Object)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+      "line": 36,
+      "method": "com.minierp.backend.domain.approval.repository.ApprovalLineQueries#findDepartmentName(java.lang.Long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+      "line": 40,
+      "method": "com.minierp.backend.domain.approval.repository.ApprovalLineQueries#findDepartmentHead(java.lang.Long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+      "line": 45,
+      "method": "com.minierp.backend.domain.approval.repository.ApprovalLineQueries#findParent(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+      "line": 21,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+      "line": 29,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+      "line": 33,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentQueries#countApprover(long,long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+      "line": 39,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 20,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 25,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)",
+      "lines": 19
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 45,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#insertDraft(java.lang.Object,long,long,java.lang.String,boolean,java.lang.Long,java.time.LocalDateTime)",
+      "lines": 15
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 61,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteLines(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 65,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#updateDraft(long,java.lang.String,boolean,java.time.LocalDateTime)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 71,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteDocument(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 75,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#insertNumberSequence(java.lang.String,int)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 81,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#lockNumberSequence(java.lang.String,int)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 86,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#updateNumberSequence(java.lang.String,int,long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 91,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 97,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)",
+      "lines": 11
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 109,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#updateSubmission(long,java.lang.String,java.time.LocalDateTime)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 114,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#updateAction(java.lang.Object,java.lang.String,java.time.LocalDateTime,java.lang.String)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "line": 120,
+      "method": "com.minierp.backend.domain.approval.repository.DocumentStore#updatePendingLine(java.lang.Object)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.approval.repository.FormQueries#findForms()",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java",
+      "line": 23,
+      "method": "com.minierp.backend.domain.approval.repository.FormQueries#findSteps(java.lang.Object)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java",
+      "line": 29,
+      "method": "com.minierp.backend.domain.approval.repository.FormQueries#findRole(java.lang.String)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java",
+      "line": 33,
+      "method": "com.minierp.backend.domain.approval.repository.FormQueries#findUser(java.lang.Long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.approval.repository.FormStore#updateOptions(java.lang.Object,java.lang.Boolean,java.lang.Boolean,java.lang.Boolean,java.lang.Boolean)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java",
+      "line": 21,
+      "method": "com.minierp.backend.domain.approval.repository.FormStore#lockForm(java.lang.Object)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java",
+      "line": 25,
+      "method": "com.minierp.backend.domain.approval.repository.FormStore#deleteSteps(java.lang.Object)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java",
+      "line": 29,
+      "method": "com.minierp.backend.domain.approval.repository.FormStore#insertStep(java.lang.Object,java.lang.String,java.lang.String,java.lang.Long,java.lang.Long,int)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.approval.repository.GeneralRequestStore#upsertBody(long,java.lang.String,java.lang.Long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java",
+      "line": 21,
+      "method": "com.minierp.backend.domain.approval.repository.GeneralRequestStore#findBody(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java",
+      "line": 26,
+      "method": "com.minierp.backend.domain.approval.repository.GeneralRequestStore#copyBody(long,long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java",
+      "line": 32,
+      "method": "com.minierp.backend.domain.approval.repository.GeneralRequestStore#deleteBody(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.approval.repository.InboxRepository#condition(java.lang.String)",
+      "lines": 15
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+      "line": 32,
+      "method": "com.minierp.backend.domain.approval.repository.InboxRepository#selectionSql(java.lang.String,java.lang.String,java.lang.String)",
+      "lines": 12
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+      "line": 45,
+      "method": "com.minierp.backend.domain.approval.repository.InboxRepository#pageSql(java.lang.String,java.lang.String,java.lang.String)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+      "line": 53,
+      "method": "com.minierp.backend.domain.approval.repository.InboxRepository#search(long,java.lang.String,java.lang.String,java.lang.String,int,int)",
+      "lines": 17
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+      "line": 71,
+      "method": "com.minierp.backend.domain.approval.repository.InboxRepository#counts(long)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 17,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#getForm(java.lang.String)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 21,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#getPerson(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 36,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolveLine(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+      "lines": 103
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 140,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolveSteps(java.util.Map<java.lang.String,java.lang.Object>,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+      "lines": 23
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 164,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#manualStepRow(int,com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep)",
+      "lines": 8
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 173,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#parent(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 178,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#getLinePreview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+      "lines": 23
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 202,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#label(java.lang.String)",
+      "lines": 8
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 211,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#references(java.util.List<com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved>)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+      "line": 218,
+      "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#previewRow(com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved)",
+      "lines": 12
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 33,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#handler(java.lang.String)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 40,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#raw(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 44,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#model(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 50,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#own(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 56,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#state(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 62,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#canRead(long,long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 66,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#lockUser(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 70,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#lockDocument(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 75,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#lines(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 79,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#manual(long)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 86,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#storeLines(long,java.util.List<com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved>,boolean)",
+      "lines": 23
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 110,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#insertDraft(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,long,long,boolean,java.lang.Long)",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 120,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#checkDraftLine(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+      "lines": 8
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 129,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#createDocument(com.minierp.backend.domain.approval.dto.DocumentRequest)",
+      "lines": 15
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 145,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#updateDocument(long,com.minierp.backend.domain.approval.dto.DocumentRequest)",
+      "lines": 21
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 167,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#deleteDocument(long)",
+      "lines": 11
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 179,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#nextNumber(java.lang.String,int)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 186,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#history(long,java.lang.Long,java.lang.String,java.lang.String)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 190,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#transition(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.lang.Integer,boolean)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 197,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#submitDocument(long)",
+      "lines": 31
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 229,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#notifySubmission(long,java.util.Map<java.lang.String,java.lang.Object>,java.util.Optional<java.util.Map<java.lang.String,java.lang.Object>>,java.util.List<com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved>)",
+      "lines": 18
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 248,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#decideDocument(long,boolean,java.lang.String)",
+      "lines": 33
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 282,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#completeDecision(java.util.Map<java.lang.String,java.lang.Object>,java.util.Optional<java.util.Map<java.lang.String,java.lang.Object>>,com.minierp.backend.domain.approval.handler.ApprovalFormHandler,boolean,long)",
+      "lines": 22
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 305,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#withdrawDocument(long)",
+      "lines": 20
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 326,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#resubmitDocument(long)",
+      "lines": 22
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 349,
+      "method": "com.minierp.backend.domain.approval.service.DocumentService#getDocument(long)",
+      "lines": 34
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 30,
+      "method": "com.minierp.backend.domain.approval.service.FormService#shortName(java.lang.String)",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 40,
+      "method": "com.minierp.backend.domain.approval.service.FormService#description(java.lang.String)",
+      "lines": 8
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 49,
+      "method": "com.minierp.backend.domain.approval.service.FormService#getForms()",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 59,
+      "method": "com.minierp.backend.domain.approval.service.FormService#getForm(java.lang.String)",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 69,
+      "method": "com.minierp.backend.domain.approval.service.FormService#stepLabel(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 8
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 78,
+      "method": "com.minierp.backend.domain.approval.service.FormService#updateFormOptions(java.lang.String,com.minierp.backend.domain.approval.service.FormService.Options)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 86,
+      "method": "com.minierp.backend.domain.approval.service.FormService#updateFormSteps(java.lang.String,java.util.List<com.minierp.backend.domain.approval.service.FormService.Step>)",
+      "lines": 21
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+      "line": 107,
+      "method": "com.minierp.backend.domain.approval.service.FormService#resolveStepValues(java.util.Map<java.lang.String,java.lang.Object>,java.util.List<com.minierp.backend.domain.approval.service.FormService.Step>)",
+      "lines": 23
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 26,
+      "method": "com.minierp.backend.domain.approval.service.InboxService#getInboxDocuments(java.lang.String,java.lang.String,java.lang.String,int,int)",
+      "lines": 18
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 45,
+      "method": "com.minierp.backend.domain.approval.service.InboxService#inboxItem(java.util.Map<java.lang.String,java.lang.Object>,java.util.Map<java.lang.Long,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>)",
+      "lines": 11
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 57,
+      "method": "com.minierp.backend.domain.approval.service.InboxService#progress(java.util.Map<java.lang.String,java.lang.Object>,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>)",
+      "lines": 22
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 86,
+      "method": "com.minierp.backend.domain.approval.service.InboxService#getInboxCounts()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 25,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#formCode()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 29,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#optionalTime(com.fasterxml.jackson.databind.JsonNode,java.lang.String)",
+      "lines": 14
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 44,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 12
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 57,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 63,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#raw(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 67,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#json(java.lang.String)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 75,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#hh(java.lang.Object)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 79,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#body(long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 85,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#copyBody(long,com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 89,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#deleteBody(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 93,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#validate(com.minierp.backend.domain.approval.model.ApprovalDraft)",
+      "lines": 17
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 111,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 21
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 136,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#mergedTimes(java.util.Map<java.lang.String,java.lang.Object>,java.util.Map<java.lang.String,java.lang.Object>,java.time.LocalDate)",
+      "lines": 15
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 152,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 16
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 169,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#onRejected(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+      "line": 172,
+      "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#onWithdrawn(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 27,
+      "method": "com.minierp.backend.domain.home.service.HomeService#home()",
+      "lines": 16
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 44,
+      "method": "com.minierp.backend.domain.home.service.HomeService#view(java.util.Map<java.lang.String,com.minierp.backend.global.permission.PermissionAccess.Grant>,java.lang.String)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 49,
+      "method": "com.minierp.backend.domain.home.service.HomeService#form(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 54,
+      "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 20
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 75,
+      "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+      "lines": 36
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 112,
+      "method": "com.minierp.backend.domain.home.service.HomeService#myTasks(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.time.LocalDate)",
+      "lines": 21
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+      "line": 134,
+      "method": "com.minierp.backend.domain.home.service.HomeService#notifications(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 10
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveAdminController.java",
+      "line": 25,
+      "method": "com.minierp.backend.domain.leave.controller.LeaveAdminController#getBalances(java.lang.Integer,java.lang.Long,java.lang.String,int,int)",
+      "lines": 10
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveAdminController.java",
+      "line": 36,
+      "method": "com.minierp.backend.domain.leave.controller.LeaveAdminController#getUserLedgerEntries(long,java.lang.Integer)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveAdminController.java",
+      "line": 51,
+      "method": "com.minierp.backend.domain.leave.controller.LeaveAdminController#createAdjustment(@jakarta.validation.Valid com.minierp.backend.domain.leave.controller.LeaveAdminController.Adjustment)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveAdminController.java",
+      "line": 61,
+      "method": "com.minierp.backend.domain.leave.controller.LeaveAdminController#createGrantRun(@jakarta.validation.Valid com.minierp.backend.domain.leave.controller.LeaveAdminController.Run)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveAdminController.java",
+      "line": 67,
+      "method": "com.minierp.backend.domain.leave.controller.LeaveAdminController#getGrantRuns(int)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeavePolicyController.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.leave.controller.LeavePolicyController#getPolicies()",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveQueryController.java",
+      "line": 21,
+      "method": "com.minierp.backend.domain.leave.controller.LeaveQueryController#getBalance(java.lang.Integer)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveQueryController.java",
+      "line": 26,
+      "method": "com.minierp.backend.domain.leave.controller.LeaveQueryController#getLedgerEntries(java.lang.Integer,java.lang.String)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveQueryController.java",
+      "line": 33,
+      "method": "com.minierp.backend.domain.leave.controller.LeaveQueryController#getDaysPreview(com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveAdminBalanceResponseDto.java",
+      "line": 17,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveAdminBalanceResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveAdminBalanceResponseDto.java",
+      "line": 24,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveAdminBalanceResponseDto.User#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveBalanceResponseDto.java",
+      "line": 12,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveBalanceResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>,int)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveBodyResponseDto.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveBodyResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>,com.minierp.backend.domain.leave.dto.LeaveBodyResponseDto.Handover)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveBodyResponseDto.java",
+      "line": 23,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveBodyResponseDto.Handover#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveGrantRunResponseDto.java",
+      "line": 18,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveGrantRunResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveLedgerEntryResponseDto.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveLedgerEntryResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveLedgerEntryResponseDto.java",
+      "line": 23,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveLedgerEntryResponseDto.Document#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveRequestResponseDto.java",
+      "line": 32,
+      "method": "com.minierp.backend.domain.leave.dto.LeaveRequestResponseDto#from(com.minierp.backend.domain.leave.entity.LeaveRequest)",
+      "lines": 10
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java",
+      "line": 75,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveRequest#cancel(com.minierp.backend.domain.user.entity.User)",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java",
+      "line": 88,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveRequest#approve(com.minierp.backend.domain.user.entity.User)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java",
+      "line": 99,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveRequest#reject(com.minierp.backend.domain.user.entity.User,java.lang.String)",
+      "lines": 11
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java",
+      "line": 114,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveRequest#calculateUsedDays(java.util.List<java.time.LocalDate>)",
+      "lines": 16
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveRequest.java",
+      "line": 131,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveRequest#validatePeriod()",
+      "lines": 11
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveStatus.java",
+      "line": 17,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveStatus#isClosed()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveType.java",
+      "line": 18,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveType#getDisplayName()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveType.java",
+      "line": 22,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveType#getUnitDays()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/entity/LeaveType.java",
+      "line": 26,
+      "method": "com.minierp.backend.domain.leave.entity.LeaveType#isHalfDay()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 24,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#formCode()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 28,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 10
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 39,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 49,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#raw(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 53,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#body(long)",
+      "lines": 8
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 62,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#copyBody(long,com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 66,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#deleteBody(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 70,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#available(long,int)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 74,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#days(java.lang.String,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 19
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 94,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#validate(com.minierp.backend.domain.approval.model.ApprovalDraft)",
+      "lines": 13
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 108,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#append(com.minierp.backend.domain.approval.model.ApprovalDocument,java.lang.String,java.math.BigDecimal,int,java.lang.String)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 115,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 123,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#release(com.minierp.backend.domain.approval.model.ApprovalDocument,boolean,java.lang.String)",
+      "lines": 11
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 135,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#leaveMemo(long)",
+      "lines": 11
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 147,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 151,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#onRejected(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+      "line": 155,
+      "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#onWithdrawn(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 17,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findGrantRuns(int)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 23,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findBalance(long,int)",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 33,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findGrantCandidates()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 37,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#countLegacyGrants(long,int)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 43,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findGrantKeys(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 47,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findHandoverUser(java.lang.Long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 51,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findRequest(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 56,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findHandoverName(java.lang.Object)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 60,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findAvailable(long,int)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 66,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#countOverlap(long,long,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 74,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findReservations(long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 80,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#countBalances(int,int,long,com.minierp.backend.global.permission.ScopeFilter,java.lang.Long,java.lang.String)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 86,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findBalances(int,int,long,com.minierp.backend.global.permission.ScopeFilter,java.lang.Long,java.lang.String)",
+      "lines": 21
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 108,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findAdjustmentBalance(long,int)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 114,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#findLedger(long,int,java.lang.String)",
+      "lines": 14
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 129,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#balanceParameters(int,int,long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "line": 133,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveQueries#balanceWhere(com.minierp.backend.global.permission.ScopeFilter,java.util.Map<java.lang.String,java.lang.Object>,java.lang.Long,java.lang.String)",
+      "lines": 12
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveRequestRepository.java",
+      "line": 12,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveRequestRepository#findByRequester_IdAndAppStatusAndStartDateBetween(java.lang.Long,com.minierp.backend.domain.leave.entity.LeaveStatus,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveRequestRepository.java",
+      "line": 18,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveRequestRepository#findOverlappingLeaves(com.minierp.backend.domain.leave.entity.LeaveStatus,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveRequestRepository.java",
+      "line": 25,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveRequestRepository#findOverlappingLeavesByRequester(java.lang.Long,com.minierp.backend.domain.leave.entity.LeaveStatus,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveRequestRepository.java",
+      "line": 34,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveRequestRepository#findByRequester_Id(java.lang.Long)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveRequestRepository.java",
+      "line": 35,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveRequestRepository#countByAppStatus(com.minierp.backend.domain.leave.entity.LeaveStatus)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 17,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#lockUser(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 21,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#insertAdjustment(long,int,java.math.BigDecimal,java.lang.String,long,java.time.LocalDateTime)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 27,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#lockGrantUser(long)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 32,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#insertGrant(long,int,java.math.BigDecimal,java.lang.String,java.lang.String,java.time.LocalDateTime)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 38,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#upsertBody(long,java.lang.String,java.time.LocalDate,java.time.LocalDate,java.lang.Long,java.lang.String,java.time.LocalDateTime)",
+      "lines": 15
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 54,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#copyBody(long,long,java.time.LocalDateTime)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 60,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#deleteBody(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 64,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#insertLedger(long,int,java.lang.String,java.math.BigDecimal,long,java.lang.String,java.time.LocalDateTime)",
+      "lines": 12
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "line": 77,
+      "method": "com.minierp.backend.domain.leave.repository.LeaveStore#updateUsedDays(long,java.math.BigDecimal)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 29,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#year(java.lang.Integer)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 37,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#getBalances(java.lang.Integer,java.lang.Long,java.lang.String,int,int)",
+      "lines": 27
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 65,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#getUserLedgerEntries(long,java.lang.Integer)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 71,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#createAdjustment(long,int,java.math.BigDecimal,java.lang.String)",
+      "lines": 13
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 85,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#validateAdjustment(java.math.BigDecimal,java.lang.String)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 93,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#all()",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 99,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#createGrantRun(java.time.LocalDate)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+      "line": 104,
+      "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#getGrantRuns(int)",
+      "lines": 8
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantRules.java",
+      "line": 15,
+      "method": "com.minierp.backend.domain.leave.service.LeaveGrantRules#due(long,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 25
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantScheduler.java",
+      "line": 13,
+      "method": "com.minierp.backend.domain.leave.service.LeaveGrantScheduler#grant()",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantService.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.leave.service.LeaveGrantService#runToday()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantService.java",
+      "line": 20,
+      "method": "com.minierp.backend.domain.leave.service.LeaveGrantService#run(java.time.LocalDate)",
+      "lines": 14
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantWork.java",
+      "line": 21,
+      "method": "com.minierp.backend.domain.leave.service.LeaveGrantWork#run(java.time.LocalDate)",
+      "lines": 40
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+      "line": 30,
+      "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#year(java.lang.Integer)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+      "line": 38,
+      "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#getBalance(java.lang.Integer)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+      "line": 44,
+      "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#getLedgerEntries(java.lang.Integer,java.lang.String)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+      "line": 48,
+      "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#getUserLedgerEntries(long,java.lang.Integer)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+      "line": 52,
+      "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#ledger(long,java.lang.Integer,java.lang.String)",
+      "lines": 14
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+      "line": 67,
+      "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#getDaysPreview(com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 28
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/dto/OvertimeBodyResponseDto.java",
+      "line": 12,
+      "method": "com.minierp.backend.domain.overtime.dto.OvertimeBodyResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+      "lines": 4
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java",
+      "line": 53,
+      "method": "com.minierp.backend.domain.overtime.entity.OvertimeRequest#approve(com.minierp.backend.domain.user.entity.User)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java",
+      "line": 61,
+      "method": "com.minierp.backend.domain.overtime.entity.OvertimeRequest#reject(com.minierp.backend.domain.user.entity.User)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/entity/OvertimeRequest.java",
+      "line": 69,
+      "method": "com.minierp.backend.domain.overtime.entity.OvertimeRequest#cancel(com.minierp.backend.domain.user.entity.User)",
+      "lines": 9
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 18,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#formCode()",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 22,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 6
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 29,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 35,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#body(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 39,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#copyBody(long,com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 43,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#deleteBody(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 47,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#validate(com.minierp.backend.domain.approval.model.ApprovalDraft)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 53,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 56,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 59,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#onRejected(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+      "line": 62,
+      "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#onWithdrawn(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+      "lines": 2
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeRequestRepository.java",
+      "line": 10,
+      "method": "com.minierp.backend.domain.overtime.repository.OvertimeRequestRepository#findByRequester_Id(java.lang.Long)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeRequestRepository.java",
+      "line": 11,
+      "method": "com.minierp.backend.domain.overtime.repository.OvertimeRequestRepository#findByRequester_IdAndStatusAndOvertimeDateBetween(java.lang.Long,com.minierp.backend.domain.overtime.entity.OvertimeStatus,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeRequestRepository.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.overtime.repository.OvertimeRequestRepository#findByStatusAndOvertimeDateBetween(com.minierp.backend.domain.overtime.entity.OvertimeStatus,java.time.LocalDate,java.time.LocalDate)",
+      "lines": 1
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+      "line": 16,
+      "method": "com.minierp.backend.domain.overtime.repository.OvertimeStore#upsertBody(long,java.time.LocalDate,java.time.LocalTime,java.time.LocalTime,java.lang.String,java.time.LocalDateTime)",
+      "lines": 7
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+      "line": 24,
+      "method": "com.minierp.backend.domain.overtime.repository.OvertimeStore#findBody(long)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+      "line": 30,
+      "method": "com.minierp.backend.domain.overtime.repository.OvertimeStore#copyBody(long,long,java.time.LocalDateTime)",
+      "lines": 5
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+      "line": 36,
+      "method": "com.minierp.backend.domain.overtime.repository.OvertimeStore#deleteBody(long)",
+      "lines": 3
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+      "line": 40,
+      "method": "com.minierp.backend.domain.overtime.repository.OvertimeStore#countValidTime(long)",
+      "lines": 4
+    }
+  ]
+}

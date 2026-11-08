@@ -1,0 +1,188 @@
+{
+  "approval": {
+    "wildcards": 19,
+    "responseFactories": 19,
+    "publicMapsOrObject": 17,
+    "methods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#create(com.minierp.backend.domain.approval.dto.DocumentRequest)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#update(long,com.minierp.backend.domain.approval.dto.DocumentRequest)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#submit(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#act(long,boolean,java.lang.String)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#withdraw(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#resubmit(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#detail(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+        "method": "com.minierp.backend.domain.approval.service.FormService#list()",
+        "returns": "List<Map<String, Object>>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+        "method": "com.minierp.backend.domain.approval.service.FormService#detail(java.lang.String)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+        "method": "com.minierp.backend.domain.approval.service.FormService#patch(java.lang.String,com.minierp.backend.domain.approval.service.FormService.Options)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+        "method": "com.minierp.backend.domain.approval.service.FormService#steps(java.lang.String,java.util.List<com.minierp.backend.domain.approval.service.FormService.Step>)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+        "method": "com.minierp.backend.domain.approval.service.InboxService#list(java.lang.String,java.lang.String,java.lang.String,int,int)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+        "method": "com.minierp.backend.domain.approval.service.InboxService#counts()",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "handlerBodies": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/general/GeneralFormHandler.java",
+        "method": "com.minierp.backend.domain.approval.general.GeneralFormHandler#body(long)",
+        "returns": "Map<String, Object>"
+      }
+    ]
+  },
+  "leave": {
+    "wildcards": 9,
+    "responseFactories": 7,
+    "publicMapsOrObject": 12,
+    "methods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+        "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#raw(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#balances(java.lang.Integer,java.lang.Long,java.lang.String,int,int)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#ledger(long,java.lang.Integer)",
+        "returns": "Object"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#adjust(long,int,java.math.BigDecimal,java.lang.String)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#grant(java.time.LocalDate)",
+        "returns": "Object"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#runs(int)",
+        "returns": "Object"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveGrantService#runToday()",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveGrantService#run(java.time.LocalDate)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#balance(java.lang.Integer)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#ledger(java.lang.Integer,java.lang.String)",
+        "returns": "List<Map<String, Object>>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#ledgerFor(long,java.lang.Integer)",
+        "returns": "List<Map<String, Object>>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#preview(com.fasterxml.jackson.databind.JsonNode)",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "handlerBodies": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+        "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#body(long)",
+        "returns": "Map<String, Object>"
+      }
+    ]
+  },
+  "overtime": {
+    "wildcards": 0,
+    "responseFactories": 0,
+    "publicMapsOrObject": 0,
+    "methods": [],
+    "handlerBodies": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/overtime/handler/OvertimeFormHandler.java",
+        "method": "com.minierp.backend.domain.overtime.handler.OvertimeFormHandler#body(long)",
+        "returns": "Map<String, Object>"
+      }
+    ]
+  }
+}

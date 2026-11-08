@@ -1,0 +1,14 @@
+{
+  "commit": "47a2cca4bea478389ee7c1962261564a7c08c6bb",
+  "files": [
+    "backend/src/main/java/com/minierp/backend/domain/approval/controller/FormController.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/controller/InboxController.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalFormResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalFormSummaryResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalInboxCountsResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalInboxItemResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java"
+  ]
+}

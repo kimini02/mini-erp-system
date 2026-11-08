@@ -1,0 +1,217 @@
+[
+  {
+    "method": "POST",
+    "path": "/api/v1/approval-documents/line-preview",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#preview(@jakarta.validation.Valid com.minierp.backend.domain.approval.controller.DocumentController.Preview)",
+    "successSnapshots": 8,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/approval-documents",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#create(@jakarta.validation.Valid com.minierp.backend.domain.approval.dto.DocumentRequest)",
+    "successSnapshots": 80,
+    "alwaysNull": []
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/approval-documents/{id}",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#update(long,@jakarta.validation.Valid com.minierp.backend.domain.approval.dto.DocumentRequest)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/approval-documents/{id}",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#delete(long)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/approval-documents/{id}",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#detail(long)",
+    "successSnapshots": 4,
+    "alwaysNull": [
+      "$.data.body.handover",
+      "$.data.completedAt",
+      "$.data.line[].actedAt",
+      "$.data.line[].comment",
+      "$.data.line[].skipReason"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/approval-documents/{id}/submit",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#submit(long)",
+    "successSnapshots": 66,
+    "alwaysNull": [
+      "$.data.body.amount",
+      "$.data.body.handover",
+      "$.data.line[].actedAt",
+      "$.data.line[].comment"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/approval-documents/{id}/approve",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#approve(long,com.minierp.backend.domain.approval.controller.DocumentController.Comment)",
+    "successSnapshots": 33,
+    "alwaysNull": [
+      "$.data.body.before.clockOut",
+      "$.data.body.handover",
+      "$.data.line[].comment",
+      "$.data.line[].skipReason",
+      "$.data.resubmittedFromId"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/approval-documents/{id}/reject",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#reject(long,com.minierp.backend.domain.approval.controller.DocumentController.Comment)",
+    "successSnapshots": 4,
+    "alwaysNull": [
+      "$.data.body.handover",
+      "$.data.line[].skipReason",
+      "$.data.resubmittedFromId"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/approval-documents/{id}/withdraw",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#withdraw(long)",
+    "successSnapshots": 5,
+    "alwaysNull": [
+      "$.data.body.handover",
+      "$.data.line[].actedAt",
+      "$.data.line[].comment",
+      "$.data.line[].skipReason"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/approval-documents/{id}/resubmit",
+    "owner": "com.minierp.backend.domain.approval.controller.DocumentController#resubmit(long)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/approval-forms",
+    "owner": "com.minierp.backend.domain.approval.controller.FormController#list()",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/approval-forms/{code}",
+    "owner": "com.minierp.backend.domain.approval.controller.FormController#detail(java.lang.String)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/approval-forms/{code}",
+    "owner": "com.minierp.backend.domain.approval.controller.FormController#patch(java.lang.String,com.minierp.backend.domain.approval.service.FormService.Options)",
+    "successSnapshots": 1,
+    "alwaysNull": [
+      "$.data.steps[].roleCode",
+      "$.data.steps[].userId"
+    ]
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/approval-forms/{code}/steps",
+    "owner": "com.minierp.backend.domain.approval.controller.FormController#steps(java.lang.String,java.util.List<com.minierp.backend.domain.approval.service.FormService.Step>)",
+    "successSnapshots": 2,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/approval-forms/{code}/line-preview",
+    "owner": "com.minierp.backend.domain.approval.controller.FormController#preview(java.lang.String,@jakarta.validation.Valid com.minierp.backend.domain.approval.controller.FormController.Preview)",
+    "successSnapshots": 1,
+    "alwaysNull": [
+      "$.data.error"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/approval-inbox",
+    "owner": "com.minierp.backend.domain.approval.controller.InboxController#list(java.lang.String,java.lang.String,java.lang.String,int,int)",
+    "successSnapshots": 5,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/approval-inbox/counts",
+    "owner": "com.minierp.backend.domain.approval.controller.InboxController#counts()",
+    "successSnapshots": 4,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/leave/admin/balances",
+    "owner": "com.minierp.backend.domain.leave.controller.LeaveAdminController#balances(java.lang.Integer,java.lang.Long,java.lang.String,int,int)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/leave/admin/ledger/{userId}",
+    "owner": "com.minierp.backend.domain.leave.controller.LeaveAdminController#ledger(long,java.lang.Integer)",
+    "successSnapshots": 1,
+    "alwaysNull": [
+      "$.data[].document"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/leave/admin/adjustments",
+    "owner": "com.minierp.backend.domain.leave.controller.LeaveAdminController#adjust(@jakarta.validation.Valid com.minierp.backend.domain.leave.controller.LeaveAdminController.Adjustment)",
+    "successSnapshots": 11,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/leave/admin/grant-runs",
+    "owner": "com.minierp.backend.domain.leave.controller.LeaveAdminController#grant(@jakarta.validation.Valid com.minierp.backend.domain.leave.controller.LeaveAdminController.Run)",
+    "successSnapshots": 3,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/leave/admin/grant-runs",
+    "owner": "com.minierp.backend.domain.leave.controller.LeaveAdminController#runs(int)",
+    "successSnapshots": 3,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/leave/policy",
+    "owner": "com.minierp.backend.domain.leave.controller.LeavePolicyController#policy()",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/leave/balance",
+    "owner": "com.minierp.backend.domain.leave.controller.LeaveQueryController#balance(java.lang.Integer)",
+    "successSnapshots": 3,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/leave/ledger",
+    "owner": "com.minierp.backend.domain.leave.controller.LeaveQueryController#ledger(java.lang.Integer,java.lang.String)",
+    "successSnapshots": 3,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/leave/days-preview",
+    "owner": "com.minierp.backend.domain.leave.controller.LeaveQueryController#preview(com.fasterxml.jackson.databind.JsonNode)",
+    "successSnapshots": 3,
+    "alwaysNull": []
+  }
+]

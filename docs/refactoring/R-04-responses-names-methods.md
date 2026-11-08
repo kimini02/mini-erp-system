@@ -208,9 +208,9 @@ R-02: 새 120자 초과·여러 문장·여러 선언자 0. 기존 문자열 예
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | users.id BIGINT NOT NULL; 트리에서는 departments.head_user_id BIGINT NULL을 null 검사 후 number |
-| name | name | String | users.user_name VARCHAR NOT NULL (head_name 별칭 포함) |
-| position | position | String | positions.name VARCHAR NOT NULL (head_position 별칭 포함) |
+| id | id | long | findHead의 users.id BIGINT NOT NULL → number(row,"id") |
+| name | name | String | findHead의 users.user_name VARCHAR(50) NOT NULL AS name |
+| position | position | String | findHead의 positions.name VARCHAR(100) NOT NULL AS position |
 | departmentName | departmentName | String | departments.name VARCHAR NOT NULL, findHead SELECT 별칭 |
 
 `OrgDepartmentResponseDto.Head`
@@ -246,26 +246,26 @@ R-02: 새 120자 초과·여러 문장·여러 선언자 0. 기존 문자열 예
 | id | id | long | departments.id BIGINT NOT NULL → number(row,"id") |
 | name | name | String | departments.name VARCHAR NOT NULL |
 | code | code | String | departments.code VARCHAR NOT NULL |
-| head | head | OrgDepartmentResponseDto.Head | head_user_id가 null이면 null, 아니면 findHead 행의 id/name/position |
-| directMemberCount | directMemberCount | Long | counts.getOrDefault(id,0L)의 Long |
-| totalMemberCount | totalMemberCount | long | aggregate(id, counts, children)의 long 합계 |
+| head | head | OrgDepartmentResponseDto.Head | 같은 findDepartments 행의 head_user_id/head_name/head_position을 Head.fromDepartment로 변환; head_user_id가 null이면 null (추가 조회 없음) |
+| directMemberCount | directMemberCount | Long | members.getOrDefault(id,0L)의 Long |
+| totalMemberCount | totalMemberCount | long | 기존 aggregate(id, counts, children)의 long 합계; 현재 long total = directMembers 뒤 descendant.totalMemberCount()를 더한 값 |
 | children | children | List&lt;OrgDepartmentTreeResponseDto&gt; | children.getOrDefault(id,List.of())를 재귀 departmentTree로 변환한 List |
 
 `OrgHolidayResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| id | id | long | holidays.id BIGINT NOT NULL → number(row,"id") |
-| date | date | LocalDate | holidays.holiday_date DATE NOT NULL → SqlStore LocalDate |
-| name | name | String | holidays.name VARCHAR NOT NULL |
-| substitute | substitute | Boolean | holidays.substitute BIT NOT NULL → 드라이버 Boolean |
+| id | id | long | 조회: holidays.id BIGINT NOT NULL → number(row,"id"); 생성: store.insertHoliday 반환 long |
+| date | date | LocalDate | 조회: holidays.holiday_date DATE NOT NULL → SqlStore LocalDate; 생성: request.date() LocalDate |
+| name | name | String | 조회: holidays.name VARCHAR NOT NULL; 생성: request.name() String |
+| substitute | substitute | Boolean | 조회: holidays.substitute BIT NOT NULL → 드라이버 Boolean; 생성: request.substitute() Boolean |
 
 `OrgPositionCreateResponseDto`
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
 | id | id | long | insertPosition 반환 long |
-| name | name | String | request.name() String |
+| name | name | String | 서비스 인자 name(String) |
 | rankOrder | rankOrder | int | 리터럴 0(int) |
 
 `OrgPositionResponseDto`
@@ -281,7 +281,7 @@ R-02: 새 120자 초과·여러 문장·여러 선언자 0. 기존 문자열 예
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
 | id | id | long | 요청 id(long) |
-| name | name | String | request.name() String |
+| name | name | String | 서비스 인자 name(String) |
 
 `OrgWorkScheduleResponseDto`
 
@@ -342,7 +342,7 @@ R-02: 새 120자 초과·여러 문장·여러 선언자 0. 기존 문자열 예
 | create | create | boolean | bool(row,"can_create")의 기본형 boolean; SELECT COALESCE(p.can_create,0) |
 | update | update | boolean | bool(row,"can_update")의 기본형 boolean; SELECT COALESCE(p.can_update,0) |
 | delete | delete | boolean | bool(row,"can_delete")의 기본형 boolean; SELECT COALESCE(p.can_delete,0) |
-| scope | scope | String | role_permissions.data_scope ENUM NULL (LEFT JOIN) |
+| scope | scope | String | role_permissions.data_scope VARCHAR(20) NULL (LEFT JOIN) |
 
 `RoleSummaryResponseDto`
 
@@ -372,7 +372,7 @@ R-02: 새 120자 초과·여러 문장·여러 선언자 0. 기존 문자열 예
 | roles | roles | List&lt;EmployeeDetailResponseDto.Role&gt; | findEmployeeRoles의 roles.id 순 행을 Role.from으로 변환한 List |
 | hireDate | hireDate | LocalDate | users.hire_date DATE NULL → LocalDate |
 | retiredDate | retiredDate | LocalDate | users.retired_date DATE NULL → LocalDate |
-| status | status | String | users.status ENUM NOT NULL → String |
+| status | status | String | users.status VARCHAR(20) NOT NULL → String |
 | invitationPending | invitationPending | boolean | row.get("user_pw") == null(boolean) |
 | remainingAnnualLeave | remainingAnnualLeave | BigDecimal | COALESCE(SUM(leave_ledger.days DECIMAL(8,1)),0) → BigDecimal |
 | createdAt | createdAt | LocalDateTime | users.created_at DATETIME → SqlStore LocalDateTime |
@@ -396,8 +396,8 @@ R-02: 새 120자 초과·여러 문장·여러 선언자 0. 기존 문자열 예
 
 | JSON 키 | 구성요소 | Java 타입 | 근거 |
 | --- | --- | --- | --- |
-| content | content | List&lt;EmployeeDetailResponseDto&gt; | PageResponseDto.content() (getEmployeeViews(ids)의 List) |
-| page | page | PageResponseDto.Page | PageResponseDto.page() (Page.of(page,size,total,content.size())) |
+| content | content | List&lt;EmployeeDetailResponseDto&gt; | getEmployeeViews(selected.ids())의 List&lt;EmployeeDetailResponseDto&gt; |
+| page | page | PageResponseDto.Page | PageResponseDto.Page.of(page,size,selected.total(),content.size()) |
 | statusCounts | statusCounts | Map&lt;String,Long&gt; | EmployeeRepository.SearchResult.counts Map&lt;String,Long&gt;; users.status별 COUNT(*) |
 
 `EmployeeLoginIdPreviewResponseDto`

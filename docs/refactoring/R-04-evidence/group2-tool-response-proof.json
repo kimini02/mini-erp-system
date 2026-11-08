@@ -1,0 +1,2025 @@
+{
+  "mappings": 35,
+  "differences": 0,
+  "differencesDetail": [],
+  "rows": [
+    {
+      "origin": "com.minierp.backend.domain.approval.repository.GeneralRequestStore#findBody:row",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalGeneralBodyResponseDto",
+      "before": [
+        {
+          "key": "content",
+          "type": "Object (SQL column; see schema type table)",
+          "nested": null
+        },
+        {
+          "key": "amount",
+          "type": "Object (SQL column; see schema type table)",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "content",
+          "component": "content",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "amount",
+          "component": "amount",
+          "type": "java.lang.Long"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#body(long):0",
+      "record": "com.minierp.backend.domain.leave.dto.LeaveBodyResponseDto",
+      "before": [
+        {
+          "key": "leaveType",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "startDate",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "endDate",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "usedDays",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "handover",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "reason",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "leaveType",
+          "component": "leaveType",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "startDate",
+          "component": "startDate",
+          "type": "java.time.LocalDate"
+        },
+        {
+          "key": "endDate",
+          "component": "endDate",
+          "type": "java.time.LocalDate"
+        },
+        {
+          "key": "usedDays",
+          "component": "usedDays",
+          "type": "java.math.BigDecimal"
+        },
+        {
+          "key": "handover",
+          "component": "handover",
+          "type": "com.minierp.backend.domain.leave.dto.LeaveBodyResponseDto.Handover"
+        },
+        {
+          "key": "reason",
+          "component": "reason",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#body(long):0.handover",
+      "record": "com.minierp.backend.domain.leave.dto.LeaveBodyResponseDto.Handover",
+      "before": [
+        {
+          "key": "id",
+          "type": "Object (SQL column; see schema type table)",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "Object (SQL column; see schema type table)",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.overtime.repository.OvertimeStore#findBody:row",
+      "record": "com.minierp.backend.domain.overtime.dto.OvertimeBodyResponseDto",
+      "before": [
+        {
+          "key": "overtimeDate",
+          "type": "Object (SQL column; see schema type table)",
+          "nested": null
+        },
+        {
+          "key": "startTime",
+          "type": "Object (SQL column; see schema type table)",
+          "nested": null
+        },
+        {
+          "key": "endTime",
+          "type": "Object (SQL column; see schema type table)",
+          "nested": null
+        },
+        {
+          "key": "reason",
+          "type": "Object (SQL column; see schema type table)",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "overtimeDate",
+          "component": "overtimeDate",
+          "type": "java.time.LocalDate"
+        },
+        {
+          "key": "startTime",
+          "component": "startTime",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "endTime",
+          "component": "endTime",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "reason",
+          "component": "reason",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#body(long):0",
+      "record": "com.minierp.backend.domain.attendance.dto.AttendanceFixBodyResponseDto",
+      "before": [
+        {
+          "key": "workDate",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "clockIn",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "clockOut",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "reason",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "before",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "workDate",
+          "component": "workDate",
+          "type": "java.time.LocalDate"
+        },
+        {
+          "key": "clockIn",
+          "component": "clockIn",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "clockOut",
+          "component": "clockOut",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "reason",
+          "component": "reason",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "before",
+          "component": "before",
+          "type": "com.fasterxml.jackson.databind.JsonNode"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#create(com.minierp.backend.domain.approval.dto.DocumentRequest):0",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalDraftResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "long",
+          "nested": null
+        },
+        {
+          "key": "status",
+          "type": "java.lang.String",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "status",
+          "component": "status",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#resubmit(long):0",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalDraftResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "long",
+          "nested": null
+        },
+        {
+          "key": "status",
+          "type": "java.lang.String",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "status",
+          "component": "status",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):3",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "long",
+          "nested": null
+        },
+        {
+          "key": "docNo",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "form",
+          "type": "java.util.Map<java.lang.String,java.lang.Object>",
+          "nested": [
+            {
+              "key": "code",
+              "type": "java.lang.Object",
+              "nested": null
+            },
+            {
+              "key": "name",
+              "type": "java.lang.Object",
+              "nested": null
+            }
+          ]
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "status",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "drafter",
+          "type": "java.util.Map<java.lang.String,java.lang.Object>",
+          "nested": [
+            {
+              "key": "id",
+              "type": "java.lang.Object",
+              "nested": null
+            },
+            {
+              "key": "name",
+              "type": "java.lang.Object",
+              "nested": null
+            },
+            {
+              "key": "title",
+              "type": "java.lang.Object",
+              "nested": null
+            },
+            {
+              "key": "department",
+              "type": "java.lang.Object",
+              "nested": null
+            }
+          ]
+        },
+        {
+          "key": "submittedAt",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "completedAt",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "body",
+          "type": "java.util.Map<java.lang.String,java.lang.Object>",
+          "nested": null
+        },
+        {
+          "key": "line",
+          "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        },
+        {
+          "key": "references",
+          "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        },
+        {
+          "key": "history",
+          "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        },
+        {
+          "key": "myActions",
+          "type": "java.util.Map<java.lang.String,java.lang.Object>",
+          "nested": [
+            {
+              "key": "canApprove",
+              "type": "boolean",
+              "nested": null
+            },
+            {
+              "key": "canReject",
+              "type": "boolean",
+              "nested": null
+            },
+            {
+              "key": "canWithdraw",
+              "type": "boolean",
+              "nested": null
+            },
+            {
+              "key": "canResubmit",
+              "type": "boolean",
+              "nested": null
+            }
+          ]
+        },
+        {
+          "key": "resubmittedFromId",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "docNo",
+          "component": "docNo",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "form",
+          "component": "form",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Form"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "status",
+          "component": "status",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "drafter",
+          "component": "drafter",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+        },
+        {
+          "key": "submittedAt",
+          "component": "submittedAt",
+          "type": "java.time.LocalDateTime"
+        },
+        {
+          "key": "completedAt",
+          "component": "completedAt",
+          "type": "java.time.LocalDateTime"
+        },
+        {
+          "key": "body",
+          "component": "body",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalFormBodyDto"
+        },
+        {
+          "key": "line",
+          "component": "line",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Line>"
+        },
+        {
+          "key": "references",
+          "component": "references",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto>"
+        },
+        {
+          "key": "history",
+          "component": "history",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.History>"
+        },
+        {
+          "key": "myActions",
+          "component": "myActions",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.MyActions"
+        },
+        {
+          "key": "resubmittedFromId",
+          "component": "resubmittedFromId",
+          "type": "java.lang.Long"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):3.line",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Line",
+      "before": [
+        {
+          "key": "order",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "kind",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "approver",
+          "type": "java.util.Map<java.lang.String,java.lang.Object>",
+          "nested": null
+        },
+        {
+          "key": "source",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "rule",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "status",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "skipReason",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "actedAt",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "comment",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "order",
+          "component": "order",
+          "type": "long"
+        },
+        {
+          "key": "kind",
+          "component": "kind",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "approver",
+          "component": "approver",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+        },
+        {
+          "key": "source",
+          "component": "source",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "rule",
+          "component": "rule",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "status",
+          "component": "status",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "skipReason",
+          "component": "skipReason",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "actedAt",
+          "component": "actedAt",
+          "type": "java.time.LocalDateTime"
+        },
+        {
+          "key": "comment",
+          "component": "comment",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):3.line.approver",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):3.references",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):3.history",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.History",
+      "before": [
+        {
+          "key": "action",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "actor",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "comment",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "at",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "action",
+          "component": "action",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "actor",
+          "component": "actor",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Actor"
+        },
+        {
+          "key": "comment",
+          "component": "comment",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "at",
+          "component": "at",
+          "type": "java.time.LocalDateTime"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):3.history.actor",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Actor",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):4",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Form",
+      "before": [
+        {
+          "key": "code",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "code",
+          "component": "code",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):5",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.DocumentService#detail(long):6",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.MyActions",
+      "before": [
+        {
+          "key": "canApprove",
+          "type": "boolean",
+          "nested": null
+        },
+        {
+          "key": "canReject",
+          "type": "boolean",
+          "nested": null
+        },
+        {
+          "key": "canWithdraw",
+          "type": "boolean",
+          "nested": null
+        },
+        {
+          "key": "canResubmit",
+          "type": "boolean",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "canApprove",
+          "component": "canApprove",
+          "type": "boolean"
+        },
+        {
+          "key": "canReject",
+          "component": "canReject",
+          "type": "boolean"
+        },
+        {
+          "key": "canWithdraw",
+          "component": "canWithdraw",
+          "type": "boolean"
+        },
+        {
+          "key": "canResubmit",
+          "component": "canResubmit",
+          "type": "boolean"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>):0",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#previewRow(com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved):0",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row",
+      "before": [
+        {
+          "key": "order",
+          "type": "int",
+          "nested": null
+        },
+        {
+          "key": "kind",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "rule",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "result",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "status",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "note",
+          "type": "java.lang.String",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "order",
+          "component": "order",
+          "type": "int"
+        },
+        {
+          "key": "kind",
+          "component": "kind",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "rule",
+          "component": "rule",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "result",
+          "component": "result",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+        },
+        {
+          "key": "status",
+          "component": "status",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "note",
+          "component": "note",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#previewRow(com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved):0.result",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):0",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto",
+      "before": [
+        {
+          "key": "rows",
+          "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        },
+        {
+          "key": "finalLine",
+          "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        },
+        {
+          "key": "references",
+          "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        },
+        {
+          "key": "error",
+          "type": "<nulltype>",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "rows",
+          "component": "rows",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row>"
+        },
+        {
+          "key": "finalLine",
+          "component": "finalLine",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto>"
+        },
+        {
+          "key": "references",
+          "component": "references",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto>"
+        },
+        {
+          "key": "error",
+          "component": "error",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):0.rows",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row",
+      "before": [
+        {
+          "key": "order",
+          "type": "int",
+          "nested": null
+        },
+        {
+          "key": "kind",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "rule",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "result",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "status",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "note",
+          "type": "java.lang.String",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "order",
+          "component": "order",
+          "type": "int"
+        },
+        {
+          "key": "kind",
+          "component": "kind",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "rule",
+          "component": "rule",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "result",
+          "component": "result",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+        },
+        {
+          "key": "status",
+          "component": "status",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "note",
+          "component": "note",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):0.rows.result",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):0.finalLine",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):0.references",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):2",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto",
+      "before": [
+        {
+          "key": "rows",
+          "type": "java.util.ArrayList<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        },
+        {
+          "key": "finalLine",
+          "type": "java.util.List<java.lang.Object>",
+          "nested": null
+        },
+        {
+          "key": "references",
+          "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        },
+        {
+          "key": "error",
+          "type": "java.lang.String",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "rows",
+          "component": "rows",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row>"
+        },
+        {
+          "key": "finalLine",
+          "component": "finalLine",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto>"
+        },
+        {
+          "key": "references",
+          "component": "references",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto>"
+        },
+        {
+          "key": "error",
+          "component": "error",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):2.rows",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row",
+      "before": [
+        {
+          "key": "order",
+          "type": "int",
+          "nested": null
+        },
+        {
+          "key": "kind",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "rule",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "result",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "status",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "note",
+          "type": "java.lang.String",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "order",
+          "component": "order",
+          "type": "int"
+        },
+        {
+          "key": "kind",
+          "component": "kind",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "rule",
+          "component": "rule",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "result",
+          "component": "result",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+        },
+        {
+          "key": "status",
+          "component": "status",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "note",
+          "component": "note",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):2.rows.result",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):2.finalLine",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):2.references",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto",
+      "before": [
+        {
+          "key": "id",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "title",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "department",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "id",
+          "component": "id",
+          "type": "long"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "title",
+          "component": "title",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "department",
+          "component": "department",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>):1",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row",
+      "before": [
+        {
+          "key": "order",
+          "type": "int",
+          "nested": null
+        },
+        {
+          "key": "kind",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "rule",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "result",
+          "type": "<nulltype>",
+          "nested": null
+        },
+        {
+          "key": "status",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "note",
+          "type": "java.lang.String",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "order",
+          "component": "order",
+          "type": "int"
+        },
+        {
+          "key": "kind",
+          "component": "kind",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "rule",
+          "component": "rule",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "result",
+          "component": "result",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+        },
+        {
+          "key": "status",
+          "component": "status",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "note",
+          "component": "note",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.FormService#presentation(java.util.Map<java.lang.String,java.lang.Object>):0",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalFormSummaryResponseDto",
+      "before": [
+        {
+          "key": "code",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "shortName",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "prefix",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "description",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "allowLineEdit",
+          "type": "boolean",
+          "nested": null
+        },
+        {
+          "key": "approverStepCount",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "referenceStepCount",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "code",
+          "component": "code",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "shortName",
+          "component": "shortName",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "prefix",
+          "component": "prefix",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "description",
+          "component": "description",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "allowLineEdit",
+          "component": "allowLineEdit",
+          "type": "boolean"
+        },
+        {
+          "key": "approverStepCount",
+          "component": "approverStepCount",
+          "type": "long"
+        },
+        {
+          "key": "referenceStepCount",
+          "component": "referenceStepCount",
+          "type": "long"
+        }
+      ],
+      "reason": "presentation(f)의 공통 다섯 키 다음 같은 out에 put한 순서"
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.FormService#presentation(java.util.Map<java.lang.String,java.lang.Object>):0",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto",
+      "before": [
+        {
+          "key": "code",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "name",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "shortName",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "prefix",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "description",
+          "type": "java.lang.String",
+          "nested": null
+        },
+        {
+          "key": "options",
+          "type": "java.util.Map<java.lang.String,java.lang.Object>",
+          "nested": null
+        },
+        {
+          "key": "steps",
+          "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "code",
+          "component": "code",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "name",
+          "component": "name",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "shortName",
+          "component": "shortName",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "prefix",
+          "component": "prefix",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "description",
+          "component": "description",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "options",
+          "component": "options",
+          "type": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto.Options"
+        },
+        {
+          "key": "steps",
+          "component": "steps",
+          "type": "java.util.List<com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto.Step>"
+        }
+      ],
+      "reason": "presentation(f)의 공통 다섯 키 다음 같은 out에 put한 순서"
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.FormService#detail(java.lang.String):0",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto.Options",
+      "before": [
+        {
+          "key": "dedupeApprover",
+          "type": "boolean",
+          "nested": null
+        },
+        {
+          "key": "fallbackToUpper",
+          "type": "boolean",
+          "nested": null
+        },
+        {
+          "key": "skipSelf",
+          "type": "boolean",
+          "nested": null
+        },
+        {
+          "key": "allowLineEdit",
+          "type": "boolean",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "dedupeApprover",
+          "component": "dedupeApprover",
+          "type": "boolean"
+        },
+        {
+          "key": "fallbackToUpper",
+          "component": "fallbackToUpper",
+          "type": "boolean"
+        },
+        {
+          "key": "skipSelf",
+          "component": "skipSelf",
+          "type": "boolean"
+        },
+        {
+          "key": "allowLineEdit",
+          "component": "allowLineEdit",
+          "type": "boolean"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.service.FormService#detail(java.lang.String):1",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto.Step",
+      "before": [
+        {
+          "key": "order",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "lineKind",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "approverType",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "roleCode",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "userId",
+          "type": "java.lang.Object",
+          "nested": null
+        },
+        {
+          "key": "label",
+          "type": "java.lang.Object",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "order",
+          "component": "order",
+          "type": "long"
+        },
+        {
+          "key": "lineKind",
+          "component": "lineKind",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "approverType",
+          "component": "approverType",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "roleCode",
+          "component": "roleCode",
+          "type": "java.lang.String"
+        },
+        {
+          "key": "userId",
+          "component": "userId",
+          "type": "java.lang.Long"
+        },
+        {
+          "key": "label",
+          "component": "label",
+          "type": "java.lang.String"
+        }
+      ],
+      "reason": ""
+    },
+    {
+      "origin": "com.minierp.backend.domain.approval.repository.InboxRepository#BOXES:row",
+      "record": "com.minierp.backend.domain.approval.dto.ApprovalInboxCountsResponseDto",
+      "before": [
+        {
+          "key": "todo",
+          "type": "COUNT alias from original literal key list",
+          "nested": null
+        },
+        {
+          "key": "in-progress",
+          "type": "COUNT alias from original literal key list",
+          "nested": null
+        },
+        {
+          "key": "done",
+          "type": "COUNT alias from original literal key list",
+          "nested": null
+        },
+        {
+          "key": "mine",
+          "type": "COUNT alias from original literal key list",
+          "nested": null
+        },
+        {
+          "key": "drafts",
+          "type": "COUNT alias from original literal key list",
+          "nested": null
+        },
+        {
+          "key": "reference",
+          "type": "COUNT alias from original literal key list",
+          "nested": null
+        }
+      ],
+      "after": [
+        {
+          "key": "todo",
+          "component": "todo",
+          "type": "long"
+        },
+        {
+          "key": "in-progress",
+          "component": "inProgress",
+          "type": "long"
+        },
+        {
+          "key": "done",
+          "component": "done",
+          "type": "long"
+        },
+        {
+          "key": "mine",
+          "component": "mine",
+          "type": "long"
+        },
+        {
+          "key": "drafts",
+          "component": "drafts",
+          "type": "long"
+        },
+        {
+          "key": "reference",
+          "component": "reference",
+          "type": "long"
+        }
+      ],
+      "reason": "counts의 BOXES 순서로 생성한 COUNT 별칭; in-progress를 JsonProperty로 보존"
+    }
+  ]
+}

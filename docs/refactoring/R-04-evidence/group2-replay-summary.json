@@ -1,0 +1,32 @@
+{
+  "handler-submitted-order": {
+    "differences": 1
+  },
+  "handler-body-order": {
+    "differences": 5
+  },
+  "sql-mutation": {
+    "differences": 1
+  },
+  "inbox-sql-parameter": {
+    "differences": 1
+  },
+  "inbox-response-key": {
+    "differences": 1
+  },
+  "inbox-overlapping-title-key": {
+    "differences": 1
+  },
+  "inbox-row-key-count": {
+    "differences": 1
+  },
+  "inbox-state-count": {
+    "differences": 1
+  },
+  "inbox-unclassified": {
+    "differences": 1
+  },
+  "inbox-guard-after-query": {
+    "differences": 1
+  }
+}
