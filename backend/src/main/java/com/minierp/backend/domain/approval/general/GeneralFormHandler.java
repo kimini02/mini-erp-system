@@ -6,7 +6,7 @@ import com.minierp.backend.domain.approval.model.*;
 import com.minierp.backend.domain.approval.repository.GeneralRequestStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import java.util.Map;
+import com.minierp.backend.domain.approval.dto.ApprovalGeneralBodyResponseDto;
 
 @Component
 @RequiredArgsConstructor
@@ -16,18 +16,18 @@ public class GeneralFormHandler implements ApprovalFormHandler {
         return "GENERAL";
     }
 
-    public void checkFormat(JsonNode b) {
-        BodyValues.text(b, "content", 16000);
-        BodyValues.optionalLong(b, "amount");
+    public void checkFormat(JsonNode body) {
+        BodyValues.text(body, "content", 16000);
+        BodyValues.optionalLong(body, "amount");
     }
 
-    public void saveBody(ApprovalDocument d, JsonNode b) {
-        checkFormat(b);
-        store.upsertBody(d.id(), b.path("content").textValue(), BodyValues.optionalLong(b, "amount"));
+    public void saveBody(ApprovalDocument document, JsonNode body) {
+        checkFormat(body);
+        store.upsertBody(document.id(), body.path("content").textValue(), BodyValues.optionalLong(body, "amount"));
     }
 
-    public Map<String, Object> body(long id) {
-        return store.findBody(id);
+    public ApprovalGeneralBodyResponseDto body(long id) {
+        return ApprovalGeneralBodyResponseDto.from(store.findBody(id));
     }
 
     public void copyBody(long source, ApprovalDocument target) {
@@ -41,15 +41,15 @@ public class GeneralFormHandler implements ApprovalFormHandler {
     public void validate(ApprovalDraft draft) {
     }
 
-    public void onSubmitted(ApprovalDocument d) {
+    public void onSubmitted(ApprovalDocument document) {
     }
 
-    public void onApproved(ApprovalDocument d) {
+    public void onApproved(ApprovalDocument document) {
     }
 
-    public void onRejected(ApprovalDocument d) {
+    public void onRejected(ApprovalDocument document) {
     }
 
-    public void onWithdrawn(ApprovalDocument d) {
+    public void onWithdrawn(ApprovalDocument document) {
     }
 }

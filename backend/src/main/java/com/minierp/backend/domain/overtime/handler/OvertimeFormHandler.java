@@ -8,7 +8,7 @@ import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import java.time.*;
-import java.util.Map;
+import com.minierp.backend.domain.overtime.dto.OvertimeBodyResponseDto;
 
 @Component
 @RequiredArgsConstructor
@@ -19,21 +19,21 @@ public class OvertimeFormHandler implements ApprovalFormHandler {
         return "OVERTIME";
     }
 
-    public void checkFormat(JsonNode b) {
-        BodyValues.date(b, "overtimeDate");
-        BodyValues.time(b, "startTime");
-        BodyValues.time(b, "endTime");
-        BodyValues.text(b, "reason", 500);
+    public void checkFormat(JsonNode body) {
+        BodyValues.date(body, "overtimeDate");
+        BodyValues.time(body, "startTime");
+        BodyValues.time(body, "endTime");
+        BodyValues.text(body, "reason", 500);
     }
 
-    public void saveBody(ApprovalDocument d, JsonNode b) {
-        checkFormat(b);
-        store.upsertBody(d.id(), BodyValues.date(b, "overtimeDate"), BodyValues.time(b, "startTime"),
-                BodyValues.time(b, "endTime"), b.path("reason").textValue(), LocalDateTime.now(clock));
+    public void saveBody(ApprovalDocument document, JsonNode body) {
+        checkFormat(body);
+        store.upsertBody(document.id(), BodyValues.date(body, "overtimeDate"), BodyValues.time(body, "startTime"),
+                BodyValues.time(body, "endTime"), body.path("reason").textValue(), LocalDateTime.now(clock));
     }
 
-    public Map<String, Object> body(long id) {
-        return store.findBody(id);
+    public OvertimeBodyResponseDto body(long id) {
+        return OvertimeBodyResponseDto.from(store.findBody(id));
     }
 
     public void copyBody(long source, ApprovalDocument target) {
@@ -50,15 +50,15 @@ public class OvertimeFormHandler implements ApprovalFormHandler {
         }
     }
 
-    public void onSubmitted(ApprovalDocument d) {
+    public void onSubmitted(ApprovalDocument document) {
     }
 
-    public void onApproved(ApprovalDocument d) {
+    public void onApproved(ApprovalDocument document) {
     }
 
-    public void onRejected(ApprovalDocument d) {
+    public void onRejected(ApprovalDocument document) {
     }
 
-    public void onWithdrawn(ApprovalDocument d) {
+    public void onWithdrawn(ApprovalDocument document) {
     }
 }

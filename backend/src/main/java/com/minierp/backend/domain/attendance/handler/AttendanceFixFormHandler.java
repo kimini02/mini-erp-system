@@ -1,6 +1,7 @@
 package com.minierp.backend.domain.attendance.handler;
 
 import com.minierp.backend.domain.attendance.repository.AttendanceStore;
+import com.minierp.backend.domain.attendance.dto.AttendanceFixBodyResponseDto;
 import com.fasterxml.jackson.databind.*;
 import com.minierp.backend.domain.approval.handler.*;
 import com.minierp.backend.domain.approval.model.*;
@@ -63,7 +64,7 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         return store.findBody(id);
     }
 
-    private Object json(String text) {
+    private JsonNode json(String text) {
         try {
             return text == null ? null : mapper.readTree(text);
         } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
@@ -75,10 +76,10 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         return value == null ? null : AttendanceStore.time(value).format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
-    public Map<String, Object> body(long id) {
+    public AttendanceFixBodyResponseDto body(long id) {
         var r = raw(id);
-        return map("workDate", r.get("work_date"), "clockIn", hh(r.get("clock_in")), "clockOut", hh(r.get("clock_out")),
-                "reason", r.get("reason"), "before", json((String) r.get("before_json")));
+        return new AttendanceFixBodyResponseDto((LocalDate) r.get("work_date"), hh(r.get("clock_in")),
+                hh(r.get("clock_out")), (String) r.get("reason"), json((String) r.get("before_json")));
     }
 
     public void copyBody(long id, ApprovalDocument target) {
