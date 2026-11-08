@@ -1,6 +1,12 @@
 package com.minierp.backend.domain.leave.controller;
 
 import com.minierp.backend.domain.leave.service.LeaveAdminService;
+import com.minierp.backend.domain.leave.dto.LeaveAdminBalanceResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveLedgerEntryResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveAdjustmentResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveGrantRunResponseDto;
+import com.minierp.backend.global.response.PageResponseDto;
+import java.util.List;
 import com.minierp.backend.global.permission.*;
 import com.minierp.backend.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,19 +24,21 @@ public class LeaveAdminController {
     private final Clock clock;
     @GetMapping("/balances")
     @RequirePermission(menu = "LEAVE_ADMIN", action = Action.VIEW)
-    public ApiResponse<?> balances(
+    public ApiResponse<PageResponseDto<LeaveAdminBalanceResponseDto>> getBalances(
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Long departmentId,
-            @RequestParam(required = false) String q,
+            @RequestParam(name = "q", required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ApiResponse.success(clock, service.balances(year, departmentId, q, page, size));
+        return ApiResponse.success(clock, service.getBalances(year, departmentId, search, page, size));
     }
 
     @GetMapping("/ledger/{userId}")
     @RequirePermission(menu = "LEAVE_ADMIN", action = Action.VIEW)
-    public ApiResponse<?> ledger(@PathVariable long userId, @RequestParam(required = false) Integer year) {
-        return ApiResponse.success(clock, service.ledger(userId, year));
+    public ApiResponse<List<LeaveLedgerEntryResponseDto>> getUserLedgerEntries(
+            @PathVariable long userId,
+            @RequestParam(required = false) Integer year) {
+        return ApiResponse.success(clock, service.getUserLedgerEntries(userId, year));
     }
 
     public record Adjustment(
@@ -42,8 +50,9 @@ public class LeaveAdminController {
 
     @PostMapping("/adjustments")
     @RequirePermission(menu = "LEAVE_ADMIN", action = Action.CREATE)
-    public ApiResponse<?> adjust(@Valid @RequestBody Adjustment b) {
-        return ApiResponse.success(clock, service.adjust(b.userId(), b.year(), b.days(), b.memo()));
+    public ApiResponse<LeaveAdjustmentResponseDto> createAdjustment(@Valid @RequestBody Adjustment request) {
+        return ApiResponse.success(clock,
+                service.createAdjustment(request.userId(), request.year(), request.days(), request.memo()));
     }
 
     public record Run(@NotNull LocalDate date) {
@@ -51,13 +60,13 @@ public class LeaveAdminController {
 
     @PostMapping("/grant-runs")
     @RequirePermission(menu = "LEAVE_ADMIN", action = Action.UPDATE)
-    public ApiResponse<?> grant(@Valid @RequestBody Run b) {
-        return ApiResponse.success(clock, service.grant(b.date()));
+    public ApiResponse<LeaveGrantRunResponseDto> createGrantRun(@Valid @RequestBody Run request) {
+        return ApiResponse.success(clock, service.createGrantRun(request.date()));
     }
 
     @GetMapping("/grant-runs")
     @RequirePermission(menu = "LEAVE_ADMIN", action = Action.UPDATE)
-    public ApiResponse<?> runs(@RequestParam(defaultValue = "10") int limit) {
-        return ApiResponse.success(clock, service.runs(limit));
+    public ApiResponse<List<LeaveGrantRunResponseDto>> getGrantRuns(@RequestParam(defaultValue = "10") int limit) {
+        return ApiResponse.success(clock, service.getGrantRuns(limit));
     }
 }

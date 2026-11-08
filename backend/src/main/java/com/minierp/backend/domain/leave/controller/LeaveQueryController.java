@@ -1,6 +1,10 @@
 package com.minierp.backend.domain.leave.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.minierp.backend.domain.leave.dto.LeaveBalanceResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveLedgerEntryResponseDto;
+import com.minierp.backend.domain.leave.dto.LeaveDaysPreviewResponseDto;
+import java.util.List;
 import com.minierp.backend.domain.leave.service.LeaveQueryService;
 import com.minierp.backend.global.permission.*;
 import com.minierp.backend.global.response.ApiResponse;
@@ -15,20 +19,20 @@ public class LeaveQueryController {
     private final LeaveQueryService service;
     private final Clock clock;
     @GetMapping("/balance")
-    public ApiResponse<?> balance(@RequestParam(required = false) Integer year) {
-        return ApiResponse.success(clock, service.balance(year));
+    public ApiResponse<LeaveBalanceResponseDto> getBalance(@RequestParam(required = false) Integer year) {
+        return ApiResponse.success(clock, service.getBalance(year));
     }
 
     @GetMapping("/ledger")
-    public ApiResponse<?> ledger(
+    public ApiResponse<List<LeaveLedgerEntryResponseDto>> getLedgerEntries(
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) String type) {
-        return ApiResponse.success(clock, service.ledger(year, type));
+        return ApiResponse.success(clock, service.getLedgerEntries(year, type));
     }
 
     @PostMapping("/days-preview")
     @RequirePermission(menu = "APPROVAL_DRAFT", action = Action.CREATE)
-    public ApiResponse<?> preview(@RequestBody JsonNode body) {
-        return ApiResponse.success(clock, service.preview(body));
+    public ApiResponse<LeaveDaysPreviewResponseDto> getDaysPreview(@RequestBody JsonNode body) {
+        return ApiResponse.success(clock, service.getDaysPreview(body));
     }
 }

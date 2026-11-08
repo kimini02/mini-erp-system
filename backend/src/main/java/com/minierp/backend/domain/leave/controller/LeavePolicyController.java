@@ -14,7 +14,7 @@ public class LeavePolicyController {
     private final Clock clock;
     // Compatibility contract only; M3 replaces the legacy position-based grant policy.
     @GetMapping
-    public ApiResponse<?> policy() {
+    public ApiResponse<List<LeavePolicyResponseDto>> getPolicies() {
         return ApiResponse.success(clock,
                 List.of(new LeavePolicyResponseDto("사원", 14), new LeavePolicyResponseDto("대리", 16),
                         new LeavePolicyResponseDto("과장", 17), new LeavePolicyResponseDto("팀장", 18),

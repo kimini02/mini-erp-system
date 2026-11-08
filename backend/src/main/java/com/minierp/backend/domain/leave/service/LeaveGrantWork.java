@@ -39,7 +39,7 @@ public class LeaveGrantWork {
                 continue;
             }
             var existing = new HashSet<>(
-                    queries.findGrantKeys(id).stream().map(r -> (String) r.get("grant_key")).toList());
+                    queries.findGrantKeys(id).stream().map(grantRow -> (String) grantRow.get("grant_key")).toList());
             for (var grant : LeaveGrantRules.due(id, (LocalDate) user.get("hire_date"), through)) {
                 if (existing.contains(grant.key())) {
                     continue;
