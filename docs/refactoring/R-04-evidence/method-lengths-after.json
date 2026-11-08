@@ -1,0 +1,1514 @@
+[
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 23,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#getDepartmentTree()",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 28,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#getDepartment(long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 33,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#createDepartment(@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.DepartmentCreate)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 40,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#updateDepartment(long,@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.DepartmentPatch)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 48,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#updateDepartmentParent(long,com.minierp.backend.domain.org.dto.OrgRequests.Parent)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 56,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#updateDepartmentHead(long,@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.Head)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 64,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#deleteDepartmentHead(long)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 70,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#updateDepartmentWorkSchedule(long,com.minierp.backend.domain.org.dto.OrgRequests.Schedule)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 78,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#deleteDepartment(long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 85,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#getDefaultWorkSchedule()",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 90,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#updateDefaultWorkSchedule(com.minierp.backend.domain.org.dto.OrgRequests.Schedule)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 96,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#getPositions()",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 101,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#createPosition(@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.PositionName)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 108,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#updatePosition(long,@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.PositionName)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 116,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#updatePositionOrder(@jakarta.validation.Valid java.util.List<@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.PositionOrder>)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 123,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#deletePosition(long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 130,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#getHolidays(int)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 135,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#createHoliday(@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.HolidayCreate)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 142,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#updateHoliday(long,@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.HolidayPatch)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "line": 150,
+    "method": "com.minierp.backend.domain.org.controller.OrgController#deleteHoliday(long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/dto/OrgDepartmentResponseDto.java",
+    "line": 19,
+    "method": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Path#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/dto/OrgDepartmentResponseDto.java",
+    "line": 25,
+    "method": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Head#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/dto/OrgDepartmentResponseDto.java",
+    "line": 30,
+    "method": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Head#fromDepartment(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/dto/OrgDepartmentResponseDto.java",
+    "line": 38,
+    "method": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.FallbackHead#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/dto/OrgDepartmentResponseDto.java",
+    "line": 52,
+    "method": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.WorkSchedule#from(java.util.Map<java.lang.String,java.lang.Object>,boolean)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/dto/OrgHolidayResponseDto.java",
+    "line": 8,
+    "method": "com.minierp.backend.domain.org.dto.OrgHolidayResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/dto/OrgPositionResponseDto.java",
+    "line": 7,
+    "method": "com.minierp.backend.domain.org.dto.OrgPositionResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/dto/OrgWorkScheduleResponseDto.java",
+    "line": 7,
+    "method": "com.minierp.backend.domain.org.dto.OrgWorkScheduleResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/DepartmentTreeLock.java",
+    "line": 14,
+    "method": "com.minierp.backend.domain.org.repository.DepartmentTreeLock#lock()",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 18,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findDepartment(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 22,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findDepartments()",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 30,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findDepartmentMemberCounts()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 34,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findHead(java.lang.Object)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 40,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#countDepartmentMembers(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 44,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#countChildDepartments(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 48,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findSchedule(long)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 54,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findDefaultSchedule()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 58,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findPositions()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 62,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findPosition(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 66,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#countPositionMembers(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 70,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findHolidays(java.time.LocalDate,java.time.LocalDate)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 76,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#countHolidaysOnDate(java.time.LocalDate)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 80,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findHolidayIdentity(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 84,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findHoliday(long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+    "line": 89,
+    "method": "com.minierp.backend.domain.org.repository.OrgQueries#findHolidayDates(java.time.LocalDate,java.time.LocalDate)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 16,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#insertDepartment(java.lang.String,java.lang.String,java.lang.Long,java.lang.Integer)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 22,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateDepartmentCode(long,java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 26,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateDepartment(long,java.lang.String,java.lang.Integer)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 32,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateDepartmentParent(long,java.lang.Long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 36,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#lockHeadCandidate(java.lang.Long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 41,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateDepartmentHead(long,java.lang.Long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 45,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#deleteDepartment(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 49,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateDefaultSchedule(java.time.LocalTime,java.time.LocalTime,java.lang.Integer)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 55,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateDepartmentToDefaultSchedule(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 59,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateDepartmentSchedule(long,java.lang.Long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 64,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#insertPosition(java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 68,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updatePositionName(long,java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 72,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updatePositionOrder(java.lang.Integer,java.lang.Long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 76,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#lockPosition(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 80,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#deletePosition(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 84,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#insertHoliday(java.time.LocalDate,java.lang.String,java.lang.Boolean)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 89,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateHoliday(long,java.lang.String,java.lang.Boolean)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 95,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#deleteHoliday(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 99,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#insertWorkSchedule(java.time.LocalTime,java.time.LocalTime,java.lang.Integer,java.lang.String)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 106,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#updateWorkSchedule(java.time.LocalTime,java.time.LocalTime,java.lang.Integer,java.lang.String,java.lang.Long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+    "line": 113,
+    "method": "com.minierp.backend.domain.org.repository.OrgStore#workScheduleParameters(java.time.LocalTime,java.time.LocalTime,java.lang.Integer,java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 24,
+    "method": "com.minierp.backend.domain.org.service.OrgService#department(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 28,
+    "method": "com.minierp.backend.domain.org.service.OrgService#lockTree()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 32,
+    "method": "com.minierp.backend.domain.org.service.OrgService#tree()",
+    "lines": 19
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 52,
+    "method": "com.minierp.backend.domain.org.service.OrgService#departmentTree(java.util.Map<java.lang.String,java.lang.Object>,java.util.Map<java.lang.Long,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>>,java.util.Map<java.lang.Long,java.lang.Long>)",
+    "lines": 16
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 69,
+    "method": "com.minierp.backend.domain.org.service.OrgService#head(java.lang.Object)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 76,
+    "method": "com.minierp.backend.domain.org.service.OrgService#getDepartment(long)",
+    "lines": 26
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 103,
+    "method": "com.minierp.backend.domain.org.service.OrgService#createDepartment(com.minierp.backend.domain.org.dto.OrgRequests.DepartmentCreate)",
+    "lines": 9
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 113,
+    "method": "com.minierp.backend.domain.org.service.OrgService#updateDepartment(long,com.minierp.backend.domain.org.dto.OrgRequests.DepartmentPatch)",
+    "lines": 10
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 124,
+    "method": "com.minierp.backend.domain.org.service.OrgService#updateDepartmentParent(long,java.lang.Long)",
+    "lines": 12
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 137,
+    "method": "com.minierp.backend.domain.org.service.OrgService#setHead(long,java.lang.Long)",
+    "lines": 17
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 155,
+    "method": "com.minierp.backend.domain.org.service.OrgService#deleteDepartment(long)",
+    "lines": 9
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 165,
+    "method": "com.minierp.backend.domain.org.service.OrgService#schedule(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 169,
+    "method": "com.minierp.backend.domain.org.service.OrgService#defaultScheduleRow()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 173,
+    "method": "com.minierp.backend.domain.org.service.OrgService#getDefaultWorkSchedule()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 177,
+    "method": "com.minierp.backend.domain.org.service.OrgService#validateSchedule(com.minierp.backend.domain.org.dto.OrgRequests.Schedule)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 184,
+    "method": "com.minierp.backend.domain.org.service.OrgService#updateDefaultWorkSchedule(com.minierp.backend.domain.org.dto.OrgRequests.Schedule)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 191,
+    "method": "com.minierp.backend.domain.org.service.OrgService#updateDepartmentSchedule(long,com.minierp.backend.domain.org.dto.OrgRequests.Schedule)",
+    "lines": 24
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 216,
+    "method": "com.minierp.backend.domain.org.service.OrgService#getPositions()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 220,
+    "method": "com.minierp.backend.domain.org.service.OrgService#createPosition(java.lang.String)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 226,
+    "method": "com.minierp.backend.domain.org.service.OrgService#updatePosition(long,java.lang.String)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 233,
+    "method": "com.minierp.backend.domain.org.service.OrgService#updatePositionOrder(java.util.List<com.minierp.backend.domain.org.dto.OrgRequests.PositionOrder>)",
+    "lines": 13
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 247,
+    "method": "com.minierp.backend.domain.org.service.OrgService#deletePosition(long)",
+    "lines": 8
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 256,
+    "method": "com.minierp.backend.domain.org.service.OrgService#getHolidays(int)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 262,
+    "method": "com.minierp.backend.domain.org.service.OrgService#createHoliday(com.minierp.backend.domain.org.dto.OrgRequests.HolidayCreate)",
+    "lines": 12
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 275,
+    "method": "com.minierp.backend.domain.org.service.OrgService#updateHoliday(long,com.minierp.backend.domain.org.dto.OrgRequests.HolidayPatch)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "line": 282,
+    "method": "com.minierp.backend.domain.org.service.OrgService#deleteHoliday(long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/org/service/WorkingDays.java",
+    "line": 13,
+    "method": "com.minierp.backend.domain.org.service.WorkingDays#count(java.time.LocalDate,java.time.LocalDate)",
+    "lines": 8
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 25,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#getMenus()",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 31,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#getRoles()",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 37,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#createRole(@jakarta.validation.Valid com.minierp.backend.domain.permission.dto.RoleRequests.Create)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 44,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#updateRole(long,@jakarta.validation.Valid com.minierp.backend.domain.permission.dto.RoleRequests.Patch)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 50,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#deleteRole(long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 57,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#getRolePermissions(long)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 63,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#updateRolePermissions(long,@jakarta.validation.Valid java.util.List<@jakarta.validation.Valid com.minierp.backend.domain.permission.dto.RoleRequests.Permission>)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 71,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#getRoleMembers(long,int,int)",
+    "lines": 8
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 80,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#createRoleMembers(long,@jakarta.validation.Valid com.minierp.backend.domain.permission.dto.RoleRequests.Members)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/controller/RoleController.java",
+    "line": 87,
+    "method": "com.minierp.backend.domain.permission.controller.RoleController#deleteRoleMember(long,long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/dto/RoleDetailResponseDto.java",
+    "line": 7,
+    "method": "com.minierp.backend.domain.permission.dto.RoleDetailResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/dto/RoleMenuResponseDto.java",
+    "line": 14,
+    "method": "com.minierp.backend.domain.permission.dto.RoleMenuResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/dto/RolePermissionsResponseDto.java",
+    "line": 12,
+    "method": "com.minierp.backend.domain.permission.dto.RolePermissionsResponseDto.Permission#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/dto/RoleSummaryResponseDto.java",
+    "line": 13,
+    "method": "com.minierp.backend.domain.permission.dto.RoleSummaryResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 15,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#findRole(long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 20,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#findMenus()",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 26,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#findRoles()",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 32,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#countRoleMembers(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 36,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#countRoleApprovalSteps(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 40,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#findPermissions(long)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 46,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#findMemberIds(long,int,int)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 51,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#countMembership(long,long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+    "line": 56,
+    "method": "com.minierp.backend.domain.permission.repository.RoleQueries#countUserRoles(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 14,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#insertRole(java.lang.String,java.lang.String,java.lang.String)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 19,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#updateRoleCode(long,java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 23,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#updateRole(long,java.lang.String,java.lang.String)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 29,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#lockRole(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 33,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#deleteRolePermissions(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 37,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#deleteRole(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 41,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#insertPermission(long,java.lang.Object,boolean,boolean,boolean,boolean,java.lang.String)",
+    "lines": 13
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 55,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#insertMembership(long,long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+    "line": 60,
+    "method": "com.minierp.backend.domain.permission.repository.RoleStore#deleteMembership(long,long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 24,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#role(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 28,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#getMenus()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 32,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#getRoles()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 36,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#createRole(com.minierp.backend.domain.permission.dto.RoleRequests.Create)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 43,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#updateRole(long,com.minierp.backend.domain.permission.dto.RoleRequests.Patch)",
+    "lines": 12
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 56,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#deleteRole(long)",
+    "lines": 13
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 70,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#getRolePermissions(long)",
+    "lines": 10
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 81,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#updateRolePermissions(long,java.util.List<com.minierp.backend.domain.permission.dto.RoleRequests.Permission>)",
+    "lines": 16
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 98,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#permissionMenus()",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 106,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#validatePermissions(java.util.Map<java.lang.String,java.util.Map<java.lang.String,java.lang.Object>>,java.util.List<com.minierp.backend.domain.permission.dto.RoleRequests.Permission>)",
+    "lines": 18
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 125,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#getRoleMembers(long,int,int)",
+    "lines": 8
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 134,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#createRoleMembers(long,java.util.List<java.lang.Long>)",
+    "lines": 11
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "line": 146,
+    "method": "com.minierp.backend.domain.permission.service.RoleService#deleteRoleMember(long,long)",
+    "lines": 16
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/AuthController.java",
+    "line": 36,
+    "method": "com.minierp.backend.domain.user.controller.AuthController#setupPassword(@jakarta.validation.Valid com.minierp.backend.domain.user.controller.AuthController.SetupRequest)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/AuthController.java",
+    "line": 42,
+    "method": "com.minierp.backend.domain.user.controller.AuthController#login(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.LoginRequestDto)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/AuthController.java",
+    "line": 48,
+    "method": "com.minierp.backend.domain.user.controller.AuthController#findId(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.FindIdRequestDto)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/AuthController.java",
+    "line": 54,
+    "method": "com.minierp.backend.domain.user.controller.AuthController#requestPasswordReset(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.PasswordResetRequestDto)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/AuthController.java",
+    "line": 61,
+    "method": "com.minierp.backend.domain.user.controller.AuthController#verifyPasswordReset(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.PasswordResetVerifyDto)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/AuthController.java",
+    "line": 68,
+    "method": "com.minierp.backend.domain.user.controller.AuthController#confirmPasswordReset(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.PasswordResetConfirmDto)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/MeController.java",
+    "line": 28,
+    "method": "com.minierp.backend.domain.user.controller.MeController#getMe()",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/MeController.java",
+    "line": 35,
+    "method": "com.minierp.backend.domain.user.controller.MeController#getPermissions()",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/MeController.java",
+    "line": 43,
+    "method": "com.minierp.backend.domain.user.controller.MeController#updatePassword(@jakarta.validation.Valid com.minierp.backend.domain.user.controller.MeController.PasswordChange)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 28,
+    "method": "com.minierp.backend.domain.user.controller.UserController#getEmployees(java.lang.String,java.lang.Long,boolean,java.lang.String,int,int,java.lang.String)",
+    "lines": 13
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 42,
+    "method": "com.minierp.backend.domain.user.controller.UserController#getUserLookup(java.lang.String,java.lang.Long,int)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 50,
+    "method": "com.minierp.backend.domain.user.controller.UserController#getLoginIdPreview(java.time.LocalDate)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 56,
+    "method": "com.minierp.backend.domain.user.controller.UserController#getEmployee(long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 61,
+    "method": "com.minierp.backend.domain.user.controller.UserController#createEmployee(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.EmployeeRequests.Create)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 68,
+    "method": "com.minierp.backend.domain.user.controller.UserController#updateEmployee(long,@jakarta.validation.Valid com.minierp.backend.domain.user.dto.EmployeeRequests.Patch)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 76,
+    "method": "com.minierp.backend.domain.user.controller.UserController#updateEmployeeStatus(long,@jakarta.validation.Valid com.minierp.backend.domain.user.dto.EmployeeRequests.Status)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 84,
+    "method": "com.minierp.backend.domain.user.controller.UserController#updateEmployeeRoles(long,@jakarta.validation.Valid com.minierp.backend.domain.user.dto.EmployeeRequests.Roles)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "line": 91,
+    "method": "com.minierp.backend.domain.user.controller.UserController#createInvitation(long)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/EmployeeDetailResponseDto.java",
+    "line": 30,
+    "method": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Department#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/EmployeeDetailResponseDto.java",
+    "line": 36,
+    "method": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Role#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/EmployeeLookupResponseDto.java",
+    "line": 7,
+    "method": "com.minierp.backend.domain.user.dto.EmployeeLookupResponseDto#from(java.util.Map<java.lang.String,java.lang.Object>)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/FindIdResponseDto.java",
+    "line": 12,
+    "method": "com.minierp.backend.domain.user.dto.FindIdResponseDto#of(java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/LoginResponseDto.java",
+    "line": 15,
+    "method": "com.minierp.backend.domain.user.dto.LoginResponseDto#of(java.lang.String,long,com.minierp.backend.domain.user.dto.UserResponseDto,boolean)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/PasswordResetConfirmResponseDto.java",
+    "line": 11,
+    "method": "com.minierp.backend.domain.user.dto.PasswordResetConfirmResponseDto#success()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/PasswordResetRequestResponseDto.java",
+    "line": 11,
+    "method": "com.minierp.backend.domain.user.dto.PasswordResetRequestResponseDto#success()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/PasswordResetVerifyResponseDto.java",
+    "line": 12,
+    "method": "com.minierp.backend.domain.user.dto.PasswordResetVerifyResponseDto#of(java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/RegistrationResult.java",
+    "line": 15,
+    "method": "com.minierp.backend.domain.user.dto.RegistrationResult#invitationDelivered()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/UserListResponseDto.java",
+    "line": 14,
+    "method": "com.minierp.backend.domain.user.dto.UserListResponseDto#of(org.springframework.data.domain.Page<com.minierp.backend.domain.user.dto.UserResponseDto>)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/UserResponseDto.java",
+    "line": 35,
+    "method": "com.minierp.backend.domain.user.dto.UserResponseDto#summary(com.minierp.backend.domain.user.entity.User)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/UserResponseDto.java",
+    "line": 42,
+    "method": "com.minierp.backend.domain.user.dto.UserResponseDto#detail(com.minierp.backend.domain.user.entity.User)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/UserResponseDto.java",
+    "line": 50,
+    "method": "com.minierp.backend.domain.user.dto.UserResponseDto#from(com.minierp.backend.domain.user.entity.User)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/UserResponseDto.java",
+    "line": 54,
+    "method": "com.minierp.backend.domain.user.dto.UserResponseDto#getDepartmentName(java.lang.String)",
+    "lines": 10
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/dto/UserRoleUpdateResponseDto.java",
+    "line": 15,
+    "method": "com.minierp.backend.domain.user.dto.UserRoleUpdateResponseDto#from(com.minierp.backend.domain.user.entity.User)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/DepartmentCode.java",
+    "line": 14,
+    "method": "com.minierp.backend.domain.user.entity.DepartmentCode#fromCode(java.lang.String)",
+    "lines": 12
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 110,
+    "method": "com.minierp.backend.domain.user.entity.User#create(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)",
+    "lines": 9
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 120,
+    "method": "com.minierp.backend.domain.user.entity.User#createInitialAdmin(java.lang.String,java.lang.String,java.lang.String,java.lang.String)",
+    "lines": 12
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 133,
+    "method": "com.minierp.backend.domain.user.entity.User#updateProfile(java.lang.String,java.lang.String,java.lang.String)",
+    "lines": 19
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 153,
+    "method": "com.minierp.backend.domain.user.entity.User#changeRole(com.minierp.backend.domain.user.entity.UserRole)",
+    "lines": 9
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 163,
+    "method": "com.minierp.backend.domain.user.entity.User#isActive()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 167,
+    "method": "com.minierp.backend.domain.user.entity.User#roleCodeList()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 171,
+    "method": "com.minierp.backend.domain.user.entity.User#passwordMatches(java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 175,
+    "method": "com.minierp.backend.domain.user.entity.User#updatePassword(java.lang.String)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 181,
+    "method": "com.minierp.backend.domain.user.entity.User#deductAnnualLeave(java.math.BigDecimal)",
+    "lines": 10
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/User.java",
+    "line": 192,
+    "method": "com.minierp.backend.domain.user.entity.User#resolveInitialAnnualLeave(java.lang.String)",
+    "lines": 14
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/UserRole.java",
+    "line": 13,
+    "method": "com.minierp.backend.domain.user.entity.UserRole#isTopManager()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/UserRole.java",
+    "line": 17,
+    "method": "com.minierp.backend.domain.user.entity.UserRole#isTeamLeader()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/UserRole.java",
+    "line": 21,
+    "method": "com.minierp.backend.domain.user.entity.UserRole#isGeneralUser()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/entity/UserRole.java",
+    "line": 25,
+    "method": "com.minierp.backend.domain.user.entity.UserRole#from(java.lang.String)",
+    "lines": 12
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 15,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findUser(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 19,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#countPrivilegedRoles(long)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 25,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findEmployeeViews(java.util.List<java.lang.Long>)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 33,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findEmployeeRoles(java.util.List<java.lang.Long>)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 39,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findDepartment(java.lang.Long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 43,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findLoginSequence(int)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 47,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findRolesByCodes(java.util.Set<java.lang.String>)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 51,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findPositionName(java.lang.Long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 55,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#countEmail(java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 59,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findPosition(java.lang.Long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 63,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#sortColumns()",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 68,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#orderBy(java.util.Map<java.lang.String,java.lang.String>,java.lang.String[])",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+    "line": 72,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeQueries#findActiveUsers(int,java.lang.String,java.lang.Long)",
+    "lines": 15
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeRepository.java",
+    "line": 17,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeRepository#search(com.minierp.backend.global.permission.ScopeFilter,java.lang.String,java.util.List<java.lang.Long>,java.lang.String,int,int,java.lang.String)",
+    "lines": 38
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 16,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#lockChief()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 20,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#lockActiveChiefs()",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 26,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#lockHeadDepartments(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 30,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#insertLoginSequence(int)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 36,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#lockLoginSequence(int)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 41,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#updateLoginSequence(int,long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 46,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#insertEmployee(java.lang.String,java.lang.String,java.lang.String,java.lang.Long,java.lang.Long,java.time.LocalDate,java.time.LocalDateTime)",
+    "lines": 16
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 63,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#insertUserRole(long,long)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 68,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#lockUser(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 72,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#updateEmployee(long,java.lang.String,java.lang.String,java.lang.Long,java.lang.Long,java.time.LocalDate,java.time.LocalDateTime)",
+    "lines": 13
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 86,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#updateStatus(long,java.lang.String,java.time.LocalDate,int,java.time.LocalDateTime)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 92,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#deleteUserRoles(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+    "line": 96,
+    "method": "com.minierp.backend.domain.user.repository.EmployeeStore#insertAssignedRole(long,long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/UserRepository.java",
+    "line": 11,
+    "method": "com.minierp.backend.domain.user.repository.UserRepository#findByIdForUpdate(java.lang.Long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/UserRepository.java",
+    "line": 14,
+    "method": "com.minierp.backend.domain.user.repository.UserRepository#existsByUserRole(com.minierp.backend.domain.user.entity.UserRole)",
+    "lines": 1
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/UserRepository.java",
+    "line": 15,
+    "method": "com.minierp.backend.domain.user.repository.UserRepository#existsByLoginId(java.lang.String)",
+    "lines": 1
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/UserRepository.java",
+    "line": 16,
+    "method": "com.minierp.backend.domain.user.repository.UserRepository#existsByUserEmail(java.lang.String)",
+    "lines": 1
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/UserRepository.java",
+    "line": 17,
+    "method": "com.minierp.backend.domain.user.repository.UserRepository#findByLoginId(java.lang.String)",
+    "lines": 1
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/UserRepository.java",
+    "line": 18,
+    "method": "com.minierp.backend.domain.user.repository.UserRepository#findByUserEmail(java.lang.String)",
+    "lines": 1
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/UserRepository.java",
+    "line": 19,
+    "method": "com.minierp.backend.domain.user.repository.UserRepository#findByUserRole(com.minierp.backend.domain.user.entity.UserRole)",
+    "lines": 1
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/AuthService.java",
+    "line": 37,
+    "method": "com.minierp.backend.domain.user.service.AuthService#login(com.minierp.backend.domain.user.dto.LoginRequestDto)",
+    "lines": 14
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/AuthService.java",
+    "line": 52,
+    "method": "com.minierp.backend.domain.user.service.AuthService#findId(com.minierp.backend.domain.user.dto.FindIdRequestDto)",
+    "lines": 7
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/AuthService.java",
+    "line": 60,
+    "method": "com.minierp.backend.domain.user.service.AuthService#requestPasswordReset(com.minierp.backend.domain.user.dto.PasswordResetRequestDto)",
+    "lines": 14
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/AuthService.java",
+    "line": 75,
+    "method": "com.minierp.backend.domain.user.service.AuthService#verifyPasswordReset(com.minierp.backend.domain.user.dto.PasswordResetVerifyDto)",
+    "lines": 16
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/AuthService.java",
+    "line": 92,
+    "method": "com.minierp.backend.domain.user.service.AuthService#confirmPasswordReset(com.minierp.backend.domain.user.dto.PasswordResetConfirmDto)",
+    "lines": 21
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/AuthService.java",
+    "line": 114,
+    "method": "com.minierp.backend.domain.user.service.AuthService#generateVerificationCode()",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/AuthService.java",
+    "line": 119,
+    "method": "com.minierp.backend.domain.user.service.AuthService#validatePasswordPolicy(java.lang.String)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/AuthService.java",
+    "line": 123,
+    "method": "com.minierp.backend.domain.user.service.AuthService#changePassword(java.lang.Long,java.lang.String,java.lang.String)",
+    "lines": 17
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 40,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#raw(long)",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 44,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#lockChief()",
+    "lines": 3
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 48,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#protectLastChief(long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 55,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#notHead(long)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 61,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#requireRoleUpdateForPrivilegedTarget(long)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 67,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#getEmployeeViews(java.util.List<java.lang.Long>)",
+    "lines": 18
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 86,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#employeeView(java.util.Map<java.lang.String,java.lang.Object>,long,java.util.List<com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Role>)",
+    "lines": 15
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 102,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#legacyRole(java.util.List<com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Role>)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 108,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#legacyDepartmentCode(java.lang.String)",
+    "lines": 8
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 117,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#page(java.util.List<?>,int,int,long)",
+    "lines": 6
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 124,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#getEmployees(java.lang.String,java.lang.Long,boolean,java.lang.String,int,int,java.lang.String)",
+    "lines": 39
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 164,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#getEmployee(long)",
+    "lines": 8
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 173,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#getLoginIdPreview(java.time.LocalDate)",
+    "lines": 5
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 179,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#roleIds(java.util.List<java.lang.String>)",
+    "lines": 11
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 191,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#register(com.minierp.backend.domain.user.dto.EmployeeRequests.Create)",
+    "lines": 31
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 223,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#patch(long,com.minierp.backend.domain.user.dto.EmployeeRequests.Patch)",
+    "lines": 35
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 259,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#status(long,com.minierp.backend.domain.user.entity.UserStatus)",
+    "lines": 19
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 279,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#updateEmployeeRoles(long,java.util.List<java.lang.String>)",
+    "lines": 13
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "line": 293,
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#invitation(long)",
+    "lines": 12
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/InitialAdminInitializer.java",
+    "line": 25,
+    "method": "com.minierp.backend.domain.user.service.InitialAdminInitializer#run(org.springframework.boot.ApplicationArguments)",
+    "lines": 30
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/InvitationService.java",
+    "line": 29,
+    "method": "com.minierp.backend.domain.user.service.InvitationService#send(com.minierp.backend.domain.user.service.EmployeeService.InvitationRequested)",
+    "lines": 26
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/InvitationService.java",
+    "line": 56,
+    "method": "com.minierp.backend.domain.user.service.InvitationService#revokeChangedEmail(com.minierp.backend.domain.user.service.EmployeeService.InvitationEmailChanged)",
+    "lines": 4
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/InvitationService.java",
+    "line": 61,
+    "method": "com.minierp.backend.domain.user.service.InvitationService#setup(java.lang.String,java.lang.String)",
+    "lines": 14
+  },
+  {
+    "file": "backend/src/main/java/com/minierp/backend/domain/user/service/UserLookupService.java",
+    "line": 16,
+    "method": "com.minierp.backend.domain.user.service.UserLookupService#getUsers(java.lang.String,java.lang.Long,int)",
+    "lines": 12
+  }
+]

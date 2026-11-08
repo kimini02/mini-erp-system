@@ -1,0 +1,104 @@
+[
+  {
+    "method": "com.minierp.backend.domain.org.service.OrgService#tree()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Head"
+  },
+  {
+    "method": "com.minierp.backend.domain.org.service.OrgService#tree()",
+    "index": 1,
+    "record": "com.minierp.backend.domain.org.dto.OrgDepartmentTreeResponseDto",
+    "nested": {
+      "head": {
+        "method": "com.minierp.backend.domain.org.service.OrgService#tree()",
+        "index": 0,
+        "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Head"
+      }
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.org.service.OrgService#detail(long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Path"
+  },
+  {
+    "method": "com.minierp.backend.domain.org.service.OrgService#detail(long)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto",
+    "nested": {
+      "path": {
+        "method": "com.minierp.backend.domain.org.service.OrgService#detail(long)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Path"
+      },
+      "head": {
+        "method": "com.minierp.backend.domain.org.service.OrgService#tree()",
+        "index": 0,
+        "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Head"
+      },
+      "fallbackHead": {
+        "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findHead",
+        "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.FallbackHead"
+      },
+      "workSchedule": {
+        "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findSchedule",
+        "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.WorkSchedule",
+        "append": [
+          "useDefault"
+        ],
+        "reason": "OrgService.detail adds useDefault after schedule query; defaultSchedule leaves it absent."
+      }
+    }
+  },
+  {
+    "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findHead",
+    "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.Head",
+    "omit": [
+      "departmentName"
+    ],
+    "reason": "Original detail removes departmentName from its own head only."
+  },
+  {
+    "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findHead",
+    "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.FallbackHead"
+  },
+  {
+    "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findSchedule",
+    "record": "com.minierp.backend.domain.org.dto.OrgDepartmentResponseDto.WorkSchedule",
+    "append": [
+      "useDefault"
+    ],
+    "reason": "OrgService.detail adds useDefault after schedule query; defaultSchedule leaves it absent."
+  },
+  {
+    "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findSchedule",
+    "record": "com.minierp.backend.domain.org.dto.OrgWorkScheduleResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findPositions",
+    "record": "com.minierp.backend.domain.org.dto.OrgPositionResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.org.service.OrgService#createPosition(java.lang.String)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.org.dto.OrgPositionCreateResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.org.service.OrgService#renamePosition(long,java.lang.String)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.org.dto.OrgPositionUpdateResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.org.service.OrgService#createHoliday(com.minierp.backend.domain.org.dto.OrgRequests.HolidayCreate)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.org.dto.OrgHolidayResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findHolidays",
+    "record": "com.minierp.backend.domain.org.dto.OrgHolidayResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.org.repository.OrgQueries#findHoliday",
+    "record": "com.minierp.backend.domain.org.dto.OrgHolidayResponseDto"
+  }
+]

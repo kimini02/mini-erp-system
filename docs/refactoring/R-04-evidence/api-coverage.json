@@ -1,0 +1,358 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/v1/departments/tree",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#tree()",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/departments/{id}",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#department(long)",
+    "successSnapshots": 1,
+    "alwaysNull": [
+      "$.data.head"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/departments",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#create(@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.DepartmentCreate)",
+    "successSnapshots": 15,
+    "alwaysNull": [
+      "$.data.fallbackHead",
+      "$.data.head"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/departments/{id}",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#patch(long,@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.DepartmentPatch)",
+    "successSnapshots": 1,
+    "alwaysNull": [
+      "$.data.head"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/departments/{id}/parent",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#move(long,com.minierp.backend.domain.org.dto.OrgRequests.Parent)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/departments/{id}/head",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#head(long,@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.Head)",
+    "successSnapshots": 2,
+    "alwaysNull": [
+      "$.data.fallbackHead"
+    ]
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/departments/{id}/head",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#clearHead(long)",
+    "successSnapshots": 1,
+    "alwaysNull": [
+      "$.data.fallbackHead",
+      "$.data.head"
+    ]
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/departments/{id}/work-schedule",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#schedule(long,com.minierp.backend.domain.org.dto.OrgRequests.Schedule)",
+    "successSnapshots": 2,
+    "alwaysNull": [
+      "$.data.head"
+    ]
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/departments/{id}",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#deleteDepartment(long)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/work-schedules/default",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#schedule()",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/work-schedules/default",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#schedule(com.minierp.backend.domain.org.dto.OrgRequests.Schedule)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/positions",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#positions()",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/positions",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#position(@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.PositionName)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/positions/{id}",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#position(long,@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.PositionName)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/positions/order",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#order(@jakarta.validation.Valid java.util.List<@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.PositionOrder>)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/positions/{id}",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#deletePosition(long)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/holidays",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#holidays(int)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/holidays",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#holiday(@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.HolidayCreate)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/holidays/{id}",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#holiday(long,@jakarta.validation.Valid com.minierp.backend.domain.org.dto.OrgRequests.HolidayPatch)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/holidays/{id}",
+    "owner": "com.minierp.backend.domain.org.controller.OrgController#deleteHoliday(long)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/menus",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#menus()",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/roles",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#roles()",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/roles",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#create(@jakarta.validation.Valid com.minierp.backend.domain.permission.dto.RoleRequests.Create)",
+    "successSnapshots": 3,
+    "alwaysNull": [
+      "$.data.description"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/roles/{id}",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#patch(long,@jakarta.validation.Valid com.minierp.backend.domain.permission.dto.RoleRequests.Patch)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/roles/{id}",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#delete(long)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/roles/{id}/permissions",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#permissions(long)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/roles/{id}/permissions",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#permissions(long,@jakarta.validation.Valid java.util.List<@jakarta.validation.Valid com.minierp.backend.domain.permission.dto.RoleRequests.Permission>)",
+    "successSnapshots": 2,
+    "alwaysNull": [
+      "$.data.role.description"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/roles/{id}/members",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#members(long,int,int)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/roles/{id}/members",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#members(long,@jakarta.validation.Valid com.minierp.backend.domain.permission.dto.RoleRequests.Members)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/roles/{id}/members/{userId}",
+    "owner": "com.minierp.backend.domain.permission.controller.RoleController#member(long,long)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/password/setup",
+    "owner": "com.minierp.backend.domain.user.controller.AuthController#setup(@jakarta.validation.Valid com.minierp.backend.domain.user.controller.AuthController.SetupRequest)",
+    "successSnapshots": 6,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/login",
+    "owner": "com.minierp.backend.domain.user.controller.AuthController#login(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.LoginRequestDto)",
+    "successSnapshots": 149,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/find-id/request",
+    "owner": "com.minierp.backend.domain.user.controller.AuthController#findId(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.FindIdRequestDto)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/password/reset/request",
+    "owner": "com.minierp.backend.domain.user.controller.AuthController#requestPasswordReset(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.PasswordResetRequestDto)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/password/reset/verify",
+    "owner": "com.minierp.backend.domain.user.controller.AuthController#verifyPasswordReset(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.PasswordResetVerifyDto)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/password/reset/confirm",
+    "owner": "com.minierp.backend.domain.user.controller.AuthController#confirmPasswordReset(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.PasswordResetConfirmDto)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/me",
+    "owner": "com.minierp.backend.domain.user.controller.MeController#me()",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/me/permissions",
+    "owner": "com.minierp.backend.domain.user.controller.MeController#permissions()",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/me/password",
+    "owner": "com.minierp.backend.domain.user.controller.MeController#password(@jakarta.validation.Valid com.minierp.backend.domain.user.controller.MeController.PasswordChange)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/users",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#list(java.lang.String,java.lang.Long,boolean,java.lang.String,int,int,java.lang.String)",
+    "successSnapshots": 7,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/users/lookup",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#lookup(java.lang.String,java.lang.Long,int)",
+    "successSnapshots": 4,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/users/login-id-preview",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#preview(java.time.LocalDate)",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/users/{id}",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#detail(long)",
+    "successSnapshots": 8,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#create(@jakarta.validation.Valid com.minierp.backend.domain.user.dto.EmployeeRequests.Create)",
+    "successSnapshots": 4,
+    "alwaysNull": []
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/users/{id}",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#patch(long,@jakarta.validation.Valid com.minierp.backend.domain.user.dto.EmployeeRequests.Patch)",
+    "successSnapshots": 12,
+    "alwaysNull": [
+      "$.data.retiredDate"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/users/{id}/status",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#status(long,@jakarta.validation.Valid com.minierp.backend.domain.user.dto.EmployeeRequests.Status)",
+    "successSnapshots": 7,
+    "alwaysNull": []
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/users/{id}/roles",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#roles(long,@jakarta.validation.Valid com.minierp.backend.domain.user.dto.EmployeeRequests.Roles)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/{id}/invitation",
+    "owner": "com.minierp.backend.domain.user.controller.UserController#invitation(long)",
+    "successSnapshots": 0,
+    "alwaysNull": []
+  }
+]

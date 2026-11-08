@@ -1,0 +1,59 @@
+[
+  {
+    "sql": "com.minierp.backend.domain.permission.repository.RoleQueries#findMenus",
+    "record": "com.minierp.backend.domain.permission.dto.RoleMenuResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.permission.repository.RoleQueries#findRoles",
+    "record": "com.minierp.backend.domain.permission.dto.RoleSummaryResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.permission.repository.RoleQueries#findRole",
+    "record": "com.minierp.backend.domain.permission.dto.RoleDetailResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.permission.repository.RoleQueries#findRole",
+    "record": "com.minierp.backend.domain.permission.dto.RolePermissionsResponseDto.LockedRole",
+    "append": [
+      "locked"
+    ],
+    "reason": "RoleService.permissions adds locked to role before reading permission rows."
+  },
+  {
+    "method": "com.minierp.backend.domain.permission.service.RoleService#permissions(long)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.permission.dto.RolePermissionsResponseDto.Permission"
+  },
+  {
+    "method": "com.minierp.backend.domain.permission.service.RoleService#permissions(long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.permission.dto.RolePermissionsResponseDto",
+    "nested": {
+      "role": {
+        "sql": "com.minierp.backend.domain.permission.repository.RoleQueries#findRole",
+        "record": "com.minierp.backend.domain.permission.dto.RolePermissionsResponseDto.LockedRole",
+        "append": [
+          "locked"
+        ],
+        "reason": "RoleService.permissions adds locked to role before reading permission rows."
+      },
+      "permissions": {
+        "method": "com.minierp.backend.domain.permission.service.RoleService#permissions(long)",
+        "index": 1,
+        "record": "com.minierp.backend.domain.permission.dto.RolePermissionsResponseDto.Permission"
+      }
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#page(java.util.List<?>,int,int,long)",
+    "index": 0,
+    "record": "com.minierp.backend.global.response.PageResponseDto",
+    "nested": {
+      "page": {
+        "method": "com.minierp.backend.domain.user.service.EmployeeService#page(java.util.List<?>,int,int,long)",
+        "index": 1,
+        "record": "com.minierp.backend.global.response.PageResponseDto.Page"
+      }
+    }
+  }
+]

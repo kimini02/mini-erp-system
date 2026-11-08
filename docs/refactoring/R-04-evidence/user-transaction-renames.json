@@ -1,0 +1,10 @@
+{
+  "com.minierp.backend.domain.org.service.OrgService#patchDepartment(long,DepartmentPatch)": "com.minierp.backend.domain.org.service.OrgService#updateDepartment(long,DepartmentPatch)",
+  "com.minierp.backend.domain.org.service.OrgService#move(long,Long)": "com.minierp.backend.domain.org.service.OrgService#updateDepartmentParent(long,Long)",
+  "com.minierp.backend.domain.org.service.OrgService#defaultSchedule(Schedule)": "com.minierp.backend.domain.org.service.OrgService#updateDefaultWorkSchedule(Schedule)",
+  "com.minierp.backend.domain.org.service.OrgService#departmentSchedule(long,Schedule)": "com.minierp.backend.domain.org.service.OrgService#updateDepartmentSchedule(long,Schedule)",
+  "com.minierp.backend.domain.org.service.OrgService#renamePosition(long,String)": "com.minierp.backend.domain.org.service.OrgService#updatePosition(long,String)",
+  "com.minierp.backend.domain.org.service.OrgService#orderPositions(List<PositionOrder>)": "com.minierp.backend.domain.org.service.OrgService#updatePositionOrder(List<PositionOrder>)",
+  "com.minierp.backend.domain.org.service.OrgService#patchHoliday(long,HolidayPatch)": "com.minierp.backend.domain.org.service.OrgService#updateHoliday(long,HolidayPatch)",
+  "com.minierp.backend.domain.user.service.EmployeeService#replaceRoles(long,List<String>)": "com.minierp.backend.domain.user.service.EmployeeService#updateEmployeeRoles(long,List<String>)"
+}
