@@ -29,12 +29,12 @@ public class InboxRepository {
         };
     }
 
-    public String selectionSql(String box, String formCode, String q) {
+    public String selectionSql(String box, String formCode, String query) {
         String where = condition(box);
         if (formCode != null && !formCode.isBlank()) {
             where += " AND f.code=:form";
         }
-        if (q != null && !q.isBlank()) {
+        if (query != null && !query.isBlank()) {
             where += " AND (d.title LIKE :q ESCAPE '!' OR d.doc_no LIKE :q ESCAPE '!')";
         }
         return
@@ -42,20 +42,20 @@ public class InboxRepository {
                 + where;
     }
 
-    public String pageSql(String box, String formCode, String q) {
+    public String pageSql(String box, String formCode, String query) {
         return
                 "SELECT d.id,d.doc_no,d.title,d.status,d.submitted_at,d.updated_at,f.code,u.user_name,p.name AS position_name,dep.name AS department_name"
-                + selectionSql(box, formCode, q) + " ORDER BY "
+                + selectionSql(box, formCode, query) + " ORDER BY "
                 + (box.equals("drafts") ? "d.updated_at" : "d.submitted_at")
                 + " DESC,d.id DESC LIMIT :size OFFSET :offset";
     }
 
-    public Map<String, Object> search(long actor, String box, String formCode, String q, int page, int size) {
+    public Map<String, Object> search(long actor, String box, String formCode, String query, int page, int size) {
         var args = map("actor", actor, "form", formCode,
-                "q", q == null ? null : "%" + q.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%",
+                "q", query == null ? null : "%" + query.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%",
                 "size", size, "offset", (long) page * size);
-        long total = db.count("SELECT COUNT(*)" + selectionSql(box, formCode, q), args);
-        var documents = db.rows(pageSql(box, formCode, q), args);
+        long total = db.count("SELECT COUNT(*)" + selectionSql(box, formCode, query), args);
+        var documents = db.rows(pageSql(box, formCode, query), args);
         if (documents.isEmpty()) {
             return map("total", total, "content", documents, "lines", Map.of());
         }
