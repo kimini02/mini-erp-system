@@ -13,7 +13,7 @@ import static com.minierp.backend.global.persistence.SqlStore.map;
 public class AttendanceFixStore {
     private final SqlStore db;
 
-    public int updateBody(long id, LocalDate date, LocalTime in, LocalTime out, String reason) {
+    public int upsertBody(long id, LocalDate date, LocalTime in, LocalTime out, String reason) {
         return db.update("""
           INSERT INTO attendance_fix_requests(document_id,work_date,clock_in,clock_out,reason) VALUES(:id,:date,:in,:out,:reason)
           ON DUPLICATE KEY UPDATE work_date=VALUES(work_date),clock_in=VALUES(clock_in),clock_out=VALUES(clock_out),reason=VALUES(reason),before_json=NULL
@@ -26,7 +26,7 @@ public class AttendanceFixStore {
                 ErrorCode.DOCUMENT_NOT_FOUND);
     }
 
-    public int insertBodyCopy(long id, long target) {
+    public int copyBody(long id, long target) {
         return db.update(
                 "INSERT INTO attendance_fix_requests(document_id,work_date,clock_in,clock_out,reason) SELECT :target,work_date,clock_in,clock_out,reason FROM attendance_fix_requests WHERE document_id=:id",
                 map("id", id, "target", target));

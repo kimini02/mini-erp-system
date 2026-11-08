@@ -1,11 +1,9 @@
 package com.minierp.backend.domain.notification.repository;
 
 import com.minierp.backend.global.persistence.SqlStore;
-import com.minierp.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.time.*;
-import java.util.*;
 import static com.minierp.backend.global.persistence.SqlStore.map;
 
 @Repository

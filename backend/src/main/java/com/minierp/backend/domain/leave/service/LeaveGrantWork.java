@@ -2,7 +2,6 @@ package com.minierp.backend.domain.leave.service;
 
 import com.minierp.backend.domain.leave.repository.LeaveQueries;
 import com.minierp.backend.domain.leave.repository.LeaveStore;
-import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;

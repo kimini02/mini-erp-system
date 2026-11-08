@@ -10,7 +10,6 @@ import com.minierp.backend.domain.user.dto.PasswordResetRequestDto;
 import com.minierp.backend.domain.user.dto.PasswordResetRequestResponseDto;
 import com.minierp.backend.domain.user.dto.PasswordResetVerifyDto;
 import com.minierp.backend.domain.user.dto.PasswordResetVerifyResponseDto;
-import com.minierp.backend.domain.user.dto.SignupRequestDto;
 import com.minierp.backend.domain.user.dto.UserResponseDto;
 import com.minierp.backend.domain.user.entity.User;
 import com.minierp.backend.domain.user.repository.UserRepository;

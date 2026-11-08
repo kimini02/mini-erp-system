@@ -1,7 +1,6 @@
 package com.minierp.backend.domain.task.repository;
 
 import com.minierp.backend.global.persistence.SqlStore;
-import com.minierp.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.time.*;

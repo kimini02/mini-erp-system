@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;
 import java.time.*;
-import static com.minierp.backend.global.persistence.SqlStore.map;
 
 @Service
 @RequiredArgsConstructor

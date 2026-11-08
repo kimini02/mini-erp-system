@@ -64,9 +64,9 @@ public class ProjectQueries {
             ScopeFilter scope,
             long actor,
             String status,
-            String q) {
+            String pattern) {
         var args = parameters(today, offset, size);
-        String where = where(args, scope, actor, status, q);
+        String where = where(args, scope, actor, status, pattern);
         return db.count("SELECT COUNT(*) FROM projects p LEFT JOIN users u ON u.id=p.leader_id WHERE " + where, args);
     }
 
@@ -77,9 +77,9 @@ public class ProjectQueries {
             ScopeFilter scope,
             long actor,
             String status,
-            String q) {
+            String pattern) {
         var args = parameters(today, offset, size);
-        String where = where(args, scope, actor, status, q);
+        String where = where(args, scope, actor, status, pattern);
         return db.rows(ProjectSummaryQuery.sql(where, true), args);
     }
 
@@ -101,15 +101,15 @@ public class ProjectQueries {
         return map("today", today, "offset", offset, "size", size);
     }
 
-    private String where(Map<String, Object> args, ScopeFilter scope, long actor, String status, String q) {
+    private String where(Map<String, Object> args, ScopeFilter scope, long actor, String status, String pattern) {
         String where = visibility(args, scope, actor);
         if (status != null) {
             where += " AND p.status=:status";
             args.put("status", status);
         }
-        if (q != null) {
+        if (pattern != null) {
             where += " AND (p.title LIKE :q ESCAPE '!' OR p.project_key LIKE :q ESCAPE '!')";
-            args.put("q", q);
+            args.put("q", pattern);
         }
         return where;
     }

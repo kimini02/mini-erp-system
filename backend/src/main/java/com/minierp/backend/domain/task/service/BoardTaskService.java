@@ -233,7 +233,7 @@ public class BoardTaskService {
         for (int attempt = 0; attempt < 2; attempt++) {
             long lower = 0;
             if (append) {
-                lower = queries.countMaxPosition(project, status, moving);
+                lower = queries.findMaxPosition(project, status, moving);
             } else if (after != null) {
                 lower = number(queries.findPredecessorPosition(after), "position");
             }

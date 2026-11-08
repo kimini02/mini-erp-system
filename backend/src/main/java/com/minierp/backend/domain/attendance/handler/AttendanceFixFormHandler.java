@@ -55,7 +55,7 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
 
     public void saveBody(ApprovalDocument d, JsonNode b) {
         checkFormat(b);
-        store.updateBody(d.id(), BodyValues.date(b, "workDate"), optionalTime(b, "clockIn"),
+        store.upsertBody(d.id(), BodyValues.date(b, "workDate"), optionalTime(b, "clockIn"),
                 optionalTime(b, "clockOut"), b.path("reason").textValue());
     }
 
@@ -82,7 +82,7 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
     }
 
     public void copyBody(long id, ApprovalDocument target) {
-        store.insertBodyCopy(id, target.id());
+        store.copyBody(id, target.id());
     }
 
     public void deleteBody(long id) {

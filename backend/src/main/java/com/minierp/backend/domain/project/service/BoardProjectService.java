@@ -1,6 +1,5 @@
 package com.minierp.backend.domain.project.service;
 
-import com.minierp.backend.domain.project.repository.ProjectSummaryQuery;
 import com.minierp.backend.domain.project.dto.BoardProjectRequests.*;
 import com.minierp.backend.domain.project.entity.ProjectStatus;
 import com.minierp.backend.domain.user.service.EmployeeService;

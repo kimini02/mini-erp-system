@@ -1010,7 +1010,7 @@ ternary_layout: 1개
 
 ## 묶음 2 리뷰 보완
 
-시작은 `64b5555`이며 develop 병합은 하지 않았다. 준비 보완 `5584474`에서 DocumentQueries·FormQueries·LeaveQueries의 닫는 줄 4곳을 복원하고, LeaveAdminService/LeaveQueries의 `prefix`를 `pattern`, LeaveQueryService의 `filter`를 `entryType`으로 바꿨다. 값 이름이 달라진 기존 7곳은 그대로 뒀다. 닫는 줄 검사: 원본 64b5555 **4건 → 준비 후보 0건**.
+시작은 `64b5555`이며 당시에는 develop 병합을 하지 않았다. 이후 `3fb2902`에서 명세 17 8차를 병합했고, `632449c`에서 9차를 먼저 병합했다. 이어진 이 리뷰 보완 커밋에서 미사용 import 13곳(리뷰 목록 8곳과 추가 발견 5곳)과 쿼리 메서드·매개변수 이름을 정리했다. 이 보완 커밋을 4단계 시작 기준으로 삼으며 해시는 R-04 보고서에 기록한다. 준비 보완 `5584474`에서 DocumentQueries·FormQueries·LeaveQueries의 닫는 줄 4곳을 복원하고, LeaveAdminService/LeaveQueries의 `prefix`를 `pattern`, LeaveQueryService의 `filter`를 `entryType`으로 바꿨다. 값 이름이 달라진 기존 7곳은 그대로 뒀다. 닫는 줄 검사: 원본 64b5555 **4건 → 준비 후보 0건**.
 
 기록 ON: **231/0/0/0**, 578.23초, `REFACTORING_COMPARE differences=0 sqlOrderChanges=12`. 순서 경고는 모두 기존 13개 목록 안이다. 준비에는 지시대로 OFF를 추가 실행하지 않았다. 문자열 집합 1,314개·@Transactional 83개·허용 목록·형식·호출 지점은 모두 통과했다.
 

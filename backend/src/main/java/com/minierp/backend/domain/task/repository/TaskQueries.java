@@ -77,7 +77,7 @@ public class TaskQueries {
                 map("p", p, "status", status, "after", after));
     }
 
-    public long countMaxPosition(long p, String status, long moving) {
+    public long findMaxPosition(long p, String status, long moving) {
         return db.count(
                 "SELECT COALESCE(MAX(position),0) FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving",
                 map("p", p, "status", status, "moving", moving));
