@@ -14,7 +14,6 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 public class AttendanceStore {
     private final SqlStore db;
     public record Schedule(LocalTime start, LocalTime end, int grace, String source, String department) {
-
     }
 
     public record Day(String type, String holiday, Map<String, Object> leave) {
@@ -127,9 +126,9 @@ public class AttendanceStore {
             LocalDateTime out,
             boolean finalized,
             LocalDateTime now) {
-        var scheduleRow = snapshot(row);
-        var judged = AttendanceRules.judge((LocalDate) row.get("work_date"), day, scheduleRow.start(),
-                scheduleRow.end(), scheduleRow.grace(), in, out, finalized);
+        var scheduleSnapshot = snapshot(row);
+        var judged = AttendanceRules.judge((LocalDate) row.get("work_date"), day, scheduleSnapshot.start(),
+                scheduleSnapshot.end(), scheduleSnapshot.grace(), in, out, finalized);
         // A repeated batch changes neither business values nor audit times when the verdict is identical.
         db.update("""
           UPDATE attendances SET clock_in_at=:in,clock_out_at=:out,day_type=:day,in_result=:inResult,out_result=:outResult,absent=:absent,judged_at=:now,updated_at=:now

@@ -301,5 +301,15 @@
   {
     "sql": "com.minierp.backend.domain.home.repository.HomeQueries#findDepartment",
     "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Department"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person"
   }
 ]

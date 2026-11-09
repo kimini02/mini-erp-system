@@ -25,8 +25,8 @@ public class TaskOverdueWork {
         int skipped = 0;
         // Same first lock as all board writes; id ordering prevents cross-project lock inversion.
         var projects = queries.findOverdueProjects(today);
-        for (var projectId : projects) {
-            long project = number(projectId, "project_id");
+        for (var projectRow : projects) {
+            long project = number(projectRow, "project_id");
             var locked = store.findLockedProject(project);
             if (locked.isEmpty()) {
                 continue;

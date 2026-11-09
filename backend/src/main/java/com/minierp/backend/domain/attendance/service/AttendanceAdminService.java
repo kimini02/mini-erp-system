@@ -103,10 +103,18 @@ public class AttendanceAdminService {
         }
 
         private void add(AttendanceRules.Result verdict, String type) {
-            if ("LATE".equals(verdict.inResult())) late++;
-            if ("EARLY".equals(verdict.outResult())) early++;
-            if (verdict.absent()) absent++;
-            if ("MISSING".equals(verdict.outResult())) missing++;
+            if ("LATE".equals(verdict.inResult())) {
+                late++;
+            }
+            if ("EARLY".equals(verdict.outResult())) {
+                early++;
+            }
+            if (verdict.absent()) {
+                absent++;
+            }
+            if ("MISSING".equals(verdict.outResult())) {
+                missing++;
+            }
             leaveDays += type.equals("LEAVE") ? 1 : type.startsWith("HALF_") ? .5 : 0;
         }
 
@@ -141,7 +149,7 @@ public class AttendanceAdminService {
                 day.leave() == null
                         ? null
                         : new AttendanceDocumentResponseDto(number(day.leave(), "documentId"),
-                        (String) day.leave().get("docNo")),
+                                (String) day.leave().get("docNo")),
                 row == null || row.get("fix_document_id") == null
                         ? null
                         : new AttendanceDocumentResponseDto(number(row, "fix_document_id"),

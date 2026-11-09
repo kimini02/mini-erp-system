@@ -1,0 +1,26 @@
+[
+  {
+    "scope": "TaskOverdueWork.run의 프로젝트 행 반복 변수",
+    "before": "projectId",
+    "after": "projectRow",
+    "kind": "local Map value"
+  },
+  {
+    "scope": "AttendanceStore.judge의 Schedule 지역 변수",
+    "before": "scheduleRow",
+    "after": "scheduleSnapshot",
+    "kind": "local Schedule value"
+  },
+  {
+    "scope": "AttendanceStore.schedule의 조회 행",
+    "before": "scheduleRow",
+    "after": "scheduleRow",
+    "kind": "unchanged Map value"
+  },
+  {
+    "scope": "HomeResponseDto.Todo.drafter, Todo.from 및 Mine.currentApprover, Mine.from",
+    "before": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "after": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "kind": "response type; id/name/title unchanged"
+  }
+]

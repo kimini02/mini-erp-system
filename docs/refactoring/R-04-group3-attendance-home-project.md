@@ -1,6 +1,6 @@
 # R-04 4단계 묶음 3 — 근태·홈·프로젝트 응답 정리
 
-4단계 마지막 묶음이다. 요청·응답·SQL·트랜잭션·CSV 동작을 보존하면서 응답 record, Java 이름, 순수 변환/집계 메서드를 정리했다. calendar는 이미 타입이 있고 catch 매개변수만 남아 변경하지 않았고, dashboard는 DTO만 있어 변경하지 않았다. 다음 단계·develop으로 병합·푸시는 하지 않았다.
+4단계 마지막 묶음이다. 최초 완료는 코드 3dbc348·보고서 4a9e59d 기준이며, 그 뒤의 P3 보완과 검증은 마지막 "리뷰 보완" 절에 구분했다. 요청·응답·SQL·트랜잭션·CSV 동작을 보존하면서 응답 record, Java 이름, 순수 변환/집계 메서드를 정리했다. calendar는 이미 타입이 있고 catch 매개변수만 남아 변경하지 않았고, dashboard는 DTO만 있어 변경하지 않았다. 다음 단계·develop으로 병합·푸시는 하지 않았다.
 
 ## 기준과 준비
 
@@ -48,13 +48,13 @@ AttendanceStore.Schedule.view의 원래 출현만 예외로 분류한다. startT
 
 첫 프로젝트 전체 ON은 기능 테스트 231/0/0/0이었지만 비교기는 differences=6으로 실패했다. select @@session.tx_isolation 한 번이 concurrentApprovalAndWithdrawalHaveOnlyOneWinner(89→88)에서 concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials(811→812)로 이동했다. 전역 SQL별 횟수는 모두 같고 해당 조회 총수도 94회로 같았으며 응답 차이는 0이었다. 실패 기록은 group3-project-initial-drift.json/.txt에 보존했다.
 
-실행 중이던 후속 검증을 중단하고 원인을 확인했다. 관련 approval/leave/overtime 소스와 테스트는 BASE와 바이트가 같았다. 실제 사용한 드라이버를 javap으로 확인하면 MariaDB Connection.getTransactionIsolation은 캐시가 없을 때 해당 SQL을 실행하며, Hikari PoolBase.checkDefaultIsolation도 이를 호출한다. SafetyNetRun.sql은 실행 스레드와 무관하게 당시의 current 프레임으로 귀속한다. 따라서 연결 초기화/첫 사용 시점 차이로 프레임 귀속이 이동한 것으로 판단한다. 직접 스택 추적을 수집한 것은 아니므로 해당 실행의 정확한 호출 스레드까지 증명한 것은 아니다.
+실행 중이던 후속 검증을 중단하고 관련 approval/leave/overtime 소스와 테스트가 BASE와 바이트가 같음을 확인했다. 이후 리뷰어가 BASE의 M2DocumentIntegrationTest에 스택 추적을 넣어 확인한 결과, 격리 수준 조회 9회 중 1회만 Hikari checkDefaultIsolation에서 실행되었다(풀 생성, `<before-all>`, main). 나머지 8회는 트랜잭션 시작의 DataSourceUtils.prepareConnectionForTransaction에서 실행되었고, 그중 7회는 동시 요청 작업 스레드였다. 이동한 두 테스트는 실행 순서 2번째와 5번째이며, 사이에 단일 요청 테스트 두 개가 있다. 따라서 조회의 기록 귀속이 뒤늦게 밀렸다고 보기보다, 작업 스레드가 물리 연결을 처음 사용하는 시점이 달라 조회가 실제로 다른 테스트에서 실행된 것으로 보는 것이 타당하다. 이는 리뷰어가 제공한 BASE 추적 결과를 반영한 판단이며, 차이 6건이 났던 그 실행 자체는 재현하지 못했다.
 
-수정 없는 BASE의 M2DocumentIntegrationTest 두 번과 후보 한 번을 별도로 실행해 각각 11/0/0/0, 두 프레임 89/811을 확인했다. 실제 비교기로 BASE 1→BASE 2 및 BASE 1→후보를 비교하면 모두 differences=0이었다. 이 세 진단 실행에서는 처음의 이동 현상이 다시 발생하지 않았다. 코드·테스트·정책·기준선·허용 목록은 바꾸지 않고 전체 ON/OFF를 다시 검증했다. 최종 결과는 위 커밋 표에만 반영하며 첫 실패를 숨기지 않는다. 기존 기록의 프레임 귀속이 타이밍에 민감할 수 있다는 한계는 이번 범위에서 고치지 않았다.
+수정 없는 BASE의 M2DocumentIntegrationTest 두 번과 후보 한 번을 별도로 실행해 각각 11/0/0/0, 두 프레임 89/811을 확인했다. 실제 비교기로 BASE 1→BASE 2 및 BASE 1→후보를 비교하면 모두 differences=0이었다. 이 세 진단 실행에서는 처음의 이동 현상이 다시 발생하지 않았다. 코드·테스트·정책·기준선·허용 목록은 바꾸지 않고 전체 ON/OFF를 다시 검증했다. 최종 결과는 위 커밋 표에만 반영하며 첫 실패를 숨기지 않는다. 물리 연결의 최초 사용 시점에 따라 격리 수준 조회가 실행되는 테스트가 달라질 수 있다는 한계는 이번 범위에서 고치지 않았다.
 
 ## 응답과 타입 근거
 
-[구성요소 대조 269건](R-04-evidence/group3-response-types.md)는 실제 원래 식/열, 새 구성요소, 타입과 원본 위치를 출현마다 기록한다. [API 대조](R-04-evidence/group3-api-map.json), [원래 기준선의 성공·항상 null 경로](R-04-evidence/group3-api-coverage.json)도 함께 본다. 반환 행을 직접 내보내던 곳은 SELECT 별칭 순서로 기록했다. 대조표 재생성은 `R-04-group3-response-types.py --before <BASE archive> --after <후보 archive> --classpath <classpath.txt> --mapping <group3-global-response-map.json> --output-dir <외부 폴더>`로 한다.
+[구성요소 대조 275건](R-04-evidence/group3-response-types.md)는 실제 원래 식/열, 새 구성요소, 타입과 원본 위치를 출현마다 기록한다. [API 대조](R-04-evidence/group3-api-map.json), [원래 기준선의 성공·항상 null 경로](R-04-evidence/group3-api-coverage.json)도 함께 본다. 반환 행을 직접 내보내던 곳은 SELECT 별칭 순서로 기록했다. 대조표 재생성은 `R-04-group3-response-types.py --before <BASE archive> --after <후보 archive> --classpath <classpath.txt> --mapping <group3-global-response-map.json> --output-dir <외부 폴더>`로 한다.
 
 | API | 반환 |
 |---|---|
@@ -86,12 +86,12 @@ AttendanceStore.Schedule.view의 원래 출현만 예외로 분류한다. startT
 - 프로젝트 요약은 15키이고 상세 record는 members·permissions를 더한다. 생성/수정에서는 permissions가 없으므로 해당 구성요소만 NON_NULL이다. 원래 키가 있는 상세/멤버 변경에서는 getPermissions가 항상 record를 만들므로 null 값이 키와 함께 있었던 경우는 없다. COALESCE(SUM) overdueCount는 BigDecimal, count/task/progress는 long이다.
 - 작업 카드 11키와 상세 15키를 나눈다. MOVED는 action/actor/at만, 다른 이력은 from/to가 null이어도 키를 남긴다. target_id가 있을 때만 target record를 만들고 그 구성요소만 NON_NULL이다. 원래 CASE는 MOVED에 target_id를 만들지 않는다. CAST AS UNSIGNED인 target_id는 BigInteger 직접 캐스트 대신 number를 쓴다.
 - 혼합 배열 세 곳은 메서드 없는 중첩 인터페이스와 모양별 record이다: 월간 근태 Day(2키/8키), 업무 History(Moved/Event), 홈 WeekItem(TaskDue/LeaveItem). 전역 JsonInclude 설정은 바꾸지 않았다.
-- 홈은 today→approvals→leave→teamWeek→myTasks→notifications 순서다. FormService.shortName은 서비스에 남겼고 DTO는 서비스에 의존하지 않는다. 알림은 rows.get(0)의 unread를 먼저 읽으며 사람 record는 프로젝트·보드·작업 assignees와 같은 세 키로 공유한다.
+- 홈은 today→approvals→leave→teamWeek→myTasks→notifications 순서다. FormService.shortName은 서비스에 남겼고 DTO는 서비스에 의존하지 않는다. 알림은 rows.get(0)의 unread를 먼저 읽는다. 리뷰 보완 뒤 홈 기안자·현재 결재자는 중첩 HomeResponseDto.Person을 쓰며 프로젝트 DTO에 의존하지 않는다. 프로젝트·보드·작업 assignees는 기존 ProjectPersonResponseDto를 공유한다.
 - 기준선이 빠뜨린 holidayName, clockOutAt, 실제 승인 뒤 fixDocument/leaveDocument, 기록 없는 날, 프로젝트 content·myRole MEMBER/null·leader null, 이력 7종·409 currentTask, 홈 권한별 null·주간 두 종류, 알림 unreadOnly·두 번째 쪽을 probe로 확인했다. 저장소 src/test에는 추가하지 않았다.
 
 ## 이름·메서드 나누기
 
-전체 대응은 각 커밋 `group3-*-renames.json`에 있다. 컨트롤러의 HTTP 매개변수는 q만 Java query로 바꾸고 `@RequestParam(name="q")`로 원래 이름을 고정했다. 나머지 요청 매개변수와 요청 record 구성요소는 그대로다.
+최초 완료의 메서드 이름 대응은 각 커밋 `group3-*-renames.json`에 있다. 리뷰 보완의 지역 변수·홈 사람 타입 대응은 [리뷰 이름 대응표](R-04-evidence/group3-review-name-map.json)에 별도로 적었다. 메서드 이름·시그니처 대응은 그대로다. 컨트롤러의 HTTP 매개변수는 q만 Java query로 바꾸고 `@RequestParam(name="q")`로 원래 이름을 고정했다. 나머지 요청 매개변수와 요청 record 구성요소는 그대로다.
 
 | 나눈 책임 | 유지한 순서/경계 |
 |---|---|
@@ -127,11 +127,11 @@ AttendanceStore.Schedule.view의 원래 출현만 예외로 분류한다. startT
 
 4단계 전체 ApiResponse<?>는 시작 93개 → 이번 묶음 시작 20개 → 최종 0개, API 98개 그대로다. 이번 묶음 domain/global 한 글자 이름은 100 → 0이다. EmployeeService.page 정의·호출은 0이다. 세는 방식은 factory 호출 수가 아니라 원래 요청대로 호출이 있는 서로 다른 줄 수이며 repository를 제외한다. 새 record의 from 매개변수 Map은 반환 Map으로 세지 않는다.
 
-재측정: `R-04-group3-check.py --before <컴파일된 d693843 archive> --after <컴파일된 대상 커밋 archive> --classpath <classpath.txt> --renames <group3-도메인-renames.json> --responses <group3-도메인-response-map.json> --output <외부 결과 폴더>`. `R-04-names.py`, `R-04-response-check.py`, `R-03-sql-location-measure.py`, `R-02-format-measure.py`, `R-03-format-units.py`를 이용한다. 전부 JDK/Python 표준 라이브러리만 쓰며 원본은 읽기 전용이다.
+재측정: `R-04-group3-check.py --before <컴파일된 d693843 archive> --after <컴파일된 대상 커밋 archive> --classpath <classpath.txt> --renames <group3-도메인-renames.json> --responses <group3-도메인-response-map.json> --output <외부 결과 폴더>`. `R-04-names.py`, `R-04-response-check.py`, `R-03-sql-location-measure.py`, `R-02-format-measure.py`, `R-03-format-units.py`를 이용한다. 전부 JDK/Python 표준 라이브러리만 쓰며 원본은 읽기 전용이다. 비교 archive에는 backend와 docs/refactoring을 함께 포함해야 한다. backend만 풀면 R-03-format-units.py:87에서 필요한 형식 도구를 찾지 못해 멈춘다.
 
 ## global 커밋 뒤 전체 main 재측정
 
-최종 코드 커밋 `3dbc348e59fa786e9aa58fa67a9e94e69474cb76`을 별도 git archive로 풀어 test-compile(11.28초) 뒤 전체 검사를 다시 수행했다. 후보 디렉터리의 과거 결과를 재사용하지 않았다. main 257개·test 79개 Java, 전체 src 파일 해시 362개가 검증 후보·작업 트리와 모두 같았다. 전체 main ApiResponse<?>·ResponseEntity<?>·한 글자 이름은 각각 0, API 98개, 트랜잭션 83개, EmployeeService.page 정의·호출 0, 테스트 및 금지 경로 변화 0이다. 상세 수치와 명령 결과는 [커밋 후 측정](R-04-evidence/group3-final-commit-measurement.json)과 group3-final-commit-* 파일에 있다.
+최초 완료 코드 커밋 `3dbc348e59fa786e9aa58fa67a9e94e69474cb76`을 별도 git archive로 풀어 test-compile(11.28초) 뒤 전체 검사를 다시 수행했다. 후보 디렉터리의 과거 결과를 재사용하지 않았다. main 257개·test 79개 Java, 전체 src 파일 해시 362개가 검증 후보·작업 트리와 모두 같았다. 전체 main ApiResponse<?>·ResponseEntity<?>·한 글자 이름은 각각 0, API 98개, 트랜잭션 83개, EmployeeService.page 정의·호출 0, 테스트 및 금지 경로 변화 0이다. 상세 수치와 명령 결과는 [커밋 후 측정](R-04-evidence/group3-final-commit-measurement.json)과 group3-final-commit-* 파일에 있다.
 
 ## 남긴 것과 판단
 
@@ -143,7 +143,7 @@ AttendanceStore.Schedule.view의 원래 출현만 예외로 분류한다. startT
 
 ## 기존 버그·한계
 
-- 기록기의 타이밍 한계: 프로젝트 첫 ON에서 드라이버 격리 수준 조회 한 번의 테스트 귀속 이동으로 차이 6건이 났다. 진단과 전체 재검증은 통과했지만 이 비결정성을 고친 것은 아니다. 위 프로젝트 첫 기록 절에 실패와 재검증을 함께 남겼다.
+- 드라이버 격리 수준 조회의 비결정성: 프로젝트 첫 ON에서 드라이버 격리 수준 조회 한 번이 실행된 테스트가 달라 차이 6건이 났다. 진단과 전체 재검증은 통과했지만 이 비결정성을 고친 것은 아니다. 위 프로젝트 첫 기록 절에 실패와 재검증을 함께 남겼다.
 - 숫자 쿼리에 문자(page=x)를 넣으면 500: GlobalExceptionHandler의 MethodArgumentTypeMismatchException 처리가 없으며 c531e1f에서도 동일. 이번에는 이름만 바꾸고 고치지 않았다.
 - AttendanceService.getMyMonthlyAttendance의 쓰이지 않는 LocalDate.now(clock), 날짜마다 records.day 조회를 유지했다. 지우거나 조회 수를 줄이는 것은 동작/시계·SQL 순서 변경이다.
 - 실제 프론트·운영 서버·개발 DB/Redis는 검증하지 않았다. SQL 지문은 파라미터 값을 저장하지 않으므로 소스의 키/값 식·순서와 타입 근거를 함께 확인했다. 모든 데이터 조합을 완전 탐색한 것은 아니며 기준선의 누락/항상 null 경로를 별도 probe로 보완했다.
@@ -152,7 +152,7 @@ AttendanceStore.Schedule.view의 원래 출현만 예외로 분류한다. startT
 
 ## 다시 실행하는 명령
 
-작업 트리 밖에 해당 커밋을 git archive로 풀고 그 사본의 backend에서 실행한다. JAVA_HOME은 Java 17 설치 경로로 지정한다. 아래 기록 폴더는 실행마다 새 경로를 사용한다.
+작업 트리 밖에 해당 커밋을 git archive로 풀 때 backend와 docs/refactoring을 모두 포함하고, 그 사본의 backend에서 실행한다. 예: `git archive <커밋> backend docs/refactoring | tar -x -C <임시 폴더>`. backend만 풀면 R-03-format-units.py:87에서 멈춘다. JAVA_HOME은 Java 17 설치 경로로 지정한다. 아래 기록 폴더는 실행마다 새 경로를 사용한다.
 
 ```sh
 ./mvnw -Duser.timezone=UTC -Drefactoring.record=/private/tmp/r04-review-on test
@@ -161,3 +161,27 @@ AttendanceStore.Schedule.view의 원래 출현만 예외로 분류한다. startT
 ```
 
 추가 비교는 BASE와 후보의 별도 사본에만 R-04-probe/R04Group3Probe.java를 backend/src/test/java/com/minierp/backend/integration/으로 복사한 뒤 같은 기록 옵션과 -Dtest=R04Group3Probe로 실행한다. 비교기의 첫 인자는 BASE의 추가 기록 폴더이고 둘째 인자는 후보의 추가 기록 폴더다. 저장소 src/test에는 복사하지 않는다.
+
+## 리뷰 보완
+
+코드 기준은 `3dbc348`, 묶음 전체 기준은 `d693843`, 작업 시작 HEAD는 `4a9e59d`이다. 지정된 P3만 반영했으며 다음 단계는 시작하지 않았다. 한 커밋으로 정리한다: `refactor: 묶음 3 리뷰 보완 — 이름·중괄호·홈 사람 record·보고서`. 커밋 해시는 최종 전달에 기록하며 저장소에서는 `git log --diff-filter=A --format=%H -- docs/refactoring/R-04-evidence/group3-review-result.json`으로 이 보완 커밋을 확인할 수 있다.
+
+- `TaskOverdueWork.run`: Map 반복 변수 projectId → projectRow.
+- `AttendanceStore.judge`: Schedule 값 scheduleRow → scheduleSnapshot. schedule()의 실제 조회 행 scheduleRow는 유지했다.
+- `AttendanceAdminService`의 if 네 곳과 `OrgDepartmentResponseDto`의 if 세 곳에 중괄호를 추가했다.
+- `HomeResponseDto.Person(long id, String name, String title)`을 만들고 Todo.drafter·Mine.currentApprover와 해당 from에서 사용한다. 프로젝트 사람 DTO import를 없앴다. 키·null 조건·값 계산은 그대로다.
+- EmployeeService의 연속 빈 줄, Schedule의 빈 본문, 지정한 세 곳의 이어쓰기 들여쓰기를 정리했다.
+- 검증 도구는 AttendanceStore의 허용 이름에 scheduleSnapshot만 추가했다. 형식 도구·기준선·기록 정책·src/test는 바꾸지 않았다.
+- 현재 응답 mapping은 홈 사람 두 출처를 각각 연결해 56→58개, 구성요소 근거는 269→275개다. 추가된 여섯 행은 Todo.drafter와 Mine.currentApprover의 id/name/title이다. 이전 커밋별 증거 JSON은 당시 소스의 기록으로 보존했다.
+
+| 검증 | 결과 |
+|---|---|
+| test-compile | BASE 8.91초, 코드 기준 8.29초, 후보 9.3초, 모두 exit 0 |
+| javap -c -p | main/test 클래스 466→467개, 기존 464개 동일. 차이는 HomeResponseDto$Todo·$Mine와 새 $Person뿐. 홈 바깥 차이 0 |
+| 중괄호 1회성 검사 | main 257개 파일, if/else·for·향상된 for·while·do-while 본문 414곳, 누락 0 |
+| R-04-group3-check (d693843 대비) | SQL·응답·실행 순서·미사용 import 0, API 98, @Transactional 83, repository 밖 SQL 0, src/test 동일, 닫는 줄 차이 0 (83.4초) |
+| 기록 ON 전체 UTC | 231/0/0/0, 849.41초, differences=0, 순서 경고 9개 모두 승인된 14개 안 |
+| 기록 OFF 전체 UTC | 231/0/0/0, 776.6초, 기록 출력 0건 |
+| R04Group3Probe | 새 BASE 31.62초 / 후보 29.98초, 각각 4/0/0/0, differences=0 |
+
+검증은 backend와 docs/refactoring을 포함한 작업 트리 밖 git archive에서 수행했고, 실행 테스트는 Java 17·UTC·Testcontainers만 사용했다. probe는 두 외부 사본에만 복사했다. [검증 결과와 소스 해시](R-04-evidence/group3-review-result.json), [ON 비교기 출력](R-04-evidence/group3-review-compare-on.txt), [probe 비교기 출력](R-04-evidence/group3-review-compare-probe.txt)에 상세 증거가 있다. SQL 지문 차이의 원인 설명은 위 "프로젝트 첫 기록의 차이와 재검증" 절처럼 리뷰어가 제공한 스택 추적 사실로 바로잡았다. 그 실패 실행 자체를 재현하지 못했다는 한계는 그대로다. 개발 DB/Redis·실제 서버를 호출하지 않았고 develop 병합·푸시도 하지 않았다.

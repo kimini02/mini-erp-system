@@ -1893,7 +1893,7 @@
     "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Todo",
     "key": "drafter",
     "component": "drafter",
-    "type": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
     "expression": "map(\"id\", r.get(\"drafter_id\"), \"name\", r.get(\"user_name\"),\n                                \"title\", r.get(\"user_title\"))",
     "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
     "line": 59
@@ -1956,7 +1956,7 @@
     "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine",
     "key": "currentApprover",
     "component": "currentApprover",
-    "type": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
     "expression": "r.get(\"approver_id\") == null\n                                ? null\n                                : map(\"id\", r.get(\"approver_id\"), \"name\", r.get(\"approver_name\"),\n                                        \"title\", r.get(\"approver_title\"))",
     "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
     "line": 66
@@ -2419,5 +2419,59 @@
     "expression": "SELECT name — SELECT d.id,d.name FROM users u JOIN departments d ON d.id=u.department_id WHERE u.id=:actor",
     "file": "backend/src/main/java/com/minierp/backend/domain/home/repository/HomeQueries.java",
     "line": 89
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"drafter_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 59
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "r.get(\"user_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 59
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"user_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 60
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"approver_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "r.get(\"approver_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"approver_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 69
   }
 ]

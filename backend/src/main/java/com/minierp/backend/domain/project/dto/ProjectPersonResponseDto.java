@@ -12,6 +12,6 @@ public record ProjectPersonResponseDto(long id, String name, String title) {
         return row.get("leader_id") == null
                 ? null
                 : new ProjectPersonResponseDto(number(row, "leader_id"),
-                (String) row.get("leader_name"), (String) row.get("leader_title"));
+                        (String) row.get("leader_name"), (String) row.get("leader_title"));
     }
 }

@@ -138,7 +138,7 @@ public class BoardProjectService {
             id = store.insertProject(request.key(), request.title(), request.content(), request.startDate(),
                     request.endDate(),
                     request.priority() == null ? "MEDIUM" : request.priority().name(), request.leaderId(),
-                            LocalDateTime.now(clock));
+                    LocalDateTime.now(clock));
         } catch (org.springframework.dao.DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.PROJECT_KEY_DUPLICATE);
         }

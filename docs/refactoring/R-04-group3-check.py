@@ -133,7 +133,7 @@ def main():
     # Query code is unchanged except the approved Schedule.view removal and Java aliases.
     prefix = Path('backend/src/main/java/com/minierp/backend')
     aliases = {
-        'domain/attendance/repository/AttendanceStore.java': {'s': {'scheduleRow'}, 't': {'sqlTime', 'localTime'}},
+        'domain/attendance/repository/AttendanceStore.java': {'s': {'scheduleRow', 'scheduleSnapshot'}, 't': {'sqlTime', 'localTime'}},
         'domain/project/repository/ProjectStore.java': {'p': {'projectId'}, 'u': {'userId'}},
         'domain/project/repository/ProjectStateStore.java': {'n': {'statusCount'}},
         'domain/task/repository/TaskQueries.java': {'p': {'projectId'}},

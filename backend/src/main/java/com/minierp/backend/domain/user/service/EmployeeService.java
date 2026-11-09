@@ -114,8 +114,6 @@ public class EmployeeService {
         };
     }
 
-
-
     public EmployeeListResponseDto getEmployees(
             String query,
             Long departmentId,

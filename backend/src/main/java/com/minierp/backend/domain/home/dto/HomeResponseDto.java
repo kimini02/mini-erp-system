@@ -3,7 +3,6 @@ package com.minierp.backend.domain.home.dto;
 import com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto;
 import com.minierp.backend.domain.leave.dto.LeaveBalanceResponseDto;
 import com.minierp.backend.domain.notification.dto.NotificationItemResponseDto;
-import com.minierp.backend.domain.project.dto.ProjectPersonResponseDto;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
@@ -11,28 +10,31 @@ import static com.minierp.backend.global.persistence.SqlStore.number;
 
 public record HomeResponseDto(AttendanceTodayResponseDto today, Approvals approvals, LeaveBalanceResponseDto leave,
         TeamWeek teamWeek, MyTasks myTasks, Notifications notifications) {
+    public record Person(long id, String name, String title) {
+    }
+
     public record Form(String code, String shortName) {
     }
 
     public record Approvals(long todoCount, List<Todo> todo, List<Mine> mine) {
     }
 
-    public record Todo(long id, String docNo, Form form, String title, ProjectPersonResponseDto drafter,
+    public record Todo(long id, String docNo, Form form, String title, Person drafter,
             LocalDateTime submittedAt) {
         public static Todo from(Map<String, Object> row, Form form) {
             return new Todo(number(row, "id"), (String) row.get("doc_no"), form, (String) row.get("title"),
-                    new ProjectPersonResponseDto(number(row, "drafter_id"), (String) row.get("user_name"),
+                    new Person(number(row, "drafter_id"), (String) row.get("user_name"),
                             (String) row.get("user_title")), (LocalDateTime) row.get("submitted_at"));
         }
     }
 
     public record Mine(long id, String docNo, Form form, String title, String status,
-            ProjectPersonResponseDto currentApprover, LocalDateTime submittedAt) {
+            Person currentApprover, LocalDateTime submittedAt) {
         public static Mine from(Map<String, Object> row, Form form) {
             return new Mine(number(row, "id"), (String) row.get("doc_no"), form, (String) row.get("title"),
                     (String) row.get("status"), row.get("approver_id") == null
                             ? null
-                            : new ProjectPersonResponseDto(number(row, "approver_id"),
+                            : new Person(number(row, "approver_id"),
                                     (String) row.get("approver_name"),
                                     (String) row.get("approver_title")), (LocalDateTime) row.get("submitted_at"));
         }

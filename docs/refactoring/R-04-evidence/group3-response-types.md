@@ -214,14 +214,14 @@
 | `HomeResponseDto.Todo.docNo` | `String` | `r.get("doc_no")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:58` |
 | `HomeResponseDto.Todo.form` | `home.dto.HomeResponseDto.Form` | `form(r)` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:58` |
 | `HomeResponseDto.Todo.title` | `String` | `r.get("title")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:58` |
-| `HomeResponseDto.Todo.drafter` | `project.dto.ProjectPersonResponseDto` | `map("id", r.get("drafter_id"), "name", r.get("user_name"), "title", r.get("user_title"))` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:59` |
+| `HomeResponseDto.Todo.drafter` | `home.dto.HomeResponseDto.Person` | `map("id", r.get("drafter_id"), "name", r.get("user_name"), "title", r.get("user_title"))` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:59` |
 | `HomeResponseDto.Todo.submittedAt` | `LocalDateTime` | `r.get("submitted_at")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:60` |
 | `HomeResponseDto.Mine.id` | `long` | `r.get("id")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:64` |
 | `HomeResponseDto.Mine.docNo` | `String` | `r.get("doc_no")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:64` |
 | `HomeResponseDto.Mine.form` | `home.dto.HomeResponseDto.Form` | `form(r)` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:64` |
 | `HomeResponseDto.Mine.title` | `String` | `r.get("title")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:64` |
 | `HomeResponseDto.Mine.status` | `String` | `r.get("status")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:65` |
-| `HomeResponseDto.Mine.currentApprover` | `project.dto.ProjectPersonResponseDto` | `r.get("approver_id") == null ? null : map("id", r.get("approver_id"), "name", r.get("approver_name"), "title", r.get("approver_title"))` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:66` |
+| `HomeResponseDto.Mine.currentApprover` | `home.dto.HomeResponseDto.Person` | `r.get("approver_id") == null ? null : map("id", r.get("approver_id"), "name", r.get("approver_name"), "title", r.get("approver_title"))` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:66` |
 | `HomeResponseDto.Mine.submittedAt` | `LocalDateTime` | `r.get("submitted_at")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:70` |
 | `HomeResponseDto.Approvals.todoCount` | `long` | `count` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:72` |
 | `HomeResponseDto.Approvals.todo` | `List<home.dto.HomeResponseDto.Todo>` | `todo` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:72` |
@@ -273,3 +273,9 @@
 | `NotificationItemResponseDto.createdAt` | `LocalDateTime` | `r.get("created_at")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:141` |
 | `HomeResponseDto.Department.id` | `long` | `SELECT id — SELECT d.id,d.name FROM users u JOIN departments d ON d.id=u.department_id WHERE u.id=:actor` | `backend/src/main/java/com/minierp/backend/domain/home/repository/HomeQueries.java:89` |
 | `HomeResponseDto.Department.name` | `String` | `SELECT name — SELECT d.id,d.name FROM users u JOIN departments d ON d.id=u.department_id WHERE u.id=:actor` | `backend/src/main/java/com/minierp/backend/domain/home/repository/HomeQueries.java:89` |
+| `HomeResponseDto.Person.id` | `long` | `r.get("drafter_id")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:59` |
+| `HomeResponseDto.Person.name` | `String` | `r.get("user_name")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:59` |
+| `HomeResponseDto.Person.title` | `String` | `r.get("user_title")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:60` |
+| `HomeResponseDto.Person.id` | `long` | `r.get("approver_id")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:68` |
+| `HomeResponseDto.Person.name` | `String` | `r.get("approver_name")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:68` |
+| `HomeResponseDto.Person.title` | `String` | `r.get("approver_title")` | `backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java:69` |
