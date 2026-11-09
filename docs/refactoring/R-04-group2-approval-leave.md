@@ -572,7 +572,7 @@ ApiResponse의 공통 외피와 message는 유지한다. 아래는 data의 타�
 
 | 기존 메서드/줄 | 현재 메서드/줄 | 나눈 private 책임 |
 | --- | --- | --- |
-| resolve / 121 | resolveLine / 103 | resolveSteps 23, manualStepRow 8: 입력 방식별 단계 행 준비 |
+| resolve / 121 | resolveLine / 103 | resolveSteps 25: 입력 방식별 단계 행 준비 (묶음 3 준비에서 내부 행 map 복원, manualStepRow 제거) |
 | submit / 40 | submitDocument / 31 | notifySubmission 18: 제출 알림 블록 |
 | act / 46 | decideDocument / 33 | completeDecision 22: 다음 단계/최종 승인 블록 |
 | steps / 37 | updateFormSteps / 21 | resolveStepValues 23: 양식 단계의 역할/사원 값 확인 |
@@ -586,7 +586,7 @@ ApiResponse의 공통 외피와 message는 유지한다. 아래는 data의 타�
 - ApprovalLineResolver.getForm/getPerson: 권한·존재 검사와 결재선 SQL 값으로 사용하는 행.
 - Resolved.person: 결재선 스냅샷 저장의 id/name/title/department 값 원천. response DTO로 대체하지 않는다.
 - FormService.StepValues(Object form,...): SQL 값용 private record.
-- 수동 결재선 step 행: 입력 방식 통일을 위한 내부 LinkedHashMap. HTTP 응답이 아니다.
+- 수동 결재선 step 행: 응답이 아닌 내부 행이므로 묶음 3 준비에서 원래 SqlStore.map(...)으로 복원했다. manualStepRow/LinkedHashMap 전개는 제거했고, approval 비 repository map 예외 1곳으로 센다.
 - LeaveFormHandler.raw: 처리기 내부 행. available/days/raw 공개 이름을 보존했다.
 - LeaveGrantService.run/runToday: 배치 행 Map 유지. 변환 실패가 FAILED 기록 경로를 새로 타지 않도록 서비스 밖에서 변환한다.
 - InboxRepository.search: 테스트가 부르는 Map 반환과 메서드·매개변수 타입/순서를 보존. total/content/lines만 반환하고 목록이 비면 결재선 조회를 건너뛴다.
@@ -597,7 +597,7 @@ ApiResponse의 공통 외피와 message는 유지한다. 아래는 data의 타�
 
 | 도메인 | ApiResponse<?> | public Map/Object(본문 별도) | 비 repository map/Map.of | 한 글자 이름 |
 | --- | --- | --- | --- | --- |
-| approval | 19 → 0 | 17 → 2 | 19 → 0 | 69 → 0 |
+| approval | 19 → 0 | 17 → 2 | 19 → 1 (내부 행 예외) | 69 → 0 |
 | leave | 9 → 0 | 12 → 3 | 7 → 0 | 23 → 0 |
 | overtime | 0 → 0 | 0 → 0 | 0 → 0 | 7 → 0 |
 
@@ -795,6 +795,12 @@ SQL의 `:q`, `ESCAPE '!'`, 인자 map의 문자열 키 `"q"`, 와일드카드 �
 
 최종 보고서·증거 추가는 docs/refactoring 안으로 한정한다. 기록 기준선·기록기·비교 규칙·테스트 소스·SQL·설정은 변경하지 않았다. 동일 소스 해시는 group2-query-rename-checks.json의 sourceHashes로 확인할 수 있다. 증거 파일은 차이·판정·출현 분류·해시를 남기고 변경 없는 전체 호출 추적은 중복 저장하지 않았다. 이름 증거의 범위는 이번 세 도메인이다.
 
+## 묶음 3 준비에 반영한 리뷰 보완
+
+resolveSteps의 규칙/수동 단계 공통 람다 이름을 step으로, 휴가 예약 원장 행 이름을 reservation으로 고쳤다. InboxService 항목 id는 number(document, "id")로 통일했다. 수동 단계 행은 명세 11차에 따라 map(...)으로 복원했다. 이번 보완의 커밋과 검증은 R-04-group3-attendance-home-project.md에 이어서 기록한다.
+
 ## 발견한 버그·확인하지 못한 것
+
+- 기존 버그: `GET /api/v1/approval-inbox?box=mine&page=x`는 500이다. GlobalExceptionHandler가 MethodArgumentTypeMismatchException을 400으로 변환하지 않는다. 사용자 독립 리뷰에서 시작 커밋 c531e1f에서도 동일함을 확인했다. 이번에는 고치지 않는다.
 
 새 기능이나 버그 수정은 하지 않았다. 실제 운영 서버·개발 DB/Redis는 호출하지 않았으며 Testcontainers만 사용했다. 임의의 모든 데이터에 대한 형식적 동등성 증명은 아니다. 정적 대조, 엄격한 기존 기록, 실패/동시성 전체 테스트, 기준선의 빈 경로를 보완한 probe가 검증 범위다. 네트워크 시간이나 운영 성능 변화는 측정하지 않았다.

@@ -122,9 +122,9 @@ public class LeaveFormHandler implements ApprovalFormHandler {
 
     private void release(ApprovalDocument document, boolean approved, String reason) {
         // Legacy reservations retain their migration year; never release them into another year.
-        for (var request : queries.findReservations(document.id())) {
-            int year = ((Number) request.get("leave_year")).intValue();
-            var days = (BigDecimal) request.get("days");
+        for (var reservation : queries.findReservations(document.id())) {
+            int year = ((Number) reservation.get("leave_year")).intValue();
+            var days = (BigDecimal) reservation.get("days");
             if (approved) {
                 append(document, "USE", days.negate(), year, leaveMemo(document.id()));
             }

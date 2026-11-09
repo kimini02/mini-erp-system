@@ -46,7 +46,7 @@ public class InboxService {
             Map<String, Object> document,
             Map<Long, List<Map<String, Object>>> lines) {
         var progress = progress(document, lines.getOrDefault(number(document, "id"), List.of()));
-        return new ApprovalInboxItemResponseDto(((Number) document.get("id")).longValue(),
+        return new ApprovalInboxItemResponseDto(number(document, "id"),
                 (String) document.get("doc_no"), (String) document.get("code"),
                 FormService.shortName((String) document.get("code")), (String) document.get("title"),
                 ApprovalInboxItemResponseDto.Drafter.from(document),

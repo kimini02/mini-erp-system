@@ -150,24 +150,17 @@ public class ApprovalLineResolver {
             steps = new ArrayList<>();
             int stepOrder = 0;
             for (var manualStep : manual) {
-                steps.add(manualStepRow(++stepOrder, manualStep));
+                steps.add(
+                        map("step_order", ++stepOrder, "line_kind", manualStep.lineKind(), "approver_type", "USER",
+                                "user_id", manualStep.userId()));
             }
         } else {
             steps = queries.findSteps(form.get("id"));
         }
-        if (steps.stream().noneMatch(manualStep -> "APPROVER".equals(manualStep.get("line_kind")))) {
+        if (steps.stream().noneMatch(step -> "APPROVER".equals(step.get("line_kind")))) {
             throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
         }
         return steps;
-    }
-
-    private Map<String, Object> manualStepRow(int order, ManualStep step) {
-        Map<String, Object> row = new LinkedHashMap<>();
-        row.put("step_order", order);
-        row.put("line_kind", step.lineKind());
-        row.put("approver_type", "USER");
-        row.put("user_id", step.userId());
-        return row;
     }
 
     private Long parent(long department) {
