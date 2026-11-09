@@ -22,14 +22,14 @@ public abstract class BaseEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        BaseEntity that = (BaseEntity) o;
+        BaseEntity that = (BaseEntity) other;
         return Objects.equals(id, that.id);
     }
 

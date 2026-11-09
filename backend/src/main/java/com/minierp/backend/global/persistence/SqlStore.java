@@ -56,8 +56,8 @@ public class SqlStore {
     }
 
     public static boolean bool(Map<String, Object> row, String key) {
-        Object v = row.get(key);
-        return v instanceof Boolean b ? b : ((Number) v).intValue() != 0;
+        Object value = row.get(key);
+        return value instanceof Boolean booleanValue ? booleanValue : ((Number) value).intValue() != 0;
     }
 
     public static Map<String, Object> map(Object... pairs) {
