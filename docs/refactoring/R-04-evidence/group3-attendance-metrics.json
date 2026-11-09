@@ -1,0 +1,1415 @@
+{
+  "attendance": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 2,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AbsenceBatchService.java",
+        "method": "com.minierp.backend.domain.attendance.service.AbsenceBatchService#runPreviousDay()",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AbsenceBatchService.java",
+        "method": "com.minierp.backend.domain.attendance.service.AbsenceBatchService#run(java.time.LocalDate)",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 2,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+        "line": 132,
+        "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+        "index": 0,
+        "start": 5371,
+        "keys": [
+          {
+            "key": "clockIn",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "clockOut",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "code",
+            "type": "java.lang.String",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+        "line": 42,
+        "method": "com.minierp.backend.domain.attendance.service.AttendanceService#getHomeAttendance()",
+        "index": 0,
+        "start": 1935,
+        "keys": [
+          {
+            "key": "type",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "documentId",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "docNo",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 0
+  },
+  "calendar": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "factories": [],
+    "oneLetter": 0
+  },
+  "home": {
+    "apiWildcard": 1,
+    "entityWildcard": 0,
+    "publicMapOrObject": 1,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "method": "com.minierp.backend.domain.home.service.HomeService#home()",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 20,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 36,
+        "method": "com.minierp.backend.domain.home.service.HomeService#home()",
+        "index": 0,
+        "start": 1588,
+        "keys": [
+          {
+            "key": "actor",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "today",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "from",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "to",
+            "type": "java.time.LocalDate",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 38,
+        "method": "com.minierp.backend.domain.home.service.HomeService#home()",
+        "index": 1,
+        "start": 1763,
+        "keys": [
+          {
+            "key": "today",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "approvals",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "leave",
+            "type": "com.minierp.backend.domain.leave.dto.LeaveBalanceResponseDto",
+            "nested": null
+          },
+          {
+            "key": "teamWeek",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "myTasks",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "notifications",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 51,
+        "method": "com.minierp.backend.domain.home.service.HomeService#form(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "start": 2485,
+        "keys": [
+          {
+            "key": "code",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "shortName",
+            "type": "java.lang.String",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 58,
+        "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "start": 2763,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "docNo",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "form",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "drafter",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": [
+              {
+                "key": "id",
+                "type": "java.lang.Object",
+                "nested": null
+              },
+              {
+                "key": "name",
+                "type": "java.lang.Object",
+                "nested": null
+              },
+              {
+                "key": "title",
+                "type": "java.lang.Object",
+                "nested": null
+              }
+            ]
+          },
+          {
+            "key": "submittedAt",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 59,
+        "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 1,
+        "start": 2889,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "name",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 64,
+        "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 2,
+        "start": 3171,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "docNo",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "form",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "status",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "currentApprover",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "submittedAt",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 68,
+        "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 3,
+        "start": 3458,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "name",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 72,
+        "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 4,
+        "start": 3702,
+        "keys": [
+          {
+            "key": "todoCount",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "todo",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          },
+          {
+            "key": "mine",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 87,
+        "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+        "index": 0,
+        "start": 4462,
+        "keys": [
+          {
+            "key": "type",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "task",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": [
+              {
+                "key": "id",
+                "type": "java.lang.Object",
+                "nested": null
+              },
+              {
+                "key": "key",
+                "type": "java.lang.String",
+                "nested": null
+              },
+              {
+                "key": "title",
+                "type": "java.lang.Object",
+                "nested": null
+              }
+            ]
+          },
+          {
+            "key": "project",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": [
+              {
+                "key": "id",
+                "type": "java.lang.Object",
+                "nested": null
+              },
+              {
+                "key": "key",
+                "type": "java.lang.Object",
+                "nested": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 88,
+        "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+        "index": 1,
+        "start": 4518,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "key",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 90,
+        "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+        "index": 2,
+        "start": 4698,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "key",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 92,
+        "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+        "index": 3,
+        "start": 4804,
+        "keys": [
+          {
+            "key": "type",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "user",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": [
+              {
+                "key": "id",
+                "type": "java.lang.Object",
+                "nested": null
+              },
+              {
+                "key": "name",
+                "type": "java.lang.Object",
+                "nested": null
+              }
+            ]
+          },
+          {
+            "key": "status",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "documentId",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 93,
+        "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+        "index": 4,
+        "start": 4920,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "name",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 108,
+        "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+        "index": 5,
+        "start": 5514,
+        "keys": [
+          {
+            "key": "department",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          },
+          {
+            "key": "from",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "to",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "days",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 109,
+        "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+        "index": 6,
+        "start": 5626,
+        "keys": [
+          {
+            "key": "date",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "items",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 119,
+        "method": "com.minierp.backend.domain.home.service.HomeService#myTasks(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.time.LocalDate)",
+        "index": 0,
+        "start": 6090,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "key",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "total",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "done",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "overdue",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "progressPct",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 125,
+        "method": "com.minierp.backend.domain.home.service.HomeService#myTasks(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.time.LocalDate)",
+        "index": 1,
+        "start": 6448,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "projectId",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "key",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "status",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "endDate",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "overdueDays",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 130,
+        "method": "com.minierp.backend.domain.home.service.HomeService#myTasks(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.time.LocalDate)",
+        "index": 2,
+        "start": 6857,
+        "keys": [
+          {
+            "key": "project",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          },
+          {
+            "key": "count",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "items",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 136,
+        "method": "com.minierp.backend.domain.home.service.HomeService#notifications(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "start": 7131,
+        "keys": [
+          {
+            "key": "unread",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "items",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 139,
+        "method": "com.minierp.backend.domain.home.service.HomeService#notifications(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 1,
+        "start": 7303,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "type",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "link",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "read",
+            "type": "boolean",
+            "nested": null
+          },
+          {
+            "key": "createdAt",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 11
+  },
+  "notification": {
+    "apiWildcard": 4,
+    "entityWildcard": 0,
+    "publicMapOrObject": 2,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+        "method": "com.minierp.backend.domain.notification.service.NotificationQueryService#list(boolean,int,int)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+        "method": "com.minierp.backend.domain.notification.service.NotificationQueryService#unreadCount()",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 2,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+        "line": 32,
+        "method": "com.minierp.backend.domain.notification.service.NotificationQueryService#list(boolean,int,int)",
+        "index": 0,
+        "start": 1413,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "type",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "link",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "read",
+            "type": "boolean",
+            "nested": null
+          },
+          {
+            "key": "createdAt",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+        "line": 39,
+        "method": "com.minierp.backend.domain.notification.service.NotificationQueryService#unreadCount()",
+        "index": 0,
+        "start": 1758,
+        "keys": [
+          {
+            "key": "count",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 2
+  },
+  "project": {
+    "apiWildcard": 4,
+    "entityWildcard": 1,
+    "publicMapOrObject": 10,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#visible(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#lock(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#view(java.util.Map<java.lang.String,java.lang.Object>)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#permissions(java.util.Map<java.lang.String,java.lang.Object>)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#list(com.minierp.backend.domain.project.entity.ProjectStatus,java.lang.String,int,int)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#members(long)",
+        "returns": "List<Map<String, Object>>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#detail(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#create(com.minierp.backend.domain.project.dto.BoardProjectRequests.Create)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#patch(long,com.minierp.backend.domain.project.dto.BoardProjectRequests.Patch)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#replaceMembers(long,java.util.List<java.lang.Long>)",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 3,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "line": 77,
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#view(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "start": 2847,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "key",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "content",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "status",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "priority",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "startDate",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "endDate",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "leader",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "memberCount",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "taskCount",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "doneCount",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "overdueCount",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "progressPct",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "myRole",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "line": 82,
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#view(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 1,
+        "start": 3217,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "name",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "line": 92,
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#permissions(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "start": 3838,
+        "keys": [
+          {
+            "key": "canManage",
+            "type": "boolean",
+            "nested": null
+          },
+          {
+            "key": "canCreateTask",
+            "type": "boolean",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 21
+  },
+  "task": {
+    "apiWildcard": 4,
+    "entityWildcard": 1,
+    "publicMapOrObject": 6,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#board(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#create(long,com.minierp.backend.domain.task.dto.BoardTaskRequests.Create)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#patch(long,com.minierp.backend.domain.task.dto.BoardTaskRequests.Patch)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#move(long,com.minierp.backend.domain.task.dto.BoardTaskRequests.Move)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/TaskOverdueService.java",
+        "method": "com.minierp.backend.domain.task.service.TaskOverdueService#runToday()",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 9,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 52,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#card(java.util.Map<java.lang.String,java.lang.Object>,java.util.Map<java.lang.String,java.lang.Object>,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>)",
+        "index": 0,
+        "start": 2021,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "key",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "status",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "priority",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "endDate",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "overdueDays",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "assignees",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          },
+          {
+            "key": "position",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "version",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "canMove",
+            "type": "boolean",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 66,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#board(long)",
+        "index": 0,
+        "start": 2932,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "name",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "title",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 75,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#board(long)",
+        "index": 1,
+        "start": 3391,
+        "keys": [
+          {
+            "key": "status",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "tasks",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 81,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#board(long)",
+        "index": 2,
+        "start": 3705,
+        "keys": [
+          {
+            "key": "project",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          },
+          {
+            "key": "members",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          },
+          {
+            "key": "permissions",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          },
+          {
+            "key": "columns",
+            "type": "java.util.List<java.util.Map<java.lang.String,java.lang.Object>>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 98,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "start": 4428,
+        "keys": [
+          {
+            "key": "action",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "actor",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "at",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 101,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 1,
+        "start": 4579,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "name",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 108,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 2,
+        "start": 4942,
+        "keys": [
+          {
+            "key": "id",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "name",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 213,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#move(long,com.minierp.backend.domain.task.dto.BoardTaskRequests.Move)",
+        "index": 0,
+        "start": 9549,
+        "keys": [
+          {
+            "key": "currentTask",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 223,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#move(long,com.minierp.backend.domain.task.dto.BoardTaskRequests.Move)",
+        "index": 1,
+        "start": 10126,
+        "keys": [
+          {
+            "key": "task",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          },
+          {
+            "key": "project",
+            "type": "java.util.Map<java.lang.String,java.lang.Object>",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 24
+  },
+  "dashboard": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "factories": [],
+    "oneLetter": 0
+  },
+  "global": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 5,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+        "method": "com.minierp.backend.global.batch.BatchRunRecorder#record(java.lang.String,java.time.LocalDate,java.lang.String,int,int,java.lang.String,java.time.LocalDateTime)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+        "method": "com.minierp.backend.global.permission.PermissionAccess#grants(long)",
+        "returns": "Map<String, Grant>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/persistence/SqlStore.java",
+        "method": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)",
+        "returns": "List<Map<String, Object>>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/persistence/SqlStore.java",
+        "method": "com.minierp.backend.global.persistence.SqlStore#one(java.lang.String,java.util.Map<java.lang.String,?>,com.minierp.backend.global.exception.ErrorCode)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/persistence/SqlStore.java",
+        "method": "com.minierp.backend.global.persistence.SqlStore#map(java.lang.Object[])",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 5,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+        "line": 28,
+        "method": "com.minierp.backend.global.batch.BatchRunRecorder#record(java.lang.String,java.time.LocalDate,java.lang.String,int,int,java.lang.String,java.time.LocalDateTime)",
+        "index": 0,
+        "start": 1075,
+        "keys": [
+          {
+            "key": "job",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "date",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "status",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "processed",
+            "type": "int",
+            "nested": null
+          },
+          {
+            "key": "skipped",
+            "type": "int",
+            "nested": null
+          },
+          {
+            "key": "message",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "started",
+            "type": "java.time.LocalDateTime",
+            "nested": null
+          },
+          {
+            "key": "finished",
+            "type": "java.time.LocalDateTime",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+        "line": 32,
+        "method": "com.minierp.backend.global.batch.BatchRunRecorder#record(java.lang.String,java.time.LocalDate,java.lang.String,int,int,java.lang.String,java.time.LocalDateTime)",
+        "index": 1,
+        "start": 1543,
+        "keys": [
+          {
+            "key": "id",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+        "line": 54,
+        "method": "com.minierp.backend.global.permission.PermissionAccess#grants(long)",
+        "index": 0,
+        "start": 2283,
+        "keys": [
+          {
+            "key": "id",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+        "line": 84,
+        "method": "com.minierp.backend.global.permission.PermissionAccess#descendants(long)",
+        "index": 0,
+        "start": 3759,
+        "keys": [
+          {
+            "key": "id",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+        "line": 96,
+        "method": "com.minierp.backend.global.permission.PermissionAccess#scope(java.lang.String,long)",
+        "index": 0,
+        "start": 4253,
+        "keys": [
+          {
+            "key": "id",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 9
+  },
+  "allMain": {
+    "apiWildcard": 13,
+    "apiCount": 98,
+    "oneLetter": 67,
+    "mainJavaFiles": 246
+  }
+}

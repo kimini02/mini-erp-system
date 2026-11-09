@@ -1,0 +1,137 @@
+{
+  "approval": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 2,
+    "mapMethods": [
+      "com.minierp.backend.domain.approval.service.ApprovalLineResolver#getForm(java.lang.String)",
+      "com.minierp.backend.domain.approval.service.ApprovalLineResolver#getPerson(long)"
+    ],
+    "factoryLines": 1,
+    "oneLetter": 0
+  },
+  "attendance": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 2,
+    "mapMethods": [
+      "com.minierp.backend.domain.attendance.service.AbsenceBatchService#runPreviousDay()",
+      "com.minierp.backend.domain.attendance.service.AbsenceBatchService#run(java.time.LocalDate)"
+    ],
+    "factoryLines": 2,
+    "oneLetter": 0
+  },
+  "calendar": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "dashboard": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "home": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 1,
+    "oneLetter": 0
+  },
+  "leave": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 3,
+    "mapMethods": [
+      "com.minierp.backend.domain.leave.handler.LeaveFormHandler#raw(long)",
+      "com.minierp.backend.domain.leave.service.LeaveGrantService#runToday()",
+      "com.minierp.backend.domain.leave.service.LeaveGrantService#run(java.time.LocalDate)"
+    ],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "notification": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "org": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "overtime": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "permission": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "project": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 2,
+    "mapMethods": [
+      "com.minierp.backend.domain.project.service.BoardProjectService#getVisibleProject(long)",
+      "com.minierp.backend.domain.project.service.BoardProjectService#lockVisibleProject(long)"
+    ],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "task": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 1,
+    "mapMethods": [
+      "com.minierp.backend.domain.task.service.TaskOverdueService#runToday()"
+    ],
+    "factoryLines": 1,
+    "oneLetter": 0
+  },
+  "user": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 1,
+    "mapMethods": [
+      "com.minierp.backend.domain.user.service.EmployeeService#raw(long)"
+    ],
+    "factoryLines": 0,
+    "oneLetter": 0
+  },
+  "global": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 5,
+    "mapMethods": [
+      "com.minierp.backend.global.batch.BatchRunRecorder#record(java.lang.String,java.time.LocalDate,java.lang.String,int,int,java.lang.String,java.time.LocalDateTime)",
+      "com.minierp.backend.global.permission.PermissionAccess#grants(long)",
+      "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)",
+      "com.minierp.backend.global.persistence.SqlStore#one(java.lang.String,java.util.Map<java.lang.String,?>,com.minierp.backend.global.exception.ErrorCode)",
+      "com.minierp.backend.global.persistence.SqlStore#map(java.lang.Object[])"
+    ],
+    "factoryLines": 5,
+    "oneLetter": 0
+  }
+}

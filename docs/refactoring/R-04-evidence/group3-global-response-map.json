@@ -1,0 +1,305 @@
+[
+  {
+    "method": "com.minierp.backend.domain.attendance.repository.AttendanceStore.Schedule#view()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.repository.AttendanceStore.Schedule#view()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleDetailResponseDto",
+    "removesFrom": {
+      "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+      "receiver": "schedule",
+      "keys": [
+        "source",
+        "departmentName"
+      ]
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#render(java.time.LocalDate,java.util.Map<java.lang.String,java.lang.Object>,com.minierp.backend.domain.attendance.repository.AttendanceStore.Day,com.minierp.backend.domain.attendance.repository.AttendanceStore.Schedule,long,long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#homeToday()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto.Leave"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.EmptyDay"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 4,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Day"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Row"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.User"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Totals"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 4,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Cell"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 5,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto.User"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.global.batch.BatchRunRecorder#record",
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "reason": "rejudge→absence.run→BatchRunRecorder.record의 SELECT; 중간 호출 순서는 별도 검사"
+  },
+  {
+    "method": "com.minierp.backend.domain.notification.service.NotificationQueryService#list(boolean,int,int)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.notification.service.NotificationQueryService#unreadCount()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.notification.dto.NotificationUnreadCountResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.project.service.BoardProjectService#view(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.project.service.BoardProjectService#view(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.project.service.BoardProjectService#permissions(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.project.dto.ProjectPermissionsResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.project.repository.ProjectQueries#findMembers",
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.project.service.BoardProjectService#view(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "putsFrom": {
+      "method": "com.minierp.backend.domain.project.service.BoardProjectService#detail(long)",
+      "receiver": "result"
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#card(java.util.Map<java.lang.String,java.lang.Object>,java.util.Map<java.lang.String,java.lang.Object>,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#card(java.util.Map<java.lang.String,java.lang.Object>,java.util.Map<java.lang.String,java.lang.Object>,java.util.List<java.util.Map<java.lang.String,java.lang.Object>>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "putsFrom": {
+      "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+      "receiver": "result"
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#board(long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#board(long)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.task.dto.TaskBoardResponseDto.Column"
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#board(long)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.task.dto.TaskBoardResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Moved"
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Event",
+    "putsFrom": {
+      "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+      "receiver": "event",
+      "keys": [
+        "from",
+        "to",
+        "target"
+      ]
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person"
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#detail(long,java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person"
+  },
+  {
+    "method": "com.minierp.backend.domain.task.service.BoardTaskService#move(long,com.minierp.backend.domain.task.dto.BoardTaskRequests.Move)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.project.repository.ProjectStateStore#recalculate(long)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto.Project"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#home()",
+    "index": 1,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#form(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Form"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Todo"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#approvals(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 4,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Approvals"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskDue"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Task"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.ProjectKey"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.LeaveItem"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+    "index": 4,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.User"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+    "index": 5,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TeamWeek"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#teamWeek(java.util.Map<java.lang.String,java.lang.Object>,boolean,boolean,java.lang.String)",
+    "index": 6,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Day"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#myTasks(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.time.LocalDate)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#myTasks(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.time.LocalDate)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#myTasks(java.util.Map<java.lang.String,java.lang.Object>,java.lang.String,java.time.LocalDate)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.MyTasks"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#notifications(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Notifications"
+  },
+  {
+    "method": "com.minierp.backend.domain.home.service.HomeService#notifications(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.home.repository.HomeQueries#findDepartment",
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Department"
+  }
+]

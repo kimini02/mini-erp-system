@@ -1,0 +1,19 @@
+{
+  "base-two": {
+    "exit": 0,
+    "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=3",
+    "warnings": [
+      "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()",
+      "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+      "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()"
+    ]
+  },
+  "project-one": {
+    "exit": 0,
+    "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=2",
+    "warnings": [
+      "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+      "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()"
+    ]
+  }
+}

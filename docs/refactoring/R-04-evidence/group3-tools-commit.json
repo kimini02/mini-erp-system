@@ -1,0 +1,15 @@
+{
+  "commit": "9f04495166e08647e3e971ab37f54dab4f267d2a",
+  "compile": {
+    "exit": 0,
+    "seconds": 25.68
+  },
+  "files": [
+    "R-04-java-analysis.py",
+    "R-04-sql-literal-check.py",
+    "R-04-names.py",
+    "R-04-response-check.py",
+    "R-04-group3-verify-tools.py",
+    "R-04-call-order-check.py"
+  ]
+}

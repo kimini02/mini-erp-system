@@ -1,0 +1,334 @@
+{
+  "attendance": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 2,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AbsenceBatchService.java",
+        "method": "com.minierp.backend.domain.attendance.service.AbsenceBatchService#runPreviousDay()",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AbsenceBatchService.java",
+        "method": "com.minierp.backend.domain.attendance.service.AbsenceBatchService#run(java.time.LocalDate)",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 2,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+        "line": 132,
+        "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)",
+        "index": 0,
+        "start": 5371,
+        "keys": [
+          {
+            "key": "clockIn",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "clockOut",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "code",
+            "type": "java.lang.String",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+        "line": 42,
+        "method": "com.minierp.backend.domain.attendance.service.AttendanceService#getHomeAttendance()",
+        "index": 0,
+        "start": 1935,
+        "keys": [
+          {
+            "key": "type",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "documentId",
+            "type": "java.lang.Object",
+            "nested": null
+          },
+          {
+            "key": "docNo",
+            "type": "java.lang.Object",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 0
+  },
+  "calendar": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "factories": [],
+    "oneLetter": 0
+  },
+  "home": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 1,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+        "line": 39,
+        "method": "com.minierp.backend.domain.home.service.HomeService#getHome()",
+        "index": 0,
+        "start": 1789,
+        "keys": [
+          {
+            "key": "actor",
+            "type": "long",
+            "nested": null
+          },
+          {
+            "key": "today",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "from",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "to",
+            "type": "java.time.LocalDate",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 0
+  },
+  "notification": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "factories": [],
+    "oneLetter": 0
+  },
+  "project": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 2,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#getVisibleProject(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+        "method": "com.minierp.backend.domain.project.service.BoardProjectService#lockVisibleProject(long)",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 0,
+    "factories": [],
+    "oneLetter": 0
+  },
+  "task": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 1,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/TaskOverdueService.java",
+        "method": "com.minierp.backend.domain.task.service.TaskOverdueService#runToday()",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 1,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+        "line": 203,
+        "method": "com.minierp.backend.domain.task.service.BoardTaskService#moveTask(long,com.minierp.backend.domain.task.dto.BoardTaskRequests.Move)",
+        "index": 0,
+        "start": 9641,
+        "keys": [
+          {
+            "key": "currentTask",
+            "type": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 0
+  },
+  "dashboard": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 0,
+    "mapMethods": [],
+    "factoryLines": 0,
+    "factories": [],
+    "oneLetter": 0
+  },
+  "global": {
+    "apiWildcard": 0,
+    "entityWildcard": 0,
+    "publicMapOrObject": 5,
+    "mapMethods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+        "method": "com.minierp.backend.global.batch.BatchRunRecorder#record(java.lang.String,java.time.LocalDate,java.lang.String,int,int,java.lang.String,java.time.LocalDateTime)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+        "method": "com.minierp.backend.global.permission.PermissionAccess#grants(long)",
+        "returns": "Map<String, Grant>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/persistence/SqlStore.java",
+        "method": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)",
+        "returns": "List<Map<String, Object>>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/persistence/SqlStore.java",
+        "method": "com.minierp.backend.global.persistence.SqlStore#one(java.lang.String,java.util.Map<java.lang.String,?>,com.minierp.backend.global.exception.ErrorCode)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/persistence/SqlStore.java",
+        "method": "com.minierp.backend.global.persistence.SqlStore#map(java.lang.Object[])",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "factoryLines": 5,
+    "factories": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+        "line": 28,
+        "method": "com.minierp.backend.global.batch.BatchRunRecorder#record(java.lang.String,java.time.LocalDate,java.lang.String,int,int,java.lang.String,java.time.LocalDateTime)",
+        "index": 0,
+        "start": 1075,
+        "keys": [
+          {
+            "key": "job",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "date",
+            "type": "java.time.LocalDate",
+            "nested": null
+          },
+          {
+            "key": "status",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "processed",
+            "type": "int",
+            "nested": null
+          },
+          {
+            "key": "skipped",
+            "type": "int",
+            "nested": null
+          },
+          {
+            "key": "message",
+            "type": "java.lang.String",
+            "nested": null
+          },
+          {
+            "key": "started",
+            "type": "java.time.LocalDateTime",
+            "nested": null
+          },
+          {
+            "key": "finished",
+            "type": "java.time.LocalDateTime",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+        "line": 32,
+        "method": "com.minierp.backend.global.batch.BatchRunRecorder#record(java.lang.String,java.time.LocalDate,java.lang.String,int,int,java.lang.String,java.time.LocalDateTime)",
+        "index": 1,
+        "start": 1543,
+        "keys": [
+          {
+            "key": "id",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+        "line": 54,
+        "method": "com.minierp.backend.global.permission.PermissionAccess#grants(long)",
+        "index": 0,
+        "start": 2283,
+        "keys": [
+          {
+            "key": "id",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+        "line": 84,
+        "method": "com.minierp.backend.global.permission.PermissionAccess#descendants(long)",
+        "index": 0,
+        "start": 3759,
+        "keys": [
+          {
+            "key": "id",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+        "line": 96,
+        "method": "com.minierp.backend.global.permission.PermissionAccess#scope(java.lang.String,long)",
+        "index": 0,
+        "start": 4253,
+        "keys": [
+          {
+            "key": "id",
+            "type": "long",
+            "nested": null
+          }
+        ]
+      }
+    ],
+    "oneLetter": 0
+  },
+  "allMain": {
+    "apiWildcard": 0,
+    "apiCount": 98,
+    "oneLetter": 0,
+    "mainJavaFiles": 257
+  }
+}

@@ -1,0 +1,120 @@
+[
+  {
+    "method": "com.minierp.backend.domain.attendance.repository.AttendanceStore.Schedule#view()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.repository.AttendanceStore.Schedule#view()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleDetailResponseDto",
+    "removesFrom": {
+      "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+      "receiver": "schedule",
+      "keys": [
+        "source",
+        "departmentName"
+      ]
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#render(java.time.LocalDate,java.util.Map<java.lang.String,java.lang.Object>,com.minierp.backend.domain.attendance.repository.AttendanceStore.Day,com.minierp.backend.domain.attendance.repository.AttendanceStore.Schedule,long,long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#homeToday()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto.Leave"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.EmptyDay"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 4,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceService#me(java.lang.String)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Day"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Row"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.User"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Totals"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 4,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Cell"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+    "index": 5,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto.User"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,java.time.LocalDate)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.global.batch.BatchRunRecorder#record",
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "reason": "rejudge→absence.run→BatchRunRecorder.record의 SELECT; 중간 호출 순서는 별도 검사"
+  },
+  {
+    "method": "com.minierp.backend.domain.notification.service.NotificationQueryService#list(boolean,int,int)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.notification.service.NotificationQueryService#unreadCount()",
+    "index": 0,
+    "record": "com.minierp.backend.domain.notification.dto.NotificationUnreadCountResponseDto"
+  }
+]

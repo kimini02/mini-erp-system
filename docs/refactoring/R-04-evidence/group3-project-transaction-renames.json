@@ -1,0 +1,10 @@
+{
+  "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(String,Long,boolean)": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#getMonthlyAttendance(String,Long,boolean)",
+  "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,LocalDate)": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#getAttendanceRecord(long,LocalDate)",
+  "com.minierp.backend.domain.notification.service.NotificationQueryService#read(long)": "com.minierp.backend.domain.notification.service.NotificationQueryService#markAsRead(long)",
+  "com.minierp.backend.domain.notification.service.NotificationQueryService#readAll()": "com.minierp.backend.domain.notification.service.NotificationQueryService#markAllAsRead()",
+  "com.minierp.backend.domain.project.service.BoardProjectService#lock(long)": "com.minierp.backend.domain.project.service.BoardProjectService#lockVisibleProject(long)",
+  "com.minierp.backend.domain.project.service.BoardProjectService#create(Create)": "com.minierp.backend.domain.project.service.BoardProjectService#createProject(Create)",
+  "com.minierp.backend.domain.project.service.BoardProjectService#patch(long,Patch)": "com.minierp.backend.domain.project.service.BoardProjectService#updateProject(long,Patch)",
+  "com.minierp.backend.domain.project.service.BoardProjectService#replaceMembers(long,List<Long>)": "com.minierp.backend.domain.project.service.BoardProjectService#updateProjectMembers(long,List<Long>)"
+}

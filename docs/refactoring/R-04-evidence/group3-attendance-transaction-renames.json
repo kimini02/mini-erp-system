@@ -1,0 +1,4 @@
+{
+  "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(String,Long,boolean)": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#getMonthlyAttendance(String,Long,boolean)",
+  "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,LocalDate)": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#getAttendanceRecord(long,LocalDate)"
+}

@@ -1,0 +1,71 @@
+{
+  "result": {
+    "exit": 0,
+    "seconds": 31.97,
+    "counts": [
+      11,
+      0,
+      0,
+      0
+    ],
+    "recordedMessages": 1
+  },
+  "frames": {
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#<after-all>": {
+      "count": 0,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#<after-each>": {
+      "count": 0,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#<before-all>": {
+      "count": 308,
+      "isolation": 1
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()": {
+      "count": 89,
+      "isolation": 1
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()": {
+      "count": 811,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentSubmissionsCannotSpendSameRemainingDays()": {
+      "count": 80,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()": {
+      "count": 369,
+      "isolation": 6
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#lineRulesHandleNormalSelfFallbackAndDuplicateApprovers()": {
+      "count": 107,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#missingHeadDoesNotAutoApproveAndSnapshotSurvivesHeadReplacement()": {
+      "count": 111,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#notificationInsertFailureRollsBackDocumentLineHistoryAndLeaveLedger()": {
+      "count": 84,
+      "isolation": 1
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#outsiderCannotReadEditOrApproveAndDeniedRequestsLeaveNoChanges()": {
+      "count": 81,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#overtimeUsesOneDateAndTimesAndApproves()": {
+      "count": 68,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#previewShowsActualFailingStepWithoutSubmittingAnyPartialLine()": {
+      "count": 48,
+      "isolation": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#rejectWithdrawAndResubmitKeepLedgerInvariantAndOriginalDocument()": {
+      "count": 272,
+      "isolation": 0
+    }
+  }
+}

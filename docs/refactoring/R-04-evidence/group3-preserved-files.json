@@ -1,0 +1,18 @@
+{
+  "backend/src/main/java/com/minierp/backend/domain/project/dto/ProjectResponseDto.java": "f659f3ae9c34f94aa59330f0f3c083559395926f0637f871cf79488fd952177a",
+  "backend/src/main/java/com/minierp/backend/domain/project/dto/ProjectMemberResponseDto.java": "cf26a4186b80723b30f02e2dff9a3667209dc930dd26363ced52376ee99eeb50",
+  "backend/src/main/java/com/minierp/backend/domain/project/dto/ProjectPermissionDto.java": "e88ad3f663bd8f3775c1c89af845b708b3782c3e8fdb5dbdd806633c0fdc3d34",
+  "backend/src/main/java/com/minierp/backend/domain/project/dto/ProjectProgressResponseDto.java": "cddd1cc17990e9b8bfcf8122ac36b83ab8486b454d6ac67eb7211899788c417f",
+  "backend/src/main/java/com/minierp/backend/domain/project/dto/LeaderSummaryDto.java": "141dccbbb01ab6bf40f706085158ce819a500722cec1e51e3ef4c94e7373f3aa",
+  "backend/src/main/java/com/minierp/backend/domain/project/dto/AssignableMemberDto.java": "128f1c4b5583a7e617263e7a990071f779467855ae3a71ae7c4945a06ced739f",
+  "backend/src/main/java/com/minierp/backend/domain/project/dto/AvailableMemberResponseDto.java": "c64d97de5544863e105ab3b762c58083baeaaa7b76e47f491610eb520018261d",
+  "backend/src/main/java/com/minierp/backend/domain/task/dto/TaskResponseDto.java": "443890027817fe375b6e6985db55f7f0b4196fbb1a1c9335605fb0ca2472e4c7",
+  "backend/src/main/java/com/minierp/backend/domain/task/dto/TaskAssignmentResponseDto.java": "93103442ddf9bee107a80fa862764b8e211d232d629e89dbcd8304d2cf42a5bf",
+  "backend/src/main/java/com/minierp/backend/domain/task/dto/RecentAssignmentDto.java": "587b3a4ca925fbc43f947a13193381572010ffb5024792f8366f7250c3b74154",
+  "backend/src/main/java/com/minierp/backend/domain/calendar/dto/CalendarEventResponseDto.java": "868c2d60188732d70cf9d5350521476497aaf12e87a3a37cd9113482fdff40f2",
+  "backend/src/main/java/com/minierp/backend/domain/calendar/controller/CalendarController.java": "6f75b20d9def8a8a83b57026b8dd75ce2ed9803611982df89919dcf0dd9ef145",
+  "backend/src/main/java/com/minierp/backend/domain/calendar/service/CalendarService.java": "565e3e9df562100f778c9481cc9fca6f0bacc6df5aae2dab632e6044b90a58bd",
+  "backend/src/main/java/com/minierp/backend/domain/dashboard/dto/AdminDashboardResponseDto.java": "4df973cc29026bea9823ece4ca72949f6aa35c9d7245a93ac405cb3bb7af51e1",
+  "backend/src/main/java/com/minierp/backend/domain/dashboard/dto/DashboardProjectDto.java": "4ce267224e4302c2625bb2a1737358c61218913903c5343d2a453020cd241a11",
+  "backend/src/main/java/com/minierp/backend/domain/dashboard/dto/DashboardResponseDto.java": "086c73f45964102d001393badabc9289a80c2cda3ca5ec2b362cef8936a61178"
+}

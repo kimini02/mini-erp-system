@@ -1,0 +1,20 @@
+{
+  "main": {
+    "count": 1,
+    "locations": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/project/entity/ProjectMember.java",
+        "line": 14,
+        "kind": "ANNOTATION",
+        "length": 114,
+        "start": 378,
+        "end": 493,
+        "joined": "@Table(name = \"project_members\", uniqueConstraints = @UniqueConstraint(columnNames = { \"project_id\", \"user_id\" }))"
+      }
+    ]
+  },
+  "test": {
+    "count": 0,
+    "locations": []
+  }
+}
