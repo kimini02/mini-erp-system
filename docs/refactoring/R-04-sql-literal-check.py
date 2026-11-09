@@ -6,7 +6,9 @@ classified by their attributed AST occurrence: map key, row lookup, or state val
 The 16 map keys must match the item's nested record components. Row keys and state
 values must increase by the same counts across InboxService and the item record.
 Outside that region all literals (including SQL/parameters) remain exact. Only
-total/content/lines may be added to InboxRepository. No unknown category is allowed.
+total/content/lines may be added to InboxRepository. AttendanceStore.Schedule.view
+may lose exactly six response-key occurrences and one HH:mm format occurrence;
+outside-view literal order/values stay exact. No unknown category is allowed.
 """
 import argparse,collections,importlib.util,json,os
 from pathlib import Path
@@ -85,6 +87,32 @@ def inbox_exception(before,after,old_rows,new_rows,removed,added,classpath):
  allowed=not invalid_added and not protected_diff and removed==movable and not unknown and len(response_keys)==16 and len(source_paths)==16 and source_paths==target_paths and not count_diff
  return {'allowed':allowed,'classificationCounts':dict(counts),'classifiedTotal':len(occurrences),'removedTotal':sum(removed.values()),'occurrences':occurrences,'unknownOccurrences':unknown,'protectedLiteralDifferences':protected_diff,'removedMatchesClassified':removed==movable,'responsePathsBefore':source_paths,'responsePathsAfter':target_paths,'expectedMovedOccurrences':dict(expected),'actualNewOccurrences':{v:delta[v] for v in expected},'movedOccurrenceDifferences':count_diff,'invalidAdded':invalid_added}
 
+
+ATTENDANCE='backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java'
+SCHEDULE='backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceScheduleResponseDto.java'
+def schedule_exception(before,after,old_rows,new_rows,removed,added,classpath):
+ if not classpath or not (after/SCHEDULE).is_file():return {'allowed':False,'reason':'Schedule record and attributed classpath required'}
+ old=a.analyze(before,classpath,[ATTENDANCE]);new=a.analyze(after,classpath,[ATTENDANCE,SCHEDULE])
+ views=[method for _,cls in a.classes(old) if cls['qualified'].endswith('AttendanceStore.Schedule') for method in cls['members'] if method['kind']=='METHOD' and method['name']=='view']
+ if len(views)!=1:return {'allowed':False,'reason':'Original Schedule.view not unique'}
+ view=views[0];literals=[n for n in a.walk(view) if n['kind']=='STRING_LITERAL']
+ maps=[n for n in a.walk(view) if response.map_call(n)]
+ keys=[n['value'] for n in maps[0]['args'][::2]] if len(maps)==1 else []
+ expected=['startTime','endTime','lateGraceMin','halfBoundary','source','departmentName']
+ key_starts={n['start'] for n in maps[0]['args'][::2]} if len(maps)==1 else set()
+ occurrences=[{'line':n['line'],'start':n['start'],'value':n['value'],'category':'responseKey' if n['start'] in key_starts else 'timeFormat' if n['value']=='HH:mm' else 'UNKNOWN'} for n in literals]
+ moved=collections.Counter(n['value'] for n in literals)
+ original_outside=[n['value'] for n in a.walk(old) if n['kind']=='STRING_LITERAL' and not view['start']<=n['start']<view['end']]
+ candidate_store=next(unit for unit in new if unit['file']==ATTENDANCE)
+ candidate_outside=[n['value'] for n in a.walk(candidate_store) if n['kind']=='STRING_LITERAL']
+ fields=response.records(new).get('com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto',[])
+ target_keys=[field['key'] for field in fields]
+ format_before=sum(row['file']==SCHEDULE and row['kind']=='L' and row['value']=='HH:mm' for row in old_rows)
+ format_after=sum(row['file']==SCHEDULE and row['kind']=='L' and row['value']=='HH:mm' for row in new_rows)
+ unknown=[row for row in occurrences if row['category']=='UNKNOWN']
+ allowed=not added and removed==moved and len(literals)==7 and keys==expected==target_keys and original_outside==candidate_outside and format_after-format_before==1 and not unknown
+ return {'allowed':allowed,'occurrences':occurrences,'removedTotal':sum(removed.values()),'classifiedTotal':len(occurrences),'responsePathsBefore':keys,'responsePathsAfter':target_keys,'outsideLiteralSequenceSame':original_outside==candidate_outside,'formatOccurrencesBefore':format_before,'formatOccurrencesAfter':format_after,'unknownOccurrences':unknown,'added':dict(added)}
+
 def compare(before,after,classpath=None):
  old_rows=m.scan(before);new_rows=m.scan(after);x=values(before,old_rows);y=values(after,new_rows);d=[];changes=[]
  for f in sorted(x.keys()|y.keys()):
@@ -92,6 +120,7 @@ def compare(before,after,classpath=None):
   row={'file':f,'removed':dict(removed),'added':dict(added)}
   if removed or added:
    if f==INBOX:row['exception']=inbox_exception(before,after,old_rows,new_rows,removed,added,classpath)
+   if f==ATTENDANCE:row['exception']=schedule_exception(before,after,old_rows,new_rows,removed,added,classpath)
    if not row.get('exception',{}).get('allowed'):d.append(row)
   changes.append(row)
  return {'filesBefore':len(x),'filesAfter':len(y),'occurrencesBefore':sum(sum(v.values()) for v in x.values()),'occurrencesAfter':sum(sum(v.values()) for v in y.values()),'differences':len(d),'differencesDetail':d,'fileChanges':changes}

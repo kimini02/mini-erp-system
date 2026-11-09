@@ -22,7 +22,7 @@ def audit(units,renames=None,extra_owners=()):
   return full
  for unit,cls in a.classes(units):
   if not re.search(r'/(?:controller|service|handler|batch|scheduler)/|FormHandler\.java$',unit['file']) and cls['qualified'] not in extra_owners:continue
-  owner=cls['qualified'];methods={m['signature']:m for m in cls['members'] if m['kind']=='METHOD' and m['name']!='<init>'};fields={m['name']:m.get('type',m.get('declaredType')) for m in cls['members'] if m['kind']=='VARIABLE' and 'static' not in m['modifiers']}
+  owner=cls['qualified'];methods={m['signature']:m for m in cls['members'] if m['kind']=='METHOD' and m['name']!='<init>'};fields={m['name']:m.get('type',m.get('declaredType')) for m in cls['members'] if cls['kind'] != 'RECORD' and m['kind']=='VARIABLE' and 'static' not in m['modifiers']}
   bean_types=set(fields.values())
   for typ in fields.values():
    match=re.fullmatch(r'java.util.List<(.+)>',typ or '')
@@ -118,9 +118,9 @@ def expand_inbox_search(units,result,renames=None):
 
 def compare(before,after,renames):
  # Only explicitly renamed pure converters can be audited at their new DTO owner.
- moved_owners={v.split('#')[0] for v in renames.values() if '.dto.' in v.split('#')[0]}
+ moved_owners={v.split('#')[0] for v in renames.values() if '.dto.' in v.split('#')[0] or v.split('#')[0] == 'com.minierp.backend.global.response.PageResponseDto'}
  left=expand_inbox_search(before,audit(before,renames),renames);right=expand_inbox_search(after,audit(after,extra_owners=moved_owners));diff=[]
- allowed={v for v in renames.values() if '.dto.' in v.split('#')[0]}
+ allowed={v for v in renames.values() if '.dto.' in v.split('#')[0] or v.split('#')[0] == 'com.minierp.backend.global.response.PageResponseDto'}
  right['frames']={k:v for k,v in right['frames'].items() if k.split('#')[0] not in moved_owners or any(k==target or k.startswith(target+'(') for target in allowed)}
  for key in sorted(left['frames'].keys()|right['frames'].keys()):
   x=left['frames'].get(key);y=right['frames'].get(key)

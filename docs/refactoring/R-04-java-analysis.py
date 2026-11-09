@@ -75,7 +75,8 @@ class R04Ast {
    else if(t instanceof LabeledStatementTree v)r.put("body",node(v.getStatement()));
    else if(t instanceof YieldTree v)r.put("expression",node(v.getValue()));
    else if(t instanceof AnnotationTree v)r.putAll(map("name",v.getAnnotationType().toString(),"raw",source.substring((int)start,(int)end),"args",nodes(v.getArguments())));
-   else if(t instanceof InstanceOfTree v)r.put("expression",node(v.getExpression()));
+   else if(t instanceof InstanceOfTree v)r.putAll(map("expression",node(v.getExpression()),"pattern",node(v.getPattern())));
+   else if(t instanceof BindingPatternTree v)r.put("variable",node(v.getVariable()));
    return r;
   }
  }

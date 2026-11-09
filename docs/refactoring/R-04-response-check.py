@@ -5,7 +5,12 @@ Mapping entries identify an original method and map-call index, or a repository
 SELECT method for rows formerly returned directly. `omit`/`append` describe the
 original conditional remove/put operations, with their source rationale recorded
 in the mapping. Nested inline maps are recursively compared with record fields;
-indirect nested values use explicit `nested` origin mappings. Keys never come
+indirect nested values use explicit `nested` origin mappings. `putsFrom.keys`
+selects one documented conditional shape; repeated put updates keep key order.
+`removesFrom` reads literal remove keys from the original AST. Branch maps and
+computeIfAbsent maps use their own method/index, including lambda maps. Sources
+returned by another bean use a method/index or SELECT mapping and a documented
+call chain. Keys never come
 from response snapshots, so absent-success and always-null paths remain audited.
 """
 import argparse,collections,importlib.util,json,re
@@ -20,7 +25,7 @@ def shape(n):
  return pairs
 
 def inventory(units,include_repository=False):
- maps=[];puts=[];variables=[];public_maps=[];wildcards=[];apis=[]
+ maps=[];puts=[];removes=[];variables=[];public_maps=[];wildcards=[];apis=[]
  for unit,cls in a.classes(units):
   if '/repository/' in unit['file'] and not include_repository:continue
   prefix=''
@@ -39,13 +44,17 @@ def inventory(units,include_repository=False):
      for path in paths:apis.append({'method':match[1].upper(),'path':prefix+path,'owner':owner})
    for n in a.walk([method['parameters'],method['body']]):
     loc={'file':unit['file'],'line':n['line'],'method':owner}
-    if map_call(n):maps.append({**loc,'index':index,'keys':shape(n)});index+=1
+    if map_call(n):maps.append({**loc,'index':index,'start':n['start'],'keys':shape(n)});index+=1
     if n['kind']=='METHOD_INVOCATION' and name(n)=='put':
      recv=(n.get('select') or {}).get('receiver') or {}
      if re.fullmatch(r'java.util.(?:\w*Map)<java.lang.String,java.lang.Object>',recv.get('type','')):
-      puts.append({**loc,'receiver':recv.get('name',''),'key':n['args'][0].get('value'),'valueType':n['args'][1].get('type')})
+      puts.append({**loc,'receiver':recv.get('name',''),'key':n['args'][0].get('value'),'valueType':n['args'][1].get('type'),'nested':shape(n['args'][1]) if map_call(n['args'][1]) else None})
+    if n['kind']=='METHOD_INVOCATION' and name(n)=='remove':
+     recv=(n.get('select') or {}).get('receiver') or {}
+     if re.fullmatch(r'java.util.(?:\w*Map)<java.lang.String,java.lang.Object>',recv.get('type','')):
+      removes.append({**loc,'receiver':recv.get('name',''),'key':n['args'][0].get('value')})
     if n['kind']=='VARIABLE' and re.search(r'Map<java.lang.String,java.lang.Object>',n.get('type','')):variables.append({**loc,'name':n['name'],'type':n['type']})
- return {'maps':maps,'puts':puts,'rowMaps':variables,'publicMapMethods':public_maps,'wildcards':wildcards,'apis':apis}
+ return {'maps':maps,'puts':puts,'removes':removes,'rowMaps':variables,'publicMapMethods':public_maps,'wildcards':wildcards,'apis':apis}
 
 def sql_keys(units,method):
  cls,name_=method.split('#',1);matches=[]
@@ -114,8 +123,21 @@ def check(before,after,mapping):
    initializers=[n['initializer'] for _,c in a.classes(before) if c['qualified']==origin_owner for method in c['members'] if method['kind']=='METHOD' and method['signature']==origin_method for n in a.walk(method['body']) if n['kind']=='VARIABLE' and n['name']==origin['receiver']]
    expected=entry.get('method',entry.get('sql',''))
    calls=[n.get('owner','')+'#'+n.get('signature','') for initializer in initializers for n in a.walk(initializer) if n['kind']=='METHOD_INVOCATION']
-   if not any(call==expected or call.startswith(expected+'(') for call in calls):raise ValueError('put receiver does not originate from mapped map/SELECT: '+str(origin))
-   fields += [{'key':p['key'],'type':p['valueType'],'nested':None} for p in found]
+   inline_source=any(map_call(initializer) and initializer.get('start')==matches[0]['start'] for initializer in initializers) if 'method' in entry and 'index' in entry else False
+   if not inline_source and not any(call==expected or call.startswith(expected+'(') for call in calls):raise ValueError('put receiver does not originate from mapped map/SELECT: '+str(origin))
+   if 'keys' in origin:
+    if not set(origin['keys'])<=set(p['key'] for p in found):raise ValueError('Selected put key not found: '+str(origin))
+    found=[p for p in found if p['key'] in origin['keys']]
+   for put in found:
+    field={'key':put['key'],'type':put['valueType'],'nested':put.get('nested')}
+    previous=next((i for i,f in enumerate(fields) if f['key']==field['key']),None)
+    if previous is None:fields.append(field)
+    else:fields[previous]=field
+  if 'removesFrom' in entry:
+   origin=entry['removesFrom'];removed=[p['key'] for p in inv['removes'] if p['method']==origin['method'] and p['receiver']==origin['receiver']]
+   if not removed or any(key is None for key in removed):raise ValueError('Literal remove operations required: '+str(origin))
+   if 'keys' in origin and origin['keys']!=removed:raise ValueError('Remove keys differ: '+str(origin))
+   fields=[field for field in fields if field['key'] not in removed]
   target=rec.get(entry['record']);source_keys=[f['key'] for f in fields];target_keys=[f['key'] for f in target] if target else None
   rows.append({'origin':label,'record':entry['record'],'before':fields,'after':target,'reason':entry.get('reason','')})
   if source_keys!=target_keys:diff.append({'origin':label,'record':entry['record'],'expected':source_keys,'actual':target_keys})
