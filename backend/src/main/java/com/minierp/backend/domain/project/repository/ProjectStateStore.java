@@ -22,13 +22,13 @@ public class ProjectStateStore {
         long done = 0;
         long todo = 0;
         for (var row : counts) {
-            long n = number(row, "n");
-            total += n;
+            long statusCount = number(row, "n");
+            total += statusCount;
             if ("DONE".equals(row.get("task_status"))) {
-                done = n;
+                done = statusCount;
             }
             if ("TODO".equals(row.get("task_status"))) {
-                todo = n;
+                todo = statusCount;
             }
         }
         String status = total == 0 || todo == total ? "READY" : done == total ? "DONE" : "PROGRESS";

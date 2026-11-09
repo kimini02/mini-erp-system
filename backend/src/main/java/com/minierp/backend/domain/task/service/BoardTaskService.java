@@ -56,7 +56,7 @@ public class BoardTaskService {
     }
 
     public Map<String, Object> board(long id) {
-        var p = projects.visible(id);
+        var p = projects.getVisibleProject(id);
         var tasks = queries.findBoardTasks(id);
         // Members and all assignments in one query: no per-card lookups, including empty boards.
         var people = queries.findBoardPeople(id);
@@ -78,12 +78,12 @@ public class BoardTaskService {
                             .map(t -> card(t, p, assignments.getOrDefault(number(t, "id"), List.of())))
                             .toList()));
         }
-        return map("project", projects.view(p), "members", members, "permissions", projects.permissions(p),
+        return map("project", projects.toSummary(p), "members", members, "permissions", projects.getPermissions(p),
                 "columns", columns);
     }
 
     public Map<String, Object> detail(long id) {
-        var p = projects.visible(projectId(id));
+        var p = projects.getVisibleProject(projectId(id));
         return detail(id, p);
     }
 
@@ -143,7 +143,7 @@ public class BoardTaskService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Map<String, Object> create(long project, Create r) {
-        var p = projects.lock(project);
+        var p = projects.lockVisibleProject(project);
         projects.requireManage(p);
         var assigned = validateAssignees(project, r.assigneeIds());
         var end = r.endDate() == null ? (LocalDate) p.get("end_date") : r.endDate();
@@ -166,7 +166,7 @@ public class BoardTaskService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Map<String, Object> patch(long id, Patch r) {
         long project = projectId(id);
-        var p = projects.lock(project);
+        var p = projects.lockVisibleProject(project);
         projects.requireManage(p);
         var task = raw(id);
         Set<Long> selected = r.assigneeIds() == null ? null : validateAssignees(project, r.assigneeIds());
@@ -203,7 +203,7 @@ public class BoardTaskService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Map<String, Object> move(long id, Move r) {
         long project = projectId(id);
-        var p = projects.lock(project);
+        var p = projects.lockVisibleProject(project);
         var task = raw(id);
         var people = assignees(id);
         if (!projects.canManage(p) && !assigned(people)) {

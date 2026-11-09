@@ -32,14 +32,14 @@ public class ProjectStore {
                         "priority", priority, "leader", leader, "now", now));
     }
 
-    public int insertLeaderMember(long p, Long u, LocalDateTime now) {
+    public int insertLeaderMember(long projectId, Long userId, LocalDateTime now) {
         return db.update("INSERT INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)",
-                map("p", p, "u", u, "now", now));
+                map("p", projectId, "u", userId, "now", now));
     }
 
-    public int insertLeaderIfMissing(long p, Long u, LocalDateTime now) {
+    public int insertLeaderIfMissing(long projectId, Long userId, LocalDateTime now) {
         return db.update("INSERT IGNORE INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)",
-                map("p", p, "u", u, "now", now));
+                map("p", projectId, "u", userId, "now", now));
     }
 
     public int updateProject(
@@ -62,9 +62,9 @@ public class ProjectStore {
                 map("id", id, "removed", removed));
     }
 
-    public int insertMember(long p, long u, LocalDateTime now) {
+    public int insertMember(long projectId, long userId, LocalDateTime now) {
         return db.update("INSERT INTO project_members(project_id,user_id,created_at) VALUES(:p,:u,:now)",
-                map("p", p, "u", u, "now", now));
+                map("p", projectId, "u", userId, "now", now));
     }
 
     public int updateChangedAt(long id, LocalDateTime now) {

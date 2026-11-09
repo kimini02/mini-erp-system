@@ -114,12 +114,7 @@ public class EmployeeService {
         };
     }
 
-    public static Map<String, Object> page(List<?> content, int page, int size, long total) {
-        long pages = (total + size - 1) / size;
-        return map("content", content,
-                "page", map("number", page, "size", size, "totalElements", total, "totalPages", pages,
-                        "first", page == 0, "last", page + 1 >= pages, "numberOfElements", content.size()));
-    }
+
 
     public EmployeeListResponseDto getEmployees(
             String query,

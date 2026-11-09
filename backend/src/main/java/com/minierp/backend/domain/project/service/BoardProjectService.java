@@ -2,7 +2,8 @@ package com.minierp.backend.domain.project.service;
 
 import com.minierp.backend.domain.project.dto.BoardProjectRequests.*;
 import com.minierp.backend.domain.project.entity.ProjectStatus;
-import com.minierp.backend.domain.user.service.EmployeeService;
+import com.minierp.backend.global.response.PageResponseDto;
+import com.minierp.backend.domain.project.dto.*;
 import com.minierp.backend.domain.project.repository.ProjectQueries;
 import com.minierp.backend.domain.project.repository.ProjectStore;
 import com.minierp.backend.global.permission.*;
@@ -31,11 +32,11 @@ public class BoardProjectService {
         return queries.visibility(args, scope, actor());
     }
 
-    public Map<String, Object> visible(long id) {
-        return visible(id, true);
+    public Map<String, Object> getVisibleProject(long id) {
+        return getVisibleProject(id, true);
     }
 
-    private Map<String, Object> visible(long id, boolean summary) {
+    private Map<String, Object> getVisibleProject(long id, boolean summary) {
         access.require("PROJECT", Action.VIEW);
         var today = LocalDate.now(clock);
         var scope = access.scope("PROJECT");
@@ -52,9 +53,9 @@ public class BoardProjectService {
 
     /** Project is the first locked row. Recheck visibility after obtaining the lock. */
     @Transactional(propagation = Propagation.MANDATORY)
-    public Map<String, Object> lock(long id) {
+    public Map<String, Object> lockVisibleProject(long id) {
         store.findLockedProject(id);
-        return visible(id, false);
+        return getVisibleProject(id, false);
     }
 
     public boolean canManage(Map<String, Object> row) {
@@ -71,28 +72,20 @@ public class BoardProjectService {
         }
     }
 
-    public Map<String, Object> view(Map<String, Object> p) {
-        long total = number(p, "task_count");
-        long done = number(p, "done_count");
-        return map("id", p.get("id"), "key", p.get("project_key"), "title", p.get("title"), "content", p.get("content"),
-                "status", p.get("status"), "priority", p.get("priority"), "startDate", p.get("start_date"),
-                "endDate", p.get("end_date"),
-                "leader", p.get("leader_id") == null
-                        ? null
-                        : map("id", p.get("leader_id"), "name", p.get("leader_name"), "title", p.get("leader_title")),
-                "memberCount", p.get("member_count"), "taskCount", total, "doneCount", done,
-                "overdueCount", p.get("overdue_count"), "progressPct", total == 0 ? 0 : done * 100 / total,
-                "myRole", p.get("leader_id") != null && number(p, "leader_id") == actor()
-                        ? "LEADER"
-                        : number(p, "is_member") > 0 ? "MEMBER" : null);
+    public ProjectSummaryResponseDto toSummary(Map<String, Object> project) {
+        String myRole = project.get("leader_id") != null && number(project, "leader_id") == actor()
+                ? "LEADER"
+                : number(project, "is_member") > 0 ? "MEMBER" : null;
+        return ProjectSummaryResponseDto.from(project, myRole);
     }
 
-    public Map<String, Object> permissions(Map<String, Object> p) {
-        boolean manage = canManage(p);
-        return map("canManage", manage, "canCreateTask", manage);
+    public ProjectPermissionsResponseDto getPermissions(Map<String, Object> projectRow) {
+        boolean manage = canManage(projectRow);
+        return new ProjectPermissionsResponseDto(manage, manage);
     }
 
-    public Map<String, Object> list(ProjectStatus status, String q, int page, int size) {
+    public PageResponseDto<ProjectSummaryResponseDto> getProjects(ProjectStatus status, String query, int page,
+            int size) {
         access.require("PROJECT", Action.VIEW);
         if (page < 0 || size < 1 || size > 100) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
@@ -102,24 +95,24 @@ public class BoardProjectService {
         var scope = access.scope("PROJECT");
         long actor = actor();
         String statusValue = status == null ? null : status.name();
-        String pattern = q == null || q.isBlank()
+        String pattern = query == null || query.isBlank()
                 ? null
-                : "%" + q.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+                : "%" + query.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
         long total = queries.countProjects(today, offset, size, scope, actor, statusValue, pattern);
         var rows = queries.findProjects(today, offset, size, scope, actor, statusValue, pattern);
-        return EmployeeService.page(rows.stream().map(this::view).toList(), page, size, total);
+        return PageResponseDto.of(rows.stream().map(this::toSummary).toList(), page, size, total);
     }
 
-    public List<Map<String, Object>> members(long id) {
-        return queries.findMembers(id);
+    public List<ProjectPersonResponseDto> getMembers(long id) {
+        return queries.findMembers(id).stream().map(ProjectPersonResponseDto::from).toList();
     }
 
-    public Map<String, Object> detail(long id) {
-        var p = visible(id);
-        var result = view(p);
-        result.put("members", members(id));
-        result.put("permissions", permissions(p));
-        return result;
+    public ProjectDetailResponseDto getProject(long id) {
+        var projectRow = getVisibleProject(id);
+        var summary = toSummary(projectRow);
+        var members = getMembers(id);
+        var permissions = getPermissions(projectRow);
+        return ProjectDetailResponseDto.from(summary, members, permissions);
     }
 
     private void active(long user) {
@@ -135,65 +128,68 @@ public class BoardProjectService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String, Object> create(Create r) {
+    public ProjectDetailResponseDto createProject(Create request) {
         access.require("PROJECT", Action.VIEW);
         access.require("PROJECT", Action.CREATE);
-        period(r.startDate(), r.endDate());
-        active(r.leaderId());
+        period(request.startDate(), request.endDate());
+        active(request.leaderId());
         long id;
         try {
-            id = store.insertProject(r.key(), r.title(), r.content(), r.startDate(), r.endDate(),
-                    r.priority() == null ? "MEDIUM" : r.priority().name(), r.leaderId(), LocalDateTime.now(clock));
+            id = store.insertProject(request.key(), request.title(), request.content(), request.startDate(),
+                    request.endDate(),
+                    request.priority() == null ? "MEDIUM" : request.priority().name(), request.leaderId(),
+                            LocalDateTime.now(clock));
         } catch (org.springframework.dao.DuplicateKeyException e) {
             throw new BusinessException(ErrorCode.PROJECT_KEY_DUPLICATE);
         }
-        store.insertLeaderMember(id, r.leaderId(), LocalDateTime.now(clock));
+        store.insertLeaderMember(id, request.leaderId(), LocalDateTime.now(clock));
         // Creation may designate an owner outside the creator's viewing scope. Return the created data, not an
         // unrestricted read endpoint.
-        var p = queries.findSummary(id, LocalDate.now(clock), actor());
-        var result = view(p);
-        result.put("members", members(id));
-        return result;
+        var projectRow = queries.findSummary(id, LocalDate.now(clock), actor());
+        var summary = toSummary(projectRow);
+        var members = getMembers(id);
+        return ProjectDetailResponseDto.from(summary, members, null);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String, Object> patch(long id, Patch r) {
-        var p = lock(id);
-        requireManage(p);
-        var start = r.startDate() == null ? (LocalDate) p.get("start_date") : r.startDate();
-        var end = r.endDate() == null ? (LocalDate) p.get("end_date") : r.endDate();
+    public ProjectDetailResponseDto updateProject(long id, Patch request) {
+        var projectRow = lockVisibleProject(id);
+        requireManage(projectRow);
+        var start = request.startDate() == null ? (LocalDate) projectRow.get("start_date") : request.startDate();
+        var end = request.endDate() == null ? (LocalDate) projectRow.get("end_date") : request.endDate();
         period(start, end);
-        if (r.title() != null && r.title().isBlank()) {
+        if (request.title() != null && request.title().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        if (r.leaderId() != null) {
-            active(r.leaderId());
-            store.insertLeaderIfMissing(id, r.leaderId(), LocalDateTime.now(clock));
+        if (request.leaderId() != null) {
+            active(request.leaderId());
+            store.insertLeaderIfMissing(id, request.leaderId(), LocalDateTime.now(clock));
         }
-        store.updateProject(id, r.title(), r.content(), start, end, r.priority() == null ? null : r.priority().name(),
-                r.leaderId(), LocalDateTime.now(clock));
+        store.updateProject(id, request.title(), request.content(), start, end,
+                request.priority() == null ? null : request.priority().name(),
+                request.leaderId(), LocalDateTime.now(clock));
         // A manager can transfer ownership out of their scope. Return this completed mutation without a second scope
         // denial/rollback.
         var changed = queries.findSummary(id, LocalDate.now(clock), actor());
-        var result = view(changed);
-        result.put("members", members(id));
-        return result;
+        var summary = toSummary(changed);
+        var members = getMembers(id);
+        return ProjectDetailResponseDto.from(summary, members, null);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String, Object> replaceMembers(long id, List<Long> requested) {
-        var p = lock(id);
-        requireManage(p);
-        var selected = validateMembers(p, requested);
+    public ProjectDetailResponseDto updateProjectMembers(long id, List<Long> requested) {
+        var projectRow = lockVisibleProject(id);
+        requireManage(projectRow);
+        var selected = validateMembers(projectRow, requested);
         applyMembers(id, selected);
-        return detail(id);
+        return getProject(id);
     }
 
-    private Set<Long> validateMembers(Map<String, Object> p, List<Long> requested) {
-        long id = number(p, "id");
+    private Set<Long> validateMembers(Map<String, Object> projectRow, List<Long> requested) {
+        long id = number(projectRow, "id");
         Set<Long> selected = new LinkedHashSet<>(requested);
-        if (p.get("leader_id") != null) {
-            selected.add(number(p, "leader_id"));
+        if (projectRow.get("leader_id") != null) {
+            selected.add(number(projectRow, "leader_id"));
         }
         var existing = memberIds(id);
         for (long user : selected) {
@@ -201,7 +197,7 @@ public class BoardProjectService {
                 active(user);
             }
         }
-        var removed = existing.stream().filter(u -> !selected.contains(u)).toList();
+        var removed = existing.stream().filter(userId -> !selected.contains(userId)).toList();
         if (!removed.isEmpty() && queries.countUnfinishedForMembers(id, removed) > 0) {
             throw new BusinessException(ErrorCode.PROJECT_MEMBER_HAS_TASKS);
         }
@@ -209,12 +205,12 @@ public class BoardProjectService {
     }
 
     private List<Long> memberIds(long id) {
-        return queries.findMemberIds(id).stream().map(r -> number(r, "user_id")).toList();
+        return queries.findMemberIds(id).stream().map(member -> number(member, "user_id")).toList();
     }
 
     private void applyMembers(long id, Set<Long> selected) {
         var old = memberIds(id);
-        var removed = old.stream().filter(u -> !selected.contains(u)).toList();
+        var removed = old.stream().filter(userId -> !selected.contains(userId)).toList();
         if (!removed.isEmpty()) {
             store.deleteMembers(id, removed);
         }
