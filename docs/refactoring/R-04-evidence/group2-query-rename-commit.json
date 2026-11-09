@@ -1,0 +1,6 @@
+{
+  "commit": "24ac2868df90a5e9226679564e699499a55c0686",
+  "files": [
+    "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java"
+  ]
+}

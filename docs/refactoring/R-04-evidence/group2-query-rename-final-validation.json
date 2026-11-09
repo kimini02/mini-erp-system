@@ -1,0 +1,51 @@
+{
+  "sourceCommit": "24ac2868df90a5e9226679564e699499a55c0686",
+  "finalDocsCompile": {
+    "exit": 0,
+    "seconds": 10.47
+  },
+  "sourceHashesMatchTestedCode": true,
+  "recordingOn": {
+    "exit": 0,
+    "seconds": 463.83,
+    "counts": [
+      231,
+      0,
+      0,
+      0
+    ],
+    "recordedMessages": 1,
+    "comparison": {
+      "exit": 0,
+      "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=10",
+      "warnings": [
+        "com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()",
+        "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+        "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()",
+        "com.minierp.backend.integration.M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()",
+        "com.minierp.backend.integration.M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()",
+        "com.minierp.backend.integration.M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+        "com.minierp.backend.integration.M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()",
+        "com.minierp.backend.integration.M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()",
+        "com.minierp.backend.integration.M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()",
+        "com.minierp.backend.integration.M4OverdueTest#concurrentRunsSendOnlyOnce()"
+      ]
+    }
+  },
+  "recordingOff": {
+    "exit": 0,
+    "seconds": 458.55,
+    "counts": [
+      231,
+      0,
+      0,
+      0
+    ],
+    "recordedMessages": 0
+  },
+  "baselineHashes": {
+    "sql.json": "8ca96939bfbd887a037156bc523f7e60fdd9961910ec950a25c986e73fca4930",
+    "responses.json": "2e2acc5d706ea90531d44a7f957938f5e9a67a0d3e049d8fde0fc8b41dddcebc",
+    "masked-fields.txt": "7c4c8e12a7287aafc91ce4073f0ab047be4086f390cd26bc9901669acee5156e"
+  }
+}

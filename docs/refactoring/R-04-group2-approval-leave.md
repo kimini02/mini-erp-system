@@ -8,7 +8,7 @@
 
 ## 커밋
 
-문서·증거를 담은 마지막 커밋은 이 문서가 속한 `docs(refactor): R-04 4단계 묶음 2 기록`으로 조회할 수 있다.
+첫 보고서·증거 커밋은 `83c80d3`이다. 사용자 확인 뒤 검색 매개변수 이름을 `24ac286`에서 보완했다. 최종 문서 커밋은 `docs(refactor): 결재함 검색 이름 보완 검증 기록`이며 Java 변경은 없다. 아래 추가 검증은 최종 Java 소스와 동일한 `24ac286`을 대상으로 새로 실행했다.
 
 | 커밋 | 묶음 | 변경 파일 |
 | --- | --- | --- |
@@ -20,6 +20,8 @@
 | c46cbf2 | 출현 위치별 검사 보완 | 2 |
 | 47a2cca | 양식·결재함 | 9 |
 | 941e351 | 휴가 | 13 |
+| 83c80d3 | 첫 보고서·증거 | 64 |
+| 24ac286 | 결재함 검색 매개변수 이름 | 1 |
 
 ## 준비 보완 결과
 
@@ -39,6 +41,7 @@
 | documents | 동일 | 0/0 | 83 | 0 | 0 | 0 | 231/0/0/0 · 439.85s · diff 0 · 경고 12 | 231/0/0/0 · 406.22s · 기록 0 | 2/0/0/0 · 43.45s · diff 0 |
 | approval | 동일 | 0/0 | 83 | 0 | 0 | 0 | 231/0/0/0 · 421.87s · diff 0 · 경고 12 | 231/0/0/0 · 419.44s · 기록 0 | 2/0/0/0 · 20.9s · diff 0 |
 | leave | 동일 | 0/0 | 83 | 0 | 0 | 0 | 231/0/0/0 · 414.33s · diff 0 · 경고 11 | 231/0/0/0 · 407.17s · 기록 0 | 2/0/0/0 · 21.13s · diff 0 |
+| query 이름 보완 | 동일 | 0/0 | 83 | 0 | 0 | 0 | 231/0/0/0 · 463.83s · diff 0 · 경고 10 | 231/0/0/0 · 458.55s · 기록 0 | 2/0/0/0 · 29.17s · diff 0 |
 
 형식 검사는 새 120자 초과·여러 문장·여러 선언자·부적절한 분할 0이다. 기존 문자열 예외 88곳, 수정 범위 밖 AttendanceStore의 보호된 텍스트 블록 닫는 줄과 ProjectMember 1개 단위 예외는 그대로다. 테스트 형식 단위 위반은 0이다. 안전망 파일과 SQL/응답 기준선 해시는 그대로다.
 
@@ -50,7 +53,7 @@
 
 InboxRepository.search에 있던 쪽 검사를 서비스로 옮기므로, 순서 도구는 이 정확한 한 메서드 경계를 양쪽 모두 펼쳐 throw와 SqlStore 호출을 대조한다. 다른 repository 경계는 그대로다. 검사를 조회 뒤로 옮긴 변조 사본은 차이 1로 실패했다.
 
-응답 도구는 presentation에서 만든 map과 같은 out의 put을 연결하고, 람다 map·중첩 메서드 원천·JsonProperty를 대조한다. 최종 구조별 결과는 group2-leave-checks.json의 response에 있다.
+응답 도구는 presentation에서 만든 map과 같은 out의 put을 연결하고, 람다 map·중첩 메서드 원천·JsonProperty를 대조한다. 최종 응답 대조 결과는 group2-query-rename-checks.json의 response에 있다. 응답 소스는 이번 이름 보완에서 바뀌지 않았으며, 구성요소별 대조 내용은 group2-leave-checks.json의 response.rows에 보존했다.
 
 ### 결재함 문자열 예외 (추가 사용자 결정)
 
@@ -594,7 +597,7 @@ ApiResponse의 공통 외피와 message는 유지한다. 아래는 data의 타�
 
 | 도메인 | ApiResponse<?> | public Map/Object(본문 별도) | 비 repository map/Map.of | 한 글자 이름 |
 | --- | --- | --- | --- | --- |
-| approval | 19 → 0 | 17 → 2 | 19 → 0 | 69 → 3 |
+| approval | 19 → 0 | 17 → 2 | 19 → 0 | 69 → 0 |
 | leave | 9 → 0 | 12 → 3 | 7 → 0 | 23 → 0 |
 | overtime | 0 → 0 | 0 → 0 | 0 → 0 | 7 → 0 |
 
@@ -741,12 +744,7 @@ grep 제시값 30/10과 달리 응답 factory는 attribution으로 SqlStore.map/
 | overtime | id | overtime/repository/OvertimeStore.java:36 | deleteBody |
 | overtime | id | overtime/repository/OvertimeStore.java:40 | countValidTime |
 
-남은 한 글자 이름은 repository에서 보존한 q이다. 매개변수 유지 지시를 우선한 예외이며, 사용자 확인 결과를 최종 보고에 반영한다.
-| 이름 | 위치 | 메서드 |
-| --- | --- | --- |
-| q | backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:32 | selectionSql |
-| q | backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:45 | pageSql |
-| q | backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java:53 | search |
+남은 한 글자 이름은 approval·leave·overtime 모두 0개다. `83c80d3`에서 보류했던 InboxRepository의 q 3곳은 사용자 확인 뒤 `24ac286`에서 query로 바꿨다. 최종 이름 측정은 group2-query-rename-names.json이며, group2-leave-names.json은 보완 전 기록으로 남긴다.
 
 ## 재현 명령
 
@@ -770,6 +768,32 @@ python3 docs/refactoring/R-02-format-measure.py --root "$CANDIDATE" --output /pr
 ```
 
 이름 대응표는 group2-renames.json, 필드별 원천 대응은 group2-response-map.json이다. R-04-group2-verify-tools.py는 이미 컴파일한 시작 사본과 후보를 받아 외부 사본에서 변조 검증을 재현한다. `--help`에 필수 경로가 있다.
+
+## 추가 확인 — 결재함 검색 매개변수 이름
+
+사용자는 “매개변수를 그대로”의 범위가 Java 이름이 아니라 테스트가 부르는 타입·순서·개수라고 확정했다. `selectionSql`, `pageSql`, `search`의 String 매개변수 이름 3개와 참조 7개만 q→query로 바꿨다. 메서드 이름·반환 타입·매개변수 시그니처는 javac 대조에서 동일하다. `search`의 Map 반환도 유지했다.
+
+SQL의 `:q`, `ESCAPE '!'`, 인자 map의 문자열 키 `"q"`, 와일드카드 이스케이프 식은 그대로다. `counts`의 기존 지역변수 query를 포함한 메서드 전체는 바이트 비교로 같다. 토큰 비교에서는 이 10개 식별자만 달랐고 모든 문자열 리터럴은 원문 그대로였다.
+
+| 검증 | 결과 |
+| --- | --- |
+| 원본 83c80d3 / 외부 후보 test-compile | exit 0 / exit 0 |
+| 최종 문서 포함 사본 test-compile (UTC) | exit 0 · 10.47초 |
+| 작업 트리 test-compile (UTC) | exit 0 · 8.81초 |
+| 83c80d3 대비 SQL·문자열 | differences=0 |
+| 묶음 2 기준 c531e1f 대비 SQL·문자열 | differences=0, 기존 결재함 51곳 분류 유지 |
+| 실행 순서·응답 구조 | 각각 differences=0 |
+| 트랜잭션·SQL 위치·미사용 import | 83개 동일 / repository 밖 0 / 미사용 0 |
+| 한 글자 이름 | approval 3→0, leave 0→0, overtime 0→0 |
+| 기록 ON 전체 UTC | 231/0/0/0 · 463.83초 · differences=0 |
+| 기록 OFF 전체 UTC | 231/0/0/0 · 458.55초 · 기록 출력 0 |
+| 별도 응답 probe | 2/0/0/0 · differences=0 |
+
+순서 경고 10개는 모두 기존 14개 목록 안이다. 실제 프레임 목록은 group2-query-rename-on.json에 있다. ON/OFF는 변경 커밋 `24ac2868df90a5e9226679564e699499a55c0686`의 작업 트리에서 순차 실행했다. 중단 당시 백그라운드 검증이 계속 진행해 완료되었으며, 재개 뒤 로그·종료 상태·소스 해시를 확인했다. 이전 코드의 검증 결과를 이번 보완의 증거로 대신 쓰지 않았다.
+
+처음 정적 대조 실행은 비교 원본 사본에 컴파일 출력이 없어 도구의 사전 조건에서 멈췄다. 저장소 적용 전 원본 사본을 컴파일해 해소했다. 이후 정적 검사와 probe를 통과한 후보만 저장소에 적용했다.
+
+최종 보고서·증거 추가는 docs/refactoring 안으로 한정한다. 기록 기준선·기록기·비교 규칙·테스트 소스·SQL·설정은 변경하지 않았다. 동일 소스 해시는 group2-query-rename-checks.json의 sourceHashes로 확인할 수 있다. 증거 파일은 차이·판정·출현 분류·해시를 남기고 변경 없는 전체 호출 추적은 중복 저장하지 않았다. 이름 증거의 범위는 이번 세 도메인이다.
 
 ## 발견한 버그·확인하지 못한 것
 
