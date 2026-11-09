@@ -3,6 +3,7 @@ package com.minierp.backend.domain.attendance.controller;
 import com.minierp.backend.domain.attendance.service.AttendanceService;
 import com.minierp.backend.global.permission.*;
 import com.minierp.backend.global.response.ApiResponse;
+import com.minierp.backend.domain.attendance.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.time.Clock;
@@ -15,25 +16,25 @@ public class AttendanceController {
     private final Clock clock;
     @GetMapping("/today")
     @RequirePermission(menu = "MY_ATTENDANCE", action = Action.VIEW)
-    public ApiResponse<?> today() {
-        return ApiResponse.success(clock, service.today());
+    public ApiResponse<AttendanceTodayResponseDto> getTodayAttendance() {
+        return ApiResponse.success(clock, service.getTodayAttendance());
     }
 
     @PostMapping("/clock-in")
     @RequirePermission(menu = "MY_ATTENDANCE", action = Action.CREATE)
-    public ApiResponse<?> in() {
+    public ApiResponse<AttendanceTodayResponseDto> clockIn() {
         return ApiResponse.success(clock, service.clockIn());
     }
 
     @PostMapping("/clock-out")
     @RequirePermission(menu = "MY_ATTENDANCE", action = Action.CREATE)
-    public ApiResponse<?> out() {
+    public ApiResponse<AttendanceTodayResponseDto> clockOut() {
         return ApiResponse.success(clock, service.clockOut());
     }
 
     @GetMapping("/me")
     @RequirePermission(menu = "MY_ATTENDANCE", action = Action.VIEW)
-    public ApiResponse<?> me(@RequestParam String month) {
-        return ApiResponse.success(clock, service.me(month));
+    public ApiResponse<AttendanceMyMonthResponseDto> getMyMonthlyAttendance(@RequestParam String month) {
+        return ApiResponse.success(clock, service.getMyMonthlyAttendance(month));
     }
 }

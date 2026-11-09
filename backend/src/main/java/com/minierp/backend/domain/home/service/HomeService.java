@@ -35,7 +35,7 @@ public class HomeService {
         LocalDate to = from.plusDays(4);
         var args = map("actor", actor, "today", today, "from", from, "to", to);
         String scope = projectView ? projects.visibilityPredicate(args) : HomeQueries.NO_PROJECTS;
-        return map("today", attendanceView ? attendance.homeToday() : null,
+        return map("today", attendanceView ? attendance.getHomeAttendance() : null,
                 "approvals", approvalView ? approvals(args) : null, "leave", leave.getBalance(null),
                 "teamWeek", attendanceView || projectView ? teamWeek(args, attendanceView, projectView, scope) : null,
                 "myTasks", projectView ? myTasks(args, scope, today) : null, "notifications", notifications(args));

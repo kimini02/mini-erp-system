@@ -1,6 +1,7 @@
 package com.minierp.backend.domain.attendance.service;
 
 import com.minierp.backend.domain.attendance.repository.AttendanceStore;
+import com.minierp.backend.domain.attendance.dto.*;
 import com.minierp.backend.domain.attendance.repository.AttendanceQueries;
 import com.minierp.backend.global.exception.*;
 import com.minierp.backend.global.permission.PermissionAccess;
@@ -19,11 +20,11 @@ public class AttendanceService {
     private final AttendanceQueries queries;
     private final Clock clock;
     private final PermissionAccess access;
-    public Map<String, Object> today() {
+    public AttendanceTodayResponseDto getTodayAttendance() {
         return view(access.actor(), LocalDate.now(clock));
     }
 
-    private Map<String, Object> view(long user, LocalDate date) {
+    private AttendanceTodayResponseDto view(long user, LocalDate date) {
         var row = records.record(user, date, false);
         var context = records.day(user, date);
         var schedule = row == null ? records.schedule(user) : records.snapshot(row);
@@ -33,13 +34,15 @@ public class AttendanceService {
     }
 
     /** Home uses one joined snapshot; the response rules are shared with /attendance/today. */
-    public Map<String, Object> homeToday() {
+    public AttendanceTodayResponseDto getHomeAttendance() {
         var date = LocalDate.now(clock);
-        var r = records.homeSnapshot(access.actor(), date);
-        Map<String, Object> leave = r.get("leave_id") == null
+        var attendanceRow = records.homeSnapshot(access.actor(), date);
+        Map<String, Object> leave = attendanceRow.get("leave_id") == null
                 ? null
-                : map("type", r.get("leave_type"), "documentId", r.get("leave_id"), "docNo", r.get("leave_no"));
-        String holiday = (String) r.get("holiday_name");
+                : map("type", attendanceRow.get("leave_type"),
+                        "documentId", attendanceRow.get("leave_id"),
+                        "docNo", attendanceRow.get("leave_no"));
+        String holiday = (String) attendanceRow.get("holiday_name");
         boolean off = holiday != null || date.getDayOfWeek() == DayOfWeek.SATURDAY
                 || date.getDayOfWeek() == DayOfWeek.SUNDAY;
         String type = off
@@ -47,11 +50,13 @@ public class AttendanceService {
                 : leave == null
                         ? "WORKDAY"
                         : leave.get("type").toString().startsWith("HALF_") ? leave.get("type").toString() : "LEAVE";
-        return render(date, r.get("id") == null ? null : r, new AttendanceStore.Day(type, holiday, leave),
-                records.snapshot(r), number(r, "late_count"), number(r, "absent_count"));
+        return render(date, attendanceRow.get("id") == null ? null : attendanceRow,
+                new AttendanceStore.Day(type, holiday, leave),
+                records.snapshot(attendanceRow), number(attendanceRow, "late_count"),
+                number(attendanceRow, "absent_count"));
     }
 
-    private Map<String, Object> render(
+    private AttendanceTodayResponseDto render(
             LocalDate date,
             Map<String, Object> row,
             AttendanceStore.Day context,
@@ -64,16 +69,17 @@ public class AttendanceService {
         var now = LocalDateTime.now(clock);
         var hypothetical = AttendanceRules.judge(date, day, schedule.start(), schedule.end(), schedule.grace(), in, now,
                 false);
-        return map("workDate", date, "dayType", day, "holidayName", context.holiday(), "schedule", schedule.view(),
-                "clockInAt", in, "clockOutAt", out, "inResult", row == null ? null : row.get("in_result"),
-                "outResult", row == null ? null : row.get("out_result"), "leave", context.leave(),
-                "canClockIn", in == null && !context.type().equals("LEAVE") && date.equals(now.toLocalDate()),
-                "canClockOut", in != null, "earlyIfNow", "EARLY".equals(hypothetical.outResult()),
-                "monthLateCount", late, "monthAbsentCount", absent);
+        return new AttendanceTodayResponseDto(date, day, context.holiday(),
+                AttendanceScheduleResponseDto.from(schedule),
+                in, out, row == null ? null : (String) row.get("in_result"),
+                row == null ? null : (String) row.get("out_result"),
+                AttendanceTodayResponseDto.Leave.from(context.leave()),
+                in == null && !context.type().equals("LEAVE") && date.equals(now.toLocalDate()), in != null,
+                "EARLY".equals(hypothetical.outResult()), late, absent);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String, Object> clockIn() {
+    public AttendanceTodayResponseDto clockIn() {
         long user = access.actor();
         records.lockUser(user);
         var now = LocalDateTime.now(clock);
@@ -95,7 +101,7 @@ public class AttendanceService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String, Object> clockOut() {
+    public AttendanceTodayResponseDto clockOut() {
         long user = access.actor();
         records.lockUser(user);
         var now = LocalDateTime.now(clock);
@@ -114,7 +120,7 @@ public class AttendanceService {
         return view(user, date);
     }
 
-    public static YearMonth month(String text) {
+    public static YearMonth parseMonth(String text) {
         try {
             if (text == null || !text.matches("\\d{4}-\\d{2}")) {
                 throw new IllegalArgumentException();
@@ -125,14 +131,14 @@ public class AttendanceService {
         }
     }
 
-    public Map<String, Object> me(String text) {
-        var month = month(text);
+    public AttendanceMyMonthResponseDto getMyMonthlyAttendance(String text) {
+        var month = parseMonth(text);
         long user = access.actor();
         var today = LocalDate.now(clock);
         Map<LocalDate, Map<String, Object>> found = new HashMap<>();
         queries.findMyMonth(user, month.atDay(1), month.atEndOfMonth())
-                .forEach(r -> found.put((LocalDate) r.get("work_date"), r));
-        List<Map<String, Object>> days = new ArrayList<>();
+                .forEach(attendanceRow -> found.put((LocalDate) attendanceRow.get("work_date"), attendanceRow));
+        List<AttendanceMyMonthResponseDto.Day> days = new ArrayList<>();
         int work = 0;
         int present = 0;
         int late = 0;
@@ -153,7 +159,7 @@ public class AttendanceService {
                 leave +=.5;
             }
             if (row == null) {
-                days.add(map("date", date, "dayType", type));
+                days.add(new AttendanceMyMonthResponseDto.EmptyDay(date, type));
                 continue;
             }
             if (row.get("clock_in_at") != null) {
@@ -171,16 +177,15 @@ public class AttendanceService {
             if ("MISSING".equals(row.get("out_result"))) {
                 missing++;
             }
-            days.add(
-                    map("date", date, "dayType", type, "clockInAt", row.get("clock_in_at"),
-                            "clockOutAt", row.get("clock_out_at"), "inResult", row.get("in_result"),
-                            "outResult", row.get("out_result"), "absent", bool(row, "absent"),
-                            "fixDocument", row.get("fix_document_id") == null
-                                    ? null
-                                    : map("id", row.get("fix_document_id"), "docNo", row.get("fix_doc_no"))));
+            days.add(new AttendanceMyMonthResponseDto.RecordedDay(date, type,
+                    (LocalDateTime) row.get("clock_in_at"), (LocalDateTime) row.get("clock_out_at"),
+                    (String) row.get("in_result"), (String) row.get("out_result"), bool(row, "absent"),
+                    row.get("fix_document_id") == null
+                            ? null
+                            : new AttendanceDocumentResponseDto(number(row, "fix_document_id"),
+                                    (String) row.get("fix_doc_no"))));
         }
-        return map("month", month.toString(),
-                "summary", map("workDays", work, "present", present, "late", late, "early", early, "absent", absent,
-                        "missing", missing, "leaveDays", leave), "days", days);
+        return new AttendanceMyMonthResponseDto(month.toString(),
+                new AttendanceMyMonthResponseDto.Summary(work, present, late, early, absent, missing, leave), days);
     }
 }

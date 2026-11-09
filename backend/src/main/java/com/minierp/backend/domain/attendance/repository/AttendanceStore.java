@@ -6,7 +6,6 @@ import com.minierp.backend.global.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import static com.minierp.backend.global.persistence.SqlStore.*;
 
@@ -15,20 +14,16 @@ import static com.minierp.backend.global.persistence.SqlStore.*;
 public class AttendanceStore {
     private final SqlStore db;
     public record Schedule(LocalTime start, LocalTime end, int grace, String source, String department) {
-        public Map<String, Object> view() {
-            var f = DateTimeFormatter.ofPattern("HH:mm");
-            return map("startTime", start.format(f), "endTime", end.format(f), "lateGraceMin", grace,
-                    "halfBoundary", start.plusHours(5).format(f), "source", source, "departmentName", department);
-        }
+
     }
 
     public record Day(String type, String holiday, Map<String, Object> leave) {
     }
 
     public static LocalTime time(Object value) {
-        return value instanceof java.sql.Time t
-                ? t.toLocalTime()
-                : value instanceof LocalTime t ? t : LocalTime.parse(value.toString());
+        return value instanceof java.sql.Time sqlTime
+                ? sqlTime.toLocalTime()
+                : value instanceof LocalTime localTime ? localTime : LocalTime.parse(value.toString());
     }
 
     public Map<String, Object> lockUser(long id) {
@@ -38,13 +33,14 @@ public class AttendanceStore {
     }
 
     public Schedule schedule(long user) {
-        var s = db.one("""
+        var scheduleRow = db.one("""
           SELECT w.start_time,w.end_time,w.late_grace_min,d.name,IF(d.work_schedule_id IS NULL,'COMPANY','DEPARTMENT') AS source
           FROM users u JOIN departments d ON d.id=u.department_id JOIN work_schedules w ON
           (d.work_schedule_id=w.id OR (d.work_schedule_id IS NULL AND w.is_default=1)) WHERE u.id=:user
           """, map("user", user), ErrorCode.USER_NOT_FOUND);
-        return new Schedule(time(s.get("start_time")), time(s.get("end_time")),
-                ((Number) s.get("late_grace_min")).intValue(), (String) s.get("source"), (String) s.get("name"));
+        return new Schedule(time(scheduleRow.get("start_time")), time(scheduleRow.get("end_time")),
+                ((Number) scheduleRow.get("late_grace_min")).intValue(), (String) scheduleRow.get("source"),
+                (String) scheduleRow.get("name"));
     }
 
     public Schedule snapshot(Map<String, Object> row) {
@@ -131,9 +127,9 @@ public class AttendanceStore {
             LocalDateTime out,
             boolean finalized,
             LocalDateTime now) {
-        var s = snapshot(row);
-        var judged = AttendanceRules.judge((LocalDate) row.get("work_date"), day, s.start(), s.end(), s.grace(), in,
-                out, finalized);
+        var scheduleRow = snapshot(row);
+        var judged = AttendanceRules.judge((LocalDate) row.get("work_date"), day, scheduleRow.start(),
+                scheduleRow.end(), scheduleRow.grace(), in, out, finalized);
         // A repeated batch changes neither business values nor audit times when the verdict is identical.
         db.update("""
           UPDATE attendances SET clock_in_at=:in,clock_out_at=:out,day_type=:day,in_result=:inResult,out_result=:outResult,absent=:absent,judged_at=:now,updated_at=:now

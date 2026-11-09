@@ -30,22 +30,22 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         if (!body.hasNonNull(field)) {
             return null;
         }
-        String v = BodyValues.text(body, field, 5);
-        if (!v.matches("[0-9]{2}:[0-9]{2}")) {
+        String value = BodyValues.text(body, field, 5);
+        if (!value.matches("[0-9]{2}:[0-9]{2}")) {
             throw BodyValues.invalid();
         }
         try {
-            return LocalTime.parse(v);
+            return LocalTime.parse(value);
         } catch (DateTimeException ex) {
             throw BodyValues.invalid();
         }
     }
 
-    public void checkFormat(JsonNode b) {
-        BodyValues.date(b, "workDate");
-        BodyValues.text(b, "reason", 500);
-        var in = optionalTime(b, "clockIn");
-        var out = optionalTime(b, "clockOut");
+    public void checkFormat(JsonNode body) {
+        BodyValues.date(body, "workDate");
+        BodyValues.text(body, "reason", 500);
+        var in = optionalTime(body, "clockIn");
+        var out = optionalTime(body, "clockOut");
         if (in == null && out == null) {
             throw BodyValues.invalid();
         }
@@ -54,10 +54,10 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         }
     }
 
-    public void saveBody(ApprovalDocument d, JsonNode b) {
-        checkFormat(b);
-        store.upsertBody(d.id(), BodyValues.date(b, "workDate"), optionalTime(b, "clockIn"),
-                optionalTime(b, "clockOut"), b.path("reason").textValue());
+    public void saveBody(ApprovalDocument document, JsonNode body) {
+        checkFormat(body);
+        store.upsertBody(document.id(), BodyValues.date(body, "workDate"), optionalTime(body, "clockIn"),
+                optionalTime(body, "clockOut"), body.path("reason").textValue());
     }
 
     private Map<String, Object> raw(long id) {
@@ -72,14 +72,16 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         }
     }
 
-    private String hh(Object value) {
+    private String formatTime(Object value) {
         return value == null ? null : AttendanceStore.time(value).format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
     public AttendanceFixBodyResponseDto body(long id) {
-        var r = raw(id);
-        return new AttendanceFixBodyResponseDto((LocalDate) r.get("work_date"), hh(r.get("clock_in")),
-                hh(r.get("clock_out")), (String) r.get("reason"), json((String) r.get("before_json")));
+        var correction = raw(id);
+        return new AttendanceFixBodyResponseDto((LocalDate) correction.get("work_date"),
+                formatTime(correction.get("clock_in")),
+                formatTime(correction.get("clock_out")), (String) correction.get("reason"),
+                json((String) correction.get("before_json")));
     }
 
     public void copyBody(long id, ApprovalDocument target) {
@@ -91,28 +93,32 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
     }
 
     public void validate(ApprovalDraft draft) {
-        var d = draft.document();
-        var r = raw(d.id());
-        var date = (LocalDate) r.get("work_date");
-        var today = LocalDate.now(clock);
-        if (!date.isBefore(today) || date.isBefore(today.minusDays(30))) {
-            throw new BusinessException(ErrorCode.ATTENDANCE_FIX_OUT_OF_RANGE);
-        }
-        var old = records.record(d.drafterId(), date, false);
-        if (records.day(d.drafterId(), date).type().equals("HOLIDAY") && old == null) {
+        var document = draft.document();
+        var correction = raw(document.id());
+        var date = (LocalDate) correction.get("work_date");
+        requireCorrectionDate(date);
+        var old = records.record(document.drafterId(), date, false);
+        if (records.day(document.drafterId(), date).type().equals("HOLIDAY") && old == null) {
             throw BodyValues.invalid();
         }
-        mergedTimes(r, old, date);
-        if (store.countOtherPending(d.drafterId(), date, d.id()) > 0) {
+        mergedTimes(correction, old, date);
+        if (store.countOtherPending(document.drafterId(), date, document.id()) > 0) {
             throw new BusinessException(ErrorCode.ATTENDANCE_FIX_DUPLICATE);
         }
     }
 
-    public void onSubmitted(ApprovalDocument d) {
-        var r = raw(d.id());
-        var date = (LocalDate) r.get("work_date");
-        var old = records.record(d.drafterId(), date, false);
-        var day = records.day(d.drafterId(), date);
+    private void requireCorrectionDate(LocalDate date) {
+        var today = LocalDate.now(clock);
+        if (!date.isBefore(today) || date.isBefore(today.minusDays(30))) {
+            throw new BusinessException(ErrorCode.ATTENDANCE_FIX_OUT_OF_RANGE);
+        }
+    }
+
+    public void onSubmitted(ApprovalDocument document) {
+        var correction = raw(document.id());
+        var date = (LocalDate) correction.get("work_date");
+        var old = records.record(document.drafterId(), date, false);
+        var day = records.day(document.drafterId(), date);
         var in = old == null ? null : (LocalDateTime) old.get("clock_in_at");
         var out = old == null ? null : (LocalDateTime) old.get("clock_out_at");
         var verdict = old == null
@@ -122,9 +128,9 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         String code = AttendanceRules.code(date, LocalDate.now(clock),
                 old == null ? day.type() : (String) old.get("day_type"), verdict, in);
         try {
-            store.updateBeforeSnapshot(d.id(), mapper.writeValueAsString(
-                    map("clockIn", in == null ? null : hh(in.toLocalTime()),
-                            "clockOut", out == null ? null : hh(out.toLocalTime()), "code", code)));
+            store.updateBeforeSnapshot(document.id(), mapper.writeValueAsString(
+                    map("clockIn", in == null ? null : formatTime(in.toLocalTime()),
+                            "clockOut", out == null ? null : formatTime(out.toLocalTime()), "code", code)));
         } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
             throw new IllegalStateException(ex);
         }
@@ -149,26 +155,27 @@ public class AttendanceFixFormHandler implements ApprovalFormHandler {
         return new Times(in, out);
     }
 
-    public void onApproved(ApprovalDocument d) {
-        var r = raw(d.id());
-        var date = (LocalDate) r.get("work_date");
-        var old = records.record(d.drafterId(), date, true);
-        var day = records.day(d.drafterId(), date);
+    public void onApproved(ApprovalDocument document) {
+        var correction = raw(document.id());
+        var date = (LocalDate) correction.get("work_date");
+        var old = records.record(document.drafterId(), date, true);
+        var day = records.day(document.drafterId(), date);
         var now = LocalDateTime.now(clock);
-        var times = mergedTimes(r, old, date);
+        var times = mergedTimes(correction, old, date);
         var in = times.in();
         var out = times.out();
         if (old == null) {
-            records.insert(d.drafterId(), date, records.schedule(d.drafterId()), day.type(), in, out, true, now);
+            records.insert(document.drafterId(), date, records.schedule(document.drafterId()), day.type(),
+                    in, out, true, now);
         } else {
             records.judge(old, day.type(), in, out, true, now);
         }
-        store.updateAttendanceFix(d.id(), d.drafterId(), date, now);
+        store.updateAttendanceFix(document.id(), document.drafterId(), date, now);
     }
 
-    public void onRejected(ApprovalDocument d) {
+    public void onRejected(ApprovalDocument document) {
     }
 
-    public void onWithdrawn(ApprovalDocument d) {
+    public void onWithdrawn(ApprovalDocument document) {
     }
 }

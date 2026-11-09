@@ -3,6 +3,7 @@ package com.minierp.backend.domain.attendance.controller;
 import com.minierp.backend.domain.attendance.service.AttendanceAdminService;
 import com.minierp.backend.global.permission.*;
 import com.minierp.backend.global.response.ApiResponse;
+import com.minierp.backend.domain.attendance.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
@@ -18,29 +19,29 @@ public class AttendanceAdminController {
     private final Clock clock;
     @GetMapping("/monthly")
     @RequirePermission(menu = "ATTENDANCE_MONTHLY", action = Action.VIEW)
-    public ApiResponse<?> monthly(
+    public ApiResponse<AttendanceMonthlyResponseDto> getMonthlyAttendance(
             @RequestParam String month,
             @RequestParam(required = false) Long departmentId,
             @RequestParam(defaultValue = "false") boolean includeSubDepartments) {
-        return ApiResponse.success(clock, service.monthly(month, departmentId, includeSubDepartments));
+        return ApiResponse.success(clock, service.getMonthlyAttendance(month, departmentId, includeSubDepartments));
     }
 
     @GetMapping("/records/{userId}/{date}")
     @RequirePermission(menu = "ATTENDANCE_MONTHLY", action = Action.VIEW)
-    public ApiResponse<?> detail(
+    public ApiResponse<AttendanceRecordResponseDto> getAttendanceRecord(
             @PathVariable long userId,
             @PathVariable @org.springframework.format.annotation.DateTimeFormat(
                     iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ApiResponse.success(clock, service.detail(userId, date));
+        return ApiResponse.success(clock, service.getAttendanceRecord(userId, date));
     }
 
     @GetMapping("/monthly/export")
     @RequirePermission(menu = "ATTENDANCE_MONTHLY", action = Action.VIEW)
-    public ResponseEntity<byte[]> csv(
+    public ResponseEntity<byte[]> exportMonthlyAttendance(
             @RequestParam String month,
             @RequestParam(required = false) Long departmentId,
             @RequestParam(defaultValue = "false") boolean includeSubDepartments) {
-        var bytes = service.csv(month, departmentId, includeSubDepartments);
+        var bytes = service.exportMonthlyAttendance(month, departmentId, includeSubDepartments);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=attendance-" + month + ".csv")
@@ -52,7 +53,7 @@ public class AttendanceAdminController {
 
     @PostMapping("/rejudge")
     @RequirePermission(menu = "ATTENDANCE_MONTHLY", action = Action.UPDATE)
-    public ApiResponse<?> rejudge(@Valid @RequestBody Rejudge body) {
-        return ApiResponse.success(clock, service.rejudge(body.date()));
+    public ApiResponse<AttendanceBatchRunResponseDto> rejudgeAttendance(@Valid @RequestBody Rejudge body) {
+        return ApiResponse.success(clock, service.rejudgeAttendance(body.date()));
     }
 }
