@@ -2,6 +2,7 @@ package com.minierp.backend.domain.home.controller;
 
 import com.minierp.backend.domain.home.service.HomeService;
 import com.minierp.backend.global.response.ApiResponse;
+import com.minierp.backend.domain.home.dto.HomeResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.time.Clock;
@@ -14,7 +15,7 @@ public class HomeController {
     private final Clock clock;
     // Login is enforced by JWT security; each widget checks its own menu permission.
     @GetMapping
-    public ApiResponse<?> home() {
-        return ApiResponse.success(clock, service.home());
+    public ApiResponse<HomeResponseDto> getHome() {
+        return ApiResponse.success(clock, service.getHome());
     }
 }
