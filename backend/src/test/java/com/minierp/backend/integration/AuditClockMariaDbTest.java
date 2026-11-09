@@ -13,22 +13,24 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AuditClockMariaDbTest extends MariaDbIntegrationTest {
-    @Autowired UserRepository users;
-    @Autowired JdbcTemplate jdbc;
-    @Autowired Clock clock;
-
+    @Autowired
+    UserRepository users;
+    @Autowired
+    JdbcTemplate jdbc;
+    @Autowired
+    Clock clock;
     @Test
     void auditTimestampUsesInjectedClockWithUtcJvm() {
         TimeZone previous = TimeZone.getDefault();
         try {
             TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
             String id = UUID.randomUUID().toString();
-            User user = users.saveAndFlush(User.create("시각 검증", id, id + "@example.test",
-                    "unused-encoded", "01", "사원"));
-            assertThat(jdbc.queryForObject("SELECT created_at FROM users WHERE id = ?",
-                    LocalDateTime.class, user.getId())).isEqualTo(LocalDateTime.now(clock));
-            assertThat(users.findById(user.getId()).orElseThrow().getCreatedAt())
+            User user = users.saveAndFlush(
+                    User.create("시각 검증", id, id + "@example.test", "unused-encoded", "01", "사원"));
+            assertThat(
+                    jdbc.queryForObject("SELECT created_at FROM users WHERE id = ?", LocalDateTime.class, user.getId()))
                     .isEqualTo(LocalDateTime.now(clock));
+            assertThat(users.findById(user.getId()).orElseThrow().getCreatedAt()).isEqualTo(LocalDateTime.now(clock));
         } finally {
             TimeZone.setDefault(previous);
         }

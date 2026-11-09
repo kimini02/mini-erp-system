@@ -1,0 +1,2477 @@
+[
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto",
+    "key": "startTime",
+    "component": "startTime",
+    "type": "java.lang.String",
+    "expression": "start.format(f)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 20
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto",
+    "key": "endTime",
+    "component": "endTime",
+    "type": "java.lang.String",
+    "expression": "end.format(f)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 20
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto",
+    "key": "lateGraceMin",
+    "component": "lateGraceMin",
+    "type": "int",
+    "expression": "grace",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 20
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto",
+    "key": "halfBoundary",
+    "component": "halfBoundary",
+    "type": "java.lang.String",
+    "expression": "start.plusHours(5).format(f)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 21
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto",
+    "key": "source",
+    "component": "source",
+    "type": "java.lang.String",
+    "expression": "source",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 21
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto",
+    "key": "departmentName",
+    "component": "departmentName",
+    "type": "java.lang.String",
+    "expression": "department",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 21
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleDetailResponseDto",
+    "key": "startTime",
+    "component": "startTime",
+    "type": "java.lang.String",
+    "expression": "start.format(f)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 20
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleDetailResponseDto",
+    "key": "endTime",
+    "component": "endTime",
+    "type": "java.lang.String",
+    "expression": "end.format(f)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 20
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleDetailResponseDto",
+    "key": "lateGraceMin",
+    "component": "lateGraceMin",
+    "type": "int",
+    "expression": "grace",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 20
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleDetailResponseDto",
+    "key": "halfBoundary",
+    "component": "halfBoundary",
+    "type": "java.lang.String",
+    "expression": "start.plusHours(5).format(f)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "line": 21
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "workDate",
+    "component": "workDate",
+    "type": "java.time.LocalDate",
+    "expression": "date",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 67
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "dayType",
+    "component": "dayType",
+    "type": "java.lang.String",
+    "expression": "day",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 67
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "holidayName",
+    "component": "holidayName",
+    "type": "java.lang.String",
+    "expression": "context.holiday()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 67
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "schedule",
+    "component": "schedule",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleResponseDto",
+    "expression": "schedule.view()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 67
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "clockInAt",
+    "component": "clockInAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "in",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "clockOutAt",
+    "component": "clockOutAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "out",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "inResult",
+    "component": "inResult",
+    "type": "java.lang.String",
+    "expression": "row == null ? null : row.get(\"in_result\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "outResult",
+    "component": "outResult",
+    "type": "java.lang.String",
+    "expression": "row == null ? null : row.get(\"out_result\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 69
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "leave",
+    "component": "leave",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto.Leave",
+    "expression": "context.leave()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 69
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "canClockIn",
+    "component": "canClockIn",
+    "type": "boolean",
+    "expression": "in == null && !context.type().equals(\"LEAVE\") && date.equals(now.toLocalDate())",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 70
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "canClockOut",
+    "component": "canClockOut",
+    "type": "boolean",
+    "expression": "in != null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 71
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "earlyIfNow",
+    "component": "earlyIfNow",
+    "type": "boolean",
+    "expression": "\"EARLY\".equals(hypothetical.outResult())",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 71
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "monthLateCount",
+    "component": "monthLateCount",
+    "type": "long",
+    "expression": "late",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 72
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "key": "monthAbsentCount",
+    "component": "monthAbsentCount",
+    "type": "long",
+    "expression": "absent",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 72
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto.Leave",
+    "key": "type",
+    "component": "type",
+    "type": "java.lang.String",
+    "expression": "r.get(\"leave_type\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 41
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto.Leave",
+    "key": "documentId",
+    "component": "documentId",
+    "type": "long",
+    "expression": "r.get(\"leave_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 41
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto.Leave",
+    "key": "docNo",
+    "component": "docNo",
+    "type": "java.lang.String",
+    "expression": "r.get(\"leave_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 41
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.EmptyDay",
+    "key": "date",
+    "component": "date",
+    "type": "java.time.LocalDate",
+    "expression": "date",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 156
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.EmptyDay",
+    "key": "dayType",
+    "component": "dayType",
+    "type": "java.lang.String",
+    "expression": "type",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 156
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay",
+    "key": "date",
+    "component": "date",
+    "type": "java.time.LocalDate",
+    "expression": "date",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 175
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay",
+    "key": "dayType",
+    "component": "dayType",
+    "type": "java.lang.String",
+    "expression": "type",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 175
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay",
+    "key": "clockInAt",
+    "component": "clockInAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "row.get(\"clock_in_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 175
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay",
+    "key": "clockOutAt",
+    "component": "clockOutAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "row.get(\"clock_out_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 176
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay",
+    "key": "inResult",
+    "component": "inResult",
+    "type": "java.lang.String",
+    "expression": "row.get(\"in_result\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 176
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay",
+    "key": "outResult",
+    "component": "outResult",
+    "type": "java.lang.String",
+    "expression": "row.get(\"out_result\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 177
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay",
+    "key": "absent",
+    "component": "absent",
+    "type": "boolean",
+    "expression": "bool(row, \"absent\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 177
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.RecordedDay",
+    "key": "fixDocument",
+    "component": "fixDocument",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "expression": "row.get(\"fix_document_id\") == null\n                                    ? null\n                                    : map(\"id\", row.get(\"fix_document_id\"), \"docNo\", row.get(\"fix_doc_no\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 178
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto",
+    "key": "month",
+    "component": "month",
+    "type": "java.lang.String",
+    "expression": "month.toString()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 182
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto",
+    "key": "summary",
+    "component": "summary",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary",
+    "expression": "map(\"workDays\", work, \"present\", present, \"late\", late, \"early\", early, \"absent\", absent,\n                        \"missing\", missing, \"leaveDays\", leave)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 183
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto",
+    "key": "days",
+    "component": "days",
+    "type": "java.util.List<com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Day>",
+    "expression": "days",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 184
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary",
+    "key": "workDays",
+    "component": "workDays",
+    "type": "int",
+    "expression": "work",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 183
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary",
+    "key": "present",
+    "component": "present",
+    "type": "int",
+    "expression": "present",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 183
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary",
+    "key": "late",
+    "component": "late",
+    "type": "int",
+    "expression": "late",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 183
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary",
+    "key": "early",
+    "component": "early",
+    "type": "int",
+    "expression": "early",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 183
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary",
+    "key": "absent",
+    "component": "absent",
+    "type": "int",
+    "expression": "absent",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 183
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary",
+    "key": "missing",
+    "component": "missing",
+    "type": "int",
+    "expression": "missing",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 184
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMyMonthResponseDto.Summary",
+    "key": "leaveDays",
+    "component": "leaveDays",
+    "type": "double",
+    "expression": "leave",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 184
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "row.get(\"fix_document_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 180
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "key": "docNo",
+    "component": "docNo",
+    "type": "java.lang.String",
+    "expression": "row.get(\"fix_doc_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "line": 180
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Day",
+    "key": "date",
+    "component": "date",
+    "type": "java.time.LocalDate",
+    "expression": "date",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 58
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Day",
+    "key": "weekday",
+    "component": "weekday",
+    "type": "java.lang.String",
+    "expression": "date.getDayOfWeek().toString().substring(0, 3)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 58
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Day",
+    "key": "dayType",
+    "component": "dayType",
+    "type": "java.lang.String",
+    "expression": "r.get(\"calendar_type\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 59
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Day",
+    "key": "holidayName",
+    "component": "holidayName",
+    "type": "java.lang.String",
+    "expression": "r.get(\"holiday_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 59
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Row",
+    "key": "user",
+    "component": "user",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.User",
+    "expression": "map(\"id\", id, \"name\", r.get(\"user_name\"), \"title\", r.get(\"title\"),\n                                    \"department\", r.get(\"department\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 66
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Row",
+    "key": "cells",
+    "component": "cells",
+    "type": "java.util.List<com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Cell>",
+    "expression": "new ArrayList<Map<String, Object>>()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 67
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Row",
+    "key": "totals",
+    "component": "totals",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Totals",
+    "expression": "map(\"late\", 0, \"early\", 0, \"absent\", 0, \"missing\", 0, \"leaveDays\", 0.0)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.User",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "id",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 66
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.User",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "r.get(\"user_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 66
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.User",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 66
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.User",
+    "key": "department",
+    "component": "department",
+    "type": "java.lang.String",
+    "expression": "r.get(\"department\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 67
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Totals",
+    "key": "late",
+    "component": "late",
+    "type": "int",
+    "expression": "0",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Totals",
+    "key": "early",
+    "component": "early",
+    "type": "int",
+    "expression": "0",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Totals",
+    "key": "absent",
+    "component": "absent",
+    "type": "int",
+    "expression": "0",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Totals",
+    "key": "missing",
+    "component": "missing",
+    "type": "int",
+    "expression": "0",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Totals",
+    "key": "leaveDays",
+    "component": "leaveDays",
+    "type": "double",
+    "expression": "0.0",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Cell",
+    "key": "date",
+    "component": "date",
+    "type": "java.time.LocalDate",
+    "expression": "date",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 76
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Cell",
+    "key": "code",
+    "component": "code",
+    "type": "java.lang.String",
+    "expression": "code",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 76
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto",
+    "key": "month",
+    "component": "month",
+    "type": "java.lang.String",
+    "expression": "month.toString()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 88
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto",
+    "key": "days",
+    "component": "days",
+    "type": "java.util.Collection<com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Day>",
+    "expression": "days.values()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 88
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto",
+    "key": "rows",
+    "component": "rows",
+    "type": "java.util.List<com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto.Row>",
+    "expression": "rows.values()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 88
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceMonthlyResponseDto",
+    "key": "legend",
+    "component": "legend",
+    "type": "java.util.List<java.lang.String>",
+    "expression": "LEGEND",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 88
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "user",
+    "component": "user",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto.User",
+    "expression": "map(\"id\", user, \"name\", u.get(\"user_name\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 128
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "date",
+    "component": "date",
+    "type": "java.time.LocalDate",
+    "expression": "date",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 128
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "code",
+    "component": "code",
+    "type": "java.lang.String",
+    "expression": "code",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 128
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "clockInAt",
+    "component": "clockInAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "in",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 128
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "clockOutAt",
+    "component": "clockOutAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "out",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 129
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "schedule",
+    "component": "schedule",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceScheduleDetailResponseDto",
+    "expression": "schedule",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 129
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "reason",
+    "component": "reason",
+    "type": "java.lang.String",
+    "expression": "reason",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 129
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "leaveDocument",
+    "component": "leaveDocument",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "expression": "day.leave() == null\n                        ? null\n                        : map(\"id\", day.leave().get(\"documentId\"), \"docNo\", day.leave().get(\"docNo\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 130
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "fixDocument",
+    "component": "fixDocument",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "expression": "row == null || row.get(\"fix_document_id\") == null\n                        ? null\n                        : map(\"id\", row.get(\"fix_document_id\"), \"docNo\", row.get(\"fix_doc_no\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 133
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto",
+    "key": "judgedAt",
+    "component": "judgedAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "row == null ? null : row.get(\"judged_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 136
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto.User",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "user",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 128
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceRecordResponseDto.User",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "u.get(\"user_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 128
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "day.leave().get(\"documentId\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 132
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "key": "docNo",
+    "component": "docNo",
+    "type": "java.lang.String",
+    "expression": "day.leave().get(\"docNo\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 132
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "row.get(\"fix_document_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 135
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceDocumentResponseDto",
+    "key": "docNo",
+    "component": "docNo",
+    "type": "java.lang.String",
+    "expression": "row.get(\"fix_doc_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "line": 135
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "SELECT id — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "jobName",
+    "component": "jobName",
+    "type": "java.lang.String",
+    "expression": "SELECT jobName — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "targetDate",
+    "component": "targetDate",
+    "type": "java.time.LocalDate",
+    "expression": "SELECT targetDate — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "SELECT status — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "processedCount",
+    "component": "processedCount",
+    "type": "long",
+    "expression": "SELECT processedCount — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "skippedCount",
+    "component": "skippedCount",
+    "type": "long",
+    "expression": "SELECT skippedCount — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "message",
+    "component": "message",
+    "type": "java.lang.String",
+    "expression": "SELECT message — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "startedAt",
+    "component": "startedAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "SELECT startedAt — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceBatchRunResponseDto",
+    "key": "finishedAt",
+    "component": "finishedAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "SELECT finishedAt — SELECT id,job_name AS jobName,target_date AS targetDate,status,processed_count AS processedCount,skipped_count AS skippedCount,message,started_at AS startedAt,finished_at AS finishedAt FROM batch_runs WHERE id=:id",
+    "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+    "line": 17
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "n.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+    "line": 32
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "type",
+    "component": "type",
+    "type": "java.lang.String",
+    "expression": "n.get(\"type\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+    "line": 32
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "n.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+    "line": 32
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "link",
+    "component": "link",
+    "type": "java.lang.String",
+    "expression": "n.get(\"link\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+    "line": 32
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "read",
+    "component": "read",
+    "type": "boolean",
+    "expression": "n.get(\"read_at\") != null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+    "line": 33
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "createdAt",
+    "component": "createdAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "n.get(\"created_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+    "line": 33
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationUnreadCountResponseDto",
+    "key": "count",
+    "component": "count",
+    "type": "long",
+    "expression": "queries.countUnread(access.actor())",
+    "file": "backend/src/main/java/com/minierp/backend/domain/notification/service/NotificationQueryService.java",
+    "line": 39
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "p.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 77
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "key",
+    "component": "key",
+    "type": "java.lang.String",
+    "expression": "p.get(\"project_key\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 77
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "p.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 77
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "content",
+    "component": "content",
+    "type": "java.lang.String",
+    "expression": "p.get(\"content\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 77
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "p.get(\"status\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 78
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "priority",
+    "component": "priority",
+    "type": "java.lang.String",
+    "expression": "p.get(\"priority\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 78
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "startDate",
+    "component": "startDate",
+    "type": "java.time.LocalDate",
+    "expression": "p.get(\"start_date\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 78
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "endDate",
+    "component": "endDate",
+    "type": "java.time.LocalDate",
+    "expression": "p.get(\"end_date\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 79
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "leader",
+    "component": "leader",
+    "type": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "expression": "p.get(\"leader_id\") == null\n                        ? null\n                        : map(\"id\", p.get(\"leader_id\"), \"name\", p.get(\"leader_name\"), \"title\", p.get(\"leader_title\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 80
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "memberCount",
+    "component": "memberCount",
+    "type": "long",
+    "expression": "p.get(\"member_count\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 83
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "taskCount",
+    "component": "taskCount",
+    "type": "long",
+    "expression": "total",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 83
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "doneCount",
+    "component": "doneCount",
+    "type": "long",
+    "expression": "done",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 83
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "overdueCount",
+    "component": "overdueCount",
+    "type": "java.math.BigDecimal",
+    "expression": "p.get(\"overdue_count\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 84
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "progressPct",
+    "component": "progressPct",
+    "type": "long",
+    "expression": "total == 0 ? 0 : done * 100 / total",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 84
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "key": "myRole",
+    "component": "myRole",
+    "type": "java.lang.String",
+    "expression": "p.get(\"leader_id\") != null && number(p, \"leader_id\") == actor()\n                        ? \"LEADER\"\n                        : number(p, \"is_member\") > 0 ? \"MEMBER\" : null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 85
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "p.get(\"leader_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 82
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "p.get(\"leader_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 82
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "p.get(\"leader_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 82
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPermissionsResponseDto",
+    "key": "canManage",
+    "component": "canManage",
+    "type": "boolean",
+    "expression": "manage",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 92
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPermissionsResponseDto",
+    "key": "canCreateTask",
+    "component": "canCreateTask",
+    "type": "boolean",
+    "expression": "manage",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 92
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "SELECT id — SELECT u.id,u.user_name AS name,pos.name AS title FROM project_members m JOIN users u ON u.id=m.user_id LEFT JOIN positions pos ON pos.id=u.position_id WHERE m.project_id=:id ORDER BY u.user_name,u.id",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectQueries.java",
+    "line": 21
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "SELECT name — SELECT u.id,u.user_name AS name,pos.name AS title FROM project_members m JOIN users u ON u.id=m.user_id LEFT JOIN positions pos ON pos.id=u.position_id WHERE m.project_id=:id ORDER BY u.user_name,u.id",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectQueries.java",
+    "line": 21
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "SELECT title — SELECT u.id,u.user_name AS name,pos.name AS title FROM project_members m JOIN users u ON u.id=m.user_id LEFT JOIN positions pos ON pos.id=u.position_id WHERE m.project_id=:id ORDER BY u.user_name,u.id",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectQueries.java",
+    "line": 21
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "p.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 77
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "key",
+    "component": "key",
+    "type": "java.lang.String",
+    "expression": "p.get(\"project_key\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 77
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "p.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 77
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "content",
+    "component": "content",
+    "type": "java.lang.String",
+    "expression": "p.get(\"content\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 77
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "p.get(\"status\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 78
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "priority",
+    "component": "priority",
+    "type": "java.lang.String",
+    "expression": "p.get(\"priority\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 78
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "startDate",
+    "component": "startDate",
+    "type": "java.time.LocalDate",
+    "expression": "p.get(\"start_date\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 78
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "endDate",
+    "component": "endDate",
+    "type": "java.time.LocalDate",
+    "expression": "p.get(\"end_date\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 79
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "leader",
+    "component": "leader",
+    "type": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "expression": "p.get(\"leader_id\") == null\n                        ? null\n                        : map(\"id\", p.get(\"leader_id\"), \"name\", p.get(\"leader_name\"), \"title\", p.get(\"leader_title\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 80
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "memberCount",
+    "component": "memberCount",
+    "type": "long",
+    "expression": "p.get(\"member_count\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 83
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "taskCount",
+    "component": "taskCount",
+    "type": "long",
+    "expression": "total",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 83
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "doneCount",
+    "component": "doneCount",
+    "type": "long",
+    "expression": "done",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 83
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "overdueCount",
+    "component": "overdueCount",
+    "type": "java.math.BigDecimal",
+    "expression": "p.get(\"overdue_count\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 84
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "progressPct",
+    "component": "progressPct",
+    "type": "long",
+    "expression": "total == 0 ? 0 : done * 100 / total",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 84
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "myRole",
+    "component": "myRole",
+    "type": "java.lang.String",
+    "expression": "p.get(\"leader_id\") != null && number(p, \"leader_id\") == actor()\n                        ? \"LEADER\"\n                        : number(p, \"is_member\") > 0 ? \"MEMBER\" : null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 85
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "members",
+    "component": "members",
+    "type": "java.util.List<com.minierp.backend.domain.project.dto.ProjectPersonResponseDto>",
+    "expression": "members(id)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 120
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectDetailResponseDto",
+    "key": "permissions",
+    "component": "permissions",
+    "type": "com.minierp.backend.domain.project.dto.ProjectPermissionsResponseDto",
+    "expression": "permissions(p)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "line": 121
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "task.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 52
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "key",
+    "component": "key",
+    "type": "java.lang.String",
+    "expression": "project.get(\"project_key\") + \"-\" + task.get(\"task_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 52
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "task.get(\"task_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 53
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "task.get(\"task_status\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 53
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "priority",
+    "component": "priority",
+    "type": "java.lang.String",
+    "expression": "task.get(\"priority\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 53
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "endDate",
+    "component": "endDate",
+    "type": "java.time.LocalDate",
+    "expression": "end",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 54
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "overdueDays",
+    "component": "overdueDays",
+    "type": "long",
+    "expression": "overdue",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 54
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "assignees",
+    "component": "assignees",
+    "type": "java.util.List<com.minierp.backend.domain.project.dto.ProjectPersonResponseDto>",
+    "expression": "people",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 54
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "position",
+    "component": "position",
+    "type": "long",
+    "expression": "task.get(\"position\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 54
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "version",
+    "component": "version",
+    "type": "long",
+    "expression": "task.get(\"version\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 55
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "key": "canMove",
+    "component": "canMove",
+    "type": "boolean",
+    "expression": "projects.canManage(project) || assigned(people)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 55
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "task.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 52
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "key",
+    "component": "key",
+    "type": "java.lang.String",
+    "expression": "project.get(\"project_key\") + \"-\" + task.get(\"task_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 52
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "task.get(\"task_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 53
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "task.get(\"task_status\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 53
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "priority",
+    "component": "priority",
+    "type": "java.lang.String",
+    "expression": "task.get(\"priority\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 53
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "endDate",
+    "component": "endDate",
+    "type": "java.time.LocalDate",
+    "expression": "end",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 54
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "overdueDays",
+    "component": "overdueDays",
+    "type": "long",
+    "expression": "overdue",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 54
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "assignees",
+    "component": "assignees",
+    "type": "java.util.List<com.minierp.backend.domain.project.dto.ProjectPersonResponseDto>",
+    "expression": "people",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 54
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "position",
+    "component": "position",
+    "type": "long",
+    "expression": "task.get(\"position\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 54
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "version",
+    "component": "version",
+    "type": "long",
+    "expression": "task.get(\"version\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 55
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "canMove",
+    "component": "canMove",
+    "type": "boolean",
+    "expression": "projects.canManage(project) || assigned(people)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 55
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "projectId",
+    "component": "projectId",
+    "type": "long",
+    "expression": "task.get(\"project_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 93
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "content",
+    "component": "content",
+    "type": "java.lang.String",
+    "expression": "task.get(\"task_content\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 94
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "canManage",
+    "component": "canManage",
+    "type": "boolean",
+    "expression": "projects.canManage(p)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 95
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto",
+    "key": "history",
+    "component": "history",
+    "type": "java.util.List<com.minierp.backend.domain.task.dto.TaskDetailResponseDto.History>",
+    "expression": "history.stream().map(h -> {\n            var event = map(\"action\", h.get(\"action\"),\n                    \"actor\", h.get(\"actor_id\") == null\n                            ? null\n                            : map(\"id\", h.get(\"actor_id\"), \"name\", h.get(\"actor_name\")),\n                    \"at\", h.get(\"created_at\"));\n            if (!\"MOVED\".equals(h.get(\"action\"))) {\n                event.put(\"from\", h.get(\"from_value\"));\n                event.put(\"to\", h.get(\"to_value\"));\n            }\n            if (h.get(\"target_id\") != null) {\n                event.put(\"target\", map(\"id\", h.get(\"target_id\"), \"name\", h.get(\"target_name\")));\n            }\n            return event;\n        }).toList()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 97
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "row.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 66
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "row.get(\"name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 66
+  },
+  {
+    "record": "com.minierp.backend.domain.project.dto.ProjectPersonResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "row.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 66
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskBoardResponseDto.Column",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "status",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 75
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskBoardResponseDto.Column",
+    "key": "tasks",
+    "component": "tasks",
+    "type": "java.util.List<com.minierp.backend.domain.task.dto.TaskCardResponseDto>",
+    "expression": "tasks.stream()\n                            .filter(t -> status.equals(t.get(\"task_status\")))\n                            .map(t -> card(t, p, assignments.getOrDefault(number(t, \"id\"), List.of())))\n                            .toList()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 76
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskBoardResponseDto",
+    "key": "project",
+    "component": "project",
+    "type": "com.minierp.backend.domain.project.dto.ProjectSummaryResponseDto",
+    "expression": "projects.view(p)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 81
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskBoardResponseDto",
+    "key": "members",
+    "component": "members",
+    "type": "java.util.List<com.minierp.backend.domain.project.dto.ProjectPersonResponseDto>",
+    "expression": "members",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 81
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskBoardResponseDto",
+    "key": "permissions",
+    "component": "permissions",
+    "type": "com.minierp.backend.domain.project.dto.ProjectPermissionsResponseDto",
+    "expression": "projects.permissions(p)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 81
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskBoardResponseDto",
+    "key": "columns",
+    "component": "columns",
+    "type": "java.util.List<com.minierp.backend.domain.task.dto.TaskBoardResponseDto.Column>",
+    "expression": "columns",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 82
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Moved",
+    "key": "action",
+    "component": "action",
+    "type": "java.lang.String",
+    "expression": "h.get(\"action\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 98
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Moved",
+    "key": "actor",
+    "component": "actor",
+    "type": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person",
+    "expression": "h.get(\"actor_id\") == null\n                            ? null\n                            : map(\"id\", h.get(\"actor_id\"), \"name\", h.get(\"actor_name\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 99
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Moved",
+    "key": "at",
+    "component": "at",
+    "type": "java.time.LocalDateTime",
+    "expression": "h.get(\"created_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 102
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Event",
+    "key": "action",
+    "component": "action",
+    "type": "java.lang.String",
+    "expression": "h.get(\"action\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 98
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Event",
+    "key": "actor",
+    "component": "actor",
+    "type": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person",
+    "expression": "h.get(\"actor_id\") == null\n                            ? null\n                            : map(\"id\", h.get(\"actor_id\"), \"name\", h.get(\"actor_name\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 99
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Event",
+    "key": "at",
+    "component": "at",
+    "type": "java.time.LocalDateTime",
+    "expression": "h.get(\"created_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 102
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Event",
+    "key": "from",
+    "component": "from",
+    "type": "java.lang.String",
+    "expression": "h.get(\"from_value\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 104
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Event",
+    "key": "to",
+    "component": "to",
+    "type": "java.lang.String",
+    "expression": "h.get(\"to_value\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 105
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Event",
+    "key": "target",
+    "component": "target",
+    "type": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person",
+    "expression": "map(\"id\", h.get(\"target_id\"), \"name\", h.get(\"target_name\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 108
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "h.get(\"actor_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 101
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "h.get(\"actor_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 101
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "h.get(\"target_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 108
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskDetailResponseDto.Person",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "h.get(\"target_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 108
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto",
+    "key": "task",
+    "component": "task",
+    "type": "com.minierp.backend.domain.task.dto.TaskCardResponseDto",
+    "expression": "card(raw(id), p, people)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 223
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto",
+    "key": "project",
+    "component": "project",
+    "type": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto.Project",
+    "expression": "summary",
+    "file": "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java",
+    "line": 223
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto.Project",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "project",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStateStore.java",
+    "line": 37
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto.Project",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "status",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStateStore.java",
+    "line": 37
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto.Project",
+    "key": "taskCount",
+    "component": "taskCount",
+    "type": "long",
+    "expression": "total",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStateStore.java",
+    "line": 37
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto.Project",
+    "key": "doneCount",
+    "component": "doneCount",
+    "type": "long",
+    "expression": "done",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStateStore.java",
+    "line": 37
+  },
+  {
+    "record": "com.minierp.backend.domain.task.dto.TaskMoveResponseDto.Project",
+    "key": "progressPct",
+    "component": "progressPct",
+    "type": "long",
+    "expression": "total == 0 ? 0 : done * 100 / total",
+    "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStateStore.java",
+    "line": 38
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto",
+    "key": "today",
+    "component": "today",
+    "type": "com.minierp.backend.domain.attendance.dto.AttendanceTodayResponseDto",
+    "expression": "attendanceView ? attendance.homeToday() : null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 38
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto",
+    "key": "approvals",
+    "component": "approvals",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Approvals",
+    "expression": "approvalView ? approvals(args) : null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 39
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto",
+    "key": "leave",
+    "component": "leave",
+    "type": "com.minierp.backend.domain.leave.dto.LeaveBalanceResponseDto",
+    "expression": "leave.getBalance(null)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 39
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto",
+    "key": "teamWeek",
+    "component": "teamWeek",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.TeamWeek",
+    "expression": "attendanceView || projectView ? teamWeek(args, attendanceView, projectView, scope) : null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 40
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto",
+    "key": "myTasks",
+    "component": "myTasks",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.MyTasks",
+    "expression": "projectView ? myTasks(args, scope, today) : null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 41
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto",
+    "key": "notifications",
+    "component": "notifications",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Notifications",
+    "expression": "notifications(args)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 41
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Form",
+    "key": "code",
+    "component": "code",
+    "type": "java.lang.String",
+    "expression": "code",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 51
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Form",
+    "key": "shortName",
+    "component": "shortName",
+    "type": "java.lang.String",
+    "expression": "FormService.shortName(code)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 51
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Todo",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 58
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Todo",
+    "key": "docNo",
+    "component": "docNo",
+    "type": "java.lang.String",
+    "expression": "r.get(\"doc_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 58
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Todo",
+    "key": "form",
+    "component": "form",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Form",
+    "expression": "form(r)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 58
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Todo",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 58
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Todo",
+    "key": "drafter",
+    "component": "drafter",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "expression": "map(\"id\", r.get(\"drafter_id\"), \"name\", r.get(\"user_name\"),\n                                \"title\", r.get(\"user_title\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 59
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Todo",
+    "key": "submittedAt",
+    "component": "submittedAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "r.get(\"submitted_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 60
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 64
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine",
+    "key": "docNo",
+    "component": "docNo",
+    "type": "java.lang.String",
+    "expression": "r.get(\"doc_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 64
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine",
+    "key": "form",
+    "component": "form",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Form",
+    "expression": "form(r)",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 64
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 64
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "r.get(\"status\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 65
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine",
+    "key": "currentApprover",
+    "component": "currentApprover",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "expression": "r.get(\"approver_id\") == null\n                                ? null\n                                : map(\"id\", r.get(\"approver_id\"), \"name\", r.get(\"approver_name\"),\n                                        \"title\", r.get(\"approver_title\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 66
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Mine",
+    "key": "submittedAt",
+    "component": "submittedAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "r.get(\"submitted_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 70
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Approvals",
+    "key": "todoCount",
+    "component": "todoCount",
+    "type": "long",
+    "expression": "count",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 72
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Approvals",
+    "key": "todo",
+    "component": "todo",
+    "type": "java.util.List<com.minierp.backend.domain.home.dto.HomeResponseDto.Todo>",
+    "expression": "todo",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 72
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Approvals",
+    "key": "mine",
+    "component": "mine",
+    "type": "java.util.List<com.minierp.backend.domain.home.dto.HomeResponseDto.Mine>",
+    "expression": "mine",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 72
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskDue",
+    "key": "type",
+    "component": "type",
+    "type": "java.lang.String",
+    "expression": "\"TASK_DUE\"",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 87
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskDue",
+    "key": "task",
+    "component": "task",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Task",
+    "expression": "map(\"id\", r.get(\"task_id\"), \"key\", r.get(\"project_key\") + \"-\" + r.get(\"task_no\"),\n                                \"title\", r.get(\"task_title\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 88
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskDue",
+    "key": "project",
+    "component": "project",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.ProjectKey",
+    "expression": "map(\"id\", r.get(\"project_id\"), \"key\", r.get(\"project_key\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 90
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Task",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"task_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 88
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Task",
+    "key": "key",
+    "component": "key",
+    "type": "java.lang.String",
+    "expression": "r.get(\"project_key\") + \"-\" + r.get(\"task_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 88
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Task",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"task_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 89
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.ProjectKey",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"project_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 90
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.ProjectKey",
+    "key": "key",
+    "component": "key",
+    "type": "java.lang.String",
+    "expression": "r.get(\"project_key\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 90
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.LeaveItem",
+    "key": "type",
+    "component": "type",
+    "type": "java.lang.String",
+    "expression": "r.get(\"type\").toString().startsWith(\"HALF_\") ? r.get(\"type\") : \"LEAVE\"",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 92
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.LeaveItem",
+    "key": "user",
+    "component": "user",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.User",
+    "expression": "map(\"id\", r.get(\"user_id\"), \"name\", r.get(\"user_name\"))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 93
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.LeaveItem",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "r.get(\"status\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 93
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.LeaveItem",
+    "key": "documentId",
+    "component": "documentId",
+    "type": "long",
+    "expression": "r.get(\"document_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 94
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.User",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"user_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 93
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.User",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "r.get(\"user_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 93
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TeamWeek",
+    "key": "department",
+    "component": "department",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Department",
+    "expression": "department",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 108
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TeamWeek",
+    "key": "from",
+    "component": "from",
+    "type": "java.time.LocalDate",
+    "expression": "from",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 108
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TeamWeek",
+    "key": "to",
+    "component": "to",
+    "type": "java.time.LocalDate",
+    "expression": "to",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 108
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TeamWeek",
+    "key": "days",
+    "component": "days",
+    "type": "java.util.List<com.minierp.backend.domain.home.dto.HomeResponseDto.Day>",
+    "expression": "days.entrySet().stream().map(e -> map(\"date\", e.getKey(), \"items\", e.getValue())).toList()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 109
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Day",
+    "key": "date",
+    "component": "date",
+    "type": "java.time.LocalDate",
+    "expression": "e.getKey()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 109
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Day",
+    "key": "items",
+    "component": "items",
+    "type": "java.util.List<com.minierp.backend.domain.home.dto.HomeResponseDto.WeekItem>",
+    "expression": "e.getValue()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 109
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "p.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 119
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project",
+    "key": "key",
+    "component": "key",
+    "type": "java.lang.String",
+    "expression": "p.get(\"project_key\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 119
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "p.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 119
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project",
+    "key": "total",
+    "component": "total",
+    "type": "long",
+    "expression": "total",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 119
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project",
+    "key": "done",
+    "component": "done",
+    "type": "long",
+    "expression": "done",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 120
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project",
+    "key": "overdue",
+    "component": "overdue",
+    "type": "java.math.BigDecimal",
+    "expression": "p.get(\"overdue_count\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 120
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project",
+    "key": "progressPct",
+    "component": "progressPct",
+    "type": "long",
+    "expression": "total == 0 ? 0 : done * 100 / total",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 121
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 125
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem",
+    "key": "projectId",
+    "component": "projectId",
+    "type": "long",
+    "expression": "r.get(\"project_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 125
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem",
+    "key": "key",
+    "component": "key",
+    "type": "java.lang.String",
+    "expression": "r.get(\"project_key\") + \"-\" + r.get(\"task_no\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 126
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"task_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 126
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem",
+    "key": "status",
+    "component": "status",
+    "type": "java.lang.String",
+    "expression": "r.get(\"task_status\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 127
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem",
+    "key": "endDate",
+    "component": "endDate",
+    "type": "java.time.LocalDate",
+    "expression": "r.get(\"end_date\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 127
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem",
+    "key": "overdueDays",
+    "component": "overdueDays",
+    "type": "long",
+    "expression": "Math.max(0, ChronoUnit.DAYS.between((LocalDate) r.get(\"end_date\"), today))",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 128
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.MyTasks",
+    "key": "project",
+    "component": "project",
+    "type": "com.minierp.backend.domain.home.dto.HomeResponseDto.Project",
+    "expression": "project",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 130
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.MyTasks",
+    "key": "count",
+    "component": "count",
+    "type": "long",
+    "expression": "rows.isEmpty() ? 0 : number(rows.get(0), \"matching_count\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 130
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.MyTasks",
+    "key": "items",
+    "component": "items",
+    "type": "java.util.List<com.minierp.backend.domain.home.dto.HomeResponseDto.TaskItem>",
+    "expression": "items",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 131
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Notifications",
+    "key": "unread",
+    "component": "unread",
+    "type": "long",
+    "expression": "rows.get(0).get(\"unread\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 136
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Notifications",
+    "key": "items",
+    "component": "items",
+    "type": "java.util.List<com.minierp.backend.domain.notification.dto.NotificationItemResponseDto>",
+    "expression": "rows.stream()\n                        .filter(r -> r.get(\"id\") != null)\n                        .map(r -> map(\"id\", r.get(\"id\"), \"type\", r.get(\"type\"), \"title\", r.get(\"title\"),\n                                \"link\", r.get(\"link\"), \"read\", r.get(\"read_at\") != null,\n                                \"createdAt\", r.get(\"created_at\")))\n                        .toList()",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 137
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 139
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "type",
+    "component": "type",
+    "type": "java.lang.String",
+    "expression": "r.get(\"type\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 139
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 139
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "link",
+    "component": "link",
+    "type": "java.lang.String",
+    "expression": "r.get(\"link\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 140
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "read",
+    "component": "read",
+    "type": "boolean",
+    "expression": "r.get(\"read_at\") != null",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 140
+  },
+  {
+    "record": "com.minierp.backend.domain.notification.dto.NotificationItemResponseDto",
+    "key": "createdAt",
+    "component": "createdAt",
+    "type": "java.time.LocalDateTime",
+    "expression": "r.get(\"created_at\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 141
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Department",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "SELECT id — SELECT d.id,d.name FROM users u JOIN departments d ON d.id=u.department_id WHERE u.id=:actor",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/repository/HomeQueries.java",
+    "line": 89
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Department",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "SELECT name — SELECT d.id,d.name FROM users u JOIN departments d ON d.id=u.department_id WHERE u.id=:actor",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/repository/HomeQueries.java",
+    "line": 89
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"drafter_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 59
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "r.get(\"user_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 59
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"user_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 60
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "id",
+    "component": "id",
+    "type": "long",
+    "expression": "r.get(\"approver_id\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "name",
+    "component": "name",
+    "type": "java.lang.String",
+    "expression": "r.get(\"approver_name\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 68
+  },
+  {
+    "record": "com.minierp.backend.domain.home.dto.HomeResponseDto.Person",
+    "key": "title",
+    "component": "title",
+    "type": "java.lang.String",
+    "expression": "r.get(\"approver_title\")",
+    "file": "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "line": 69
+  }
+]

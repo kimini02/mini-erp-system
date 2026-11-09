@@ -1,7 +1,6 @@
 package com.minierp.backend.domain.user.controller;
 
 import java.time.Clock;
-
 import com.minierp.backend.domain.user.dto.FindIdRequestDto;
 import com.minierp.backend.domain.user.dto.FindIdResponseDto;
 import com.minierp.backend.domain.user.dto.LoginRequestDto;
@@ -12,13 +11,10 @@ import com.minierp.backend.domain.user.dto.PasswordResetRequestDto;
 import com.minierp.backend.domain.user.dto.PasswordResetRequestResponseDto;
 import com.minierp.backend.domain.user.dto.PasswordResetVerifyDto;
 import com.minierp.backend.domain.user.dto.PasswordResetVerifyResponseDto;
-import com.minierp.backend.domain.user.dto.SignupRequestDto;
-import com.minierp.backend.domain.user.dto.UserResponseDto;
 import com.minierp.backend.domain.user.service.AuthService;
 import com.minierp.backend.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,18 +25,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
     private final Clock clock;
-
     private final AuthService authService;
     private final com.minierp.backend.domain.user.service.InvitationService invitations;
+    public record SetupRequest(
+            @jakarta.validation.constraints.NotBlank String setupToken,
+            @jakarta.validation.constraints.NotBlank String newPassword) {
+    }
 
-    public record SetupRequest(@jakarta.validation.constraints.NotBlank String setupToken,
-                               @jakarta.validation.constraints.NotBlank String newPassword) {}
     @PostMapping("/password/setup")
-    public ResponseEntity<ApiResponse<Void>> setup(@Valid @RequestBody SetupRequest r) {
-        invitations.setup(r.setupToken(), r.newPassword());
-        return ResponseEntity.ok(ApiResponse.successMessage(clock,"비밀번호 설정이 완료되었습니다."));
+    public ResponseEntity<ApiResponse<Void>> setupPassword(@Valid @RequestBody SetupRequest request) {
+        invitations.setup(request.setupToken(), request.newPassword());
+        return ResponseEntity.ok(ApiResponse.successMessage(clock, "비밀번호 설정이 완료되었습니다."));
     }
 
     @PostMapping("/login")
@@ -56,19 +52,22 @@ public class AuthController {
     }
 
     @PostMapping("/password/reset/request")
-    public ResponseEntity<ApiResponse<PasswordResetRequestResponseDto>> requestPasswordReset(@Valid @RequestBody PasswordResetRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<PasswordResetRequestResponseDto>> requestPasswordReset(
+            @Valid @RequestBody PasswordResetRequestDto requestDto) {
         PasswordResetRequestResponseDto response = authService.requestPasswordReset(requestDto);
         return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 
     @PostMapping("/password/reset/verify")
-    public ResponseEntity<ApiResponse<PasswordResetVerifyResponseDto>> verifyPasswordReset(@Valid @RequestBody PasswordResetVerifyDto requestDto) {
+    public ResponseEntity<ApiResponse<PasswordResetVerifyResponseDto>> verifyPasswordReset(
+            @Valid @RequestBody PasswordResetVerifyDto requestDto) {
         PasswordResetVerifyResponseDto response = authService.verifyPasswordReset(requestDto);
         return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 
     @PostMapping("/password/reset/confirm")
-    public ResponseEntity<ApiResponse<PasswordResetConfirmResponseDto>> confirmPasswordReset(@Valid @RequestBody PasswordResetConfirmDto requestDto) {
+    public ResponseEntity<ApiResponse<PasswordResetConfirmResponseDto>> confirmPasswordReset(
+            @Valid @RequestBody PasswordResetConfirmDto requestDto) {
         PasswordResetConfirmResponseDto response = authService.confirmPasswordReset(requestDto);
         return ResponseEntity.ok(ApiResponse.success(clock, response));
     }

@@ -17,9 +17,7 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
@@ -31,12 +29,11 @@ class InitialAdminInitializerTest {
     private BCryptPasswordEncoder encoder;
     private InitialAdminInitializer initializer;
     private String password;
-
     @BeforeEach
     void setUp() {
         repository = mock(UserRepository.class);
         encoder = new BCryptPasswordEncoder();
-        password = "Aa1!" + UUID.randomUUID().toString().substring(0,12);
+        password = "Aa1!" + UUID.randomUUID().toString().substring(0, 12);
         environment = new MockEnvironment()
                 .withProperty("INITIAL_ADMIN_LOGIN_ID", "initial-admin")
                 .withProperty("INITIAL_ADMIN_NAME", "초기 관리소장")
@@ -59,21 +56,20 @@ class InitialAdminInitializerTest {
     void existingAdminDoesNotReadCredentialsOrWriteAnything() {
         when(repository.existsByUserRole(UserRole.ADMIN)).thenReturn(true);
         var unreadEnvironment = mock(org.springframework.core.env.Environment.class);
-        new InitialAdminInitializer(repository, encoder, unreadEnvironment)
-                .run(new DefaultApplicationArguments());
+        new InitialAdminInitializer(repository, encoder, unreadEnvironment).run(new DefaultApplicationArguments());
         verify(repository).existsByUserRole(UserRole.ADMIN);
         verifyNoMoreInteractions(repository);
         verifyNoInteractions(unreadEnvironment);
     }
 
     @ParameterizedTest
-    @CsvSource({
-            "LOGIN_ID, missing", "NAME, missing", "EMAIL, missing", "PASSWORD, missing",
-            "LOGIN_ID, blank", "NAME, blank", "EMAIL, blank", "PASSWORD, blank"
-    })
+    @CsvSource({ "LOGIN_ID, missing", "NAME, missing", "EMAIL, missing", "PASSWORD, missing", "LOGIN_ID, blank",
+            "NAME, blank", "EMAIL, blank", "PASSWORD, blank" })
     void missingOrBlankCredentialOnlyWarns(String key, String kind, CapturedOutput output) {
         if (kind.equals("missing")) {
-            ((org.springframework.core.env.MapPropertySource) environment.getPropertySources().get("mockProperties")).getSource().remove("INITIAL_ADMIN_" + key);
+            ((org.springframework.core.env.MapPropertySource) environment.getPropertySources().get("mockProperties"))
+                    .getSource()
+                    .remove("INITIAL_ADMIN_" + key);
         } else {
             environment.setProperty("INITIAL_ADMIN_" + key, "   ");
         }

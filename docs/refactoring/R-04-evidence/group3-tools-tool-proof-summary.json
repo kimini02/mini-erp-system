@@ -1,0 +1,10 @@
+{
+  "schedulePositive": 0,
+  "scheduleMutations": {
+    "sql": 1,
+    "response-key": 1,
+    "time-format": 1
+  },
+  "homeDateVariableCounted": true,
+  "globalOneLetterCount": 2
+}

@@ -1,0 +1,23 @@
+{
+  "sql-parameter": {
+    "differences": 1
+  },
+  "response-key": {
+    "differences": 1
+  },
+  "row-key-count": {
+    "differences": 1
+  },
+  "state-count": {
+    "differences": 1
+  },
+  "unclassified-source": {
+    "differences": 1
+  },
+  "order-self": {
+    "differences": 0
+  },
+  "guard-after-query": {
+    "differences": 1
+  }
+}

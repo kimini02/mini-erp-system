@@ -1,0 +1,65 @@
+{
+  "commit": "3dbc348e59fa786e9aa58fa67a9e94e69474cb76",
+  "files": [
+    "backend/src/main/java/com/minierp/backend/global/entity/BaseEntity.java",
+    "backend/src/main/java/com/minierp/backend/global/persistence/SqlStore.java",
+    "backend/src/main/java/com/minierp/backend/global/exception/GlobalExceptionHandler.java"
+  ],
+  "runtime": {
+    "on": {
+      "exit": 0,
+      "seconds": 1009.59,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordedMessages": 1,
+      "comparison": {
+        "exit": 0,
+        "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=11",
+        "warnings": [
+          "com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()",
+          "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()",
+          "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+          "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()",
+          "com.minierp.backend.integration.M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()",
+          "com.minierp.backend.integration.M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()",
+          "com.minierp.backend.integration.M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+          "com.minierp.backend.integration.M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()",
+          "com.minierp.backend.integration.M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()",
+          "com.minierp.backend.integration.M4OverdueTest#concurrentRunsSendOnlyOnce()",
+          "com.minierp.backend.integration.M5ProductionTest#<before-all>"
+        ]
+      }
+    },
+    "off": {
+      "exit": 0,
+      "seconds": 751.91,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordedMessages": 0
+    }
+  },
+  "probe": {
+    "exit": 0,
+    "seconds": 36.49,
+    "counts": [
+      4,
+      0,
+      0,
+      0
+    ],
+    "recordedMessages": 1,
+    "comparison": {
+      "exit": 0,
+      "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=0",
+      "warnings": []
+    }
+  }
+}

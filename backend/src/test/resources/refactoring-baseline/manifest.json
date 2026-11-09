@@ -1,0 +1,186 @@
+{
+  "productionBaseCommit": "faf7972",
+  "reviewedSafetyNetCommit": "ba6dca0",
+  "recordingPolicy": "ordered-outcome-dependent-http-races-v2",
+  "java": 17,
+  "jvmTimezone": "UTC",
+  "tests": 231,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "sqlShapes": 801,
+  "httpResponses": 921,
+  "validationRuns": [
+    {
+      "run": "record-1",
+      "exit": 0,
+      "wallSeconds": 762.19,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=0"
+    },
+    {
+      "run": "record-2",
+      "exit": 0,
+      "wallSeconds": 482.02,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=11"
+    },
+    {
+      "run": "record-3",
+      "exit": 0,
+      "wallSeconds": 595.16,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=12"
+    },
+    {
+      "run": "record-4",
+      "exit": 0,
+      "wallSeconds": 447.58,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=9"
+    },
+    {
+      "run": "record-5",
+      "exit": 0,
+      "wallSeconds": 452.07,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 1,
+      "compareExit": 0,
+      "compareSummary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=12"
+    },
+    {
+      "run": "off",
+      "exit": 0,
+      "wallSeconds": 653.0,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordMessages": 0
+    }
+  ],
+  "orderWarningFrameUnion": [
+    "com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()",
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()",
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()",
+    "com.minierp.backend.integration.M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()",
+    "com.minierp.backend.integration.M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()",
+    "com.minierp.backend.integration.M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+    "com.minierp.backend.integration.M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()",
+    "com.minierp.backend.integration.M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()",
+    "com.minierp.backend.integration.M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()",
+    "com.minierp.backend.integration.M4LegacyExperimentTest#fullRenumberUpdatesOneHundredRowsAndUnlockedMovesDuplicateTwentyTimes()",
+    "com.minierp.backend.integration.M4OverdueTest#concurrentRunsSendOnlyOnce()",
+    "com.minierp.backend.integration.M5ProductionTest#<before-all>"
+  ],
+  "files": {
+    "sql.json": "8ca96939bfbd887a037156bc523f7e60fdd9961910ec950a25c986e73fca4930",
+    "responses.json": "2e2acc5d706ea90531d44a7f957938f5e9a67a0d3e049d8fde0fc8b41dddcebc",
+    "masked-fields.txt": "7c4c8e12a7287aafc91ce4073f0ab047be4086f390cd26bc9901669acee5156e"
+  },
+  "comparisonRules": {
+    "reviewedComparatorCommit": "c176f10",
+    "workerSql": "exact per-frame equality; candidate cannot widen order tolerance",
+    "sqlCounts": "per-frame multiset equality excluding only the exact diagnostic poll",
+    "order": "strict list first; otherwise baseline workerSql only; M5 boot restricted to exact two CREATE USER swap",
+    "strictOrderFrames": {
+      "com.minierp.backend.integration.M5ProductionTest#separatedAccountsMigrateAndPerformRepresentativeWritesButRejectDdl()": "Blocking HttpClient.send completes each request before the next starts",
+      "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#1]": "snapshot/assigned latches serialize worker SELECT, main assignment, worker MOVE",
+      "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#2]": "snapshot/assigned latches serialize worker SELECT, main assignment, worker RETIRED",
+      "com.minierp.backend.integration.DepartmentHeadConcurrencyTest#headCheckUsesCurrentReadEvenWithAnOlderTransactionSnapshot()[test-template-invocation:#3]": "snapshot/assigned latches serialize worker SELECT, main assignment, worker ON_LEAVE",
+      "com.minierp.backend.integration.M1AcceptanceTest#concurrentInvitationLinksCannotOverwriteFirstPassword()": "Only the valid invitation reaches SQL; revoked token fails at the in-memory owner lookup",
+      "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentSubmissionsCannotSpendSameRemainingDays()": "RecordingOrder v2 completes each submission before releasing the next",
+      "com.minierp.backend.integration.M4BoardConcurrencyTest#projectLockPreventsWriteSkewInTenConcurrentCompletions()": "RecordingOrder v2 completes each move before releasing the next"
+    },
+    "m5BootSwap": {
+      "frame": "com.minierp.backend.integration.M5ProductionTest#<before-all>",
+      "sql": [
+        "create user 'workflow_app'@'%' identified by ?",
+        "create user 'workflow_migrator'@'%' identified by ?"
+      ],
+      "countEach": 1,
+      "allOtherRuns": "identical at their original positions"
+    },
+    "recompareRuns": [
+      {
+        "run": 1,
+        "exit": 0,
+        "seconds": 1.51,
+        "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=0",
+        "workerFramesCompared": 411,
+        "workerFlagChanges": 0
+      },
+      {
+        "run": 2,
+        "exit": 0,
+        "seconds": 1.35,
+        "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=11",
+        "workerFramesCompared": 411,
+        "workerFlagChanges": 0
+      },
+      {
+        "run": 3,
+        "exit": 0,
+        "seconds": 1.373,
+        "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=12",
+        "workerFramesCompared": 411,
+        "workerFlagChanges": 0
+      },
+      {
+        "run": 4,
+        "exit": 0,
+        "seconds": 1.263,
+        "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=9",
+        "workerFramesCompared": 411,
+        "workerFlagChanges": 0
+      },
+      {
+        "run": 5,
+        "exit": 0,
+        "seconds": 1.284,
+        "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=12",
+        "workerFramesCompared": 411,
+        "workerFlagChanges": 0
+      }
+    ],
+    "selfCheckPassed": 17,
+    "serializationFreshJvmsIdentical": 5,
+    "baselineBytes": "unchanged from c176f10; files hashes unchanged"
+  }
+}

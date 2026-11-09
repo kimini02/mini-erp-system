@@ -1,0 +1,197 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/monthly",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceAdminController#getMonthlyAttendance(java.lang.String,java.lang.Long,boolean)",
+    "successSnapshots": 6,
+    "alwaysNull": [
+      "$.data.days[].holidayName"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/records/{userId}/{date}",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceAdminController#getAttendanceRecord(long,java.time.LocalDate)",
+    "successSnapshots": 3,
+    "alwaysNull": [
+      "$.data.fixDocument",
+      "$.data.leaveDocument"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/monthly/export",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceAdminController#exportMonthlyAttendance(java.lang.String,java.lang.Long,boolean)",
+    "successSnapshots": 2,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/attendance/rejudge",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceAdminController#rejudgeAttendance(@jakarta.validation.Valid com.minierp.backend.domain.attendance.controller.AttendanceAdminController.Rejudge)",
+    "successSnapshots": 3,
+    "alwaysNull": [
+      "$.data.message"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/today",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceController#getTodayAttendance()",
+    "successSnapshots": 6,
+    "alwaysNull": [
+      "$.data.clockOutAt"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/attendance/clock-in",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceController#clockIn()",
+    "successSnapshots": 32,
+    "alwaysNull": [
+      "$.data.clockOutAt",
+      "$.data.holidayName"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/attendance/clock-out",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceController#clockOut()",
+    "successSnapshots": 10,
+    "alwaysNull": [
+      "$.data.holidayName"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/me",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceController#getMyMonthlyAttendance(java.lang.String)",
+    "successSnapshots": 1,
+    "alwaysNull": [
+      "$.data.days[].clockOutAt",
+      "$.data.days[].fixDocument"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/home",
+    "owner": "com.minierp.backend.domain.home.controller.HomeController#getHome()",
+    "successSnapshots": 53,
+    "alwaysNull": [
+      "$.data.today.clockOutAt"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/notifications",
+    "owner": "com.minierp.backend.domain.notification.controller.NotificationController#getNotifications(boolean,int,int)",
+    "successSnapshots": 2,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/notifications/unread-count",
+    "owner": "com.minierp.backend.domain.notification.controller.NotificationController#getUnreadCount()",
+    "successSnapshots": 4,
+    "alwaysNull": []
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/notifications/{id}/read",
+    "owner": "com.minierp.backend.domain.notification.controller.NotificationController#markAsRead(long)",
+    "successSnapshots": 2,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/notifications/read-all",
+    "owner": "com.minierp.backend.domain.notification.controller.NotificationController#markAllAsRead()",
+    "successSnapshots": 1,
+    "alwaysNull": []
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/projects",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#getProjects(com.minierp.backend.domain.project.entity.ProjectStatus,java.lang.String,int,int)",
+    "successSnapshots": 7,
+    "alwaysNull": [
+      "$.data.content[].content"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/projects",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#createProject(@jakarta.validation.Valid com.minierp.backend.domain.project.dto.BoardProjectRequests.Create)",
+    "successSnapshots": 1,
+    "alwaysNull": [
+      "$.data.content",
+      "$.data.myRole"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/projects/{id:[0-9]+}",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#getProject(long)",
+    "successSnapshots": 2,
+    "alwaysNull": [
+      "$.data.content"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/projects/{id:[0-9]+}",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#updateProject(long,@jakarta.validation.Valid com.minierp.backend.domain.project.dto.BoardProjectRequests.Patch)",
+    "successSnapshots": 2,
+    "alwaysNull": [
+      "$.data.content"
+    ]
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/projects/{id:[0-9]+}/members",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#updateProjectMembers(long,@jakarta.validation.Valid com.minierp.backend.domain.project.dto.BoardProjectRequests.Members)",
+    "successSnapshots": 5,
+    "alwaysNull": [
+      "$.data.content"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/projects/{id:[0-9]+}/board",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#getBoard(long)",
+    "successSnapshots": 7,
+    "alwaysNull": [
+      "$.data.project.content"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/projects/{id:[0-9]+}/tasks",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#createTask(long,@jakarta.validation.Valid com.minierp.backend.domain.task.dto.BoardTaskRequests.Create)",
+    "successSnapshots": 18,
+    "alwaysNull": [
+      "$.data.history[].from"
+    ]
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/tasks/{id:[0-9]+}",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#getTask(long)",
+    "successSnapshots": 9,
+    "alwaysNull": []
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/tasks/{id:[0-9]+}",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#updateTask(long,@jakarta.validation.Valid com.minierp.backend.domain.task.dto.BoardTaskRequests.Patch)",
+    "successSnapshots": 2,
+    "alwaysNull": []
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tasks/{id:[0-9]+}/move",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#moveTask(long,@jakarta.validation.Valid com.minierp.backend.domain.task.dto.BoardTaskRequests.Move)",
+    "successSnapshots": 72,
+    "alwaysNull": []
+  }
+]

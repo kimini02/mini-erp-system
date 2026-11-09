@@ -1,0 +1,2348 @@
+{
+  "framesBefore": 8,
+  "framesAfter": 8,
+  "differences": 0,
+  "differencesDetail": [],
+  "manualBefore": [],
+  "manualAfter": [],
+  "before": {
+    "com.minierp.backend.domain.approval.service.DocumentService#create(com.minierp.backend.domain.approval.dto.DocumentRequest)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 124,
+      "events": [
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [],
+          "else": [
+            {
+              "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolve(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertDraft(java.lang.Object,long,long,java.lang.String,boolean,java.lang.Long,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)"
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"
+            }
+          ]
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#update(long,com.minierp.backend.domain.approval.dto.DocumentRequest)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 140,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "INVALID_INPUT_VALUE"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [],
+          "else": [
+            {
+              "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolve(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)"
+            }
+          ]
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteLines(long)"
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateDraft(long,java.lang.String,boolean,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#delete(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 160,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#deleteBody(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteDocument(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#submit(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 190,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolve(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#validate(com.minierp.backend.domain.approval.model.ApprovalDraft)"
+        },
+        {
+          "clock": "java.time.LocalDate#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertNumberSequence(java.lang.String,int)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockNumberSequence(java.lang.String,int)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateNumberSequence(java.lang.String,int,long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteLines(long)"
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateSubmission(long,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "region": "conditional",
+              "condition": [],
+              "then": [
+                {
+                  "clock": "java.time.LocalDateTime#now"
+                }
+              ],
+              "else": []
+            },
+            {
+              "clock": "java.time.LocalDateTime#now"
+            },
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ],
+          "else": [
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "region": "if",
+              "condition": [],
+              "then": [
+                {
+                  "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+                }
+              ],
+              "else": []
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#act(long,boolean,java.lang.String)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 231,
+      "events": [
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countApprover(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "REJECT_REASON_REQUIRED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "INVALID_INPUT_VALUE"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "clock": "java.time.LocalDateTime#now"
+            },
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateAction(java.lang.Object,java.lang.String,java.time.LocalDateTime,java.lang.String)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updatePendingLine(java.lang.Object)"
+            },
+            {
+              "region": "if",
+              "condition": [
+                {
+                  "region": "conditional",
+                  "condition": [],
+                  "then": [
+                    {
+                      "clock": "java.time.LocalDateTime#now"
+                    }
+                  ],
+                  "else": []
+                },
+                {
+                  "clock": "java.time.LocalDateTime#now"
+                },
+                {
+                  "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)"
+                }
+              ],
+              "then": [
+                {
+                  "throw": "com.minierp.backend.global.exception.BusinessException",
+                  "errorCodes": [
+                    "DOCUMENT_STATE_CONFLICT"
+                  ]
+                }
+              ],
+              "else": []
+            },
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ],
+          "else": [
+            {
+              "region": "if",
+              "condition": [
+                {
+                  "region": "conditional",
+                  "condition": [],
+                  "then": [
+                    {
+                      "clock": "java.time.LocalDateTime#now"
+                    }
+                  ],
+                  "else": []
+                },
+                {
+                  "clock": "java.time.LocalDateTime#now"
+                },
+                {
+                  "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)"
+                }
+              ],
+              "then": [
+                {
+                  "throw": "com.minierp.backend.global.exception.BusinessException",
+                  "errorCodes": [
+                    "DOCUMENT_STATE_CONFLICT"
+                  ]
+                }
+              ],
+              "else": []
+            },
+            {
+              "region": "if",
+              "condition": [],
+              "then": [
+                {
+                  "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+                }
+              ],
+              "else": [
+                {
+                  "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onRejected(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+                }
+              ]
+            },
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#withdraw(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 278,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "WITHDRAW_NOT_ALLOWED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "region": "conditional",
+              "condition": [],
+              "then": [
+                {
+                  "clock": "java.time.LocalDateTime#now"
+                }
+              ],
+              "else": []
+            },
+            {
+              "clock": "java.time.LocalDateTime#now"
+            },
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onWithdrawn(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#resubmit(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 298,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [],
+          "else": [
+            {
+              "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolve(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertDraft(java.lang.Object,long,long,java.lang.String,boolean,java.lang.Long,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#copyBody(long,com.minierp.backend.domain.approval.model.ApprovalDocument)"
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"
+            }
+          ]
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#detail(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 321,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    }
+  },
+  "after": {
+    "com.minierp.backend.domain.approval.service.DocumentService#create(com.minierp.backend.domain.approval.dto.DocumentRequest)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 124,
+      "events": [
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [],
+          "else": [
+            {
+              "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolve(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertDraft(java.lang.Object,long,long,java.lang.String,boolean,java.lang.Long,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)"
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"
+            }
+          ]
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#update(long,com.minierp.backend.domain.approval.dto.DocumentRequest)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 140,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "INVALID_INPUT_VALUE"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#checkFormat(com.fasterxml.jackson.databind.JsonNode)"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [],
+          "else": [
+            {
+              "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolve(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)"
+            }
+          ]
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#saveBody(com.minierp.backend.domain.approval.model.ApprovalDocument,com.fasterxml.jackson.databind.JsonNode)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteLines(long)"
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateDraft(long,java.lang.String,boolean,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#delete(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 160,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#deleteBody(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteDocument(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#submit(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 190,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolve(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#validate(com.minierp.backend.domain.approval.model.ApprovalDraft)"
+        },
+        {
+          "clock": "java.time.LocalDate#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertNumberSequence(java.lang.String,int)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockNumberSequence(java.lang.String,int)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateNumberSequence(java.lang.String,int,long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#deleteLines(long)"
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateSubmission(long,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onSubmitted(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "region": "conditional",
+              "condition": [],
+              "then": [
+                {
+                  "clock": "java.time.LocalDateTime#now"
+                }
+              ],
+              "else": []
+            },
+            {
+              "clock": "java.time.LocalDateTime#now"
+            },
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ],
+          "else": [
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "region": "if",
+              "condition": [],
+              "then": [
+                {
+                  "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+                }
+              ],
+              "else": []
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#act(long,boolean,java.lang.String)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 231,
+      "events": [
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countApprover(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "REJECT_REASON_REQUIRED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "INVALID_INPUT_VALUE"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "clock": "java.time.LocalDateTime#now"
+            },
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateAction(java.lang.Object,java.lang.String,java.time.LocalDateTime,java.lang.String)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updatePendingLine(java.lang.Object)"
+            },
+            {
+              "region": "if",
+              "condition": [
+                {
+                  "region": "conditional",
+                  "condition": [],
+                  "then": [
+                    {
+                      "clock": "java.time.LocalDateTime#now"
+                    }
+                  ],
+                  "else": []
+                },
+                {
+                  "clock": "java.time.LocalDateTime#now"
+                },
+                {
+                  "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)"
+                }
+              ],
+              "then": [
+                {
+                  "throw": "com.minierp.backend.global.exception.BusinessException",
+                  "errorCodes": [
+                    "DOCUMENT_STATE_CONFLICT"
+                  ]
+                }
+              ],
+              "else": []
+            },
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ],
+          "else": [
+            {
+              "region": "if",
+              "condition": [
+                {
+                  "region": "conditional",
+                  "condition": [],
+                  "then": [
+                    {
+                      "clock": "java.time.LocalDateTime#now"
+                    }
+                  ],
+                  "else": []
+                },
+                {
+                  "clock": "java.time.LocalDateTime#now"
+                },
+                {
+                  "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)"
+                }
+              ],
+              "then": [
+                {
+                  "throw": "com.minierp.backend.global.exception.BusinessException",
+                  "errorCodes": [
+                    "DOCUMENT_STATE_CONFLICT"
+                  ]
+                }
+              ],
+              "else": []
+            },
+            {
+              "region": "if",
+              "condition": [],
+              "then": [
+                {
+                  "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onApproved(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+                }
+              ],
+              "else": [
+                {
+                  "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onRejected(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+                }
+              ]
+            },
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#withdraw(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 278,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "WITHDRAW_NOT_ALLOWED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "region": "conditional",
+              "condition": [],
+              "then": [
+                {
+                  "clock": "java.time.LocalDateTime#now"
+                }
+              ],
+              "else": []
+            },
+            {
+              "clock": "java.time.LocalDateTime#now"
+            },
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#updateTransition(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Integer,java.time.LocalDateTime,java.time.LocalDateTime)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#onWithdrawn(com.minierp.backend.domain.approval.model.ApprovalDocument)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertHistory(long,java.lang.Long,java.lang.String,java.lang.String,java.time.LocalDateTime)"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.notification.service.NotificationService#store(long,long,java.lang.String,java.lang.String)"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#resubmit(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 298,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockUser(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#lockDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "DOCUMENT_STATE_CONFLICT"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#form(java.lang.String)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "conditional",
+          "condition": [],
+          "then": [],
+          "else": [
+            {
+              "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#resolve(java.util.Map<java.lang.String,java.lang.Object>,long,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "clock": "java.time.LocalDateTime#now"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertDraft(java.lang.Object,long,long,java.lang.String,boolean,java.lang.Long,java.time.LocalDateTime)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#copyBody(long,com.minierp.backend.domain.approval.model.ApprovalDocument)"
+        },
+        {
+          "region": "foreach",
+          "iterable": [],
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentStore#insertLine(long,int,java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.Object,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"
+            }
+          ]
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.DocumentService#detail(long)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+      "line": 321,
+      "events": [
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findDocument(long)"
+        },
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [
+            {
+              "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#countReadableDocument(long,long)"
+            }
+          ],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "ACCESS_DENIED"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findLines(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#person(long)"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.DocumentQueries#findHistory(long)"
+        },
+        {
+          "bean": "java.util.List<com.minierp.backend.domain.approval.handler.ApprovalFormHandler>#stream()"
+        },
+        {
+          "region": "lambda",
+          "body": [
+            {
+              "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#formCode()"
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.handler.ApprovalFormHandler#body(long)"
+        }
+      ]
+    }
+  }
+}

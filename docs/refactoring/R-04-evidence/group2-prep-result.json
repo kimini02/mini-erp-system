@@ -1,0 +1,40 @@
+{
+  "commit": "c531e1f4ade77950eb692b55622ac18bbb8e7400",
+  "suite": {
+    "exit": 0,
+    "seconds": 592.06,
+    "counts": [
+      231,
+      0,
+      0,
+      0
+    ],
+    "recordedMessages": 1,
+    "comparison": {
+      "exit": 0,
+      "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=12",
+      "warnings": [
+        "com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()",
+        "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()",
+        "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+        "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()",
+        "com.minierp.backend.integration.M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()",
+        "com.minierp.backend.integration.M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()",
+        "com.minierp.backend.integration.M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+        "com.minierp.backend.integration.M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()",
+        "com.minierp.backend.integration.M4BoardConcurrencyTest#gapsUpdateOneRowSerializeTwentyMovesAndRebalanceOnlyWhenExhausted()",
+        "com.minierp.backend.integration.M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()",
+        "com.minierp.backend.integration.M4OverdueTest#concurrentRunsSendOnlyOnce()",
+        "com.minierp.backend.integration.M5ProductionTest#<before-all>"
+      ]
+    }
+  },
+  "rename": {
+    "com.minierp.backend.domain.org.service.OrgService#updateDepartmentSchedule": "com.minierp.backend.domain.org.service.OrgService#updateDepartmentWorkSchedule",
+    "com.minierp.backend.domain.user.controller.UserController#getUserLookup": "com.minierp.backend.domain.user.controller.UserController#getLookupUsers",
+    "com.minierp.backend.domain.user.service.UserLookupService#getUsers": "com.minierp.backend.domain.user.service.UserLookupService#getLookupUsers"
+  },
+  "transactionRenames": {
+    "com.minierp.backend.domain.org.service.OrgService#updateDepartmentSchedule(long,Schedule)": "com.minierp.backend.domain.org.service.OrgService#updateDepartmentWorkSchedule(long,Schedule)"
+  }
+}

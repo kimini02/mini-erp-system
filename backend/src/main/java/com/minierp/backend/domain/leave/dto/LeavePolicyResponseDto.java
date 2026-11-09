@@ -9,4 +9,3 @@ public class LeavePolicyResponseDto {
     private String position;
     private int annualLeaveDays;
 }
-

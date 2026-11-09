@@ -3,20 +3,16 @@ package com.minierp.backend.global.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
 public class PasswordResetStoreService {
-
     private static final Duration VERIFICATION_CODE_TTL = Duration.ofMinutes(5);
     private static final Duration RESET_PROOF_TTL = Duration.ofMinutes(15);
     private static final Duration REQUEST_RATE_LIMIT_TTL = Duration.ofMinutes(1);
     private static final long MAX_REQUESTS_PER_MINUTE = 5;
-
     private final StringRedisTemplate redisTemplate;
-
     public long incrementRequestCount(String email) {
         String key = requestCountKey(email);
         Long count = redisTemplate.opsForValue().increment(key);
@@ -66,4 +62,3 @@ public class PasswordResetStoreService {
         return "pwdreset:req:" + email;
     }
 }
-

@@ -1,7 +1,8 @@
 package com.minierp.backend.support;
+
 /** Unchanged phase-one query, retained only as a measurement comparator. */
 public final class LegacyProjectSummary {
- public static final String SELECT="""
+    public static final String SELECT = """
  SELECT p.*,u.user_name AS leader_name,pos.name AS leader_title,
  COALESCE(m.members,0) AS member_count,COALESCE(m.mine,0) AS is_member,COALESCE(t.total,0) AS task_count,
  COALESCE(t.done,0) AS done_count,COALESCE(t.overdue,0) AS overdue_count

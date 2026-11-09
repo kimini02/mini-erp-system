@@ -1,0 +1,7 @@
+{
+  "commit": "c46cbf2f41d7e2cf4a80128c9018b9e3b9ced07b",
+  "files": [
+    "docs/refactoring/R-04-call-order-check.py",
+    "docs/refactoring/R-04-sql-literal-check.py"
+  ]
+}

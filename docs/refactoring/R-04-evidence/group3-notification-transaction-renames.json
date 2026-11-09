@@ -1,0 +1,6 @@
+{
+  "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(String,Long,boolean)": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#getMonthlyAttendance(String,Long,boolean)",
+  "com.minierp.backend.domain.attendance.service.AttendanceAdminService#detail(long,LocalDate)": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#getAttendanceRecord(long,LocalDate)",
+  "com.minierp.backend.domain.notification.service.NotificationQueryService#read(long)": "com.minierp.backend.domain.notification.service.NotificationQueryService#markAsRead(long)",
+  "com.minierp.backend.domain.notification.service.NotificationQueryService#readAll()": "com.minierp.backend.domain.notification.service.NotificationQueryService#markAllAsRead()"
+}

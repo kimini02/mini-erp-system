@@ -1,0 +1,16 @@
+{
+  "com.minierp.backend.domain.org.service.OrgService#patchDepartment(long,DepartmentPatch)": "com.minierp.backend.domain.org.service.OrgService#updateDepartment(long,DepartmentPatch)",
+  "com.minierp.backend.domain.org.service.OrgService#move(long,Long)": "com.minierp.backend.domain.org.service.OrgService#updateDepartmentParent(long,Long)",
+  "com.minierp.backend.domain.org.service.OrgService#defaultSchedule(Schedule)": "com.minierp.backend.domain.org.service.OrgService#updateDefaultWorkSchedule(Schedule)",
+  "com.minierp.backend.domain.org.service.OrgService#departmentSchedule(long,Schedule)": "com.minierp.backend.domain.org.service.OrgService#updateDepartmentSchedule(long,Schedule)",
+  "com.minierp.backend.domain.org.service.OrgService#renamePosition(long,String)": "com.minierp.backend.domain.org.service.OrgService#updatePosition(long,String)",
+  "com.minierp.backend.domain.org.service.OrgService#orderPositions(List<PositionOrder>)": "com.minierp.backend.domain.org.service.OrgService#updatePositionOrder(List<PositionOrder>)",
+  "com.minierp.backend.domain.org.service.OrgService#patchHoliday(long,HolidayPatch)": "com.minierp.backend.domain.org.service.OrgService#updateHoliday(long,HolidayPatch)",
+  "com.minierp.backend.domain.permission.service.RoleService#create(Create)": "com.minierp.backend.domain.permission.service.RoleService#createRole(Create)",
+  "com.minierp.backend.domain.permission.service.RoleService#patch(long,Patch)": "com.minierp.backend.domain.permission.service.RoleService#updateRole(long,Patch)",
+  "com.minierp.backend.domain.permission.service.RoleService#delete(long)": "com.minierp.backend.domain.permission.service.RoleService#deleteRole(long)",
+  "com.minierp.backend.domain.permission.service.RoleService#permissions(long,List<Permission>)": "com.minierp.backend.domain.permission.service.RoleService#updateRolePermissions(long,List<Permission>)",
+  "com.minierp.backend.domain.permission.service.RoleService#addMembers(long,List<Long>)": "com.minierp.backend.domain.permission.service.RoleService#createRoleMembers(long,List<Long>)",
+  "com.minierp.backend.domain.permission.service.RoleService#removeMember(long,long)": "com.minierp.backend.domain.permission.service.RoleService#deleteRoleMember(long,long)",
+  "com.minierp.backend.domain.user.service.EmployeeService#replaceRoles(long,List<String>)": "com.minierp.backend.domain.user.service.EmployeeService#updateEmployeeRoles(long,List<String>)"
+}

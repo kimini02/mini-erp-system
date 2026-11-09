@@ -3,25 +3,23 @@ package com.minierp.backend.global.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-
 /** 에러 코드 — HTTP 상태코드 + 메시지를 한곳에서 관리 */
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
-
-    PROJECT_KEY_DUPLICATE(HttpStatus.CONFLICT,"이미 쓰는 프로젝트 키입니다."),
-    PROJECT_MEMBER_HAS_TASKS(HttpStatus.CONFLICT,"담당 중인 미완료 업무가 있어 멤버에서 뺄 수 없습니다. 담당자를 먼저 바꿔 주세요."),
-    TASK_ASSIGNEE_NOT_MEMBER(HttpStatus.UNPROCESSABLE_ENTITY,"프로젝트 멤버만 담당자로 지정할 수 있습니다."),
-    TASK_VERSION_CONFLICT(HttpStatus.CONFLICT,"다른 사람이 먼저 이 업무를 옮겼습니다. 보드를 새로 고칩니다."),
-    INVALID_TASK_POSITION(HttpStatus.UNPROCESSABLE_ENTITY,"옮길 위치가 올바르지 않습니다."),
-    ALREADY_CLOCKED_IN(HttpStatus.CONFLICT,"오늘은 이미 출근했습니다."),
-    NOT_CLOCKED_IN(HttpStatus.CONFLICT,"출근 기록이 없습니다. 출근부터 해 주세요."),
-    ATTENDANCE_ON_LEAVE(HttpStatus.CONFLICT,"오늘은 휴가입니다. 휴가를 회수한 뒤 출근하세요."),
-    ATTENDANCE_FIX_OUT_OF_RANGE(HttpStatus.UNPROCESSABLE_ENTITY,"최근 30일 안의 지난 날짜만 정정할 수 있습니다."),
-    ATTENDANCE_FIX_CLOCK_IN_REQUIRED(HttpStatus.UNPROCESSABLE_ENTITY,"출근 기록이 없는 날은 출근 시각을 함께 정정해야 합니다."),
-    ATTENDANCE_FIX_DUPLICATE(HttpStatus.CONFLICT,"같은 날짜로 진행 중인 정정 문서가 있습니다."),
-    INVALID_ATTENDANCE_TIME(HttpStatus.BAD_REQUEST,"퇴근 시각은 출근 시각보다 늦어야 합니다."),
-    LEAVE_BALANCE_NEGATIVE(HttpStatus.UNPROCESSABLE_ENTITY,"조정하면 사용 가능 연차가 0보다 작아집니다."),
+    PROJECT_KEY_DUPLICATE(HttpStatus.CONFLICT, "이미 쓰는 프로젝트 키입니다."),
+    PROJECT_MEMBER_HAS_TASKS(HttpStatus.CONFLICT, "담당 중인 미완료 업무가 있어 멤버에서 뺄 수 없습니다. 담당자를 먼저 바꿔 주세요."),
+    TASK_ASSIGNEE_NOT_MEMBER(HttpStatus.UNPROCESSABLE_ENTITY, "프로젝트 멤버만 담당자로 지정할 수 있습니다."),
+    TASK_VERSION_CONFLICT(HttpStatus.CONFLICT, "다른 사람이 먼저 이 업무를 옮겼습니다. 보드를 새로 고칩니다."),
+    INVALID_TASK_POSITION(HttpStatus.UNPROCESSABLE_ENTITY, "옮길 위치가 올바르지 않습니다."),
+    ALREADY_CLOCKED_IN(HttpStatus.CONFLICT, "오늘은 이미 출근했습니다."),
+    NOT_CLOCKED_IN(HttpStatus.CONFLICT, "출근 기록이 없습니다. 출근부터 해 주세요."),
+    ATTENDANCE_ON_LEAVE(HttpStatus.CONFLICT, "오늘은 휴가입니다. 휴가를 회수한 뒤 출근하세요."),
+    ATTENDANCE_FIX_OUT_OF_RANGE(HttpStatus.UNPROCESSABLE_ENTITY, "최근 30일 안의 지난 날짜만 정정할 수 있습니다."),
+    ATTENDANCE_FIX_CLOCK_IN_REQUIRED(HttpStatus.UNPROCESSABLE_ENTITY, "출근 기록이 없는 날은 출근 시각을 함께 정정해야 합니다."),
+    ATTENDANCE_FIX_DUPLICATE(HttpStatus.CONFLICT, "같은 날짜로 진행 중인 정정 문서가 있습니다."),
+    INVALID_ATTENDANCE_TIME(HttpStatus.BAD_REQUEST, "퇴근 시각은 출근 시각보다 늦어야 합니다."),
+    LEAVE_BALANCE_NEGATIVE(HttpStatus.UNPROCESSABLE_ENTITY, "조정하면 사용 가능 연차가 0보다 작아집니다."),
     DOCUMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결재 문서를 찾을 수 없습니다."),
     DOCUMENT_STATE_CONFLICT(HttpStatus.CONFLICT, "이미 처리되었거나 지금 처리할 수 없는 문서입니다. 새로고침해 주세요."),
     WITHDRAW_NOT_ALLOWED(HttpStatus.CONFLICT, "이미 승인한 사람이 있어 회수할 수 없습니다."),
@@ -33,7 +31,6 @@ public enum ErrorCode {
     LINE_EDIT_NOT_ALLOWED(HttpStatus.FORBIDDEN, "이 양식은 결재선을 바꿀 수 없습니다."),
     INVALID_APPROVAL_STEPS(HttpStatus.BAD_REQUEST, "결재자 단계가 하나 이상 있어야 합니다."),
     FORM_NOT_FOUND(HttpStatus.NOT_FOUND, "결재 양식을 찾을 수 없습니다."),
-
     TOKEN_REVOKED(HttpStatus.UNAUTHORIZED, "로그인이 만료되었습니다. 다시 로그인해 주세요."),
     SETUP_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "비밀번호 설정 링크가 만료되었거나 이미 사용되었습니다."),
     ACCOUNT_INACTIVE(HttpStatus.FORBIDDEN, "재직 중인 계정이 아닙니다."),
@@ -54,7 +51,6 @@ public enum ErrorCode {
     HEAD_NOT_IN_DEPARTMENT(HttpStatus.UNPROCESSABLE_ENTITY, "그 부서 소속 사원만 부서장이 될 수 있습니다."),
     HEAD_MUST_BE_REASSIGNED(HttpStatus.UNPROCESSABLE_ENTITY, "부서장을 먼저 다른 사람으로 바꿔 주세요."),
     ROLE_REQUIRED(HttpStatus.UNPROCESSABLE_ENTITY, "역할이 하나 이상 있어야 합니다."),
-
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "잘못된 요청 값입니다."),
     LOGIN_ID_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
@@ -98,7 +94,6 @@ public enum ErrorCode {
     ASSIGNMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "담당자 배정 정보를 찾을 수 없습니다."),
     TASK_ACCESS_DENIED(HttpStatus.FORBIDDEN, "본인에게 배정된 업무만 접근할 수 있습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
-
     private final HttpStatus status;
     private final String message;
 }

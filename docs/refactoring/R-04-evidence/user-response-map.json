@@ -1,0 +1,88 @@
+[
+  {
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#views(java.util.List<java.lang.Long>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Role"
+  },
+  {
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#views(java.util.List<java.lang.Long>)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Department"
+  },
+  {
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#views(java.util.List<java.lang.Long>)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto",
+    "nested": {
+      "roles": {
+        "method": "com.minierp.backend.domain.user.service.EmployeeService#views(java.util.List<java.lang.Long>)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Role"
+      },
+      "department": {
+        "method": "com.minierp.backend.domain.user.service.EmployeeService#views(java.util.List<java.lang.Long>)",
+        "index": 2,
+        "record": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Department"
+      }
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#page(java.util.List<?>,int,int,long)",
+    "index": 1,
+    "record": "com.minierp.backend.global.response.PageResponseDto.Page"
+  },
+  {
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#page(java.util.List<?>,int,int,long)",
+    "index": 0,
+    "record": "com.minierp.backend.global.response.PageResponseDto",
+    "nested": {
+      "page": {
+        "method": "com.minierp.backend.domain.user.service.EmployeeService#page(java.util.List<?>,int,int,long)",
+        "index": 1,
+        "record": "com.minierp.backend.global.response.PageResponseDto.Page"
+      }
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.user.service.EmployeeService#page(java.util.List<?>,int,int,long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.user.dto.EmployeeListResponseDto",
+    "append": [
+      "statusCounts"
+    ],
+    "nested": {
+      "content": {
+        "method": "com.minierp.backend.domain.user.service.EmployeeService#views(java.util.List<java.lang.Long>)",
+        "index": 1,
+        "record": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto",
+        "nested": {
+          "roles": {
+            "method": "com.minierp.backend.domain.user.service.EmployeeService#views(java.util.List<java.lang.Long>)",
+            "index": 0,
+            "record": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Role"
+          },
+          "department": {
+            "method": "com.minierp.backend.domain.user.service.EmployeeService#views(java.util.List<java.lang.Long>)",
+            "index": 2,
+            "record": "com.minierp.backend.domain.user.dto.EmployeeDetailResponseDto.Department"
+          }
+        }
+      },
+      "page": {
+        "method": "com.minierp.backend.domain.user.service.EmployeeService#page(java.util.List<?>,int,int,long)",
+        "index": 1,
+        "record": "com.minierp.backend.global.response.PageResponseDto.Page"
+      }
+    },
+    "reason": "EmployeeService.list puts selected.counts into statusCounts after page(content,...)."
+  },
+  {
+    "method": "com.minierp.backend.domain.user.controller.UserController#preview(java.time.LocalDate)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.user.dto.EmployeeLoginIdPreviewResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.user.repository.EmployeeQueries#findActiveUsers",
+    "record": "com.minierp.backend.domain.user.dto.EmployeeLookupResponseDto"
+  }
+]

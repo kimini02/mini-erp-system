@@ -1,0 +1,39 @@
+{
+  "functionalTests": {
+    "exit": 0,
+    "seconds": 1161.5,
+    "counts": [
+      231,
+      0,
+      0,
+      0
+    ],
+    "recordedMessages": 1
+  },
+  "comparisonDifferences": 6,
+  "orderWarnings": 10,
+  "globalSqlMultisetEqual": true,
+  "globalIsolationCount": 94,
+  "responseDifferences": 0,
+  "frames": {
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()": {
+      "baselineQueryCount": 89,
+      "candidateQueryCount": 88,
+      "baselineIsolationCount": 1,
+      "candidateIsolationCount": 0
+    },
+    "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()": {
+      "baselineQueryCount": 811,
+      "candidateQueryCount": 812,
+      "baselineIsolationCount": 0,
+      "candidateIsolationCount": 1
+    }
+  },
+  "driverSource": "MariaDB Connection.getTransactionIsolation checks cached level, otherwise Statement.executeQuery SELECT @@session.tx_isolation",
+  "recorderSource": "SafetyNetRun.sql assigns every thread to current global test frame",
+  "unchangedDomains": [
+    "approval",
+    "leave",
+    "overtime"
+  ]
+}

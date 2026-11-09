@@ -9,56 +9,45 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
- * 업무(Task) 엔티티
- * - @Setter 금지, 상태 변경은 도메인 메서드(changeStatus, update)로만 수행
- * - Task 마감일은 프로젝트 마감일을 초과할 수 없음 (@PrePersist/@PreUpdate 검증)
- * - TaskAssignment를 통해 다대다 담당자 배정 (중간 테이블)
- */
+* 업무(Task) 엔티티
+* - @Setter 금지, 상태 변경은 도메인 메서드(changeStatus, update)로만 수행
+* - Task 마감일은 프로젝트 마감일을 초과할 수 없음 (@PrePersist/@PreUpdate 검증)
+* - TaskAssignment를 통해 다대다 담당자 배정 (중간 테이블)
+*/
 @Entity
 @Table(name = "tasks")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Task extends BaseEntity {
-
     @Column(name = "task_title", nullable = false, length = 100)
     private String taskTitle;
-
     @Column(name = "task_content", nullable = false, length = 1000)
     private String taskContent;
-
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "task_status", nullable = false)
     private TaskStatus taskStatus;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
-
     // Task 삭제 시 배정 정보도 함께 삭제 (데이터 정합성)
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskAssignment> taskAssignments = new ArrayList<>();
-
     public static Task create(
             String taskTitle,
             String taskContent,
             LocalDate endDate,
             TaskStatus taskStatus,
             Priority priority,
-            Project project
-    ) {
+            Project project) {
         Task task = new Task();
         task.taskTitle = taskTitle;
         task.taskContent = taskContent;
@@ -95,7 +84,8 @@ public class Task extends BaseEntity {
     @PrePersist
     @PreUpdate
     private void validatePeriod() {
-        if (project != null && project.getEndDate() != null && endDate != null && endDate.isAfter(project.getEndDate())) {
+        if (project != null && project.getEndDate() != null && endDate != null
+                && endDate.isAfter(project.getEndDate())) {
             throw new BusinessException(ErrorCode.INVALID_TASK_PERIOD);
         }
     }

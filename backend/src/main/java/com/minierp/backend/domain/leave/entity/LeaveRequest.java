@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -16,7 +15,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -28,43 +26,41 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class LeaveRequest extends BaseEntity {
-
-    @Column(name="document_id",nullable=false,unique=true)
+    @Column(name = "document_id", nullable = false, unique = true)
     private Long documentId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @org.hibernate.annotations.JoinFormula("(select d.drafter_id from approval_documents d where d.id=document_id)")
     private User requester;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @org.hibernate.annotations.JoinFormula("(select l.approver_id from approval_lines l where l.document_id=document_id and l.line_kind='APPROVER' order by l.step_order desc limit 1)")
+    @org.hibernate.annotations.JoinFormula(
+            "(select l.approver_id from approval_lines l where l.document_id=document_id and l.line_kind='APPROVER' order by l.step_order desc limit 1)")
     private User approver;
-
     @Enumerated(EnumType.STRING)
-    @org.hibernate.annotations.Formula("(case leave_type when 'HALF_AM' then 'HALF_MORNING' when 'HALF_PM' then 'HALF_AFTERNOON' else leave_type end)")
+    @org.hibernate.annotations.Formula(
+            "(case leave_type when 'HALF_AM' then 'HALF_MORNING' when 'HALF_PM' then 'HALF_AFTERNOON' else leave_type end)")
     private LeaveType appType;
-
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
-
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
-
     @Column(name = "used_days", nullable = false, precision = 4, scale = 1)
     private BigDecimal usedDays;
-
     @Enumerated(EnumType.STRING)
-    @org.hibernate.annotations.Formula("(select case d.status when 'IN_PROGRESS' then 'PENDING' when 'WITHDRAWN' then 'CANCELLED' else d.status end from approval_documents d where d.id=document_id)")
+    @org.hibernate.annotations.Formula(
+            "(select case d.status when 'IN_PROGRESS' then 'PENDING' when 'WITHDRAWN' then 'CANCELLED' else d.status end from approval_documents d where d.id=document_id)")
     private LeaveStatus appStatus = LeaveStatus.PENDING;
-
-    @org.hibernate.annotations.Formula("(select h.comment from approval_histories h where h.document_id=document_id and h.action='REJECT' order by h.id desc limit 1)")
+    @org.hibernate.annotations.Formula(
+            "(select h.comment from approval_histories h where h.document_id=document_id and h.action='REJECT' order by h.id desc limit 1)")
     private String rejectReason;
-
     @Column(name = "reason", length = 500)
     private String requestReason;
-
     @Builder
-    public LeaveRequest(User requester, LeaveType appType, LocalDate startDate, LocalDate endDate, String requestReason) {
+    public LeaveRequest(
+            User requester,
+            LeaveType appType,
+            LocalDate startDate,
+            LocalDate endDate,
+            String requestReason) {
         this.requester = requester;
         this.appType = appType;
         this.startDate = startDate;
@@ -74,8 +70,8 @@ public class LeaveRequest extends BaseEntity {
     }
 
     /**
-     * 연차 취소 처리
-     */
+    * 연차 취소 처리
+    */
     public void cancel(User requester) {
         if (this.appStatus != LeaveStatus.PENDING) {
             throw new IllegalStateException("이미 처리된 결재 건입니다. (현재 상태: " + appStatus.getDisplayName() + ")");
@@ -87,8 +83,8 @@ public class LeaveRequest extends BaseEntity {
     }
 
     /**
-     * 연차 승인 처리
-     */
+    * 연차 승인 처리
+    */
     public void approve(User approver) {
         if (this.appStatus != LeaveStatus.PENDING) {
             throw new IllegalStateException("이미 처리된 결재 건입니다. (현재 상태: " + appStatus.getDisplayName() + ")");
@@ -98,8 +94,8 @@ public class LeaveRequest extends BaseEntity {
     }
 
     /**
-     * 연차 반려 처리
-     */
+    * 연차 반려 처리
+    */
     public void reject(User approver, String reason) {
         if (this.appStatus != LeaveStatus.PENDING) {
             throw new IllegalStateException("이미 처리된 결재 건입니다. (현재 상태: " + appStatus.getDisplayName() + ")");
@@ -113,24 +109,22 @@ public class LeaveRequest extends BaseEntity {
     }
 
     /**
-     * 주말을 제외한 실제 연차 소진 일수를 계산 (반차는 0.5 고정)
-     */
+    * 주말을 제외한 실제 연차 소진 일수를 계산 (반차는 0.5 고정)
+    */
     public void calculateUsedDays(List<LocalDate> holidayList) {
         if (appType.isHalfDay()) {
-            this.usedDays = appType.getUnitDays(); // 0.5
+            this.usedDays = appType.getUnitDays();
+            // 0.5
             return;
         }
-
         long workingDays = startDate.datesUntil(endDate.plusDays(1))
                 .filter(date -> date.getDayOfWeek() != DayOfWeek.SATURDAY)
                 .filter(date -> date.getDayOfWeek() != DayOfWeek.SUNDAY)
                 .filter(date -> !holidayList.contains(date))
                 .count();
-
         if (workingDays == 0) {
             throw new IllegalArgumentException("신청 기간에 평일이 포함되어 있지 않습니다.");
         }
-
         this.usedDays = BigDecimal.valueOf(workingDays);
     }
 
@@ -140,8 +134,8 @@ public class LeaveRequest extends BaseEntity {
         if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
             throw new IllegalArgumentException("종료일은 시작일보다 빠를 수 없습니다.");
         }
-
-        if (appType != null && appType.isHalfDay() && (startDate == null || endDate == null || !startDate.equals(endDate))) {
+        if (appType != null && appType.isHalfDay()
+                && (startDate == null || endDate == null || !startDate.equals(endDate))) {
             throw new IllegalArgumentException("반차는 시작일과 종료일이 같은 하루만 신청할 수 있습니다.");
         }
     }

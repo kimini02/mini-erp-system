@@ -15,53 +15,67 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 class SqlStoreDateTimeMariaDbTest extends MariaDbIntegrationTest {
-    @Autowired MockMvc mvc;
-    @Autowired ObjectMapper mapper;
-    @Autowired UserRepository users;
-    @Autowired JwtTokenProvider tokens;
-    @Autowired JdbcTemplate jdbc;
-    @Autowired SqlStore store;
-    @Autowired Clock clock;
+    @Autowired
+    MockMvc mvc;
+    @Autowired
+    ObjectMapper mapper;
+    @Autowired
+    UserRepository users;
+    @Autowired
+    JwtTokenProvider tokens;
+    @Autowired
+    JdbcTemplate jdbc;
+    @Autowired
+    SqlStore store;
+    @Autowired
+    Clock clock;
     private TimeZone previousZone;
-
-    @BeforeEach void useUtcJvm() {
+    @BeforeEach
+    void useUtcJvm() {
         previousZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
-    @AfterEach void restoreJvmZone() {
+    @AfterEach
+    void restoreJvmZone() {
         TimeZone.setDefault(previousZone);
     }
 
-    @Test void userListPreservesKoreanDatabaseDateTimeWithoutOffsetWithUtcJvm() throws Exception {
+    @Test
+    void userListPreservesKoreanDatabaseDateTimeWithoutOffsetWithUtcJvm() throws Exception {
         String login = "datetime-" + UUID.randomUUID();
         User user = User.create("시각 검증", login, login + "@example.test", "unused-encoded", "01", "사원");
         user.changeRole(UserRole.ADMIN);
         users.saveAndFlush(user);
-        LocalDateTime koreanTime = LocalDateTime.now(clock).withHour(21).withMinute(7).withSecond(29).withNano(213456000);
-        jdbc.update("UPDATE users SET created_at=?, updated_at=NULL, hire_date=? WHERE id=?",
-                koreanTime, koreanTime.toLocalDate(), user.getId());
+        LocalDateTime koreanTime = LocalDateTime.now(clock)
+                .withHour(21)
+                .withMinute(7)
+                .withSecond(29)
+                .withNano(213456000);
+        jdbc.update("UPDATE users SET created_at=?, updated_at=NULL, hire_date=? WHERE id=?", koreanTime,
+                koreanTime.toLocalDate(), user.getId());
         // Read text directly from MariaDB so the expected value cannot inherit a JDBC timezone conversion.
         String databaseTime = jdbc.queryForObject(
-                "SELECT DATE_FORMAT(created_at,'%Y-%m-%dT%H:%i:%s.%f') FROM users WHERE id=?", String.class, user.getId());
+                "SELECT DATE_FORMAT(created_at,'%Y-%m-%dT%H:%i:%s.%f') FROM users WHERE id=?", String.class,
+                user.getId());
         assertThat(databaseTime).isEqualTo(koreanTime.toString());
         String token = tokens.generateAccessToken(user.getId().toString(), user.getTokenVersion());
-        var response = mvc.perform(get("/api/v1/users").param("q", login)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        var response = mvc.perform(get("/api/v1/users").param("q", login).header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
         var content = mapper.readTree(response).path("data").path("content");
         assertThat(content.size()).isEqualTo(1);
         assertThat(content.get(0).path("createdAt").asText()).isEqualTo(databaseTime);
@@ -69,7 +83,8 @@ class SqlStoreDateTimeMariaDbTest extends MariaDbIntegrationTest {
         assertThat(content.get(0).path("updatedAt").isNull()).isTrue();
     }
 
-    @Test void rowsAndOneNormalizeTemporalValuesRegardlessOfColumnName() throws Exception {
+    @Test
+    void rowsAndOneNormalizeTemporalValuesRegardlessOfColumnName() throws Exception {
         // M2 submittedAt/completedAt follow the same query boundary as M1 createdAt.
         String sql = """
                 SELECT CAST(:at AS DATETIME(6)) AS submittedAt, CAST(:day AS DATE) AS workDate,

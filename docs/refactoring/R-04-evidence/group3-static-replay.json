@@ -1,0 +1,12 @@
+{
+  "order": 0,
+  "sql": 0,
+  "response": 0,
+  "unused": 0,
+  "transactions": 83,
+  "outsideSql": 0,
+  "testSourceSame": true,
+  "apiSame": true,
+  "apiCount": 98,
+  "textBlockClosingChanges": []
+}

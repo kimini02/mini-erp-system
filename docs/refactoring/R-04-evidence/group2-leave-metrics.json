@@ -1,0 +1,50 @@
+{
+  "approval": {
+    "wildcards": 0,
+    "responseFactories": 0,
+    "publicMapsOrObject": 2,
+    "methods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#getForm(java.lang.String)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#getPerson(long)",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "handlerBodies": []
+  },
+  "leave": {
+    "wildcards": 0,
+    "responseFactories": 0,
+    "publicMapsOrObject": 3,
+    "methods": [
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/handler/LeaveFormHandler.java",
+        "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#raw(long)",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveGrantService#runToday()",
+        "returns": "Map<String, Object>"
+      },
+      {
+        "file": "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantService.java",
+        "method": "com.minierp.backend.domain.leave.service.LeaveGrantService#run(java.time.LocalDate)",
+        "returns": "Map<String, Object>"
+      }
+    ],
+    "handlerBodies": []
+  },
+  "overtime": {
+    "wildcards": 0,
+    "responseFactories": 0,
+    "publicMapsOrObject": 0,
+    "methods": [],
+    "handlerBodies": []
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "file": "domain/attendance/repository/AttendanceStore.java",
+    "identifierChanges": 14,
+    "otherTokenChanges": 0
+  },
+  {
+    "file": "domain/project/repository/ProjectStore.java",
+    "identifierChanges": 12,
+    "otherTokenChanges": 0
+  },
+  {
+    "file": "domain/project/repository/ProjectStateStore.java",
+    "identifierChanges": 4,
+    "otherTokenChanges": 0
+  },
+  {
+    "file": "domain/task/repository/TaskQueries.java",
+    "identifierChanges": 8,
+    "otherTokenChanges": 0
+  },
+  {
+    "file": "domain/task/repository/TaskStore.java",
+    "identifierChanges": 4,
+    "otherTokenChanges": 0
+  },
+  {
+    "file": "global/entity/BaseEntity.java",
+    "identifierChanges": 5,
+    "otherTokenChanges": 0
+  },
+  {
+    "file": "global/persistence/SqlStore.java",
+    "identifierChanges": 5,
+    "otherTokenChanges": 0
+  },
+  {
+    "file": "global/exception/GlobalExceptionHandler.java",
+    "identifierChanges": 17,
+    "otherTokenChanges": 0
+  }
+]

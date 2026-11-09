@@ -8,12 +8,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CurrentUserResolver {
-
     public Long resolveUserId(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
-
         try {
             return Long.valueOf(authentication.getName());
         } catch (NumberFormatException e) {
@@ -25,8 +23,8 @@ public class CurrentUserResolver {
         if (authentication == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
-
-        return authentication.getAuthorities().stream()
+        return authentication.getAuthorities()
+                .stream()
                 .map(authority -> authority.getAuthority())
                 .filter(authority -> authority.startsWith("ROLE_"))
                 .map(authority -> authority.replace("ROLE_", ""))
@@ -39,4 +37,3 @@ public class CurrentUserResolver {
         return resolveUserRole(authentication).isTopManager();
     }
 }
-

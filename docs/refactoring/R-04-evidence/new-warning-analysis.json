@@ -1,0 +1,34 @@
+{
+  "test": "com.minierp.backend.integration.M4LegacyExperimentTest#unlockedWholeListRecalculationReproducesWriteSkewTenTimes()",
+  "before": {
+    "queryCount": 171,
+    "comparedQueryCount": 171,
+    "diagnosticQueryCount": 0,
+    "workerSql": true
+  },
+  "after": {
+    "queryCount": 171,
+    "comparedQueryCount": 171,
+    "diagnosticQueryCount": 0,
+    "workerSql": true
+  },
+  "sameSqlMultiset": true,
+  "beforeSlice24to31": [
+    "insert into tasks(project_id,task_no,position,end_date,created_at,task_title,task_content,task_status,priority) values(?,?,?,?,?,'카드','','doing','medium')",
+    "select id from tasks where project_id=? order by task_no",
+    "select @@session.tx_isolation",
+    "select @@session.tx_isolation",
+    "update tasks set task_status='done' where id=?",
+    "update tasks set task_status='done' where id=?",
+    "select task_status from tasks where project_id=?"
+  ],
+  "afterSlice24to31": [
+    "insert into tasks(project_id,task_no,position,end_date,created_at,task_title,task_content,task_status,priority) values(?,?,?,?,?,'카드','','doing','medium')",
+    "select id from tasks where project_id=? order by task_no",
+    "select @@session.tx_isolation",
+    "update tasks set task_status='done' where id=?",
+    "select @@session.tx_isolation",
+    "update tasks set task_status='done' where id=?",
+    "select task_status from tasks where project_id=?"
+  ]
+}

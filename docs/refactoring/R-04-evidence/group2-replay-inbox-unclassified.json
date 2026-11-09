@@ -1,0 +1,1240 @@
+{
+  "filesBefore": 40,
+  "filesAfter": 40,
+  "occurrencesBefore": 1023,
+  "occurrencesAfter": 977,
+  "differences": 1,
+  "differencesDetail": [
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+      "removed": {
+        "id": 3,
+        "UNCLASSIFIED": 1,
+        "status": 3,
+        "DRAFT": 1,
+        "CURRENT": 2,
+        "WITHDRAWN": 4,
+        "DONE": 2,
+        "APPROVED": 1,
+        "PENDING": 2,
+        "IN_PROGRESS": 2,
+        "TODO": 2,
+        "REJECTED": 2,
+        "SKIPPED": 2,
+        "name": 2,
+        "approver_name": 1,
+        "title": 4,
+        "approver_title": 1,
+        "docNo": 1,
+        "doc_no": 1,
+        "formCode": 1,
+        "code": 2,
+        "formName": 1,
+        "drafter": 1,
+        "user_name": 1,
+        "position_name": 1,
+        "department": 1,
+        "department_name": 1,
+        "submittedAt": 1,
+        "submitted_at": 1,
+        "updatedAt": 1,
+        "updated_at": 1,
+        "steps": 1,
+        "currentApprover": 1
+      },
+      "added": {
+        "total": 2,
+        "content": 2,
+        "lines": 2
+      },
+      "exception": {
+        "allowed": false,
+        "classificationCounts": {
+          "UNKNOWN": 1,
+          "rowKey": 15,
+          "stateValue": 20,
+          "responseKey": 16
+        },
+        "classifiedTotal": 52,
+        "removedTotal": 52,
+        "occurrences": [
+          {
+            "line": 74,
+            "start": 4168,
+            "end": 4182,
+            "value": "UNCLASSIFIED",
+            "category": "UNKNOWN"
+          },
+          {
+            "line": 76,
+            "start": 4279,
+            "end": 4287,
+            "value": "status",
+            "category": "rowKey"
+          },
+          {
+            "line": 77,
+            "start": 4329,
+            "end": 4336,
+            "value": "DRAFT",
+            "category": "stateValue"
+          },
+          {
+            "line": 77,
+            "start": 4340,
+            "end": 4349,
+            "value": "CURRENT",
+            "category": "stateValue"
+          },
+          {
+            "line": 77,
+            "start": 4366,
+            "end": 4377,
+            "value": "WITHDRAWN",
+            "category": "stateValue"
+          },
+          {
+            "line": 77,
+            "start": 4381,
+            "end": 4392,
+            "value": "WITHDRAWN",
+            "category": "stateValue"
+          },
+          {
+            "line": 77,
+            "start": 4395,
+            "end": 4401,
+            "value": "DONE",
+            "category": "stateValue"
+          },
+          {
+            "line": 79,
+            "start": 4493,
+            "end": 4497,
+            "value": "id",
+            "category": "rowKey"
+          },
+          {
+            "line": 80,
+            "start": 4560,
+            "end": 4568,
+            "value": "status",
+            "category": "rowKey"
+          },
+          {
+            "line": 82,
+            "start": 4642,
+            "end": 4652,
+            "value": "APPROVED",
+            "category": "stateValue"
+          },
+          {
+            "line": 82,
+            "start": 4656,
+            "end": 4662,
+            "value": "DONE",
+            "category": "stateValue"
+          },
+          {
+            "line": 83,
+            "start": 4689,
+            "end": 4698,
+            "value": "PENDING",
+            "category": "stateValue"
+          },
+          {
+            "line": 83,
+            "start": 4716,
+            "end": 4729,
+            "value": "IN_PROGRESS",
+            "category": "stateValue"
+          },
+          {
+            "line": 84,
+            "start": 4761,
+            "end": 4770,
+            "value": "CURRENT",
+            "category": "stateValue"
+          },
+          {
+            "line": 85,
+            "start": 4815,
+            "end": 4826,
+            "value": "WITHDRAWN",
+            "category": "stateValue"
+          },
+          {
+            "line": 85,
+            "start": 4830,
+            "end": 4841,
+            "value": "WITHDRAWN",
+            "category": "stateValue"
+          },
+          {
+            "line": 85,
+            "start": 4844,
+            "end": 4850,
+            "value": "TODO",
+            "category": "stateValue"
+          },
+          {
+            "line": 86,
+            "start": 4877,
+            "end": 4887,
+            "value": "REJECTED",
+            "category": "stateValue"
+          },
+          {
+            "line": 86,
+            "start": 4891,
+            "end": 4901,
+            "value": "REJECTED",
+            "category": "stateValue"
+          },
+          {
+            "line": 87,
+            "start": 4928,
+            "end": 4937,
+            "value": "SKIPPED",
+            "category": "stateValue"
+          },
+          {
+            "line": 87,
+            "start": 4941,
+            "end": 4950,
+            "value": "SKIPPED",
+            "category": "stateValue"
+          },
+          {
+            "line": 88,
+            "start": 4983,
+            "end": 4989,
+            "value": "TODO",
+            "category": "stateValue"
+          },
+          {
+            "line": 90,
+            "start": 5044,
+            "end": 5053,
+            "value": "PENDING",
+            "category": "stateValue"
+          },
+          {
+            "line": 90,
+            "start": 5072,
+            "end": 5085,
+            "value": "IN_PROGRESS",
+            "category": "stateValue"
+          },
+          {
+            "line": 91,
+            "start": 5124,
+            "end": 5130,
+            "value": "name",
+            "category": "responseKey"
+          },
+          {
+            "line": 91,
+            "start": 5138,
+            "end": 5153,
+            "value": "approver_name",
+            "category": "rowKey"
+          },
+          {
+            "line": 91,
+            "start": 5156,
+            "end": 5163,
+            "value": "title",
+            "category": "responseKey"
+          },
+          {
+            "line": 91,
+            "start": 5171,
+            "end": 5187,
+            "value": "approver_title",
+            "category": "rowKey"
+          },
+          {
+            "line": 94,
+            "start": 5246,
+            "end": 5250,
+            "value": "id",
+            "category": "responseKey"
+          },
+          {
+            "line": 94,
+            "start": 5258,
+            "end": 5262,
+            "value": "id",
+            "category": "rowKey"
+          },
+          {
+            "line": 94,
+            "start": 5265,
+            "end": 5272,
+            "value": "docNo",
+            "category": "responseKey"
+          },
+          {
+            "line": 94,
+            "start": 5280,
+            "end": 5288,
+            "value": "doc_no",
+            "category": "rowKey"
+          },
+          {
+            "line": 94,
+            "start": 5291,
+            "end": 5301,
+            "value": "formCode",
+            "category": "responseKey"
+          },
+          {
+            "line": 94,
+            "start": 5309,
+            "end": 5315,
+            "value": "code",
+            "category": "rowKey"
+          },
+          {
+            "line": 95,
+            "start": 5338,
+            "end": 5348,
+            "value": "formName",
+            "category": "responseKey"
+          },
+          {
+            "line": 95,
+            "start": 5387,
+            "end": 5393,
+            "value": "code",
+            "category": "rowKey"
+          },
+          {
+            "line": 95,
+            "start": 5397,
+            "end": 5404,
+            "value": "title",
+            "category": "responseKey"
+          },
+          {
+            "line": 95,
+            "start": 5412,
+            "end": 5419,
+            "value": "title",
+            "category": "rowKey"
+          },
+          {
+            "line": 96,
+            "start": 5442,
+            "end": 5451,
+            "value": "drafter",
+            "category": "responseKey"
+          },
+          {
+            "line": 96,
+            "start": 5457,
+            "end": 5463,
+            "value": "name",
+            "category": "responseKey"
+          },
+          {
+            "line": 96,
+            "start": 5471,
+            "end": 5482,
+            "value": "user_name",
+            "category": "rowKey"
+          },
+          {
+            "line": 96,
+            "start": 5485,
+            "end": 5492,
+            "value": "title",
+            "category": "responseKey"
+          },
+          {
+            "line": 96,
+            "start": 5500,
+            "end": 5515,
+            "value": "position_name",
+            "category": "rowKey"
+          },
+          {
+            "line": 97,
+            "start": 5546,
+            "end": 5558,
+            "value": "department",
+            "category": "responseKey"
+          },
+          {
+            "line": 97,
+            "start": 5566,
+            "end": 5583,
+            "value": "department_name",
+            "category": "rowKey"
+          },
+          {
+            "line": 97,
+            "start": 5587,
+            "end": 5600,
+            "value": "submittedAt",
+            "category": "responseKey"
+          },
+          {
+            "line": 97,
+            "start": 5608,
+            "end": 5622,
+            "value": "submitted_at",
+            "category": "rowKey"
+          },
+          {
+            "line": 98,
+            "start": 5645,
+            "end": 5656,
+            "value": "updatedAt",
+            "category": "responseKey"
+          },
+          {
+            "line": 98,
+            "start": 5664,
+            "end": 5676,
+            "value": "updated_at",
+            "category": "rowKey"
+          },
+          {
+            "line": 98,
+            "start": 5679,
+            "end": 5687,
+            "value": "status",
+            "category": "responseKey"
+          },
+          {
+            "line": 98,
+            "start": 5697,
+            "end": 5704,
+            "value": "steps",
+            "category": "responseKey"
+          },
+          {
+            "line": 98,
+            "start": 5716,
+            "end": 5733,
+            "value": "currentApprover",
+            "category": "responseKey"
+          }
+        ],
+        "unknownOccurrences": [
+          {
+            "line": 74,
+            "start": 4168,
+            "end": 4182,
+            "value": "UNCLASSIFIED",
+            "category": "UNKNOWN"
+          }
+        ],
+        "protectedLiteralDifferences": {},
+        "removedMatchesClassified": true,
+        "responsePathsBefore": [
+          "id",
+          "docNo",
+          "formCode",
+          "formName",
+          "title",
+          "drafter",
+          "drafter.name",
+          "drafter.title",
+          "drafter.department",
+          "submittedAt",
+          "updatedAt",
+          "status",
+          "steps",
+          "currentApprover",
+          "currentApprover.name",
+          "currentApprover.title"
+        ],
+        "responsePathsAfter": [
+          "id",
+          "docNo",
+          "formCode",
+          "formName",
+          "title",
+          "drafter",
+          "drafter.name",
+          "drafter.title",
+          "drafter.department",
+          "submittedAt",
+          "updatedAt",
+          "status",
+          "steps",
+          "currentApprover",
+          "currentApprover.name",
+          "currentApprover.title"
+        ],
+        "expectedMovedOccurrences": {
+          "status": 2,
+          "DRAFT": 1,
+          "CURRENT": 2,
+          "WITHDRAWN": 4,
+          "DONE": 2,
+          "id": 2,
+          "APPROVED": 1,
+          "PENDING": 2,
+          "IN_PROGRESS": 2,
+          "TODO": 2,
+          "REJECTED": 2,
+          "SKIPPED": 2,
+          "approver_name": 1,
+          "approver_title": 1,
+          "doc_no": 1,
+          "code": 2,
+          "title": 1,
+          "user_name": 1,
+          "position_name": 1,
+          "department_name": 1,
+          "submitted_at": 1,
+          "updated_at": 1
+        },
+        "actualNewOccurrences": {
+          "status": 2,
+          "DRAFT": 1,
+          "CURRENT": 2,
+          "WITHDRAWN": 4,
+          "DONE": 2,
+          "id": 2,
+          "APPROVED": 1,
+          "PENDING": 2,
+          "IN_PROGRESS": 2,
+          "TODO": 2,
+          "REJECTED": 2,
+          "SKIPPED": 2,
+          "approver_name": 1,
+          "approver_title": 1,
+          "doc_no": 1,
+          "code": 2,
+          "title": 1,
+          "user_name": 1,
+          "position_name": 1,
+          "department_name": 1,
+          "submitted_at": 1,
+          "updated_at": 1
+        },
+        "movedOccurrenceDifferences": {},
+        "invalidAdded": {}
+      }
+    }
+  ],
+  "fileChanges": [
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/ApprovalLineQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/DocumentStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/FormStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/GeneralRequestStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/repository/InboxRepository.java",
+      "removed": {
+        "id": 3,
+        "UNCLASSIFIED": 1,
+        "status": 3,
+        "DRAFT": 1,
+        "CURRENT": 2,
+        "WITHDRAWN": 4,
+        "DONE": 2,
+        "APPROVED": 1,
+        "PENDING": 2,
+        "IN_PROGRESS": 2,
+        "TODO": 2,
+        "REJECTED": 2,
+        "SKIPPED": 2,
+        "name": 2,
+        "approver_name": 1,
+        "title": 4,
+        "approver_title": 1,
+        "docNo": 1,
+        "doc_no": 1,
+        "formCode": 1,
+        "code": 2,
+        "formName": 1,
+        "drafter": 1,
+        "user_name": 1,
+        "position_name": 1,
+        "department": 1,
+        "department_name": 1,
+        "submittedAt": 1,
+        "submitted_at": 1,
+        "updatedAt": 1,
+        "updated_at": 1,
+        "steps": 1,
+        "currentApprover": 1
+      },
+      "added": {
+        "total": 2,
+        "content": 2,
+        "lines": 2
+      },
+      "exception": {
+        "allowed": false,
+        "classificationCounts": {
+          "UNKNOWN": 1,
+          "rowKey": 15,
+          "stateValue": 20,
+          "responseKey": 16
+        },
+        "classifiedTotal": 52,
+        "removedTotal": 52,
+        "occurrences": [
+          {
+            "line": 74,
+            "start": 4168,
+            "end": 4182,
+            "value": "UNCLASSIFIED",
+            "category": "UNKNOWN"
+          },
+          {
+            "line": 76,
+            "start": 4279,
+            "end": 4287,
+            "value": "status",
+            "category": "rowKey"
+          },
+          {
+            "line": 77,
+            "start": 4329,
+            "end": 4336,
+            "value": "DRAFT",
+            "category": "stateValue"
+          },
+          {
+            "line": 77,
+            "start": 4340,
+            "end": 4349,
+            "value": "CURRENT",
+            "category": "stateValue"
+          },
+          {
+            "line": 77,
+            "start": 4366,
+            "end": 4377,
+            "value": "WITHDRAWN",
+            "category": "stateValue"
+          },
+          {
+            "line": 77,
+            "start": 4381,
+            "end": 4392,
+            "value": "WITHDRAWN",
+            "category": "stateValue"
+          },
+          {
+            "line": 77,
+            "start": 4395,
+            "end": 4401,
+            "value": "DONE",
+            "category": "stateValue"
+          },
+          {
+            "line": 79,
+            "start": 4493,
+            "end": 4497,
+            "value": "id",
+            "category": "rowKey"
+          },
+          {
+            "line": 80,
+            "start": 4560,
+            "end": 4568,
+            "value": "status",
+            "category": "rowKey"
+          },
+          {
+            "line": 82,
+            "start": 4642,
+            "end": 4652,
+            "value": "APPROVED",
+            "category": "stateValue"
+          },
+          {
+            "line": 82,
+            "start": 4656,
+            "end": 4662,
+            "value": "DONE",
+            "category": "stateValue"
+          },
+          {
+            "line": 83,
+            "start": 4689,
+            "end": 4698,
+            "value": "PENDING",
+            "category": "stateValue"
+          },
+          {
+            "line": 83,
+            "start": 4716,
+            "end": 4729,
+            "value": "IN_PROGRESS",
+            "category": "stateValue"
+          },
+          {
+            "line": 84,
+            "start": 4761,
+            "end": 4770,
+            "value": "CURRENT",
+            "category": "stateValue"
+          },
+          {
+            "line": 85,
+            "start": 4815,
+            "end": 4826,
+            "value": "WITHDRAWN",
+            "category": "stateValue"
+          },
+          {
+            "line": 85,
+            "start": 4830,
+            "end": 4841,
+            "value": "WITHDRAWN",
+            "category": "stateValue"
+          },
+          {
+            "line": 85,
+            "start": 4844,
+            "end": 4850,
+            "value": "TODO",
+            "category": "stateValue"
+          },
+          {
+            "line": 86,
+            "start": 4877,
+            "end": 4887,
+            "value": "REJECTED",
+            "category": "stateValue"
+          },
+          {
+            "line": 86,
+            "start": 4891,
+            "end": 4901,
+            "value": "REJECTED",
+            "category": "stateValue"
+          },
+          {
+            "line": 87,
+            "start": 4928,
+            "end": 4937,
+            "value": "SKIPPED",
+            "category": "stateValue"
+          },
+          {
+            "line": 87,
+            "start": 4941,
+            "end": 4950,
+            "value": "SKIPPED",
+            "category": "stateValue"
+          },
+          {
+            "line": 88,
+            "start": 4983,
+            "end": 4989,
+            "value": "TODO",
+            "category": "stateValue"
+          },
+          {
+            "line": 90,
+            "start": 5044,
+            "end": 5053,
+            "value": "PENDING",
+            "category": "stateValue"
+          },
+          {
+            "line": 90,
+            "start": 5072,
+            "end": 5085,
+            "value": "IN_PROGRESS",
+            "category": "stateValue"
+          },
+          {
+            "line": 91,
+            "start": 5124,
+            "end": 5130,
+            "value": "name",
+            "category": "responseKey"
+          },
+          {
+            "line": 91,
+            "start": 5138,
+            "end": 5153,
+            "value": "approver_name",
+            "category": "rowKey"
+          },
+          {
+            "line": 91,
+            "start": 5156,
+            "end": 5163,
+            "value": "title",
+            "category": "responseKey"
+          },
+          {
+            "line": 91,
+            "start": 5171,
+            "end": 5187,
+            "value": "approver_title",
+            "category": "rowKey"
+          },
+          {
+            "line": 94,
+            "start": 5246,
+            "end": 5250,
+            "value": "id",
+            "category": "responseKey"
+          },
+          {
+            "line": 94,
+            "start": 5258,
+            "end": 5262,
+            "value": "id",
+            "category": "rowKey"
+          },
+          {
+            "line": 94,
+            "start": 5265,
+            "end": 5272,
+            "value": "docNo",
+            "category": "responseKey"
+          },
+          {
+            "line": 94,
+            "start": 5280,
+            "end": 5288,
+            "value": "doc_no",
+            "category": "rowKey"
+          },
+          {
+            "line": 94,
+            "start": 5291,
+            "end": 5301,
+            "value": "formCode",
+            "category": "responseKey"
+          },
+          {
+            "line": 94,
+            "start": 5309,
+            "end": 5315,
+            "value": "code",
+            "category": "rowKey"
+          },
+          {
+            "line": 95,
+            "start": 5338,
+            "end": 5348,
+            "value": "formName",
+            "category": "responseKey"
+          },
+          {
+            "line": 95,
+            "start": 5387,
+            "end": 5393,
+            "value": "code",
+            "category": "rowKey"
+          },
+          {
+            "line": 95,
+            "start": 5397,
+            "end": 5404,
+            "value": "title",
+            "category": "responseKey"
+          },
+          {
+            "line": 95,
+            "start": 5412,
+            "end": 5419,
+            "value": "title",
+            "category": "rowKey"
+          },
+          {
+            "line": 96,
+            "start": 5442,
+            "end": 5451,
+            "value": "drafter",
+            "category": "responseKey"
+          },
+          {
+            "line": 96,
+            "start": 5457,
+            "end": 5463,
+            "value": "name",
+            "category": "responseKey"
+          },
+          {
+            "line": 96,
+            "start": 5471,
+            "end": 5482,
+            "value": "user_name",
+            "category": "rowKey"
+          },
+          {
+            "line": 96,
+            "start": 5485,
+            "end": 5492,
+            "value": "title",
+            "category": "responseKey"
+          },
+          {
+            "line": 96,
+            "start": 5500,
+            "end": 5515,
+            "value": "position_name",
+            "category": "rowKey"
+          },
+          {
+            "line": 97,
+            "start": 5546,
+            "end": 5558,
+            "value": "department",
+            "category": "responseKey"
+          },
+          {
+            "line": 97,
+            "start": 5566,
+            "end": 5583,
+            "value": "department_name",
+            "category": "rowKey"
+          },
+          {
+            "line": 97,
+            "start": 5587,
+            "end": 5600,
+            "value": "submittedAt",
+            "category": "responseKey"
+          },
+          {
+            "line": 97,
+            "start": 5608,
+            "end": 5622,
+            "value": "submitted_at",
+            "category": "rowKey"
+          },
+          {
+            "line": 98,
+            "start": 5645,
+            "end": 5656,
+            "value": "updatedAt",
+            "category": "responseKey"
+          },
+          {
+            "line": 98,
+            "start": 5664,
+            "end": 5676,
+            "value": "updated_at",
+            "category": "rowKey"
+          },
+          {
+            "line": 98,
+            "start": 5679,
+            "end": 5687,
+            "value": "status",
+            "category": "responseKey"
+          },
+          {
+            "line": 98,
+            "start": 5697,
+            "end": 5704,
+            "value": "steps",
+            "category": "responseKey"
+          },
+          {
+            "line": 98,
+            "start": 5716,
+            "end": 5733,
+            "value": "currentApprover",
+            "category": "responseKey"
+          }
+        ],
+        "unknownOccurrences": [
+          {
+            "line": 74,
+            "start": 4168,
+            "end": 4182,
+            "value": "UNCLASSIFIED",
+            "category": "UNKNOWN"
+          }
+        ],
+        "protectedLiteralDifferences": {},
+        "removedMatchesClassified": true,
+        "responsePathsBefore": [
+          "id",
+          "docNo",
+          "formCode",
+          "formName",
+          "title",
+          "drafter",
+          "drafter.name",
+          "drafter.title",
+          "drafter.department",
+          "submittedAt",
+          "updatedAt",
+          "status",
+          "steps",
+          "currentApprover",
+          "currentApprover.name",
+          "currentApprover.title"
+        ],
+        "responsePathsAfter": [
+          "id",
+          "docNo",
+          "formCode",
+          "formName",
+          "title",
+          "drafter",
+          "drafter.name",
+          "drafter.title",
+          "drafter.department",
+          "submittedAt",
+          "updatedAt",
+          "status",
+          "steps",
+          "currentApprover",
+          "currentApprover.name",
+          "currentApprover.title"
+        ],
+        "expectedMovedOccurrences": {
+          "status": 2,
+          "DRAFT": 1,
+          "CURRENT": 2,
+          "WITHDRAWN": 4,
+          "DONE": 2,
+          "id": 2,
+          "APPROVED": 1,
+          "PENDING": 2,
+          "IN_PROGRESS": 2,
+          "TODO": 2,
+          "REJECTED": 2,
+          "SKIPPED": 2,
+          "approver_name": 1,
+          "approver_title": 1,
+          "doc_no": 1,
+          "code": 2,
+          "title": 1,
+          "user_name": 1,
+          "position_name": 1,
+          "department_name": 1,
+          "submitted_at": 1,
+          "updated_at": 1
+        },
+        "actualNewOccurrences": {
+          "status": 2,
+          "DRAFT": 1,
+          "CURRENT": 2,
+          "WITHDRAWN": 4,
+          "DONE": 2,
+          "id": 2,
+          "APPROVED": 1,
+          "PENDING": 2,
+          "IN_PROGRESS": 2,
+          "TODO": 2,
+          "REJECTED": 2,
+          "SKIPPED": 2,
+          "approver_name": 1,
+          "approver_title": 1,
+          "doc_no": 1,
+          "code": 2,
+          "title": 1,
+          "user_name": 1,
+          "position_name": 1,
+          "department_name": 1,
+          "submitted_at": 1,
+          "updated_at": 1
+        },
+        "movedOccurrenceDifferences": {},
+        "invalidAdded": {}
+      }
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceFixStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceMonthlyQuery.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/home/repository/HomeQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveRequestRepository.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/leave/repository/LeaveStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/notification/repository/NotificationQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/notification/repository/NotificationStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/DepartmentTreeLock.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/org/repository/OrgStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/overtime/repository/OvertimeStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/permission/repository/RoleStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectMemberRepository.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStateStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectSummaryQuery.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/task/repository/TaskAssignmentRepository.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/task/repository/TaskQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/task/repository/TaskRepository.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/task/repository/TaskStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeQueries.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeRepository.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/EmployeeStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/user/repository/UserRepository.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/global/batch/BatchRunRecorder.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/global/permission/PermissionAccess.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/global/persistence/SqlStore.java",
+      "removed": {},
+      "added": {}
+    },
+    {
+      "file": "backend/src/main/java/com/minierp/backend/global/service/InvitationTokenStore.java",
+      "removed": {},
+      "added": {}
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "cases": 13,
+  "differences": 0,
+  "negativeDifferences": 2,
+  "totalsUpdates": [
+    {
+      "file": "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+      "line": 83,
+      "method": "com.minierp.backend.domain.attendance.service.AttendanceAdminService#monthly(java.lang.String,java.lang.Long,boolean)",
+      "receiver": "t",
+      "key": "leaveDays",
+      "valueType": "double",
+      "nested": null
+    }
+  ],
+  "manualCallChains": [
+    "AttendanceAdminService.rejudge -> AbsenceBatchService.run -> BatchRunRecorder.record",
+    "BoardTaskService.move -> ProjectStateStore.recalculate"
+  ],
+  "reason": "The returned row origin is checked by method/SELECT mapping; intermediate bean-call order is checked separately."
+}

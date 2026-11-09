@@ -1,0 +1,14 @@
+{
+  "commit": "34aa34e0db423f4df495aae7765a89708729fbd2",
+  "files": [
+    "backend/src/main/java/com/minierp/backend/domain/approval/controller/DocumentController.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/controller/FormController.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalDocumentResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalDraftResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalLinePreviewResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/dto/ApprovalPersonResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/service/ApprovalLineResolver.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/service/DocumentService.java",
+    "backend/src/main/java/com/minierp/backend/domain/approval/service/FormService.java"
+  ]
+}

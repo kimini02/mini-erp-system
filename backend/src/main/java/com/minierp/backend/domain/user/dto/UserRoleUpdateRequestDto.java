@@ -5,8 +5,6 @@ import lombok.Getter;
 
 @Getter
 public class UserRoleUpdateRequestDto {
-
     @NotBlank(message = "권한은 필수입니다.")
     private String role;
 }
-

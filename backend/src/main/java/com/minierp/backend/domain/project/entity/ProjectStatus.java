@@ -6,10 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ProjectStatus {
-
     READY("준비"),
     PROGRESS("진행 중"),
     DONE("완료");
-
     private final String description;
 }

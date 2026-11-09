@@ -14,15 +14,12 @@ import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-
 import java.util.Map;
 import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class InitialAdminMariaDbTest extends MariaDbIntegrationTest {
-    private static final String PASSWORD = "Aa1!" + UUID.randomUUID().toString().substring(0,12);
-
+    private static final String PASSWORD = "Aa1!" + UUID.randomUUID().toString().substring(0, 12);
     @DynamicPropertySource
     static void adminProperties(DynamicPropertyRegistry registry) {
         registry.add("INITIAL_ADMIN_LOGIN_ID", () -> "bootstrap-admin");
@@ -31,12 +28,16 @@ class InitialAdminMariaDbTest extends MariaDbIntegrationTest {
         registry.add("INITIAL_ADMIN_PASSWORD", () -> PASSWORD);
     }
 
-    @Autowired UserRepository repository;
-    @Autowired InitialAdminInitializer initializer;
-    @Autowired PasswordEncoder encoder;
-    @Autowired AuthService authService;
-    @Autowired ObjectMapper objectMapper;
-
+    @Autowired
+    UserRepository repository;
+    @Autowired
+    InitialAdminInitializer initializer;
+    @Autowired
+    PasswordEncoder encoder;
+    @Autowired
+    AuthService authService;
+    @Autowired
+    ObjectMapper objectMapper;
     @Test
     void startupCreatesUsableAdminAndRepeatedStartupCallbackDoesNotDuplicate() {
         var admin = repository.findByLoginId("bootstrap-admin").orElseThrow();
@@ -54,11 +55,9 @@ class InitialAdminMariaDbTest extends MariaDbIntegrationTest {
         assertThat(admin.getRemainingAnnualLeave()).isZero();
         assertThat(admin.getUserPw().equals(PASSWORD)).isFalse();
         assertThat(encoder.matches(PASSWORD, admin.getUserPw())).isTrue();
-
-        var login = objectMapper.convertValue(
-                Map.of("id", "bootstrap-admin", "password", PASSWORD), LoginRequestDto.class);
+        var login = objectMapper.convertValue(Map.of("id", "bootstrap-admin", "password", PASSWORD),
+                LoginRequestDto.class);
         assertThat(authService.login(login).getAccessToken()).isNotBlank();
-
         initializer.run(new DefaultApplicationArguments());
         var admins = repository.findByUserRole(UserRole.ADMIN);
         assertThat(admins).hasSize(1);

@@ -1,0 +1,140 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/monthly",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceAdminController#getMonthlyAttendance(java.lang.String,java.lang.Long,boolean)",
+    "returns": "ApiResponse<AttendanceMonthlyResponseDto>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/records/{userId}/{date}",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceAdminController#getAttendanceRecord(long,java.time.LocalDate)",
+    "returns": "ApiResponse<AttendanceRecordResponseDto>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/monthly/export",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceAdminController#exportMonthlyAttendance(java.lang.String,java.lang.Long,boolean)",
+    "returns": "ResponseEntity<byte[]>"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/attendance/rejudge",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceAdminController#rejudgeAttendance(@jakarta.validation.Valid com.minierp.backend.domain.attendance.controller.AttendanceAdminController.Rejudge)",
+    "returns": "ApiResponse<AttendanceBatchRunResponseDto>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/today",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceController#getTodayAttendance()",
+    "returns": "ApiResponse<AttendanceTodayResponseDto>"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/attendance/clock-in",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceController#clockIn()",
+    "returns": "ApiResponse<AttendanceTodayResponseDto>"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/attendance/clock-out",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceController#clockOut()",
+    "returns": "ApiResponse<AttendanceTodayResponseDto>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/attendance/me",
+    "owner": "com.minierp.backend.domain.attendance.controller.AttendanceController#getMyMonthlyAttendance(java.lang.String)",
+    "returns": "ApiResponse<AttendanceMyMonthResponseDto>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/home",
+    "owner": "com.minierp.backend.domain.home.controller.HomeController#getHome()",
+    "returns": "ApiResponse<HomeResponseDto>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/notifications",
+    "owner": "com.minierp.backend.domain.notification.controller.NotificationController#getNotifications(boolean,int,int)",
+    "returns": "ApiResponse<PageResponseDto<NotificationItemResponseDto>>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/notifications/unread-count",
+    "owner": "com.minierp.backend.domain.notification.controller.NotificationController#getUnreadCount()",
+    "returns": "ApiResponse<NotificationUnreadCountResponseDto>"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/notifications/{id}/read",
+    "owner": "com.minierp.backend.domain.notification.controller.NotificationController#markAsRead(long)",
+    "returns": "ApiResponse<Void>"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/notifications/read-all",
+    "owner": "com.minierp.backend.domain.notification.controller.NotificationController#markAllAsRead()",
+    "returns": "ApiResponse<Void>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/projects",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#getProjects(com.minierp.backend.domain.project.entity.ProjectStatus,java.lang.String,int,int)",
+    "returns": "ApiResponse<PageResponseDto<ProjectSummaryResponseDto>>"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/projects",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#createProject(@jakarta.validation.Valid com.minierp.backend.domain.project.dto.BoardProjectRequests.Create)",
+    "returns": "ResponseEntity<ApiResponse<ProjectDetailResponseDto>>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/projects/{id:[0-9]+}",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#getProject(long)",
+    "returns": "ApiResponse<ProjectDetailResponseDto>"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/projects/{id:[0-9]+}",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#updateProject(long,@jakarta.validation.Valid com.minierp.backend.domain.project.dto.BoardProjectRequests.Patch)",
+    "returns": "ApiResponse<ProjectDetailResponseDto>"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/projects/{id:[0-9]+}/members",
+    "owner": "com.minierp.backend.domain.project.controller.ProjectBoardController#updateProjectMembers(long,@jakarta.validation.Valid com.minierp.backend.domain.project.dto.BoardProjectRequests.Members)",
+    "returns": "ApiResponse<ProjectDetailResponseDto>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/projects/{id:[0-9]+}/board",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#getBoard(long)",
+    "returns": "ApiResponse<TaskBoardResponseDto>"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/projects/{id:[0-9]+}/tasks",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#createTask(long,@jakarta.validation.Valid com.minierp.backend.domain.task.dto.BoardTaskRequests.Create)",
+    "returns": "ResponseEntity<ApiResponse<TaskDetailResponseDto>>"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/tasks/{id:[0-9]+}",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#getTask(long)",
+    "returns": "ApiResponse<TaskDetailResponseDto>"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/tasks/{id:[0-9]+}",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#updateTask(long,@jakarta.validation.Valid com.minierp.backend.domain.task.dto.BoardTaskRequests.Patch)",
+    "returns": "ApiResponse<TaskDetailResponseDto>"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tasks/{id:[0-9]+}/move",
+    "owner": "com.minierp.backend.domain.task.controller.TaskBoardController#moveTask(long,@jakarta.validation.Valid com.minierp.backend.domain.task.dto.BoardTaskRequests.Move)",
+    "returns": "ApiResponse<TaskMoveResponseDto>"
+  }
+]

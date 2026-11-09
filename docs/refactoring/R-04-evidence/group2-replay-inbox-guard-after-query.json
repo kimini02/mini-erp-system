@@ -1,0 +1,308 @@
+{
+  "framesBefore": 2,
+  "framesAfter": 2,
+  "differences": 1,
+  "differencesDetail": [
+    {
+      "method": "com.minierp.backend.domain.approval.service.InboxService#getInboxDocuments(java.lang.String,java.lang.String,java.lang.String,int,int)",
+      "before": {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+        "line": 16,
+        "events": [
+          {
+            "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+          },
+          {
+            "region": "if",
+            "condition": [],
+            "then": [
+              {
+                "throw": "com.minierp.backend.global.exception.BusinessException",
+                "errorCodes": [
+                  "INVALID_INPUT_VALUE"
+                ]
+              }
+            ],
+            "else": []
+          },
+          {
+            "region": "switch",
+            "selector": [],
+            "cases": [
+              {
+                "region": "case",
+                "labels": [],
+                "body": [
+                  {
+                    "throw": "com.minierp.backend.global.exception.BusinessException",
+                    "errorCodes": [
+                      "INVALID_INPUT_VALUE"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "bean": "com.minierp.backend.global.persistence.SqlStore#count(java.lang.String,java.util.Map<java.lang.String,?>)"
+          },
+          {
+            "region": "switch",
+            "selector": [],
+            "cases": [
+              {
+                "region": "case",
+                "labels": [],
+                "body": [
+                  {
+                    "throw": "com.minierp.backend.global.exception.BusinessException",
+                    "errorCodes": [
+                      "INVALID_INPUT_VALUE"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "bean": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)"
+          },
+          {
+            "bean": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)"
+          }
+        ]
+      },
+      "after": {
+        "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+        "line": 26,
+        "events": [
+          {
+            "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+          },
+          {
+            "region": "switch",
+            "selector": [],
+            "cases": [
+              {
+                "region": "case",
+                "labels": [],
+                "body": [
+                  {
+                    "throw": "com.minierp.backend.global.exception.BusinessException",
+                    "errorCodes": [
+                      "INVALID_INPUT_VALUE"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "bean": "com.minierp.backend.global.persistence.SqlStore#count(java.lang.String,java.util.Map<java.lang.String,?>)"
+          },
+          {
+            "region": "switch",
+            "selector": [],
+            "cases": [
+              {
+                "region": "case",
+                "labels": [],
+                "body": [
+                  {
+                    "throw": "com.minierp.backend.global.exception.BusinessException",
+                    "errorCodes": [
+                      "INVALID_INPUT_VALUE"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "bean": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)"
+          },
+          {
+            "bean": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)"
+          },
+          {
+            "region": "if",
+            "condition": [],
+            "then": [
+              {
+                "throw": "com.minierp.backend.global.exception.BusinessException",
+                "errorCodes": [
+                  "INVALID_INPUT_VALUE"
+                ]
+              }
+            ],
+            "else": []
+          }
+        ]
+      }
+    }
+  ],
+  "manualBefore": [],
+  "manualAfter": [],
+  "before": {
+    "com.minierp.backend.domain.approval.service.InboxService#getInboxDocuments(java.lang.String,java.lang.String,java.lang.String,int,int)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 16,
+      "events": [
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "INVALID_INPUT_VALUE"
+              ]
+            }
+          ],
+          "else": []
+        },
+        {
+          "region": "switch",
+          "selector": [],
+          "cases": [
+            {
+              "region": "case",
+              "labels": [],
+              "body": [
+                {
+                  "throw": "com.minierp.backend.global.exception.BusinessException",
+                  "errorCodes": [
+                    "INVALID_INPUT_VALUE"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.global.persistence.SqlStore#count(java.lang.String,java.util.Map<java.lang.String,?>)"
+        },
+        {
+          "region": "switch",
+          "selector": [],
+          "cases": [
+            {
+              "region": "case",
+              "labels": [],
+              "body": [
+                {
+                  "throw": "com.minierp.backend.global.exception.BusinessException",
+                  "errorCodes": [
+                    "INVALID_INPUT_VALUE"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)"
+        },
+        {
+          "bean": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)"
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.InboxService#getInboxCounts()": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 20,
+      "events": [
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.InboxRepository#counts(long)"
+        }
+      ]
+    }
+  },
+  "after": {
+    "com.minierp.backend.domain.approval.service.InboxService#getInboxDocuments(java.lang.String,java.lang.String,java.lang.String,int,int)": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 26,
+      "events": [
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "region": "switch",
+          "selector": [],
+          "cases": [
+            {
+              "region": "case",
+              "labels": [],
+              "body": [
+                {
+                  "throw": "com.minierp.backend.global.exception.BusinessException",
+                  "errorCodes": [
+                    "INVALID_INPUT_VALUE"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.global.persistence.SqlStore#count(java.lang.String,java.util.Map<java.lang.String,?>)"
+        },
+        {
+          "region": "switch",
+          "selector": [],
+          "cases": [
+            {
+              "region": "case",
+              "labels": [],
+              "body": [
+                {
+                  "throw": "com.minierp.backend.global.exception.BusinessException",
+                  "errorCodes": [
+                    "INVALID_INPUT_VALUE"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "bean": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)"
+        },
+        {
+          "bean": "com.minierp.backend.global.persistence.SqlStore#rows(java.lang.String,java.util.Map<java.lang.String,?>)"
+        },
+        {
+          "region": "if",
+          "condition": [],
+          "then": [
+            {
+              "throw": "com.minierp.backend.global.exception.BusinessException",
+              "errorCodes": [
+                "INVALID_INPUT_VALUE"
+              ]
+            }
+          ],
+          "else": []
+        }
+      ]
+    },
+    "com.minierp.backend.domain.approval.service.InboxService#getInboxCounts()": {
+      "file": "backend/src/main/java/com/minierp/backend/domain/approval/service/InboxService.java",
+      "line": 87,
+      "events": [
+        {
+          "bean": "com.minierp.backend.global.permission.PermissionAccess#actor()"
+        },
+        {
+          "bean": "com.minierp.backend.domain.approval.repository.InboxRepository#counts(long)"
+        }
+      ]
+    }
+  }
+}

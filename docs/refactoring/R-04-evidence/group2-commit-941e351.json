@@ -1,0 +1,18 @@
+{
+  "commit": "941e351423bfb675e76751aae15ec6c60b8e35a5",
+  "files": [
+    "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveAdminController.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeavePolicyController.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/controller/LeaveQueryController.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveAdjustmentResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveAdminBalanceResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveBalanceResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveDaysPreviewResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveGrantRunResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/dto/LeaveLedgerEntryResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveAdminService.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveGrantWork.java",
+    "backend/src/main/java/com/minierp/backend/domain/leave/service/LeaveQueryService.java"
+  ]
+}

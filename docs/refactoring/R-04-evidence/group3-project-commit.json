@@ -1,0 +1,72 @@
+{
+  "commit": "6e826bcafc43776cb2c3ff07b4521cf87100b531",
+  "files": [
+    "backend/src/main/java/com/minierp/backend/domain/user/service/EmployeeService.java",
+    "backend/src/main/java/com/minierp/backend/domain/project/dto/ProjectDetailResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/project/dto/ProjectPermissionsResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/project/dto/ProjectSummaryResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/project/dto/ProjectPersonResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStore.java",
+    "backend/src/main/java/com/minierp/backend/domain/project/repository/ProjectStateStore.java",
+    "backend/src/main/java/com/minierp/backend/domain/project/controller/ProjectBoardController.java",
+    "backend/src/main/java/com/minierp/backend/domain/project/service/BoardProjectService.java",
+    "backend/src/main/java/com/minierp/backend/domain/task/service/BoardTaskService.java"
+  ],
+  "runtime": {
+    "on": {
+      "exit": 0,
+      "seconds": 827.89,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordedMessages": 1,
+      "comparison": {
+        "exit": 0,
+        "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=11",
+        "warnings": [
+          "com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()",
+          "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalAndWithdrawalHaveOnlyOneWinner()",
+          "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+          "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()",
+          "com.minierp.backend.integration.M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()",
+          "com.minierp.backend.integration.M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()",
+          "com.minierp.backend.integration.M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+          "com.minierp.backend.integration.M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()",
+          "com.minierp.backend.integration.M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()",
+          "com.minierp.backend.integration.M4OverdueTest#concurrentRunsSendOnlyOnce()",
+          "com.minierp.backend.integration.M5ProductionTest#<before-all>"
+        ]
+      }
+    },
+    "off": {
+      "exit": 0,
+      "seconds": 482.14,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordedMessages": 0
+    }
+  },
+  "probe": {
+    "exit": 0,
+    "seconds": 24.26,
+    "counts": [
+      4,
+      0,
+      0,
+      0
+    ],
+    "recordedMessages": 1,
+    "comparison": {
+      "exit": 0,
+      "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=0",
+      "warnings": []
+    }
+  }
+}

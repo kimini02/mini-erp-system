@@ -1,0 +1,75 @@
+{
+  "commit": "02918dc8aea1cdfdd5d2c233b6da3151e99d1e02",
+  "files": [
+    "backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceScheduleDetailResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceDocumentResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceBatchRunResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceRecordResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceMonthlyResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceScheduleResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceTodayResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/dto/AttendanceMyMonthResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/handler/AttendanceFixFormHandler.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/repository/AttendanceStore.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/controller/AttendanceController.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/controller/AttendanceAdminController.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceAdminService.java",
+    "backend/src/main/java/com/minierp/backend/domain/attendance/service/AttendanceService.java",
+    "backend/src/main/java/com/minierp/backend/domain/home/service/HomeService.java"
+  ],
+  "runtime": {
+    "on": {
+      "exit": 0,
+      "seconds": 676.66,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordedMessages": 1,
+      "comparison": {
+        "exit": 0,
+        "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=9",
+        "warnings": [
+          "com.minierp.backend.integration.M1AcceptanceTest#concurrentIdAllocationIsUniqueAndUnsafeMaxPlusOneCollides()",
+          "com.minierp.backend.integration.M2DocumentIntegrationTest#concurrentApprovalHasOne409AndNoNotificationFromLosingRequestInTenTrials()",
+          "com.minierp.backend.integration.M2DocumentIntegrationTest#documentNumbersAreUniqueForEightDifferentDraftersSubmittingConcurrently()",
+          "com.minierp.backend.integration.M2LegacyApprovalRaceTest#unconditionalLegacyApprovalAcceptsBothRequestsInTenControlledRaces()",
+          "com.minierp.backend.integration.M3AttendanceTest#concurrentClockInHasExactlyOneWinnerInTenTrials()",
+          "com.minierp.backend.integration.M3LeaveAdjustmentConcurrencyTest#unlockedModelFailsThenLockedAdjustmentsAndSubmissionsPreserveBalance()",
+          "com.minierp.backend.integration.M3LeaveGrantTest#twoConcurrentBatchRunsIssueEachKeyOnlyOnceInTenTrials()",
+          "com.minierp.backend.integration.M4BoardConcurrencyTest#tenConcurrentCreatesHaveContiguousUniqueNumbers()",
+          "com.minierp.backend.integration.M4OverdueTest#concurrentRunsSendOnlyOnce()"
+        ]
+      }
+    },
+    "off": {
+      "exit": 0,
+      "seconds": 697.9,
+      "counts": [
+        231,
+        0,
+        0,
+        0
+      ],
+      "recordedMessages": 0
+    }
+  },
+  "probe": {
+    "exit": 0,
+    "seconds": 37.98,
+    "counts": [
+      4,
+      0,
+      0,
+      0
+    ],
+    "recordedMessages": 1,
+    "comparison": {
+      "exit": 0,
+      "summary": "REFACTORING_COMPARE differences=0 sqlOrderChanges=0",
+      "warnings": []
+    }
+  }
+}

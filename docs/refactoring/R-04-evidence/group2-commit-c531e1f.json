@@ -1,0 +1,12 @@
+{
+  "commit": "c531e1f4ade77950eb692b55622ac18bbb8e7400",
+  "files": [
+    "backend/src/main/java/com/minierp/backend/domain/org/controller/OrgController.java",
+    "backend/src/main/java/com/minierp/backend/domain/org/service/OrgService.java",
+    "backend/src/main/java/com/minierp/backend/domain/permission/dto/RolePermissionsResponseDto.java",
+    "backend/src/main/java/com/minierp/backend/domain/permission/service/RoleService.java",
+    "backend/src/main/java/com/minierp/backend/domain/user/controller/UserController.java",
+    "backend/src/main/java/com/minierp/backend/domain/user/service/UserLookupService.java",
+    "docs/refactoring/R-04-responses-names-methods.md"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "commit": "3dbc348e59fa786e9aa58fa67a9e94e69474cb76",
+  "compile": {
+    "exit": 0,
+    "seconds": 11.28
+  },
+  "check": {
+    "exit": 0,
+    "seconds": 160.81
+  },
+  "summary": {
+    "order": 0,
+    "sql": 0,
+    "response": 0,
+    "unused": 0,
+    "transactions": 83,
+    "outsideSql": 0,
+    "testSourceSame": true,
+    "apiSame": true,
+    "apiCount": 98,
+    "textBlockClosingChanges": []
+  },
+  "sourceHashCount": 362,
+  "sourceMatchesVerifiedCandidateAndWorktree": true,
+  "mainJavaFiles": 257,
+  "testJavaFiles": 79,
+  "allMainApiWildcard": 0,
+  "allMainEntityWildcard": 0,
+  "allMainOneLetter": 0,
+  "employeeServicePageDefinitionsOrCalls": [],
+  "forbiddenPathChanges": [],
+  "authorizedSpecMergeOnly": [
+    "backend/md/17-refactoring.md"
+  ]
+}

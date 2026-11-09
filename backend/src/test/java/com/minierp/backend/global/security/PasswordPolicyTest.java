@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PasswordPolicyTest {
-    @Test void usesExistingEightToTwentyCharacterPolicy() {
+    @Test
+    void usesExistingEightToTwentyCharacterPolicy() {
         assertThat(PasswordPolicy.accepts("Aa1!")).isFalse();
         assertThat(PasswordPolicy.accepts("Aa1!" + "x".repeat(17))).isFalse();
         assertThat(PasswordPolicy.accepts("Aa1!" + "x".repeat(4))).isTrue();

@@ -1,0 +1,258 @@
+[
+  {
+    "sql": "com.minierp.backend.domain.approval.repository.GeneralRequestStore#findBody",
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalGeneralBodyResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.leave.handler.LeaveFormHandler#body(long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.leave.dto.LeaveBodyResponseDto",
+    "nested": {
+      "handover": {
+        "sql": "com.minierp.backend.domain.leave.repository.LeaveQueries#findHandoverName",
+        "record": "com.minierp.backend.domain.leave.dto.LeaveBodyResponseDto.Handover"
+      }
+    }
+  },
+  {
+    "sql": "com.minierp.backend.domain.overtime.repository.OvertimeStore#findBody",
+    "record": "com.minierp.backend.domain.overtime.dto.OvertimeBodyResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.attendance.handler.AttendanceFixFormHandler#body(long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.attendance.dto.AttendanceFixBodyResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.DocumentService#create(com.minierp.backend.domain.approval.dto.DocumentRequest)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalDraftResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.DocumentService#resubmit(long)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalDraftResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.DocumentService#detail(long)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto",
+    "nested": {
+      "line": {
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#detail(long)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Line",
+        "nested": {
+          "approver": {
+            "method": "com.minierp.backend.domain.approval.service.DocumentService#snapshot(java.util.Map<java.lang.String,java.lang.Object>)",
+            "index": 0,
+            "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+          }
+        }
+      },
+      "references": {
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#snapshot(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+      },
+      "history": {
+        "method": "com.minierp.backend.domain.approval.service.DocumentService#detail(long)",
+        "index": 1,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.History",
+        "nested": {
+          "actor": {
+            "method": "com.minierp.backend.domain.approval.service.DocumentService#detail(long)",
+            "index": 2,
+            "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Actor"
+          }
+        }
+      }
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.DocumentService#detail(long)",
+    "index": 4,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.Form"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.DocumentService#detail(long)",
+    "index": 5,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.DocumentService#detail(long)",
+    "index": 6,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalDocumentResponseDto.MyActions"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#previewRow(com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row",
+    "nested": {
+      "result": {
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+      }
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto",
+    "nested": {
+      "rows": {
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#previewRow(com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row",
+        "nested": {
+          "result": {
+            "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+            "index": 0,
+            "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+          }
+        }
+      },
+      "finalLine": {
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+      },
+      "references": {
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+      }
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+    "index": 2,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto",
+    "nested": {
+      "rows": {
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#previewRow(com.minierp.backend.domain.approval.service.ApprovalLineResolver.Resolved)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row",
+        "nested": {
+          "result": {
+            "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+            "index": 0,
+            "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+          }
+        }
+      },
+      "finalLine": {
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+      },
+      "references": {
+        "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#publicPerson(java.util.Map<java.lang.String,java.lang.Object>)",
+        "index": 0,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalPersonResponseDto"
+      }
+    }
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.ApprovalLineResolver#preview(java.lang.String,long,java.util.List<com.minierp.backend.domain.approval.dto.DocumentRequest.ManualStep>)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalLinePreviewResponseDto.Row"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.FormService#presentation(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalFormSummaryResponseDto",
+    "putsFrom": {
+      "method": "com.minierp.backend.domain.approval.service.FormService#list()",
+      "receiver": "out"
+    },
+    "reason": "presentation(f)의 공통 다섯 키 다음 같은 out에 put한 순서"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.FormService#presentation(java.util.Map<java.lang.String,java.lang.Object>)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto",
+    "putsFrom": {
+      "method": "com.minierp.backend.domain.approval.service.FormService#detail(java.lang.String)",
+      "receiver": "out"
+    },
+    "reason": "presentation(f)의 공통 다섯 키 다음 같은 out에 put한 순서"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.FormService#detail(java.lang.String)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto.Options"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.service.FormService#detail(java.lang.String)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalFormResponseDto.Step"
+  },
+  {
+    "method": "com.minierp.backend.domain.approval.repository.InboxRepository#search(long,java.lang.String,java.lang.String,java.lang.String,int,int)",
+    "index": 3,
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalInboxItemResponseDto",
+    "nested": {
+      "currentApprover": {
+        "method": "com.minierp.backend.domain.approval.repository.InboxRepository#search(long,java.lang.String,java.lang.String,java.lang.String,int,int)",
+        "index": 2,
+        "record": "com.minierp.backend.domain.approval.dto.ApprovalInboxItemResponseDto.CurrentApprover"
+      }
+    },
+    "reason": "Raw repository rows now become an item record in InboxService; currentApprover is the earlier conditional map."
+  },
+  {
+    "constant": "com.minierp.backend.domain.approval.repository.InboxRepository#BOXES",
+    "record": "com.minierp.backend.domain.approval.dto.ApprovalInboxCountsResponseDto",
+    "reason": "Same COUNT aliases; JsonProperty preserves in-progress."
+  },
+  {
+    "sql": "com.minierp.backend.domain.leave.repository.LeaveQueries#findBalance",
+    "record": "com.minierp.backend.domain.leave.dto.LeaveBalanceResponseDto",
+    "putsFrom": {
+      "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#balance(java.lang.Integer)",
+      "receiver": "result"
+    },
+    "reason": "원래 SELECT 별칭 순서 뒤 year put"
+  },
+  {
+    "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#ledger(long,java.lang.Integer,java.lang.String)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.leave.dto.LeaveLedgerEntryResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#ledger(long,java.lang.Integer,java.lang.String)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.leave.dto.LeaveLedgerEntryResponseDto.Document"
+  },
+  {
+    "method": "com.minierp.backend.domain.leave.service.LeaveQueryService#preview(com.fasterxml.jackson.databind.JsonNode)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.leave.dto.LeaveDaysPreviewResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#balances(java.lang.Integer,java.lang.Long,java.lang.String,int,int)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.leave.dto.LeaveAdminBalanceResponseDto"
+  },
+  {
+    "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#balances(java.lang.Integer,java.lang.Long,java.lang.String,int,int)",
+    "index": 1,
+    "record": "com.minierp.backend.domain.leave.dto.LeaveAdminBalanceResponseDto.User"
+  },
+  {
+    "method": "com.minierp.backend.domain.leave.service.LeaveAdminService#adjust(long,int,java.math.BigDecimal,java.lang.String)",
+    "index": 0,
+    "record": "com.minierp.backend.domain.leave.dto.LeaveAdjustmentResponseDto"
+  },
+  {
+    "sql": "com.minierp.backend.domain.leave.repository.LeaveQueries#findGrantRuns",
+    "record": "com.minierp.backend.domain.leave.dto.LeaveGrantRunResponseDto"
+  }
+]

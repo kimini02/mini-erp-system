@@ -9,9 +9,7 @@ public enum OvertimeStatus {
     APPROVED("승인"),
     REJECTED("반려"),
     CANCELLED("취소");
-
     private final String displayName;
-
     OvertimeStatus(String displayName) {
         this.displayName = displayName;
     }

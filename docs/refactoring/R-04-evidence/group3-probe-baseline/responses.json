@@ -1,0 +1,341 @@
+{
+  "recordingPolicy" : "ordered-outcome-dependent-http-races-v2",
+  "tests" : {
+    "com.minierp.backend.integration.R04Group3Probe#<after-all>" : [ ],
+    "com.minierp.backend.integration.R04Group3Probe#<after-each>" : [ ],
+    "com.minierp.backend.integration.R04Group3Probe#<before-all>" : [ ],
+    "com.minierp.backend.integration.R04Group3Probe#attendanceHolidayDocumentsMissingDatesAndCsv()" : [ {
+      "method" : "GET",
+      "path" : "/api/v1/attendance/today",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"canClockIn\":true,\"canClockOut\":false,\"clockInAt\":null,\"clockOutAt\":null,\"dayType\":\"HOLIDAY\",\"earlyIfNow\":false,\"holidayName\":\"근태 비교 휴일\",\"inResult\":null,\"leave\":null,\"monthAbsentCount\":0,\"monthLateCount\":0,\"outResult\":null,\"schedule\":{\"departmentName\":\"개발팀\",\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"source\":\"COMPANY\",\"startTime\":\"09:00\"},\"workDate\":\"2026-04-06\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 1
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/attendance/clock-in",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"canClockIn\":false,\"canClockOut\":true,\"clockInAt\":\"2026-04-06T09:20:00\",\"clockOutAt\":null,\"dayType\":\"HOLIDAY\",\"earlyIfNow\":false,\"holidayName\":\"근태 비교 휴일\",\"inResult\":\"NONE\",\"leave\":null,\"monthAbsentCount\":0,\"monthLateCount\":0,\"outResult\":\"NONE\",\"schedule\":{\"departmentName\":\"개발팀\",\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"source\":\"COMPANY\",\"startTime\":\"09:00\"},\"workDate\":\"2026-04-06\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 2
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/attendance/clock-out",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"canClockIn\":false,\"canClockOut\":true,\"clockInAt\":\"2026-04-06T09:20:00\",\"clockOutAt\":\"2026-04-06T18:05:00\",\"dayType\":\"HOLIDAY\",\"earlyIfNow\":false,\"holidayName\":\"근태 비교 휴일\",\"inResult\":\"NONE\",\"leave\":null,\"monthAbsentCount\":0,\"monthLateCount\":0,\"outResult\":\"NONE\",\"schedule\":{\"departmentName\":\"개발팀\",\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"source\":\"COMPANY\",\"startTime\":\"09:00\"},\"workDate\":\"2026-04-06\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 3
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/attendance/me",
+      "query" : {
+        "month" : [ "2026-04" ]
+      },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"days\":[{\"date\":\"2026-04-01\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-02\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-03\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-04\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-04-05\",\"dayType\":\"HOLIDAY\"},{\"absent\":false,\"clockInAt\":\"2026-04-06T09:20:00\",\"clockOutAt\":\"2026-04-06T18:05:00\",\"date\":\"2026-04-06\",\"dayType\":\"HOLIDAY\",\"fixDocument\":null,\"inResult\":\"NONE\",\"outResult\":\"NONE\"},{\"date\":\"2026-04-07\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-08\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-09\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-10\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-11\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-04-12\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-04-13\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-14\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-15\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-16\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-17\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-18\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-04-19\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-04-20\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-21\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-22\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-23\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-24\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-25\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-04-26\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-04-27\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-28\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-29\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-04-30\",\"dayType\":\"WORKDAY\"}],\"month\":\"2026-04\",\"summary\":{\"absent\":0,\"early\":0,\"late\":0,\"leaveDays\":0.0,\"missing\":0,\"present\":1,\"workDays\":21}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 4
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/attendance/monthly",
+      "query" : {
+        "month" : [ "2026-04" ]
+      },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"days\":[{\"date\":\"2026-04-01\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"WED\"},{\"date\":\"2026-04-02\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"THU\"},{\"date\":\"2026-04-03\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"FRI\"},{\"date\":\"2026-04-04\",\"dayType\":\"HOLIDAY\",\"holidayName\":null,\"weekday\":\"SAT\"},{\"date\":\"2026-04-05\",\"dayType\":\"HOLIDAY\",\"holidayName\":null,\"weekday\":\"SUN\"},{\"date\":\"2026-04-06\",\"dayType\":\"HOLIDAY\",\"holidayName\":\"근태 비교 휴일\",\"weekday\":\"MON\"},{\"date\":\"2026-04-07\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"TUE\"},{\"date\":\"2026-04-08\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"WED\"},{\"date\":\"2026-04-09\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"THU\"},{\"date\":\"2026-04-10\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"FRI\"},{\"date\":\"2026-04-11\",\"dayType\":\"HOLIDAY\",\"holidayName\":null,\"weekday\":\"SAT\"},{\"date\":\"2026-04-12\",\"dayType\":\"HOLIDAY\",\"holidayName\":null,\"weekday\":\"SUN\"},{\"date\":\"2026-04-13\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"MON\"},{\"date\":\"2026-04-14\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"TUE\"},{\"date\":\"2026-04-15\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"WED\"},{\"date\":\"2026-04-16\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"THU\"},{\"date\":\"2026-04-17\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"FRI\"},{\"date\":\"2026-04-18\",\"dayType\":\"HOLIDAY\",\"holidayName\":null,\"weekday\":\"SAT\"},{\"date\":\"2026-04-19\",\"dayType\":\"HOLIDAY\",\"holidayName\":null,\"weekday\":\"SUN\"},{\"date\":\"2026-04-20\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"MON\"},{\"date\":\"2026-04-21\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"TUE\"},{\"date\":\"2026-04-22\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"WED\"},{\"date\":\"2026-04-23\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"THU\"},{\"date\":\"2026-04-24\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"FRI\"},{\"date\":\"2026-04-25\",\"dayType\":\"HOLIDAY\",\"holidayName\":null,\"weekday\":\"SAT\"},{\"date\":\"2026-04-26\",\"dayType\":\"HOLIDAY\",\"holidayName\":null,\"weekday\":\"SUN\"},{\"date\":\"2026-04-27\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"MON\"},{\"date\":\"2026-04-28\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"TUE\"},{\"date\":\"2026-04-29\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"WED\"},{\"date\":\"2026-04-30\",\"dayType\":\"WORKDAY\",\"holidayName\":null,\"weekday\":\"THU\"}],\"legend\":[\"ON_TIME\",\"LATE\",\"EARLY\",\"MISSING\",\"ABSENT\",\"LEAVE\",\"HALF_AM\",\"HALF_PM\",\"HOLIDAY\",\"HOLIDAY_WORK\",\"NONE\",\"FUTURE\"],\"month\":\"2026-04\",\"rows\":[{\"cells\":[{\"code\":\"NONE\",\"date\":\"2026-04-01\"},{\"code\":\"NONE\",\"date\":\"2026-04-02\"},{\"code\":\"NONE\",\"date\":\"2026-04-03\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-04\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-05\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-06\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-07\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-08\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-09\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-10\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-11\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-12\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-13\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-14\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-15\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-16\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-17\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-18\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-19\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-20\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-21\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-22\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-23\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-24\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-25\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-26\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-27\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-28\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-29\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-30\"}],\"totals\":{\"absent\":0,\"early\":0,\"late\":0,\"leaveDays\":0.0,\"missing\":0},\"user\":{\"department\":\"회사\",\"id\":3,\"name\":\"chief\",\"title\":\"사원\"}},{\"cells\":[{\"code\":\"NONE\",\"date\":\"2026-04-01\"},{\"code\":\"NONE\",\"date\":\"2026-04-02\"},{\"code\":\"NONE\",\"date\":\"2026-04-03\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-04\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-05\"},{\"code\":\"HOLIDAY_WORK\",\"date\":\"2026-04-06\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-07\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-08\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-09\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-10\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-11\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-12\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-13\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-14\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-15\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-16\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-17\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-18\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-19\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-20\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-21\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-22\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-23\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-24\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-25\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-26\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-27\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-28\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-29\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-30\"}],\"totals\":{\"absent\":0,\"early\":0,\"late\":0,\"leaveDays\":0.0,\"missing\":0},\"user\":{\"department\":\"개발팀\",\"id\":1,\"name\":\"employee\",\"title\":\"사원\"}},{\"cells\":[{\"code\":\"NONE\",\"date\":\"2026-04-01\"},{\"code\":\"NONE\",\"date\":\"2026-04-02\"},{\"code\":\"NONE\",\"date\":\"2026-04-03\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-04\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-05\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-06\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-07\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-08\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-09\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-10\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-11\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-12\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-13\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-14\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-15\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-16\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-17\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-18\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-19\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-20\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-21\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-22\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-23\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-24\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-25\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-26\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-27\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-28\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-29\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-30\"}],\"totals\":{\"absent\":0,\"early\":0,\"late\":0,\"leaveDays\":0.0,\"missing\":0},\"user\":{\"department\":\"개발팀\",\"id\":2,\"name\":\"leader\",\"title\":\"사원\"}},{\"cells\":[{\"code\":\"NONE\",\"date\":\"2026-04-01\"},{\"code\":\"NONE\",\"date\":\"2026-04-02\"},{\"code\":\"NONE\",\"date\":\"2026-04-03\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-04\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-05\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-06\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-07\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-08\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-09\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-10\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-11\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-12\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-13\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-14\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-15\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-16\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-17\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-18\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-19\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-20\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-21\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-22\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-23\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-24\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-25\"},{\"code\":\"HOLIDAY\",\"date\":\"2026-04-26\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-27\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-28\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-29\"},{\"code\":\"FUTURE\",\"date\":\"2026-04-30\"}],\"totals\":{\"absent\":0,\"early\":0,\"late\":0,\"leaveDays\":0.0,\"missing\":0},\"user\":{\"department\":\"개발팀\",\"id\":4,\"name\":\"outside\",\"title\":\"사원\"}}]},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 5
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents",
+      "query" : { },
+      "status" : 201,
+      "kind" : "json",
+      "body" : "{\"data\":{\"id\":1,\"status\":\"DRAFT\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 6
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents/1/submit",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"body\":{\"before\":{\"clockIn\":\"09:14\",\"clockOut\":null,\"code\":\"LATE\"},\"clockIn\":\"09:02\",\"clockOut\":\"18:10\",\"reason\":\"근태 정정 비교\",\"workDate\":\"2026-03-30\"},\"completedAt\":null,\"docNo\":\"AT-2026-0001\",\"drafter\":{\"department\":\"개발팀\",\"id\":1,\"name\":\"employee\",\"title\":\"사원\"},\"form\":{\"code\":\"ATTENDANCE_FIX\",\"name\":\"근태 정정\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":1,\"name\":\"employee\"},\"at\":\"2026-04-06T18:05:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T18:05:00\",\"comment\":\"양식 결재선 스냅샷\"}],\"id\":1,\"line\":[{\"actedAt\":null,\"approver\":{\"department\":\"개발팀\",\"id\":2,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"PENDING\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":true},\"references\":[],\"resubmittedFromId\":null,\"status\":\"IN_PROGRESS\",\"submittedAt\":\"2026-04-06T18:05:00\",\"title\":\"검증 문서\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 7
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents/1/approve",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"body\":{\"before\":{\"clockIn\":\"09:14\",\"clockOut\":null,\"code\":\"LATE\"},\"clockIn\":\"09:02\",\"clockOut\":\"18:10\",\"reason\":\"근태 정정 비교\",\"workDate\":\"2026-03-30\"},\"completedAt\":\"2026-04-06T18:05:00\",\"docNo\":\"AT-2026-0001\",\"drafter\":{\"department\":\"개발팀\",\"id\":1,\"name\":\"employee\",\"title\":\"사원\"},\"form\":{\"code\":\"ATTENDANCE_FIX\",\"name\":\"근태 정정\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":1,\"name\":\"employee\"},\"at\":\"2026-04-06T18:05:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T18:05:00\",\"comment\":\"양식 결재선 스냅샷\"},{\"action\":\"APPROVE\",\"actor\":{\"id\":2,\"name\":\"leader\"},\"at\":\"2026-04-06T18:05:00\",\"comment\":null}],\"id\":1,\"line\":[{\"actedAt\":\"2026-04-06T18:05:00\",\"approver\":{\"department\":\"개발팀\",\"id\":2,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"APPROVED\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":false},\"references\":[],\"resubmittedFromId\":null,\"status\":\"APPROVED\",\"submittedAt\":\"2026-04-06T18:05:00\",\"title\":\"검증 문서\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 8
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/attendance/records/1/2026-03-30",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"clockInAt\":\"2026-03-30T09:02:00\",\"clockOutAt\":\"2026-03-30T18:10:00\",\"code\":\"ON_TIME\",\"date\":\"2026-03-30\",\"fixDocument\":{\"docNo\":\"AT-2026-0001\",\"id\":1},\"judgedAt\":\"2026-04-06T18:05:00\",\"leaveDocument\":null,\"reason\":\"저장된 근무시간과 유예 기준을 충족했습니다.\",\"schedule\":{\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"startTime\":\"09:00\"},\"user\":{\"id\":1,\"name\":\"employee\"}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 9
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/attendance/me",
+      "query" : {
+        "month" : [ "2026-03" ]
+      },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"days\":[{\"date\":\"2026-03-01\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-03-02\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-03\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-04\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-05\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-06\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-07\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-03-08\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-03-09\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-10\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-11\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-12\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-13\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-14\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-03-15\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-03-16\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-17\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-18\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-19\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-20\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-21\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-03-22\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-03-23\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-24\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-25\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-26\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-27\",\"dayType\":\"WORKDAY\"},{\"date\":\"2026-03-28\",\"dayType\":\"HOLIDAY\"},{\"date\":\"2026-03-29\",\"dayType\":\"HOLIDAY\"},{\"absent\":false,\"clockInAt\":\"2026-03-30T09:02:00\",\"clockOutAt\":\"2026-03-30T18:10:00\",\"date\":\"2026-03-30\",\"dayType\":\"WORKDAY\",\"fixDocument\":{\"docNo\":\"AT-2026-0001\",\"id\":1},\"inResult\":\"ON_TIME\",\"outResult\":\"ON_TIME\"},{\"date\":\"2026-03-31\",\"dayType\":\"WORKDAY\"}],\"month\":\"2026-03\",\"summary\":{\"absent\":0,\"early\":0,\"late\":0,\"leaveDays\":0.0,\"missing\":0,\"present\":1,\"workDays\":22}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 10
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents",
+      "query" : { },
+      "status" : 201,
+      "kind" : "json",
+      "body" : "{\"data\":{\"id\":2,\"status\":\"DRAFT\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 11
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents/2/submit",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"body\":{\"endDate\":\"2026-04-13\",\"handover\":null,\"leaveType\":\"ANNUAL\",\"reason\":\"검증\",\"startDate\":\"2026-04-13\",\"usedDays\":1.0},\"completedAt\":null,\"docNo\":\"HR-2026-0001\",\"drafter\":{\"department\":\"개발팀\",\"id\":1,\"name\":\"employee\",\"title\":\"사원\"},\"form\":{\"code\":\"LEAVE\",\"name\":\"휴가 신청\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":1,\"name\":\"employee\"},\"at\":\"2026-04-06T18:05:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T18:05:00\",\"comment\":\"양식 결재선 스냅샷\"}],\"id\":2,\"line\":[{\"actedAt\":null,\"approver\":{\"department\":\"개발팀\",\"id\":2,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"PENDING\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":true},\"references\":[],\"resubmittedFromId\":null,\"status\":\"IN_PROGRESS\",\"submittedAt\":\"2026-04-06T18:05:00\",\"title\":\"검증 문서\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 12
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents/2/approve",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"body\":{\"endDate\":\"2026-04-13\",\"handover\":null,\"leaveType\":\"ANNUAL\",\"reason\":\"검증\",\"startDate\":\"2026-04-13\",\"usedDays\":1.0},\"completedAt\":\"2026-04-06T18:05:00\",\"docNo\":\"HR-2026-0001\",\"drafter\":{\"department\":\"개발팀\",\"id\":1,\"name\":\"employee\",\"title\":\"사원\"},\"form\":{\"code\":\"LEAVE\",\"name\":\"휴가 신청\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":1,\"name\":\"employee\"},\"at\":\"2026-04-06T18:05:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T18:05:00\",\"comment\":\"양식 결재선 스냅샷\"},{\"action\":\"APPROVE\",\"actor\":{\"id\":2,\"name\":\"leader\"},\"at\":\"2026-04-06T18:05:00\",\"comment\":null}],\"id\":2,\"line\":[{\"actedAt\":\"2026-04-06T18:05:00\",\"approver\":{\"department\":\"개발팀\",\"id\":2,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"APPROVED\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":false},\"references\":[],\"resubmittedFromId\":null,\"status\":\"APPROVED\",\"submittedAt\":\"2026-04-06T18:05:00\",\"title\":\"검증 문서\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 13
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/attendance/records/1/2026-04-13",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"clockInAt\":null,\"clockOutAt\":null,\"code\":\"LEAVE\",\"date\":\"2026-04-13\",\"fixDocument\":null,\"judgedAt\":null,\"leaveDocument\":{\"docNo\":\"HR-2026-0001\",\"id\":2},\"reason\":\"승인된 휴가를 반영한 판정입니다.\",\"schedule\":{\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"startTime\":\"09:00\"},\"user\":{\"id\":1,\"name\":\"employee\"}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 14
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/attendance/records/4/2026-04-08",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"clockInAt\":null,\"clockOutAt\":null,\"code\":\"FUTURE\",\"date\":\"2026-04-08\",\"fixDocument\":null,\"judgedAt\":null,\"leaveDocument\":null,\"reason\":\"판정할 근태 기록이 없거나 재직 기간 밖의 날짜입니다.\",\"schedule\":{\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"startTime\":\"09:00\"},\"user\":{\"id\":4,\"name\":\"outside\"}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T18:05:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 15
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/attendance/monthly/export",
+      "query" : {
+        "month" : [ "2026-04" ]
+      },
+      "status" : 200,
+      "kind" : "non-json",
+      "body" : "﻿\"이름\",\"직급\",\"부서\",\"2026-04-01\",\"2026-04-02\",\"2026-04-03\",\"2026-04-04\",\"2026-04-05\",\"2026-04-06\",\"2026-04-07\",\"2026-04-08\",\"2026-04-09\",\"2026-04-10\",\"2026-04-11\",\"2026-04-12\",\"2026-04-13\",\"2026-04-14\",\"2026-04-15\",\"2026-04-16\",\"2026-04-17\",\"2026-04-18\",\"2026-04-19\",\"2026-04-20\",\"2026-04-21\",\"2026-04-22\",\"2026-04-23\",\"2026-04-24\",\"2026-04-25\",\"2026-04-26\",\"2026-04-27\",\"2026-04-28\",\"2026-04-29\",\"2026-04-30\",\"지각\",\"조퇴\",\"결근\",\"퇴근 누락\",\"휴가 일수\"\r\n\"chief\",\"사원\",\"회사\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"0\",\"0\",\"0\",\"0\",\"0.0\"\r\n\"employee\",\"사원\",\"개발팀\",\"\",\"\",\"\",\"\",\"\",\"휴일 근무\",\"\",\"\",\"\",\"\",\"\",\"\",\"휴가\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"0\",\"0\",\"0\",\"0\",\"1.0\"\r\n\"leader\",\"사원\",\"개발팀\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"0\",\"0\",\"0\",\"0\",\"0.0\"\r\n\"outside\",\"사원\",\"개발팀\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"0\",\"0\",\"0\",\"0\",\"0.0\"\r\n",
+      "concurrent" : false,
+      "requestIndex" : 16
+    } ],
+    "com.minierp.backend.integration.R04Group3Probe#everyTaskHistoryShapeAndConflictCard()" : [ {
+      "method" : "POST",
+      "path" : "/api/v1/projects/2/tasks",
+      "query" : { },
+      "status" : 201,
+      "kind" : "json",
+      "body" : "{\"data\":{\"assignees\":[{\"id\":9,\"name\":\"employee\",\"title\":\"사원\"}],\"canManage\":true,\"canMove\":true,\"content\":\"업무 내용\",\"endDate\":\"2026-04-04\",\"history\":[{\"action\":\"ASSIGNED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"target\":{\"id\":9,\"name\":\"employee\"},\"to\":\"9\"},{\"action\":\"CREATED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"to\":\"업무 비교\"}],\"id\":1,\"key\":\"R4TASK-1\",\"overdueDays\":2,\"position\":1024,\"priority\":\"MEDIUM\",\"projectId\":2,\"status\":\"TODO\",\"title\":\"업무 비교\",\"version\":0},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 1
+    }, {
+      "method" : "PATCH",
+      "path" : "/api/v1/tasks/1",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"assignees\":[{\"id\":12,\"name\":\"outside\",\"title\":\"사원\"}],\"canManage\":true,\"canMove\":true,\"content\":\"수정 내용\",\"endDate\":\"2026-04-04\",\"history\":[{\"action\":\"UPDATED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"to\":\"제목, 설명\"},{\"action\":\"ASSIGNED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"target\":{\"id\":12,\"name\":\"outside\"},\"to\":\"12\"},{\"action\":\"UNASSIGNED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":\"9\",\"target\":{\"id\":9,\"name\":\"employee\"},\"to\":null},{\"action\":\"ASSIGNED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"target\":{\"id\":9,\"name\":\"employee\"},\"to\":\"9\"},{\"action\":\"CREATED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"to\":\"업무 비교\"}],\"id\":1,\"key\":\"R4TASK-1\",\"overdueDays\":2,\"position\":1024,\"priority\":\"MEDIUM\",\"projectId\":2,\"status\":\"TODO\",\"title\":\"수정 업무\",\"version\":1},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 2
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/tasks/1/move",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"project\":{\"doneCount\":0,\"id\":2,\"progressPct\":0,\"status\":\"PROGRESS\",\"taskCount\":1},\"task\":{\"assignees\":[{\"id\":12,\"name\":\"outside\",\"title\":\"사원\"}],\"canMove\":true,\"endDate\":\"2026-04-04\",\"id\":1,\"key\":\"R4TASK-1\",\"overdueDays\":2,\"position\":1024,\"priority\":\"MEDIUM\",\"status\":\"DOING\",\"title\":\"수정 업무\",\"version\":2}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 3
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/tasks/1/move",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"project\":{\"doneCount\":0,\"id\":2,\"progressPct\":0,\"status\":\"PROGRESS\",\"taskCount\":1},\"task\":{\"assignees\":[{\"id\":12,\"name\":\"outside\",\"title\":\"사원\"}],\"canMove\":true,\"endDate\":\"2026-04-04\",\"id\":1,\"key\":\"R4TASK-1\",\"overdueDays\":2,\"position\":1024,\"priority\":\"MEDIUM\",\"status\":\"DOING\",\"title\":\"수정 업무\",\"version\":3}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 4
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/tasks/1",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"assignees\":[{\"id\":12,\"name\":\"outside\",\"title\":\"사원\"}],\"canManage\":false,\"canMove\":false,\"content\":\"수정 내용\",\"endDate\":\"2026-04-04\",\"history\":[{\"action\":\"OVERDUE_NOTIFIED\",\"actor\":null,\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"target\":{\"id\":12,\"name\":\"outside\"},\"to\":\"12\"},{\"action\":\"MOVED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\"},{\"action\":\"STATUS\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":\"TODO\",\"to\":\"DOING\"},{\"action\":\"UPDATED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"to\":\"제목, 설명\"},{\"action\":\"ASSIGNED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"target\":{\"id\":12,\"name\":\"outside\"},\"to\":\"12\"},{\"action\":\"UNASSIGNED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":\"9\",\"target\":{\"id\":9,\"name\":\"employee\"},\"to\":null},{\"action\":\"ASSIGNED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"target\":{\"id\":9,\"name\":\"employee\"},\"to\":\"9\"},{\"action\":\"CREATED\",\"actor\":{\"id\":10,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"from\":null,\"to\":\"업무 비교\"}],\"id\":1,\"key\":\"R4TASK-1\",\"overdueDays\":2,\"position\":1024,\"priority\":\"MEDIUM\",\"projectId\":2,\"status\":\"DOING\",\"title\":\"수정 업무\",\"version\":3},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 5
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/tasks/1/move",
+      "query" : { },
+      "status" : 409,
+      "kind" : "json",
+      "body" : "{\"error\":{\"code\":\"TASK_VERSION_CONFLICT\",\"details\":{\"currentTask\":{\"assignees\":[{\"id\":12,\"name\":\"outside\",\"title\":\"사원\"}],\"canMove\":true,\"endDate\":\"2026-04-04\",\"id\":1,\"key\":\"R4TASK-1\",\"overdueDays\":2,\"position\":1024,\"priority\":\"MEDIUM\",\"status\":\"DOING\",\"title\":\"수정 업무\",\"version\":3}},\"message\":\"다른 사람이 먼저 이 업무를 옮겼습니다. 보드를 새로 고칩니다.\"},\"success\":false,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 6
+    } ],
+    "com.minierp.backend.integration.R04Group3Probe#homeBothTeamItemsPermissionNullsAndUnreadSecondPage()" : [ {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents",
+      "query" : { },
+      "status" : 201,
+      "kind" : "json",
+      "body" : "{\"data\":{\"id\":3,\"status\":\"DRAFT\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 1
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents/3/submit",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"body\":{\"endDate\":\"2026-04-07\",\"handover\":null,\"leaveType\":\"ANNUAL\",\"reason\":\"검증\",\"startDate\":\"2026-04-07\",\"usedDays\":1.0},\"completedAt\":null,\"docNo\":\"HR-2026-0002\",\"drafter\":{\"department\":\"개발팀\",\"id\":13,\"name\":\"employee\",\"title\":\"사원\"},\"form\":{\"code\":\"LEAVE\",\"name\":\"휴가 신청\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":13,\"name\":\"employee\"},\"at\":\"2026-04-06T09:20:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T09:20:00\",\"comment\":\"양식 결재선 스냅샷\"}],\"id\":3,\"line\":[{\"actedAt\":null,\"approver\":{\"department\":\"개발팀\",\"id\":14,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"PENDING\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":true},\"references\":[],\"resubmittedFromId\":null,\"status\":\"IN_PROGRESS\",\"submittedAt\":\"2026-04-06T09:20:00\",\"title\":\"검증 문서\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 2
+    }, {
+      "method" : "POST",
+      "path" : "/api/v1/approval-documents/3/approve",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"body\":{\"endDate\":\"2026-04-07\",\"handover\":null,\"leaveType\":\"ANNUAL\",\"reason\":\"검증\",\"startDate\":\"2026-04-07\",\"usedDays\":1.0},\"completedAt\":\"2026-04-06T09:20:00\",\"docNo\":\"HR-2026-0002\",\"drafter\":{\"department\":\"개발팀\",\"id\":13,\"name\":\"employee\",\"title\":\"사원\"},\"form\":{\"code\":\"LEAVE\",\"name\":\"휴가 신청\"},\"history\":[{\"action\":\"SUBMIT\",\"actor\":{\"id\":13,\"name\":\"employee\"},\"at\":\"2026-04-06T09:20:00\",\"comment\":null},{\"action\":\"LINE_GENERATED\",\"actor\":null,\"at\":\"2026-04-06T09:20:00\",\"comment\":\"양식 결재선 스냅샷\"},{\"action\":\"APPROVE\",\"actor\":{\"id\":14,\"name\":\"leader\"},\"at\":\"2026-04-06T09:20:00\",\"comment\":null}],\"id\":3,\"line\":[{\"actedAt\":\"2026-04-06T09:20:00\",\"approver\":{\"department\":\"개발팀\",\"id\":14,\"name\":\"leader\",\"title\":\"사원\"},\"comment\":null,\"kind\":\"APPROVER\",\"order\":1,\"rule\":\"기안자의 부서장\",\"skipReason\":null,\"source\":\"RULE\",\"status\":\"APPROVED\"}],\"myActions\":{\"canApprove\":false,\"canReject\":false,\"canResubmit\":false,\"canWithdraw\":false},\"references\":[],\"resubmittedFromId\":null,\"status\":\"APPROVED\",\"submittedAt\":\"2026-04-06T09:20:00\",\"title\":\"검증 문서\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 3
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/home",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"approvals\":{\"mine\":[],\"todo\":[],\"todoCount\":0},\"leave\":{\"available\":9.0,\"granted\":10.0,\"reserved\":0.0,\"used\":1.0,\"year\":2026},\"myTasks\":{\"count\":1,\"items\":[{\"endDate\":\"2026-04-08\",\"id\":2,\"key\":\"R4HOME-1\",\"overdueDays\":0,\"projectId\":3,\"status\":\"DOING\",\"title\":\"카드\"}],\"project\":{\"done\":0,\"id\":3,\"key\":\"R4HOME\",\"overdue\":0,\"progressPct\":0,\"title\":\"측정\",\"total\":1}},\"notifications\":{\"items\":[{\"createdAt\":\"2026-04-06T09:20:00\",\"id\":8,\"link\":\"/approvals/3\",\"read\":false,\"title\":\"검증 문서\",\"type\":\"APPROVED\"}],\"unread\":1},\"teamWeek\":{\"days\":[{\"date\":\"2026-04-06\",\"items\":[]},{\"date\":\"2026-04-07\",\"items\":[{\"documentId\":3,\"status\":\"APPROVED\",\"type\":\"LEAVE\",\"user\":{\"id\":13,\"name\":\"employee\"}}]},{\"date\":\"2026-04-08\",\"items\":[{\"project\":{\"id\":3,\"key\":\"R4HOME\"},\"task\":{\"id\":2,\"key\":\"R4HOME-1\",\"title\":\"카드\"},\"type\":\"TASK_DUE\"}]},{\"date\":\"2026-04-09\",\"items\":[]},{\"date\":\"2026-04-10\",\"items\":[]}],\"department\":{\"id\":2,\"name\":\"개발팀\"},\"from\":\"2026-04-06\",\"to\":\"2026-04-10\"},\"today\":{\"canClockIn\":true,\"canClockOut\":false,\"clockInAt\":null,\"clockOutAt\":null,\"dayType\":\"WORKDAY\",\"earlyIfNow\":false,\"holidayName\":null,\"inResult\":null,\"leave\":null,\"monthAbsentCount\":0,\"monthLateCount\":0,\"outResult\":null,\"schedule\":{\"departmentName\":\"개발팀\",\"endTime\":\"18:00\",\"halfBoundary\":\"14:00\",\"lateGraceMin\":10,\"source\":\"COMPANY\",\"startTime\":\"09:00\"},\"workDate\":\"2026-04-06\"}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 4
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/home",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"approvals\":null,\"leave\":{\"available\":9.0,\"granted\":10.0,\"reserved\":0.0,\"used\":1.0,\"year\":2026},\"myTasks\":null,\"notifications\":{\"items\":[{\"createdAt\":\"2026-04-06T09:20:00\",\"id\":8,\"link\":\"/approvals/3\",\"read\":false,\"title\":\"검증 문서\",\"type\":\"APPROVED\"}],\"unread\":1},\"teamWeek\":null,\"today\":null},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 5
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/notifications",
+      "query" : {
+        "page" : [ "1" ],
+        "size" : [ "2" ],
+        "unreadOnly" : [ "true" ]
+      },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"content\":[{\"createdAt\":\"2026-04-06T09:22:00\",\"id\":11,\"link\":\"/projects/1\",\"read\":false,\"title\":\"읽음 비교 2\",\"type\":\"TASK_ASSIGNED\"},{\"createdAt\":\"2026-04-06T09:21:00\",\"id\":10,\"link\":\"/projects/1\",\"read\":false,\"title\":\"읽음 비교 1\",\"type\":\"TASK_ASSIGNED\"}],\"page\":{\"first\":false,\"last\":true,\"number\":1,\"numberOfElements\":2,\"size\":2,\"totalElements\":4,\"totalPages\":2}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 6
+    } ],
+    "com.minierp.backend.integration.R04Group3Probe#projectAllResponseShapesAndNullableLeader()" : [ {
+      "method" : "POST",
+      "path" : "/api/v1/projects",
+      "query" : { },
+      "status" : 201,
+      "kind" : "json",
+      "body" : "{\"data\":{\"content\":\"프로젝트 내용\",\"doneCount\":0,\"endDate\":\"2026-05-06\",\"id\":1,\"key\":\"R4PROBE\",\"leader\":{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"},\"memberCount\":1,\"members\":[{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"}],\"myRole\":null,\"overdueCount\":0,\"priority\":\"MEDIUM\",\"progressPct\":0,\"startDate\":\"2026-04-06\",\"status\":\"READY\",\"taskCount\":0,\"title\":\"응답 비교\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 1
+    }, {
+      "method" : "PATCH",
+      "path" : "/api/v1/projects/1",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"content\":\"바꾼 내용\",\"doneCount\":0,\"endDate\":\"2026-05-06\",\"id\":1,\"key\":\"R4PROBE\",\"leader\":{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"},\"memberCount\":1,\"members\":[{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"}],\"myRole\":null,\"overdueCount\":0,\"priority\":\"MEDIUM\",\"progressPct\":0,\"startDate\":\"2026-04-06\",\"status\":\"READY\",\"taskCount\":0,\"title\":\"응답 비교\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 2
+    }, {
+      "method" : "PUT",
+      "path" : "/api/v1/projects/1/members",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"content\":\"바꾼 내용\",\"doneCount\":0,\"endDate\":\"2026-05-06\",\"id\":1,\"key\":\"R4PROBE\",\"leader\":{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"},\"memberCount\":2,\"members\":[{\"id\":5,\"name\":\"employee\",\"title\":\"사원\"},{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"}],\"myRole\":null,\"overdueCount\":0,\"permissions\":{\"canCreateTask\":true,\"canManage\":true},\"priority\":\"MEDIUM\",\"progressPct\":0,\"startDate\":\"2026-04-06\",\"status\":\"READY\",\"taskCount\":0,\"title\":\"응답 비교\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 3
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/projects/1",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"content\":\"바꾼 내용\",\"doneCount\":0,\"endDate\":\"2026-05-06\",\"id\":1,\"key\":\"R4PROBE\",\"leader\":{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"},\"memberCount\":2,\"members\":[{\"id\":5,\"name\":\"employee\",\"title\":\"사원\"},{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"}],\"myRole\":\"MEMBER\",\"overdueCount\":0,\"permissions\":{\"canCreateTask\":false,\"canManage\":false},\"priority\":\"MEDIUM\",\"progressPct\":0,\"startDate\":\"2026-04-06\",\"status\":\"READY\",\"taskCount\":0,\"title\":\"응답 비교\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 4
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/projects",
+      "query" : {
+        "q" : [ "R4PROBE" ]
+      },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"content\":[{\"content\":\"바꾼 내용\",\"doneCount\":0,\"endDate\":\"2026-05-06\",\"id\":1,\"key\":\"R4PROBE\",\"leader\":{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"},\"memberCount\":2,\"myRole\":\"MEMBER\",\"overdueCount\":0,\"priority\":\"MEDIUM\",\"progressPct\":0,\"startDate\":\"2026-04-06\",\"status\":\"READY\",\"taskCount\":0,\"title\":\"응답 비교\"}],\"page\":{\"first\":true,\"last\":true,\"number\":0,\"numberOfElements\":1,\"size\":20,\"totalElements\":1,\"totalPages\":1}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 5
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/projects/1/board",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"columns\":[{\"status\":\"TODO\",\"tasks\":[]},{\"status\":\"DOING\",\"tasks\":[]},{\"status\":\"DONE\",\"tasks\":[]}],\"members\":[{\"id\":5,\"name\":\"employee\",\"title\":\"사원\"},{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"}],\"permissions\":{\"canCreateTask\":false,\"canManage\":false},\"project\":{\"content\":\"바꾼 내용\",\"doneCount\":0,\"endDate\":\"2026-05-06\",\"id\":1,\"key\":\"R4PROBE\",\"leader\":{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"},\"memberCount\":2,\"myRole\":\"MEMBER\",\"overdueCount\":0,\"priority\":\"MEDIUM\",\"progressPct\":0,\"startDate\":\"2026-04-06\",\"status\":\"READY\",\"taskCount\":0,\"title\":\"응답 비교\"}},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 6
+    }, {
+      "method" : "GET",
+      "path" : "/api/v1/projects/1",
+      "query" : { },
+      "status" : 200,
+      "kind" : "json",
+      "body" : "{\"data\":{\"content\":\"바꾼 내용\",\"doneCount\":0,\"endDate\":\"2026-05-06\",\"id\":1,\"key\":\"R4PROBE\",\"leader\":null,\"memberCount\":2,\"members\":[{\"id\":5,\"name\":\"employee\",\"title\":\"사원\"},{\"id\":6,\"name\":\"leader\",\"title\":\"사원\"}],\"myRole\":null,\"overdueCount\":0,\"permissions\":{\"canCreateTask\":true,\"canManage\":true},\"priority\":\"MEDIUM\",\"progressPct\":0,\"startDate\":\"2026-04-06\",\"status\":\"READY\",\"taskCount\":0,\"title\":\"응답 비교\"},\"message\":\"요청이 성공적으로 처리되었습니다.\",\"success\":true,\"timestamp\":\"2026-04-06T09:20:00\"}",
+      "concurrent" : false,
+      "requestIndex" : 7
+    } ]
+  }
+}
