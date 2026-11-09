@@ -29,7 +29,7 @@ public class TaskStore {
     }
 
     public long insertTask(
-            long p,
+            long projectId,
             long seq,
             long pos,
             long actor,
@@ -41,8 +41,8 @@ public class TaskStore {
             LocalDateTime now) {
         return db.insert(
                 "INSERT INTO tasks(project_id,task_no,position,version,created_by,task_title,task_content,end_date,priority,task_status,created_at) VALUES(:p,:seq,:pos,0,:actor,:title,:content,:end,:priority,:status,:now)",
-                map("p", p, "seq", seq, "pos", pos, "actor", actor, "title", title, "content", content, "end", end,
-                        "priority", priority, "status", status, "now", now));
+                map("p", projectId, "seq", seq, "pos", pos, "actor", actor, "title", title, "content", content,
+                        "end", end, "priority", priority, "status", status, "now", now));
     }
 
     public int updateLastSequence(long seq, long id) {
@@ -65,12 +65,12 @@ public class TaskStore {
         return db.rows("SELECT id FROM projects WHERE id=:id FOR UPDATE", map("id", id));
     }
 
-    public int updateRebalancedPositions(long p, String status, long moving) {
+    public int updateRebalancedPositions(long projectId, String status, long moving) {
         return db.update("""
     UPDATE tasks t JOIN (SELECT id,ROW_NUMBER() OVER(ORDER BY position,id)*1024 AS new_position FROM tasks
       WHERE project_id=:p AND task_status=:status AND id<>:moving) ranked ON ranked.id=t.id SET t.position=ranked.new_position
     """,
-                map("p", p, "status", status, "moving", moving));
+                map("p", projectId, "status", status, "moving", moving));
     }
 
     public int insertDueClaim(Object task, Object user, Object due, LocalDateTime now) {

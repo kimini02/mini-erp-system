@@ -2,6 +2,8 @@ package com.minierp.backend.domain.task.service;
 
 import com.minierp.backend.domain.project.repository.ProjectStateStore;
 import com.minierp.backend.domain.task.dto.BoardTaskRequests.*;
+import com.minierp.backend.domain.task.dto.*;
+import com.minierp.backend.domain.project.dto.ProjectPersonResponseDto;
 import com.minierp.backend.domain.project.service.*;
 import com.minierp.backend.domain.notification.service.NotificationService;
 import com.minierp.backend.domain.task.repository.TaskQueries;
@@ -33,83 +35,69 @@ public class BoardTaskService {
         return number(queries.findTaskProject(task), "project_id");
     }
 
-    private List<Map<String, Object>> assignees(long id) {
-        return queries.findAssignees(id);
+    private List<ProjectPersonResponseDto> assignees(long id) {
+        return queries.findAssignees(id).stream().map(ProjectPersonResponseDto::from).toList();
     }
 
-    private boolean assigned(List<Map<String, Object>> people) {
-        return people.stream().anyMatch(u -> number(u, "id") == projects.actor());
+    private boolean assigned(List<ProjectPersonResponseDto> people) {
+        return people.stream().anyMatch(person -> person.id() == projects.actor());
     }
 
-    private Map<String, Object> card(
+    private TaskCardResponseDto card(
             Map<String, Object> task,
             Map<String, Object> project,
-            List<Map<String, Object>> people) {
+            List<ProjectPersonResponseDto> people) {
         var end = (LocalDate) task.get("end_date");
         long overdue = "DONE".equals(task.get("task_status"))
                 ? 0
                 : Math.max(0, ChronoUnit.DAYS.between(end, LocalDate.now(clock)));
-        return map("id", task.get("id"), "key", project.get("project_key") + "-" + task.get("task_no"),
-                "title", task.get("task_title"), "status", task.get("task_status"), "priority", task.get("priority"),
-                "endDate", end, "overdueDays", overdue, "assignees", people, "position", task.get("position"),
-                "version", task.get("version"), "canMove", projects.canManage(project) || assigned(people));
+        return new TaskCardResponseDto(number(task, "id"), project.get("project_key") + "-" + task.get("task_no"),
+                (String) task.get("task_title"), (String) task.get("task_status"), (String) task.get("priority"),
+                end, overdue, people, number(task, "position"), number(task, "version"),
+                projects.canManage(project) || assigned(people));
     }
 
-    public Map<String, Object> board(long id) {
-        var p = projects.getVisibleProject(id);
+    public TaskBoardResponseDto getBoard(long id) {
+        var projectRow = projects.getVisibleProject(id);
         var tasks = queries.findBoardTasks(id);
         // Members and all assignments in one query: no per-card lookups, including empty boards.
         var people = queries.findBoardPeople(id);
-        List<Map<String, Object>> members = new ArrayList<>();
-        Map<Long, List<Map<String, Object>>> assignments = new HashMap<>();
+        List<ProjectPersonResponseDto> members = new ArrayList<>();
+        Map<Long, List<ProjectPersonResponseDto>> assignments = new HashMap<>();
         for (var row : people) {
-            var user = map("id", row.get("id"), "name", row.get("name"), "title", row.get("title"));
+            var user = ProjectPersonResponseDto.from(row);
             if (row.get("task_id") == null) {
                 members.add(user);
             } else {
-                assignments.computeIfAbsent(number(row, "task_id"), k -> new ArrayList<>()).add(user);
+                assignments.computeIfAbsent(number(row, "task_id"), taskId -> new ArrayList<>()).add(user);
             }
         }
-        List<Map<String, Object>> columns = new ArrayList<>();
+        List<TaskBoardResponseDto.Column> columns = new ArrayList<>();
         for (String status : List.of("TODO", "DOING", "DONE")) {
-            columns.add(map("status", status,
-                    "tasks", tasks.stream()
-                            .filter(t -> status.equals(t.get("task_status")))
-                            .map(t -> card(t, p, assignments.getOrDefault(number(t, "id"), List.of())))
+            columns.add(new TaskBoardResponseDto.Column(status, tasks.stream()
+                            .filter(taskRow -> status.equals(taskRow.get("task_status")))
+                            .map(taskRow -> card(taskRow, projectRow,
+                                    assignments.getOrDefault(number(taskRow, "id"), List.of())))
                             .toList()));
         }
-        return map("project", projects.toSummary(p), "members", members, "permissions", projects.getPermissions(p),
-                "columns", columns);
+        return new TaskBoardResponseDto(projects.toSummary(projectRow), members, projects.getPermissions(projectRow),
+                columns);
     }
 
-    public Map<String, Object> detail(long id) {
-        var p = projects.getVisibleProject(projectId(id));
-        return detail(id, p);
+    public TaskDetailResponseDto getTask(long id) {
+        var projectRow = projects.getVisibleProject(projectId(id));
+        return taskDetail(id, projectRow);
     }
 
-    private Map<String, Object> detail(long id, Map<String, Object> p) {
+    private TaskDetailResponseDto taskDetail(long id, Map<String, Object> projectRow) {
         var task = raw(id);
-        var result = card(task, p, assignees(id));
-        result.put("projectId", task.get("project_id"));
-        result.put("content", task.get("task_content"));
-        result.put("canManage", projects.canManage(p));
+        var card = card(task, projectRow, assignees(id));
+        long projectId = number(task, "project_id");
+        String content = (String) task.get("task_content");
+        boolean canManage = projects.canManage(projectRow);
         var history = queries.findHistory(id);
-        result.put("history", history.stream().map(h -> {
-            var event = map("action", h.get("action"),
-                    "actor", h.get("actor_id") == null
-                            ? null
-                            : map("id", h.get("actor_id"), "name", h.get("actor_name")),
-                    "at", h.get("created_at"));
-            if (!"MOVED".equals(h.get("action"))) {
-                event.put("from", h.get("from_value"));
-                event.put("to", h.get("to_value"));
-            }
-            if (h.get("target_id") != null) {
-                event.put("target", map("id", h.get("target_id"), "name", h.get("target_name")));
-            }
-            return event;
-        }).toList());
-        return result;
+        return TaskDetailResponseDto.from(card, projectId, content, canManage,
+                history.stream().map(TaskDetailResponseDto::historyFrom).toList());
     }
 
     private void history(long id, String action, String from, String to) {
@@ -125,7 +113,7 @@ public class BoardTaskService {
     }
 
     private void assign(long task, long project, String title, Set<Long> selected) {
-        var old = queries.findAssigneeIds(task).stream().map(r -> number(r, "user_id")).toList();
+        var old = queries.findAssigneeIds(task).stream().map(assignment -> number(assignment, "user_id")).toList();
         for (long user : old) {
             if (!selected.contains(user)) {
                 store.deleteAssignment(task, user);
@@ -142,85 +130,87 @@ public class BoardTaskService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String, Object> create(long project, Create r) {
-        var p = projects.lockVisibleProject(project);
-        projects.requireManage(p);
-        var assigned = validateAssignees(project, r.assigneeIds());
-        var end = r.endDate() == null ? (LocalDate) p.get("end_date") : r.endDate();
-        String status = r.status() == null ? "TODO" : r.status().name();
-        long seq = number(p, "last_task_seq") + 1;
+    public TaskDetailResponseDto createTask(long project, Create request) {
+        var projectRow = projects.lockVisibleProject(project);
+        projects.requireManage(projectRow);
+        var assigned = validateAssignees(project, request.assigneeIds());
+        var end = request.endDate() == null ? (LocalDate) projectRow.get("end_date") : request.endDate();
+        String status = request.status() == null ? "TODO" : request.status().name();
+        long seq = number(projectRow, "last_task_seq") + 1;
         if (seq > Integer.MAX_VALUE) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         long position = position(project, status, 0, null, true);
-        long id = store.insertTask(project, seq, position, projects.actor(), r.title(),
-                r.content() == null ? "" : r.content(), end,
-                r.priority() == null ? "MEDIUM" : r.priority().name(), status, LocalDateTime.now(clock));
+        long id = store.insertTask(project, seq, position, projects.actor(), request.title(),
+                request.content() == null ? "" : request.content(), end,
+                request.priority() == null ? "MEDIUM" : request.priority().name(), status, LocalDateTime.now(clock));
         store.updateLastSequence(seq, project);
-        history(id, "CREATED", null, r.title());
-        assign(id, project, p.get("project_key") + "-" + seq + " " + r.title(), assigned);
+        history(id, "CREATED", null, request.title());
+        assign(id, project, projectRow.get("project_key") + "-" + seq + " " + request.title(), assigned);
         states.recalculate(project);
-        return detail(id, p);
+        return taskDetail(id, projectRow);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String, Object> patch(long id, Patch r) {
+    public TaskDetailResponseDto updateTask(long id, Patch request) {
         long project = projectId(id);
-        var p = projects.lockVisibleProject(project);
-        projects.requireManage(p);
+        var projectRow = projects.lockVisibleProject(project);
+        projects.requireManage(projectRow);
         var task = raw(id);
-        Set<Long> selected = r.assigneeIds() == null ? null : validateAssignees(project, r.assigneeIds());
-        if (r.title() != null && r.title().isBlank()) {
+        Set<Long> selected = request.assigneeIds() == null ? null : validateAssignees(project, request.assigneeIds());
+        if (request.title() != null && request.title().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        store.updateTask(id, r.title(), r.content(), r.endDate(), r.priority() == null ? null : r.priority().name(),
+        store.updateTask(id, request.title(), request.content(), request.endDate(),
+                request.priority() == null ? null : request.priority().name(),
                 LocalDateTime.now(clock));
         if (selected != null) {
             assign(id, project,
-                    p.get("project_key") + "-" + task.get("task_no") + " "
-                            + (r.title() == null ? task.get("task_title") : r.title()), selected);
+                    projectRow.get("project_key") + "-" + task.get("task_no") + " "
+                            + (request.title() == null ? task.get("task_title") : request.title()), selected);
         }
         List<String> changed = new ArrayList<>();
-        if (r.title() != null) {
+        if (request.title() != null) {
             changed.add("제목");
         }
-        if (r.content() != null) {
+        if (request.content() != null) {
             changed.add("설명");
         }
-        if (r.endDate() != null) {
+        if (request.endDate() != null) {
             changed.add("마감일");
         }
-        if (r.priority() != null) {
+        if (request.priority() != null) {
             changed.add("우선순위");
         }
         if (!changed.isEmpty()) {
             history(id, "UPDATED", null, String.join(", ", changed));
         }
         states.recalculate(project);
-        return detail(id, p);
+        return taskDetail(id, projectRow);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String, Object> move(long id, Move r) {
+    public TaskMoveResponseDto moveTask(long id, Move request) {
         long project = projectId(id);
-        var p = projects.lockVisibleProject(project);
+        var projectRow = projects.lockVisibleProject(project);
         var task = raw(id);
         var people = assignees(id);
-        if (!projects.canManage(p) && !assigned(people)) {
+        if (!projects.canManage(projectRow) && !assigned(people)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
-        if (number(task, "version") != r.version()) {
-            throw new BusinessException(ErrorCode.TASK_VERSION_CONFLICT, map("currentTask", card(task, p, people)));
+        if (number(task, "version") != request.version()) {
+            throw new BusinessException(ErrorCode.TASK_VERSION_CONFLICT,
+                    map("currentTask", card(task, projectRow, people)));
         }
-        String status = r.status().name();
-        long pos = position(project, status, id, r.afterTaskId(), false);
+        String status = request.status().name();
+        long pos = position(project, status, id, request.afterTaskId(), false);
         store.updatePosition(id, status, pos, LocalDateTime.now(clock));
         boolean changed = !status.equals(task.get("task_status"));
         history(id, changed ? "STATUS" : "MOVED",
                 changed ? (String) task.get("task_status") : task.get("position").toString(),
                 changed ? status : Long.toString(pos));
         var summary = states.recalculate(project);
-        return map("task", card(raw(id), p, people), "project", summary);
+        return new TaskMoveResponseDto(card(raw(id), projectRow, people), TaskMoveResponseDto.Project.from(summary));
     }
 
     /** Requires the project lock. Only the destination column is rebalanced, excluding the moving card. */

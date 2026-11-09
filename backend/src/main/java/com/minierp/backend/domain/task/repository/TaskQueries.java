@@ -49,9 +49,9 @@ public class TaskQueries {
    """, map("id", id));
     }
 
-    public long countMembers(long p, Set<Long> ids) {
+    public long countMembers(long projectId, Set<Long> ids) {
         return db.count("SELECT COUNT(*) FROM project_members WHERE project_id=:p AND user_id IN (:ids)",
-                map("p", p, "ids", ids));
+                map("p", projectId, "ids", ids));
     }
 
     public List<Map<String, Object>> findAssigneeIds(long id) {
@@ -72,15 +72,15 @@ public class TaskQueries {
      """, map("project", project, "today", today));
     }
 
-    public long countValidPredecessor(long p, String status, Long after) {
+    public long countValidPredecessor(long projectId, String status, Long after) {
         return db.count("SELECT COUNT(*) FROM tasks WHERE id=:after AND project_id=:p AND task_status=:status",
-                map("p", p, "status", status, "after", after));
+                map("p", projectId, "status", status, "after", after));
     }
 
-    public long findMaxPosition(long p, String status, long moving) {
+    public long findMaxPosition(long projectId, String status, long moving) {
         return db.count(
                 "SELECT COALESCE(MAX(position),0) FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving",
-                map("p", p, "status", status, "moving", moving));
+                map("p", projectId, "status", status, "moving", moving));
     }
 
     public Map<String, Object> findPredecessorPosition(Long after) {
@@ -88,9 +88,9 @@ public class TaskQueries {
                 ErrorCode.INVALID_TASK_POSITION);
     }
 
-    public List<Map<String, Object>> findNextPosition(long p, String status, long moving, long lower) {
+    public List<Map<String, Object>> findNextPosition(long projectId, String status, long moving, long lower) {
         return db.rows(
                 "SELECT position FROM tasks WHERE project_id=:p AND task_status=:status AND id<>:moving AND position>:lower ORDER BY position,id LIMIT 1",
-                map("p", p, "status", status, "moving", moving, "lower", lower));
+                map("p", projectId, "status", status, "moving", moving, "lower", lower));
     }
 }

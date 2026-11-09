@@ -16,8 +16,8 @@ public class TaskOverdueService {
         var today = LocalDate.now(clock);
         var started = LocalDateTime.now(clock);
         try {
-            var r = work.run(today);
-            return runs.record("TASK_OVERDUE", today, "SUCCESS", r.processed(), r.skipped(), null, started);
+            var run = work.run(today);
+            return runs.record("TASK_OVERDUE", today, "SUCCESS", run.processed(), run.skipped(), null, started);
         } catch (RuntimeException e) {
             runs.record("TASK_OVERDUE", today, "FAILED", 0, 0, "마감 알림에 실패했습니다. 서버 상태를 확인한 뒤 다시 실행하세요.", started);
             throw e;

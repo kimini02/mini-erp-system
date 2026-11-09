@@ -25,17 +25,17 @@ public class TaskOverdueWork {
         int skipped = 0;
         // Same first lock as all board writes; id ordering prevents cross-project lock inversion.
         var projects = queries.findOverdueProjects(today);
-        for (var p : projects) {
-            long project = number(p, "project_id");
+        for (var projectId : projects) {
+            long project = number(projectId, "project_id");
             var locked = store.findLockedProject(project);
             if (locked.isEmpty()) {
                 continue;
             }
             var tasks = queries.findOverdueTasks(project, today);
-            for (var t : tasks) {
-                Object taskId = t.get("id");
-                Object user = t.get("user_id");
-                Object due = t.get("end_date");
+            for (var taskRow : tasks) {
+                Object taskId = taskRow.get("id");
+                Object user = taskRow.get("user_id");
+                Object due = taskRow.get("end_date");
                 var now = LocalDateTime.now(clock);
                 // All claim writers hold the project lock; NOT EXISTS excludes previously claimed keys.
                 // The unique key rejects any unexpected competing writer and rolls back the batch.
@@ -44,9 +44,10 @@ public class TaskOverdueWork {
                     skipped++;
                     continue;
                 }
-                long task = number(t, "id");
-                String title = t.get("project_key") + "-" + t.get("task_no") + " " + t.get("task_title");
-                notifications.storeTaskOverdue(number(t, "user_id"), title,
+                long task = number(taskRow, "id");
+                String title = taskRow.get("project_key") + "-" + taskRow.get("task_no") + " "
+                        + taskRow.get("task_title");
+                notifications.storeTaskOverdue(number(taskRow, "user_id"), title,
                         "/projects/" + project + "/board?taskId=" + task);
                 store.insertOverdueHistory(taskId, user, now);
                 processed++;
