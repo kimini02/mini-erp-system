@@ -5,6 +5,10 @@ import lombok.RequiredArgsConstructor;
 import com.minierp.backend.global.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,11 +29,24 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({ MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class,
-            org.springframework.http.converter.HttpMessageNotReadableException.class, IllegalArgumentException.class })
+            IllegalArgumentException.class })
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception exception) {
         ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ErrorResponse.of(clock, errorCode, extractValidationMessage(exception)));
+    }
+
+    @ExceptionHandler({ MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class,
+            HttpMessageNotReadableException.class })
+    public ResponseEntity<ErrorResponse> handleInvalidInput() {
+        ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.of(clock, errorCode));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType() {
+        ErrorCode errorCode = ErrorCode.UNSUPPORTED_MEDIA_TYPE;
+        return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.of(clock, errorCode));
     }
 
     @ExceptionHandler({ org.springframework.web.servlet.resource.NoResourceFoundException.class,
@@ -51,8 +68,8 @@ public class GlobalExceptionHandler {
         if (removed) {
             return handleNotFound(exception);
         }
-        // Preserve unrelated error behavior; general method-status cleanup is outside M4.
-        return handleException(exception);
+        ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
+        return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.of(clock, errorCode));
     }
 
     @ExceptionHandler(Exception.class)
