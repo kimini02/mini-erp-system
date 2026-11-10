@@ -51,13 +51,15 @@ const ProfileModal = ({ isOpen, onClose, user: initialUser }) => {
 
   const d = serverUser?.data || serverUser || initialUser || {};
 
+  const departmentName = typeof d.department === 'string' ? d.department : d.department?.name;
+
   const displayInfo = {
     name: d.name || '이름 미확인',
     // 서버 데이터(d.loginId)가 없으면 로컬 스토리지에서 가져오기
     id: d.loginId || localStorage.getItem('userLoginId') || d.userId || 'ID 미확인',
     email: d.email || '이메일 미확인',
     position: d.position || '직급 미확인',
-    dept: d.departmentName || d.department || d.departmentCode || '소속 부서 미지정',
+    dept: d.departmentName || departmentName || d.departmentCode || '소속 부서 미지정',
     leave: balance ? formatDays(balance.available) : '-',
   };
 
