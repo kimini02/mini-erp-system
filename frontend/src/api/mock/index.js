@@ -95,6 +95,7 @@ function userListView(u) {
     name: u.name,
     email: u.email,
     department: dept ? { id: dept.id, name: dept.name } : null,
+    departmentName: dept?.name ?? null,
     position: positionById(u.positionId)?.name,
     roles: u.roles.map((code) => ({ code, name: roleByCode(code)?.name || code })),
     hireDate: u.hireDate,

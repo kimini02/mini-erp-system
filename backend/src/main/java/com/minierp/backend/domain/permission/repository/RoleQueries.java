@@ -43,7 +43,7 @@ public class RoleQueries {
                 map("id", id));
     }
 
-    public List<Map<String, Object>> findMemberIds(long id, int size, int offset) {
+    public List<Map<String, Object>> findMemberIds(long id, int size, long offset) {
         return db.rows("SELECT user_id FROM user_roles WHERE role_id=:id ORDER BY user_id LIMIT :size OFFSET :offset",
                 map("id", id, "size", size, "offset", offset));
     }

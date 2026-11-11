@@ -52,6 +52,8 @@ public enum ErrorCode {
     HEAD_MUST_BE_REASSIGNED(HttpStatus.UNPROCESSABLE_ENTITY, "부서장을 먼저 다른 사람으로 바꿔 주세요."),
     ROLE_REQUIRED(HttpStatus.UNPROCESSABLE_ENTITY, "역할이 하나 이상 있어야 합니다."),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "잘못된 요청 값입니다."),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 요청 방식입니다."),
+    UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 요청 본문 형식입니다."),
     LOGIN_ID_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),

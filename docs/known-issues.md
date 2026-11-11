@@ -12,7 +12,9 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 | KI-06 | JDBC 날짜가 UTC 오프셋을 포함한 JSON으로 반환되어 화면 시각이 틀어짐 | M2 선행 수정 — 공통 조회 | 해결됨 — `6c39c97` SqlStore 날짜 타입 정규화 ([검증 기록](troubleshooting/M2-0-jdbc-local-date-time.md)) |
 | KI-07 | 기존 대시보드 관리자 요약의 전체 휴가 대기 노출 | M3 — 관리소장 전용 요약 | 해결됨 — `a2254af`, 관리소장 외 403 |
 | KI-08 | 캘린더 화면이 제거된 구 API를 호출해 대부분 동작하지 않음 | 프론트 리팩토링 안전망에서 발견(2026-10-28) | 해결됨 — `2f77ec8` 현재 API로 내 일정 캘린더 재작성 |
-| KI-09 | 목 모드에서 "내 프로필"을 열면 앱 전체가 흰 화면 | 프론트 리팩토링 안전망에서 발견(2026-10-28) | 미해결 — 목 데이터 전용, 실제 서버 영향 없음 |
+| KI-09 | 목 모드에서 "내 프로필"을 열면 앱 전체가 흰 화면 | 리팩토링 후 별도 버그 수정 | 해결됨 — 목 상세 부서 이름·프로필 객체 처리 ([검증 기록](troubleshooting/KI-09-mock-profile.md)) |
+| KI-10 | 잘못된 입력·메서드·본문 형식 및 역할 멤버 큰 페이지에서 500, JSON 파싱 내부 문구 노출 | 리팩토링 후 별도 버그 수정 | 해결됨 — 전용 400·405·415, Allow·빈 406·long OFFSET 보완 ([검증 기록](troubleshooting/KI-10-client-error-status.md)) |
+| KI-11 | catch-all 500에서 원인 예외와 요청 경로가 로그에 남지 않음 | 클라이언트 오류 수정 리뷰 보완 | 해결됨 — catch-all만 ERROR·스택 기록, 요청 민감값 제외 ([검증 기록](troubleshooting/KI-11-server-error-logging.md)) |
 
 ## KI-01 — 특근 신청 500 (M2, 해결됨)
 - 해결 커밋: `ef2244e` (하루 단위 처리기·기존 비활성 테스트 복구), `617b7ca` (구 API 제거).
@@ -111,7 +113,7 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 
 ## M4 남은 범위·확정한 정책
 - 사용자 호환 remainingAnnualLeave의 전 연도 합산은 이전 지시대로 유지한다.
-- 코드 확인: 일반 HTTP 메서드 불일치가 공통 catch-all에서 500이 될 수 있다. M4에서 삭제한 메서드만 404로 처리했으며 다른 도메인 계약은 변경하지 않았다.
+- 당시 남긴 일반 HTTP 메서드 불일치 500은 리팩토링 후 KI-10에서 405로 수정했다. M4에서 삭제한 v1 메서드의 404는 유지한다.
 - 홈 teamWeek 전용 메뉴가 명세에 없다. 현재 휴가는 MY_ATTENDANCE V, 업무는 PROJECT V+보기 범위를 적용한다. 개인 leave/notifications는 기존 API처럼 로그인 기준이다. 사용자가 이 항목별 메뉴 권한을 확정했다.
 - 구 화면과 API는 호환되지 않는다. 사용자 결정대로 M4 새 화면과 함께 병합해야 하며 이번 작업에서는 프론트·병합·푸시를 수행하지 않았다.
 - 부서 상태·근무시간 이력, 캘린더의 별도 권한 재설계는 이번 범위 밖이다.
@@ -126,9 +128,22 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
   - 하드코딩 공휴일, 출퇴근 버튼(홈·내 근태에 있음), FullCalendar 의존성과 전용 CSS를 없앴다(캘린더 조각 238,926 → 약 10,000바이트).
   - 검증(목 모드): 사원 계정 10·11월 달력·월 요약·특근 표시, 바로가기 세 종류의 날짜 채움 확인. 안전망 비교에서 캘린더 외 화면 변화 없음은 F-01 기준선으로 확인. 실제 서버 화면 확인은 배포 때 한다.
 
-## KI-09 — 목 모드 "내 프로필" 흰 화면 (미해결, 개발 전용)
-- 발견: 같은 안전망에서 `Objects are not valid as a React child (found: object with keys {id, name})`.
-- 원인: `ProfileModal`(구 ProfilePage)은 부서 이름을 `departmentName || department || …` 순으로 고른다. 실제 `GET /users/{id}`는 `departmentName`을 주므로 문자열이 쓰이지만, 목 응답에는 `departmentName`이 없어 `{id, name}` 객체를 그대로 그리다 앱 전체가 멈춘다.
-- 영향: 목 모드(`npm run dev:mock`)에서만 생긴다. 실제 서버 응답에서는 재현되지 않는다(코드·명세 12 응답 확인, 실제 서버 화면 확인은 아직).
-- 처리: 리팩토링 중에는 고치지 않았다. 목 응답에 `departmentName`을 맞추고, 화면은 `department?.name`처럼 객체를 직접 그리지 않게 바꾸는 것이 방향이다. 안전망 모달 기록에서는 이 항목을 뺐다.
+## KI-09 — 목 모드 "내 프로필" 흰 화면 (해결됨, 개발 전용)
+- 발견: 프론트 리팩토링 안전망에서 `Objects are not valid as a React child (found: object with keys {id, name})`. 이번 수정 전에도 목 모드 사원의 프로필 클릭으로 흰 화면을 재현했다.
+- 원인: 목 사원 상세에 `departmentName`이 없고, `ProfileModal`이 `{id, name}` 부서 객체를 그대로 렌더링했다.
+- 해결: `userListView`에 `departmentName`을 맞추고, 화면은 부서 문자열 또는 객체의 `name`을 골라 표시한다. 기존 이름 우선순위·부서 코드·미지정 표시를 유지한다.
+- 검증: 수정 후 실제 목 모드 프로필 표시·콘솔 오류 0, 실제 컴포넌트 부서 표현 5가지 검사, 프론트 빌드 통과. 실제 서버는 호출하지 않았다. [재현과 검증 기록](troubleshooting/KI-09-mock-profile.md).
 
+## KI-10 — 클라이언트 오류 상태 코드와 JSON 문구 (해결됨)
+- 원인: 타입 변환·필수 파라미터 누락·메서드/미디어 타입 불일치를 catch-all이 500으로 처리하고, JSON 읽기 오류는 예외 원문을 반환했다.
+- 해결: 입력 변환·누락·JSON 읽기 오류는 기본 문구의 `INVALID_INPUT_VALUE`(400), 일반 메서드 불일치는 `METHOD_NOT_ALLOWED`(405), 미디어 타입 불일치는 `UNSUPPORTED_MEDIA_TYPE`(415). 미인증 401, 제거된 v1 경로 404, 실제 서버 예외 500은 유지한다.
+- 검증: `ClientErrorStatusTest` 18건. 수정 전 12건 실패 → 수정 후 18건 통과. [수정 전 실패·전체 UTC 결과](troubleshooting/KI-10-client-error-status.md). `IllegalArgumentException`·`ConstraintViolationException` 문구는 이번 범위에서 변경하지 않았다.
+
+- 리뷰 보완: 405 Allow 헤더, 빈 406 처리, 역할 멤버 OFFSET의 long 계산을 추가했다. 대상 21개와 전체 252개가 통과했다. 위 18건은 최초 수정 당시 결과다.
+
+## KI-11 — 서버 오류 로그 누락 (해결됨)
+
+- 원인: catch-all이 500만 반환하고 로그를 남기지 않았다.
+- 해결: 메서드·쿼리 없는 요청 경로·예외와 스택을 ERROR로 기록한다. 요청 본문·쿼리·헤더·토큰은 로그 항목에 넣지 않는다. XML Accept는 전용 빈 406으로 처리하며 클라이언트 오류에 ERROR를 추가하지 않는다.
+- 검증: `ServerErrorLoggingTest`에서 알림 저장 실패 500의 로그 0건 → 1건, 400 ERROR 0건, 요청 식별값·토큰 부재와 롤백을 확인했다. 전체 252개 성공, 실패·오류·건너뜀 0.
+- 해결 커밋: `fix(api): 405 Allow 헤더·서버 오류 로그·역할 멤버 페이지 계산` (이 절과 같은 커밋). [재현·검증 기록](troubleshooting/KI-11-server-error-logging.md).
