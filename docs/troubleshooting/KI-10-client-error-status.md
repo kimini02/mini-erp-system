@@ -108,3 +108,81 @@ JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Ho
 ## 커밋
 
 `fix(api): 클라이언트 입력 오류의 500 응답 수정`. 이 문서의 최초 커밋은 `git log --diff-filter=A --format='%h %s' -- docs/troubleshooting/KI-10-client-error-status.md`로 확인한다.
+
+## 리뷰 보완 — Allow·406·역할 멤버 페이지 (2026-11-11)
+
+기준은 `fix/client-error-status`의 `9c82fab`이다. 위의 최초 수정 기록은 당시 결과이며, catch-all의 로그와 406 처리는 이번 보완에서 바뀐다. 500 로그의 별도 이슈는 [KI-11](KI-11-server-error-logging.md)에 기록했다.
+
+### 증상·재현·원인
+
+- 인증된 `POST /api/v1/home`: 상태는 405이나 `Allow` 헤더가 비어 있었다. Spring 예외가 가진 허용 메서드를 응답에 전달하지 않은 것이 원인이다.
+- 인증된 `GET /api/v1/home`, `Accept: application/xml`: 최종 상태는 이미 406이었지만 catch-all이 JSON 오류 본문을 쓰려다 `Failure in @ExceptionHandler` 경고와 스택 추적이 발생했다. 상태 코드만 단언하면 수정 전에도 통과하므로 빈 본문과 경고·ERROR 부재를 함께 검사한다.
+- 인증된 `GET /api/v1/roles/1/members?page=30000000&size=100`: `int` 곱셈 `page * size`가 `-1294967296`으로 넘쳤다. MariaDB는 음수 OFFSET에 `1064-42000`을 반환하고 응답은 500이었다. 저장소 메서드의 offset도 int였다.
+
+### 수정 전 실패부터 확인
+
+운영 코드는 `9c82fab` 그대로인 외부 `git archive` 사본에 테스트만 추가했다. Java 17·UTC·MariaDB 10.11 Testcontainers로 실행했으며 종료 코드는 1이었다. 요청 덤프·JWT는 아래 발췌에 포함하지 않았다.
+
+```text
+ClientErrorStatusTest: Tests run: 20, Failures: 3, Errors: 0, Skipped: 0
+unsupportedMethodReturnsMethodNotAllowed:
+  Expecting EmptySet: [] to contain: [GET]
+unsupportedAcceptReturnsEmpty406WithoutExceptionHandlerWarnings:
+  not to contain: ["Failure in @ExceptionHandler", "ERROR"]
+  but found: ["Failure in @ExceptionHandler"]
+largeRoleMemberPageReturnsEmptyContentWithoutOffsetOverflow:
+  ROLE_MEMBER_LARGE_PAGE status=500
+  Range for response status value 500 expected:<SUCCESSFUL> but was:<SERVER_ERROR>
+ServerErrorLoggingTest: Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+  SERVER_LOG_CAPTURE server_events=0 client_error_events=0
+  Expected size: 1 but was: 0 in: []
+Tests run: 21, Failures: 4, Errors: 0, Skipped: 0
+BUILD FAILURE
+```
+
+### 선택한 방법·버린 방법
+
+- 405: `getSupportedHttpMethods()`의 값을 `ResponseEntity.allow(...)`에 넣는다. GET 같은 메서드를 하드코딩하면 다른 경로에 맞지 않으므로 사용하지 않았다. 제거된 v1 경로의 404 분기를 먼저 처리한다.
+- 406: 전용 처리기가 `ResponseEntity<Void>`로 빈 응답을 반환한다. Accept로 거절한 JSON 오류 본문을 다시 강제하거나 catch-all에 맡기는 방법은 경고를 반복하므로 사용하지 않았다.
+- 역할 멤버: 곱셈 전에 `(long) page`로 바꾸고 `RoleQueries.findMemberIds`의 offset도 long으로 받는다. 곱셈 뒤 캐스팅은 이미 넘친 값을 보존하므로 사용하지 않았다. SQL 문자열·정렬·필터·페이지 크기 규칙은 그대로다.
+
+### 전후 결과
+
+| 검사 | 수정 전 | 수정 후 |
+| --- | --- | --- |
+| `POST /home` | 405, Allow 없음 | 405, Allow에 GET 포함 |
+| XML Accept | 406, 예외 처리 경고·스택 추적 | 406, 빈 본문, 예외 처리 경고·ERROR 없음 |
+| 역할 멤버 page=30000000, size=100 | 500, OFFSET=-1294967296 | 200, content=[], 페이지 번호·전체 건수 유지 |
+| 제거된 v1 메서드 4개 | 404 | 404 유지 |
+| 미인증 요청 2개 | 401 | 401 유지 |
+
+공통 접두어는 `/api/v1`이다. 수정 전 실패 4건에 대응하는 대상 테스트는 수정 후 모두 통과했다. 기존 405 테스트에 Allow 단언을 추가했고, 406·큰 페이지·500 로그 테스트 3개를 새로 추가했다.
+
+검증은 작업 트리 밖 `git archive HEAD backend docs/refactoring` 사본에 이번 변경 파일 5개를 덮어쓴 뒤 수행했다. 운영·테스트 소스는 검증 사본과 작업 트리의 SHA-256을 대조했다. Java 17.0.16, UTC, MariaDB 10.11 Testcontainers를 사용했다.
+
+- 전체 **252개 성공 / 실패 0 / 오류 0 / 건너뜀 0** (62개 suite, Maven 표시 시간 14분 38초). 기존 249개 + 신규 3개이며 기존 405 검사는 Allow 단언을 보강했다.
+- 대상 `ClientErrorStatusTest` 20개, `ServerErrorLoggingTest` 1개 모두 성공.
+- 알림 저장 실패 롤백의 기존 3개 테스트(M2 문서·M3 근태 정정·M4 업무)도 변경 없이 성공.
+- 기록 기본 OFF, `REFACTORING_RECORDED` 출력 0건. 기준선 3개 바이트 동일.
+
+```text
+Tests run: 252, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+ROLE_MEMBER_LARGE_PAGE status=200
+SERVER_LOG_CAPTURE server_events=1 client_error_events=0
+```
+
+실행 명령(외부 사본의 backend에서):
+
+```bash
+JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home \
+  ./mvnw -Duser.timezone=UTC test
+```
+
+수정 전 대상 실행에는 같은 명령에 `-Dtest=ClientErrorStatusTest,ServerErrorLoggingTest`를 추가했다. 로그 단언 보완 뒤 수정 전 재실행은 `-Dtest=ServerErrorLoggingTest`로 수행했으며 1개 실패(로그 0건)를 다시 확인했다.
+
+### 남은 범위·확인하지 못한 것
+
+- 페이지 공통 응답의 `PageResponseDto.Page.of`에는 `page + 1`의 int 연산이 남아 있다. `Integer.MAX_VALUE`에서 last 메타데이터가 넘칠 가능성이 있으나 이번에 요청한 역할 조회 OFFSET 변경 밖이므로 수정하지 않았다. 이번 30,000,000 페이지의 last는 true로 검증했다.
+- 실제 서버와 개발 DB/Redis는 사용하지 않았다. 기록 모드와 기준선 비교는 이번 동작 수정의 기준이 아니므로 실행하지 않았고, 기준선 3개의 SHA-256은 시작점과 같다.
+- 커밋: `fix(api): 405 Allow 헤더·서버 오류 로그·역할 멤버 페이지 계산`. 해시는 `git log -1 --format='%h %s' -- docs/troubleshooting/KI-11-server-error-logging.md`로 확인한다.

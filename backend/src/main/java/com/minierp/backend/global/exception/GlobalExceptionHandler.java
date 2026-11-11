@@ -2,10 +2,14 @@ package com.minierp.backend.global.exception;
 
 import java.time.Clock;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import com.minierp.backend.global.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
 * 전역 예외 처리기 — BusinessException + ErrorCode 조합으로 일관된 응답 포맷 제공
 */
+@Slf4j
 @RequiredArgsConstructor
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -49,6 +54,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.of(clock, errorCode));
     }
 
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public ResponseEntity<Void> handleNotAcceptable() {
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+    }
+
     @ExceptionHandler({ org.springframework.web.servlet.resource.NoResourceFoundException.class,
             org.springframework.web.servlet.NoHandlerFoundException.class })
     public ResponseEntity<ErrorResponse> handleNotFound(Exception exception) {
@@ -69,11 +79,18 @@ public class GlobalExceptionHandler {
             return handleNotFound(exception);
         }
         ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
-        return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.of(clock, errorCode));
+        var response = ResponseEntity.status(errorCode.getStatus());
+        var allowedMethods = exception.getSupportedHttpMethods();
+        if (allowedMethods != null) {
+            response.allow(allowedMethods.toArray(HttpMethod[]::new));
+        }
+        return response.body(ErrorResponse.of(clock, errorCode));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception exception) {
+    public ResponseEntity<ErrorResponse> handleException(
+            Exception exception, jakarta.servlet.http.HttpServletRequest request) {
+        log.error("Unhandled server error method={} path={}", request.getMethod(), request.getRequestURI(), exception);
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity.status(errorCode.getStatus()).body(ErrorResponse.of(clock, errorCode));
     }

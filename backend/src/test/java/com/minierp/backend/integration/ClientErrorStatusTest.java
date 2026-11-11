@@ -3,6 +3,11 @@ package com.minierp.backend.integration;
 import com.minierp.backend.global.exception.ErrorCode;
 import com.minierp.backend.support.ApprovalApiTestSupport;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -18,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ExtendWith(OutputCaptureExtension.class)
 class ClientErrorStatusTest extends ApprovalApiTestSupport {
     @ParameterizedTest
     @ValueSource(strings = {
@@ -41,9 +47,35 @@ class ClientErrorStatusTest extends ApprovalApiTestSupport {
 
     @Test
     void unsupportedMethodReturnsMethodNotAllowed() throws Exception {
-        expectError(mvc.perform(post("/api/v1/home").header("Authorization", "Bearer " + chiefToken)),
-                405, "METHOD_NOT_ALLOWED", "지원하지 않는 요청 방식입니다.",
+        var action = mvc.perform(post("/api/v1/home").header("Authorization", "Bearer " + chiefToken));
+        expectError(action, 405, "METHOD_NOT_ALLOWED", "지원하지 않는 요청 방식입니다.",
                 HttpRequestMethodNotSupportedException.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.put(HttpHeaders.ALLOW, action.andReturn().getResponse().getHeaders(HttpHeaders.ALLOW));
+        assertThat(headers.getAllow()).contains(HttpMethod.GET);
+    }
+
+    @Test
+    void unsupportedAcceptReturnsEmpty406WithoutExceptionHandlerWarnings(CapturedOutput output) throws Exception {
+        mvc.perform(get("/api/v1/home").header("Authorization", "Bearer " + chiefToken)
+                        .accept(MediaType.APPLICATION_XML))
+                .andExpect(status().isNotAcceptable())
+                .andExpect(content().string(""));
+        assertThat(output.getAll()).doesNotContain("Failure in @ExceptionHandler", "ERROR");
+    }
+
+    @Test
+    void largeRoleMemberPageReturnsEmptyContentWithoutOffsetOverflow() throws Exception {
+        var first = data(getAs("/api/v1/roles/1/members?page=0&size=100", chiefToken));
+        assertThat(first.path("content").size()).isPositive();
+        var action = getAs("/api/v1/roles/1/members?page=30000000&size=100", chiefToken);
+        System.out.printf("ROLE_MEMBER_LARGE_PAGE status=%d%n", action.andReturn().getResponse().getStatus());
+        var page = data(action);
+        assertThat(page.path("content").isArray()).isTrue();
+        assertThat(page.path("content").size()).isZero();
+        assertThat(page.path("page").path("number").asInt()).isEqualTo(30000000);
+        assertThat(page.path("page").path("totalElements")).isEqualTo(first.path("page").path("totalElements"));
+        assertThat(page.path("page").path("last").asBoolean()).isTrue();
     }
 
     @Test
