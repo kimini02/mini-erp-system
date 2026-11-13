@@ -15,6 +15,7 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 | KI-09 | 목 모드에서 "내 프로필"을 열면 앱 전체가 흰 화면 | 리팩토링 후 별도 버그 수정 | 해결됨 — 목 상세 부서 이름·프로필 객체 처리 ([검증 기록](troubleshooting/KI-09-mock-profile.md)) |
 | KI-10 | 잘못된 입력·메서드·본문 형식 및 역할 멤버 큰 페이지에서 500, JSON 파싱 내부 문구 노출 | 리팩토링 후 별도 버그 수정 | 해결됨 — 전용 400·405·415, Allow·빈 406·long OFFSET 보완 ([검증 기록](troubleshooting/KI-10-client-error-status.md)) |
 | KI-11 | catch-all 500에서 원인 예외와 요청 경로가 로그에 남지 않음 | 클라이언트 오류 수정 리뷰 보완 | 해결됨 — catch-all만 ERROR·스택 기록, 요청 민감값 제외 ([검증 기록](troubleshooting/KI-11-server-error-logging.md)) |
+| KI-12 | 운영 메일 설정 부재·비활성으로 신규 사원의 첫 비밀번호 설정 불가 | 배포 전 수정 | 해결됨 — SMTP·초대 주소 환경 변수와 조기 검증 ([기록](troubleshooting/KI-12-production-mail.md)) |
 
 ## KI-01 — 특근 신청 500 (M2, 해결됨)
 - 해결 커밋: `ef2244e` (하루 단위 처리기·기존 비활성 테스트 복구), `617b7ca` (구 API 제거).

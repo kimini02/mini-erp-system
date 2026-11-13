@@ -18,9 +18,9 @@ if path.is_symlink(): raise SystemExit('Refusing symlink env file.')
 values={}
 if path.exists():
     if path.stat().st_uid!=0 or path.stat().st_mode & 0o777 != 0o600: raise SystemExit('Existing env must be root:root 600.')
-    print('Existing DB/JWT secrets will be preserved. No values will be displayed.')
+    print('Existing DB/JWT secrets will be preserved. SMTP and invitation settings will be updated without displaying values.')
 else:
-    values.update(DB_APP_USERNAME='workflow_app',DB_APP_PASSWORD=random_secret(),DB_MIGRATOR_USERNAME='workflow_migrator',DB_MIGRATOR_PASSWORD=random_secret(),JWT_SECRET=random_secret(),APP_MAIL_ENABLED='false',JAVA_OPTS='-Duser.timezone=UTC -Xms256m -Xmx512m -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/lib/workflow/heap.hprof')
+    values.update(DB_APP_USERNAME='workflow_app',DB_APP_PASSWORD=random_secret(),DB_MIGRATOR_USERNAME='workflow_migrator',DB_MIGRATOR_PASSWORD=random_secret(),JWT_SECRET=random_secret(),JAVA_OPTS='-Duser.timezone=UTC -Xms256m -Xmx512m -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/lib/workflow/heap.hprof')
 if not path.exists():
     for key,label in [('INITIAL_ADMIN_LOGIN_ID','Initial administrator login ID'),('INITIAL_ADMIN_NAME','Initial administrator name'),('INITIAL_ADMIN_EMAIL','Initial administrator email'),('INITIAL_ADMIN_PASSWORD','Initial administrator password')]:
         value=getpass.getpass(label+' (hidden): ')
@@ -34,6 +34,22 @@ if not path.exists():
     if webhook:
         if not re.fullmatch(r'https://(?:discord.com|discordapp.com)/api/webhooks/[A-Za-z0-9_/-]+',webhook): raise SystemExit('Invalid webhook URL; nothing saved.')
         values['DISCORD_WEBHOOK_URL']=webhook
+# Mail is required for new employees to set their first password in this deployment.
+from urllib.parse import urlsplit
+for key,label in [('SMTP_HOST','SMTP host (STARTTLS)'),('SMTP_PORT','SMTP port'),('SMTP_USERNAME','SMTP username'),('SMTP_PASSWORD','SMTP password'),('APP_MAIL_FROM','Sender email address'),('APP_INVITATION_SETUP_URL','Invitation URL (HTTPS domain + /password/setup)')]:
+    value=getpass.getpass(label+' (hidden): ')
+    if not value or value.isspace() or value=='CHANGE_ME' or any(c in value for c in '\r\n\0'):
+        raise SystemExit('Nonempty single-line mail settings are required; nothing saved.')
+    values[key]=value
+if not values['SMTP_PORT'].isascii() or not values['SMTP_PORT'].isdigit() or not 1<=int(values['SMTP_PORT'])<=65535:
+    raise SystemExit('Invalid SMTP port; nothing saved.')
+try:
+    url=urlsplit(values['APP_INVITATION_SETUP_URL'])
+    host=(url.hostname or '').lower().rstrip('.')
+    local=host=='localhost' or host.endswith('.localhost') or host.startswith('127.') or host in ('::1','0.0.0.0')
+    if url.scheme!='https' or not host or local or url.username is not None: raise ValueError()
+except ValueError: raise SystemExit('Invitation URL must use the public HTTPS domain; nothing saved.')
+values['APP_MAIL_ENABLED']='true'
 duck=Path('/etc/workflow/duckdns')
 if duck.exists() or duck.is_symlink():
     if duck.is_symlink() or duck.stat().st_uid!=0 or duck.stat().st_gid!=0 or duck.stat().st_mode & 0o777!=0o600: raise SystemExit('Existing DuckDNS file must be root:root 600.')
@@ -49,15 +65,21 @@ if not re.fullmatch(r'[A-Za-z0-9-]+',duck_token):raise SystemExit('Invalid DuckD
 def quote(value):
     for char in ['\\','"','$','`']: value=value.replace(char,'\\'+char)
     return '"'+value+'"'
-if not path.exists():
-    fd,tmp=tempfile.mkstemp(dir=path.parent,prefix='.env.')
-    try:
-        os.fchmod(fd,0o600)
-        with os.fdopen(fd,'w') as f:
-            for key,value in values.items(): f.write(key+'='+quote(value)+'\n')
-        os.chown(tmp,0,0);os.replace(tmp,path)
-    finally:
-        if os.path.exists(tmp):os.unlink(tmp)
+# Preserve all unrelated settings byte-for-byte, including previously removed initial credentials.
+existing=path.read_text() if path.exists() else ''
+lines=[line for line in existing.splitlines(keepends=True)
+       if line.split('=',1)[0] not in values]
+fd,tmp=tempfile.mkstemp(dir=path.parent,prefix='.env.')
+try:
+    os.fchmod(fd,0o600)
+    with os.fdopen(fd,'w') as f:
+        retained=''.join(lines)
+        f.write(retained)
+        if retained and not retained.endswith('\n'): f.write('\n')
+        for key,value in values.items(): f.write(key+'='+quote(value)+'\n')
+    os.chown(tmp,0,0);os.replace(tmp,path)
+finally:
+    if os.path.exists(tmp):os.unlink(tmp)
 if not duck.exists():
     fd,tmp=tempfile.mkstemp(dir=duck.parent,prefix='.duckdns.')
     try:

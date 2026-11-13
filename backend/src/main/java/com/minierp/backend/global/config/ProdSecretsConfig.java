@@ -1,10 +1,13 @@
 package com.minierp.backend.global.config;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
-/** Fail before creating any DB/Redis clients. Never include values in diagnostics. */
+
+/** Fail before creating any DB/Redis/SMTP clients. Never include values in diagnostics. */
 @Configuration(proxyBeanMethods = false)
 @Profile("prod")
 public class ProdSecretsConfig {
@@ -13,11 +16,53 @@ public class ProdSecretsConfig {
         return factory -> {
             for (String key : List.of("DB_APP_USERNAME", "DB_APP_PASSWORD", "DB_MIGRATOR_USERNAME",
                     "DB_MIGRATOR_PASSWORD", "JWT_SECRET")) {
-                String value = environment.getProperty(key);
-                if (value == null || value.isBlank() || value.equals("CHANGE_ME")) {
-                    throw new IllegalStateException("Required production setting is missing: " + key);
+                requireSetting(environment, key);
+            }
+            if (environment.getProperty("app.mail.enabled", Boolean.class, false)) {
+                for (String key : List.of("SMTP_HOST", "SMTP_PORT", "SMTP_USERNAME", "SMTP_PASSWORD",
+                        "APP_MAIL_FROM", "APP_INVITATION_SETUP_URL")) {
+                    requireSetting(environment, key);
                 }
+                validatePort(environment.getProperty("SMTP_PORT"));
+                validateInvitationUrl(environment.getProperty("app.invitation.setup-url"));
             }
         };
+    }
+
+    private static void requireSetting(Environment environment, String key) {
+        String value = environment.getProperty(key);
+        if (value == null || value.isBlank() || value.equals("CHANGE_ME")) {
+            throw new IllegalStateException("Required production setting is missing: " + key);
+        }
+    }
+
+    private static void validatePort(String value) {
+        try {
+            int port = Integer.parseInt(value);
+            if (port >= 1 && port <= 65535) {
+                return;
+            }
+        } catch (NumberFormatException ignored) {
+            // Do not attach the original exception: its message contains the supplied value.
+        }
+        throw new IllegalStateException("Invalid production setting: SMTP_PORT");
+    }
+
+    private static void validateInvitationUrl(String value) {
+        try {
+            URI uri = URI.create(value);
+            String host = uri.getHost();
+            if (host != null) {
+                host = host.toLowerCase(Locale.ROOT).replaceAll("\\.$", "");
+                boolean local = host.equals("localhost") || host.endsWith(".localhost")
+                        || host.startsWith("127.") || host.equals("[::1]") || host.equals("0.0.0.0");
+                if ("https".equalsIgnoreCase(uri.getScheme()) && !local && uri.getUserInfo() == null) {
+                    return;
+                }
+            }
+        } catch (IllegalArgumentException ignored) {
+            // Never echo a configured URL or its parse exception.
+        }
+        throw new IllegalStateException("Invalid production setting: APP_INVITATION_SETUP_URL");
     }
 }

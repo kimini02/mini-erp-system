@@ -100,6 +100,28 @@ sudo certbot renew --dry-run
 
 ## 6. 첫 배포와 관리자 로그인
 
+### 운영 메일 설정
+
+운영에서는 메일을 켭니다. 신규 사원은 초대 메일로 첫 비밀번호를 설정하고, 기존 사원은 메일 인증번호로 비밀번호를 재설정합니다. 메일을 끄면 신규 사원의 초대 링크가 발급되지 않습니다.
+
+1. 사용할 SMTP 제공자에서 인증 가능한 계정과 발신 주소를 준비합니다. 이 구성은 인증 + STARTTLS(일반적으로 587 포트)를 사용합니다. 제공자가 앱 비밀번호를 요구하면 계정 로그인 비밀번호 대신 앱 비밀번호를 사용합니다. 465 전용 암시적 TLS 설정은 이 스크립트의 범위가 아닙니다.
+2. HTTPS 도메인·인증서 준비 후 `sudo bash ~/workflow-setup/setup-secrets.sh`를 실행합니다. 최초 설치에서는 관리자·DuckDNS 값과 함께, 기존 설치에서는 기존 DB·JWT 값을 보존한 채 아래 여섯 값을 입력합니다. 입력은 모두 숨겨지고 `/etc/workflow/env`(root:root 600)에 저장됩니다.
+
+   | 환경 변수 | 입력 |
+   | --- | --- |
+   | `SMTP_HOST` | SMTP 호스트 |
+   | `SMTP_PORT` | SMTP 포트 |
+   | `SMTP_USERNAME` | SMTP 인증 계정 |
+   | `SMTP_PASSWORD` | SMTP 비밀번호 또는 앱 비밀번호 |
+   | `APP_MAIL_FROM` | 제공자가 허용한 보내는 주소 |
+   | `APP_INVITATION_SETUP_URL` | `https://CHANGE_ME.duckdns.org/password/setup`의 CHANGE_ME를 실제 도메인으로 바꾼 주소 |
+
+3. 스크립트가 `APP_MAIL_ENABLED=true`로 설정합니다. 메일을 켰는데 필수 값이 없거나 비어 있으면 DB·Redis 연결 전에 기동을 거부합니다. 초대 주소는 localhost·루프백 주소가 아닌 HTTPS 주소여야 합니다. 설정 오류 로그에는 키 이름만 남기며 값은 남기지 않습니다.
+4. 첫 배포를 진행합니다. 기존 운영 설정을 갱신했다면 점검 시간에 앱을 재시작해야 반영됩니다. 비밀값을 `export`, 명령 인자, 터미널 출력, 문서에 옮겨 적지 않습니다. 이미 제거한 최초 관리자 자격 증명은 스크립트 재실행으로 복원하지 않습니다.
+5. 운영자가 별도로 승인한 실제 메일 점검에서 본인 주소로 초대를 발송해 `invitationSent=true`, 받은 링크의 운영 도메인, 첫 비밀번호 설정과 로그인까지 확인합니다. 비밀번호 재설정도 본인 계정으로 확인합니다. **현재 코드 검증에서는 실제 메일을 보내지 않았습니다.** SMTP 자격 증명·발신 도메인 승인·스팸 분류는 배포 때 확인해야 합니다.
+
+SMTP 상태는 `/healthz`에 합치지 않습니다. DB·Redis health가 UP이어도 메일 전달 성공을 뜻하지 않으므로 초대 결과와 실제 수신을 별도로 확인합니다.
+
 로컬에서 리뷰한 깨끗한 커밋을 준비합니다. 미추적 `.claude/`만 작업 트리 검사에서 제외하고, 다른 미추적·수정 파일은 배포를 막습니다.
 
 ```bash
@@ -126,11 +148,11 @@ sudo /usr/local/lib/workflow/clear-initial-password.sh
 sudo systemctl restart workflow
 ```
 
-파일에서만 지우면 기존 프로세스 환경에는 남으므로 재시작까지 합니다. 이미 관리자가 있으면 계정은 다시 생성하지 않습니다. 메일은 기본 꺼짐이고 초대 응답은 `invitationSent=false`입니다.
+파일에서만 지우면 기존 프로세스 환경에는 남으므로 재시작까지 합니다. 이미 관리자가 있으면 계정은 다시 생성하지 않습니다. 운영 메일은 위 절차로 켜고 초대 응답의 `invitationSent`와 실제 수신을 확인합니다.
 
 ### OOM 힙 덤프 관리
 
-새 비밀 설정의 HeapDumpPath는 **/var/lib/workflow/heap.hprof**입니다. 첫 OOM 덤프 한 개만 남기며 JVM은 기존 파일을 덮어쓰지 않습니다. 이 파일이 있으면 다음 OOM에서는 새 덤프를 만들지 못합니다. 기존 /etc/workflow/env는 재실행해도 자동 변경하지 않으므로, 예전 설정을 쓰는 운영자는 점검 시간에 JAVA_OPTS의 HeapDumpPath만 이 파일 경로로 바꾸고 앱을 재시작해야 합니다. 다른 비밀값은 보존합니다.
+새 비밀 설정의 HeapDumpPath는 **/var/lib/workflow/heap.hprof**입니다. 첫 OOM 덤프 한 개만 남기며 JVM은 기존 파일을 덮어쓰지 않습니다. 이 파일이 있으면 다음 OOM에서는 새 덤프를 만들지 못합니다. 기존 /etc/workflow/env의 JAVA_OPTS는 재실행해도 자동 변경하지 않으므로, 예전 설정을 쓰는 운영자는 점검 시간에 JAVA_OPTS의 HeapDumpPath만 이 파일 경로로 바꾸고 앱을 재시작해야 합니다. 다른 비밀값은 보존합니다.
 
 내용을 출력하지 않고 서버에서 크기·소유자·권한만 확인합니다. **힙 덤프에는 비밀값·개인정보가 포함될 수 있으므로 로컬로 옮기거나 공유하지 않습니다.** 서버에서 필요한 확인을 마친 뒤 파일 하나만 삭제합니다. 실행 예시는 운영자가 승인된 점검 시간에 수행합니다.
 
@@ -290,9 +312,9 @@ bash deploy/bin/probe.sh https://CHANGE_ME.duckdns.org/api/v1/home /tmp/workflow
 ## 10. 운영상의 선택과 한계
 
 - Flyway가 같은 앱 프로세스에서 실행되므로 **프로세스 환경에는 migrator 비밀번호도 있습니다.** 계정 분리가 막는 범위는 앱의 DML 전용 DB 연결을 통한 DDL(SQL 주입 등)입니다. 서버/앱 프로세스를 장악당해 migrator 비밀값을 얻는 경우까지 막지는 못합니다.
-- prod에는 app.invitation.setup-url이 없어 기본값 http://localhost:5173/password/setup이 적용됩니다. 메일이 꺼져 있을 때는 발송에 사용되지 않습니다. **메일을 켤 때 app.invitation.setup-url도 실제 HTTPS 도메인의 /password/setup으로 함께 설정**합니다. 환경변수 APP_INVITATION_SETUP_URL로 설정할 수 있습니다. 예: https://CHANGE_ME.duckdns.org/password/setup. 설정 반영은 점검 시간의 앱 재시작이 필요합니다.
+- prod의 메일 설정과 초대 링크 주소는 6절의 환경 변수에서 받습니다. 메일 활성 시 값 누락·localhost 초대 주소는 기동 전에 거부합니다. 실제 SMTP 접속·수신 여부는 운영자가 별도로 확인합니다.
 
-- 실제 값 없는 prod는 조기 실패합니다. management는 loopback 8081의 health만 노출하고 SMTP health는 제외합니다(메일 비활성 운영에서 SMTP로 앱 상태가 DOWN이 되지 않게 함).
+- 실제 값 없는 prod는 조기 실패합니다. management는 loopback 8081의 health만 노출하고 SMTP health는 제외합니다(외부 SMTP 장애와 앱·DB의 기동 상태를 분리하며, 메일 수신은 별도 확인).
 - Redis는 loopback·protected-mode·64MB, 인증 없음입니다. 같은 서버의 다른 프로세스도 접속할 수 있다는 한계가 있습니다. 초대 링크/비밀번호 재설정 외 용도를 추가하지 않습니다.
 - 페이지에는 health 확인용 내부 subrequest를 사용합니다. 정적 index가 앱 장애 중 정상으로 보이지 않도록 한 선택이며, 페이지 방문마다 health 요청 한 번의 비용이 있습니다. assets는 이 확인을 하지 않습니다.
 - Nginx **사이트 error_log는 /dev/null**입니다. 해당 로그는 쿼리 토큰을 지울 수 없어 그대로 보관하는 대안을 버렸습니다. 요청별 상세 오류 대신 쿼리 없는 access JSON의 status/upstream_status/time을 사용하고, 설정·시작 오류는 nginx -t/journal로 확인합니다.
