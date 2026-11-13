@@ -8,11 +8,11 @@ import { authApi } from '@/api/auth';
 import { isValidPassword } from '@/lib/password';
 import { getErrorCode, getErrorMessage } from '@/lib/errors';
 
-/** 초대 메일 링크(/password/setup?token=…)로 첫 비밀번호를 정합니다. */
+/** 초대 메일 링크(/password/setup?setupToken=…)로 첫 비밀번호를 정합니다. */
 export default function PasswordSetupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
+  const token = searchParams.get('setupToken') || searchParams.get('token') || '';
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

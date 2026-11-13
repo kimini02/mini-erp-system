@@ -20,6 +20,7 @@ import com.minierp.backend.global.service.MailService;
 import com.minierp.backend.global.service.PasswordResetStoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
@@ -34,6 +35,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final MailService mailService;
     private final PasswordResetStoreService passwordResetStoreService;
+    private final ApplicationEventPublisher events;
     @Transactional(readOnly = true)
     public LoginResponseDto login(LoginRequestDto requestDto) {
         User user = userRepository.findByLoginId(requestDto.getId())
@@ -51,10 +53,11 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public FindIdResponseDto findId(FindIdRequestDto requestDto) {
-        User user = userRepository.findByUserEmail(requestDto.getEmail())
+        userRepository.findByUserEmail(requestDto.getEmail())
                 .filter(matchedUser -> matchedUser.getUserName().equals(requestDto.getName()))
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "해당하는 사용자를 찾을 수 없습니다."));
-        return FindIdResponseDto.of(user.getLoginId());
+                .ifPresent(user -> events.publishEvent(
+                        new FindIdMailService.Requested(user.getUserEmail(), user.getLoginId())));
+        return FindIdResponseDto.success();
     }
 
     @Transactional

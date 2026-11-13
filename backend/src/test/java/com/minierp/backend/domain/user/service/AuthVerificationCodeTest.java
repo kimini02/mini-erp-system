@@ -33,7 +33,7 @@ class AuthVerificationCodeTest {
         try (var random = mockConstruction(SecureRandom.class,
                 (generator, context) -> when(generator.nextInt(900_000)).thenReturn(0, 899_999))) {
             var service = new AuthService(users, mock(PasswordEncoder.class), mock(JwtTokenProvider.class), mail,
-                    store);
+                    store, mock(org.springframework.context.ApplicationEventPublisher.class));
             service.requestPasswordReset(request);
             service.requestPasswordReset(request);
             assertThat(random.constructed()).hasSize(1);

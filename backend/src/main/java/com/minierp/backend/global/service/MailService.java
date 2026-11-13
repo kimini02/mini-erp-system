@@ -55,6 +55,22 @@ public class MailService {
         mailSender.send(message);
     }
 
+    public void sendFindIdMail(String toEmail, String loginId) {
+        if (!mailEnabled) {
+            return;
+        }
+        String from = resolveFromAddress();
+        if (from == null || from.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "메일 발신 주소 설정이 필요합니다.");
+        }
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setFrom(from);
+        message.setSubject("[WorkFlow] 아이디 안내");
+        message.setText("요청하신 WorkFlow 아이디는 " + loginId + "입니다.\n본인이 요청하지 않았다면 이 메일을 무시해 주세요.");
+        mailSender.send(message);
+    }
+
     private String resolveFromAddress() {
         if (fromAddress != null && !fromAddress.isBlank()) {
             return fromAddress;

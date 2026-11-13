@@ -48,7 +48,7 @@ public class AuthController {
     @PostMapping("/find-id/request")
     public ResponseEntity<ApiResponse<FindIdResponseDto>> findId(@Valid @RequestBody FindIdRequestDto requestDto) {
         FindIdResponseDto response = authService.findId(requestDto);
-        return ResponseEntity.ok(ApiResponse.success(clock, response, "아이디를 찾았습니다"));
+        return ResponseEntity.ok(ApiResponse.success(clock, response));
     }
 
     @PostMapping("/password/reset/request")

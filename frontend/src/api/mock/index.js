@@ -3,6 +3,7 @@ import { createDb, menus } from './db';
 import { installM2 } from './m2';
 import { installM3 } from './m3';
 import { installM4 } from './m4';
+import { installRecovery } from './recovery';
 
 /**
  * 개발용 가짜 서버 (VITE_USE_MOCK=true).
@@ -215,6 +216,8 @@ const route = (method, pattern, handler, options = {}) => {
     allowBeforePwChange: options.allowBeforePwChange,
   });
 };
+
+installRecovery({ route, db, fail, validatePassword });
 
 // 인증 · 내 정보
 route(

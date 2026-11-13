@@ -16,6 +16,7 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 | KI-10 | 잘못된 입력·메서드·본문 형식 및 역할 멤버 큰 페이지에서 500, JSON 파싱 내부 문구 노출 | 리팩토링 후 별도 버그 수정 | 해결됨 — 전용 400·405·415, Allow·빈 406·long OFFSET 보완 ([검증 기록](troubleshooting/KI-10-client-error-status.md)) |
 | KI-11 | catch-all 500에서 원인 예외와 요청 경로가 로그에 남지 않음 | 클라이언트 오류 수정 리뷰 보완 | 해결됨 — catch-all만 ERROR·스택 기록, 요청 민감값 제외 ([검증 기록](troubleshooting/KI-11-server-error-logging.md)) |
 | KI-12 | 운영 메일 설정 부재·비활성으로 신규 사원의 첫 비밀번호 설정 불가 | 배포 전 수정 | 해결됨 — SMTP·초대 주소 환경 변수와 조기 검증 ([기록](troubleshooting/KI-12-production-mail.md)) |
+| KI-13 | 찾기 화면이 로그인 전 사원 API를 사용하고 아이디 API가 계정을 직접 노출 | 배포 전 수정 | 해결됨 — 인증 API 연결·아이디 이메일 안내 계약 ([기록](troubleshooting/KI-13-account-recovery.md)) |
 
 ## KI-01 — 특근 신청 500 (M2, 해결됨)
 - 해결 커밋: `ef2244e` (하루 단위 처리기·기존 비활성 테스트 복구), `617b7ca` (구 API 제거).
@@ -148,3 +149,16 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 - 해결: 메서드·쿼리 없는 요청 경로·예외와 스택을 ERROR로 기록한다. 요청 본문·쿼리·헤더·토큰은 로그 항목에 넣지 않는다. XML Accept는 전용 빈 406으로 처리하며 클라이언트 오류에 ERROR를 추가하지 않는다.
 - 검증: `ServerErrorLoggingTest`에서 알림 저장 실패 500의 로그 0건 → 1건, 400 ERROR 0건, 요청 식별값·토큰 부재와 롤백을 확인했다. 전체 252개 성공, 실패·오류·건너뜀 0.
 - 해결 커밋: `fix(api): 405 Allow 헤더·서버 오류 로그·역할 멤버 페이지 계산` (이 절과 같은 커밋). [재현·검증 기록](troubleshooting/KI-11-server-error-logging.md).
+
+## KI-12 — 운영 메일 설정 (해결됨)
+
+- SMTP와 초대 URL 환경 변수·기동 전 검증·안전한 입력/갱신 스크립트를 추가했다. 운영자는 메일을 켜기로 결정했다.
+- 운영 설정 커밋: `7a44d5a`. 실제 메일 발송은 검증 범위에서 제외했다. [설정·검증](troubleshooting/KI-12-production-mail.md).
+- 추가로 실제 초대 메일의 `setupToken`과 화면의 `token` 불일치를 맞췄다. 화면은 `setupToken`을 우선하고 기존 `token` 링크도 받는다.
+
+## KI-13 — 찾기 화면과 인증 계약 (해결됨)
+
+- FindIdPage/FindPwPage의 비인증 `/users` 조회·수정과 화면 내부 인증번호 비교를 제거했다. 기존 인증 API를 사용하며 `/auth/`의 401은 현재 화면에서 처리한다.
+- **아이디 찾기 계약 변경: 직접 반환 → 이메일 발송, 계정 존재 여부 노출 방지.** 사용자 결정에 따라 `POST /auth/find-id/request`는 일치/불일치 모두 같은 200과 안내를 반환하며 `loginId`를 반환하지 않는다. 일치한 계정에만 커밋 후 별도 스레드에서 메일을 보낸다. backend/md 명세 12는 변경하지 않았다.
+- 비밀번호 재설정의 기존 서버 계약은 유지한다. 이메일 요청 → 인증번호 확인 → resetProof로 변경하며, 목 API도 같은 흐름을 지원한다.
+- [실패 재현·UI·전체 검증과 남은 한계](troubleshooting/KI-13-account-recovery.md).
