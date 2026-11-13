@@ -16,7 +16,6 @@ import com.minierp.backend.domain.user.repository.UserRepository;
 import com.minierp.backend.global.exception.BusinessException;
 import com.minierp.backend.global.exception.ErrorCode;
 import com.minierp.backend.global.security.JwtTokenProvider;
-import com.minierp.backend.global.service.MailService;
 import com.minierp.backend.global.service.PasswordResetStoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +32,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final MailService mailService;
     private final PasswordResetStoreService passwordResetStoreService;
     private final ApplicationEventPublisher events;
     @Transactional(readOnly = true)
@@ -53,6 +51,10 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public FindIdResponseDto findId(FindIdRequestDto requestDto) {
+        long requestCount = passwordResetStoreService.incrementFindIdRequestCount(requestDto.getEmail());
+        if (requestCount > passwordResetStoreService.getMaxRequestsPerMinute()) {
+            throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS);
+        }
         userRepository.findByUserEmail(requestDto.getEmail())
                 .filter(matchedUser -> matchedUser.getUserName().equals(requestDto.getName()))
                 .ifPresent(user -> events.publishEvent(
@@ -69,7 +71,7 @@ public class AuthService {
         userRepository.findByUserEmail(requestDto.getEmail()).ifPresent(user -> {
             String verificationCode = generateVerificationCode();
             passwordResetStoreService.saveVerificationCode(user.getUserEmail(), verificationCode);
-            mailService.sendVerificationCodeMail(user.getUserEmail(), verificationCode);
+            events.publishEvent(new PasswordResetMailService.Requested(user.getUserEmail(), verificationCode));
         });
         // 계정 존재 여부와 관계없이 동일 응답
         return PasswordResetRequestResponseDto.success();

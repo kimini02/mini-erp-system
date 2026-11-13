@@ -51,7 +51,7 @@ smtpWaitDoesNotHoldHttpResponse: Expecting value to be true but was false
 
 - 비동기 대기열은 영속 저장이 아니다. 앱 종료·대기열 포화·SMTP 실패 시 자동 재시도하지 않는다. 화면 안내대로 다시 신청해야 하며 실제 수신은 별도 확인해야 한다.
 - 응답 분리는 SMTP 대기에 의한 큰 시간 차이를 제거하는 방식이다. DB 조회나 스케줄링까지 동일 시간임을 보장하는 것은 아니다. 실서비스 지연 분포는 측정하지 않았다.
-- 기존 비밀번호 재설정 API의 발송 구조·속도 제한 정책은 변경하지 않았다. 별도 아이디 찾기 속도 제한과 영속 재시도는 추가하지 않았다.
+- 초기 구현에서는 비밀번호 재설정 발송 구조를 유지했고, 아이디 찾기 속도 제한은 추가하지 않았다. 아래 리뷰 보완에서 메일 응답 분리와 아이디 찾기 한도를 추가했으며 영속 재시도는 추가하지 않았다.
 - npm ci는 기존 잠금 파일에서 취약점 17건(낮음 1, 보통 7, 높음 9)을 보고했다. 이번 범위에서 의존성 업데이트·audit fix는 하지 않았다.
 - 개발 DB/Redis, 실제 SMTP/서버, 명세, 마이그레이션, 기준선, 토큰 만료 동작과 포트폴리오 재현 항목은 변경·호출하지 않았다.
 
@@ -75,3 +75,60 @@ PasswordInput 하나로 통합했다. 각 필드는 별도 표시 상태를 가�
 | 내 프로필 모달 | 가짜 인증번호 확인 후 두 필드에서 공통 보기 버튼 동작 |
 
 최종 프론트 build·lint exit 0, 브라우저 console error 0. 키보드 버튼과 접근성 속성을 확인했으며 실제 화면 읽기 프로그램으로 듣는 시험은 수행하지 않았다. 실제 계정의 비밀번호나 SMTP 자격 증명은 입력·변경하지 않았다.
+
+## 리뷰 보완 — 재설정 메일 응답 분리·아이디 찾기 요청 제한
+
+### 증상·원인
+
+1. 재설정 요청은 계정이 있을 때만 트랜잭션 안에서 SMTP를 기다렸다. 같은 본문이라도 응답 지연과 SMTP 실패 시 400 응답으로 계정 존재 여부를 구별할 수 있었다. DB 트랜잭션을 롤백해도 이미 보낸 메일은 취소되지 않았다.
+2. 아이디 찾기는 이메일별 제한이 없어 같은 계정으로 반복 발송할 수 있었다.
+
+### 수정·선택
+
+- 인증번호의 생성·Redis 저장 시점, TTL, 확인/재설정 API는 그대로다. AuthService는 PasswordResetMailService.Requested를 발행하고 AFTER_COMMIT 리스너가 기존 accountRecoveryMailExecutor에 전송만 넘긴다. 트랜잭션이 롤백되면 발송하지 않는다.
+- 아이디 찾기와 스레드 1개·대기열 100개의 기존 실행기를 공유한다. SMTP 실패·작업 제출 거절은 개인정보·인증번호·예외 원문 없이 일반 경고로 남기며 공개 응답을 바꾸지 않는다.
+- 아이디 찾기 제한도 Redis INCR와 첫 요청의 1분 TTL, 최대 5회, 초과 시 429 TOO_MANY_REQUESTS를 사용한다. 계정 조회보다 먼저 처리하므로 이름 불일치·없는 계정도 동일하게 제한한다.
+- findid:req:<email>과 기존 pwdreset:req:<email>을 분리해 아이디 찾기가 기존 비밀번호 재설정 허용 횟수를 소모하지 않게 했다. 다른 이메일도 독립적이다. 제한 초과 시 메일을 발행하지 않는다.
+- AuthVerificationCodeTest는 기존 SecureRandom 양 끝값과 Redis 저장 단언을 유지하고, 직접 메일 호출 대신 발행된 이벤트의 인증번호를 대조한다.
+
+버린 방법: AFTER_COMMIT 동기 발송은 여전히 응답을 지연시킨다. 임의 sleep으로 응답 시간을 맞추면 자원 점유만 늘고 SMTP 지연 상한을 맞추기 어렵다. 새 브로커·재시도·영속 대기열은 요청 범위 밖이므로 기존 실행기로 분리했다. 두 API의 요청 카운터 공유는 기존 재설정 한도를 바꾸므로 채택하지 않았다.
+
+### 수정 전 실패
+
+작업 트리 밖 32cbf2c archive에 테스트만 추가했다. 모든 새 회귀 테스트는 기존 AuthService·MockMvc·JavaMailSender만 사용하므로 새 이벤트/리스너 클래스 없이 컴파일됐다. MariaDB 10.11·Redis 7.4-alpine은 Testcontainers, 메일은 Mockito 가짜 또는 KI-12의 로컬 소켓이다.
+
+```text
+FindIdRecoveryTest: Tests run: 8, Failures: 3, Errors: 0, Skipped: 0
+  findIdLimitsEachEmailAndDoesNotConsumeResetAllowance: expected: 429 / but was: 200
+  nonMatchingRequestsUseTheSameEmailLimitWithoutSending: expected: 429 / but was: 200
+  expiredFindIdWindowAllowsAnotherRequest: expected: 429 / but was: 200
+PasswordResetRecoveryTest: Tests run: 6, Failures: 3, Errors: 1, Skipped: 0
+  resetMailWaitsForCommitWhileCodeStorageIsUnchanged: Wanted at most 0 times but was 1
+  rolledBackResetDoesNotSendMail: Wanted at most 0 times but was 1
+  smtpWaitDoesNotHoldResetHttpResponse: java.util.concurrent.TimeoutException
+  smtpFailureDoesNotExposeWhetherResetAccountExists: expected: 200 / but was: 400
+전체 선택 실행: Tests run: 41, Failures: 9, Errors: 1, Skipped: 0
+Total time: 49.830 s
+```
+
+재설정 SMTP gate를 닫은 채 HTTP 결과를 2초 기다리면 수정 전에는 TimeoutException으로 실패했다. finally에서 gate를 열어 요청을 정리했다. 수정 후에는 SMTP가 여전히 기다리는 동안 HTTP 200이 먼저 끝난다. 기존 동일 응답·기존 재설정 제한 두 테스트는 수정 전에도 통과했으며, 변경 후에도 그 계약을 지키는 회귀 검증이다.
+
+### 수정 후 검증
+
+- 수정 후 선택 실행: **42/0/0/0**(실행/실패/오류/건너뜀), Maven **01:47 min**. ProdMailConfigTest 27, FindIdRecoveryTest 8, PasswordResetRecoveryTest 6, AuthVerificationCodeTest 1.
+- 로컬 무응답 SMTP 출력: `SMTP_SILENT_PROBE elapsed_ms=404 result=READ_TIMEOUT`.
+- 최종 전체 UTC: **293/0/0/0**, 65개 테스트 클래스, Maven **12:07 min**, BUILD SUCCESS. 기존 281개 + 새 12개. 전체 실행의 로컬 SMTP 출력은 `SMTP_SILENT_PROBE elapsed_ms=430 result=READ_TIMEOUT`이었다.
+- 실행 사본: `/private/tmp/mail-account-recovery-review/full`. `git archive 32cbf2c backend docs/refactoring` 후 이번 변경 파일을 적용했다. `backend/src` 370개 파일의 SHA-256이 작업 트리와 모두 같다.
+- 실행 명령: `JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home ./mvnw -Duser.timezone=UTC test`. 기록 옵션은 사용하지 않았다.
+
+- FindIdRecoveryTest: 기존 5개 + 한도/독립성/만료 3개. 기존 테스트도 실제 일회용 Redis로 실행한다. 만료 테스트는 1분을 기다리는 대신 해당 키만 expire(Duration.ZERO)하여 다음 요청이 다시 허용되는지 확인한다. 첫 요청 TTL이 1~60초인 것도 확인한다.
+- PasswordResetRecoveryTest 6개: 계정 유무 동일 응답·일치 시 저장 코드 발송, 커밋 전 미발송/커밋 후 발송, 롤백 미발송, SMTP/HTTP 분리, SMTP 실패 동일 응답, 기존 재설정 5회 한도·초과 시 코드 불변/미발송.
+- 프론트 변경 없음. 이번 보완에서는 build·lint를 다시 실행하지 않았다. 응답 계약과 기존 429 처리 형태는 유지한다.
+- 기준선·기록 정책·명세·마이그레이션·포트폴리오 재현 항목은 변경하지 않았다. 실제 메일·개발 DB/Redis·서버 호출, 병합·푸시·배포는 하지 않았다.
+
+### 남은 한계
+
+- SMTP 대기를 HTTP에서 분리한 것이며 계정 조회·Redis 저장·스케줄링까지 응답 시간을 완전히 동일하게 만든 것은 아니다.
+- Redis의 인증번호와 요청 횟수는 기존처럼 DB 롤백과 함께 취소되지 않는다. 롤백 미발송 테스트는 코드가 Redis에는 남는 기존 동작도 명시한다.
+- 공유 실행기는 메모리 대기열이다. 장시간 적체·프로세스 종료·제출 거절·SMTP 실패 시 메일이 유실되거나 인증번호가 발송 전에 만료될 수 있다. 자동 재시도나 영속 대기열은 추가하지 않았다.
+- 기존 제한 방식의 INCR와 EXPIRE는 별도 명령이다. 두 명령 사이 프로세스 장애에 대한 원자화는 이번 범위에서 변경하지 않았다. 이메일 표기 정규화나 IP별 제한도 추가하지 않았다.

@@ -14,7 +14,14 @@ public class PasswordResetStoreService {
     private static final long MAX_REQUESTS_PER_MINUTE = 5;
     private final StringRedisTemplate redisTemplate;
     public long incrementRequestCount(String email) {
-        String key = requestCountKey(email);
+        return incrementCount(requestCountKey(email));
+    }
+
+    public long incrementFindIdRequestCount(String email) {
+        return incrementCount("findid:req:" + email);
+    }
+
+    private long incrementCount(String key) {
         Long count = redisTemplate.opsForValue().increment(key);
         if (count != null && count == 1L) {
             redisTemplate.expire(key, REQUEST_RATE_LIMIT_TTL);
