@@ -161,4 +161,4 @@ M0 이후 확인한 문제와 해결 기록이다. M2에서 KI-01·KI-02·KI-03�
 - FindIdPage/FindPwPage의 비인증 `/users` 조회·수정과 화면 내부 인증번호 비교를 제거했다. 기존 인증 API를 사용하며 `/auth/`의 401은 현재 화면에서 처리한다.
 - **아이디 찾기 계약 변경: 직접 반환 → 이메일 발송, 계정 존재 여부 노출 방지.** 사용자 결정에 따라 `POST /auth/find-id/request`는 일치/불일치 모두 같은 200과 안내를 반환하며 `loginId`를 반환하지 않는다. 일치한 계정에만 커밋 후 별도 스레드에서 메일을 보낸다. backend/md 명세 12는 변경하지 않았다.
 - 비밀번호 재설정의 기존 서버 계약은 유지한다. 이메일 요청 → 인증번호 확인 → resetProof로 변경하며, 목 API도 같은 흐름을 지원한다.
-- [실패 재현·UI·전체 검증과 남은 한계](troubleshooting/KI-13-account-recovery.md).
+- 해결 커밋: `c051305`. 최종 전체 UTC 281건 성공, 실패·오류·건너뜀 0. [실패 재현·UI·전체 검증과 남은 한계](troubleshooting/KI-13-account-recovery.md).

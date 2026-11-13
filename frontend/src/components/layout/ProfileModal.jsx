@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Eye, EyeOff, Mail } from 'lucide-react';
+import { CheckCircle2, Mail } from 'lucide-react';
 import axios from '@/api/axios';
+import PasswordInput from '@/components/auth/PasswordInput';
 import { leaveApi } from '@/api/leave';
 import { formatDays } from '@/lib/approval';
 import { toast } from '@/lib/toast';
@@ -12,7 +13,6 @@ import { Avatar, Badge, Button, Field, Input, InfoRow, Modal } from '@/component
 const ProfileModal = ({ isOpen, onClose, user: initialUser }) => {
   const [mode, setMode] = useState('profile');
   const [step, setStep] = useState(1);
-  const [showPw, setShowPw] = useState(false);
   const [formData, setFormData] = useState({
     authCode: '',
     newPassword: '',
@@ -213,28 +213,18 @@ const ProfileModal = ({ isOpen, onClose, user: initialUser }) => {
       {step === 3 && (
         <div className="space-y-4">
           <Field label="새 비밀번호" htmlFor="pw-new">
-            <Input
+            <PasswordInput
               id="pw-new"
-              type={showPw ? 'text' : 'password'}
+              label="새 비밀번호"
               value={formData.newPassword}
               onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
               autoComplete="new-password"
-              trailing={
-                <button
-                  type="button"
-                  onClick={() => setShowPw(!showPw)}
-                  className="rounded p-1 text-gray-400 hover:text-gray-600"
-                  aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'}
-                >
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              }
             />
           </Field>
           <Field label="비밀번호 확인" htmlFor="pw-confirm">
-            <Input
+            <PasswordInput
               id="pw-confirm"
-              type={showPw ? 'text' : 'password'}
+              label="비밀번호 확인"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               autoComplete="new-password"
