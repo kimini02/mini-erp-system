@@ -208,6 +208,7 @@
 
 - M2의 `ApprovalFormHandler`를 하나 더 구현합니다. 결재 화면·결재함·알림은 그대로 씁니다.
 - 기본 결재선: 부서장(`DEPT_HEAD`), 옵션은 휴가와 같음(`fallback`·`skip_self`·`dedupe` = true, `allow_line_edit` = false). 문서번호 `AT-2026-0001`.
+  - 기안자가 부서장이면 상위 부서장에게 넘어갑니다(13장 1.3, 2026-11-17 변경). 전에는 팀장이 자기 근태 정정을 결재 없이 즉시 승인받았습니다.
 - 본문: `{ "workDate": "2026-10-02", "clockIn": "09:02", "clockOut": "18:10", "reason": "출입카드 오류로 출근을 늦게 찍음" }`
   - `clockIn`·`clockOut` 중 하나 이상, `HH:mm`. 둘 다 있으면 퇴근 > 출근. `reason` 필수.
 - 상신 검사(`validate`): `workDate`가 **오늘보다 이전**이고 **최근 30일 이내**, 근무일이거나 그날 기록이 있음, 같은 날짜로 진행 중인 정정 문서가 없음(`409 ATTENDANCE_FIX_DUPLICATE`)
