@@ -27,7 +27,12 @@ if not path.exists():
         if not value or any(c in value for c in '\r\n\0'): raise SystemExit('Nonempty single-line values are required; nothing saved.')
         values[key]=value
     pw=values['INITIAL_ADMIN_PASSWORD']
-    if not (8<=len(pw)<=20 and re.search('[A-Z]',pw) and re.search('[a-z]',pw) and re.search('[0-9]',pw) and re.search('[^A-Za-z0-9]',pw)):
+    # Match PasswordPolicy.accepts: UTF-16 length, Java dot line terminators, and the exact symbol set.
+    allowed_symbols='!@#$%^&*()_+-=[]{};\':"\\|,.<>/?'
+    length=len(pw.encode('utf-16-le',errors='surrogatepass'))//2
+    if not (8<=length<=20 and not any(c in pw for c in '\r\n\x85\u2028\u2029')
+            and re.search('[A-Z]',pw) and re.search('[a-z]',pw) and re.search('[0-9]',pw)
+            and any(c in allowed_symbols for c in pw)):
         raise SystemExit('Password must be 8-20 characters with upper/lowercase, number and symbol; nothing saved.')
     if getpass.getpass('Confirm initial password (hidden): ')!=pw: raise SystemExit('Passwords differ; nothing saved.')
     webhook=getpass.getpass('Optional Discord webhook URL (hidden; Enter to skip): ')

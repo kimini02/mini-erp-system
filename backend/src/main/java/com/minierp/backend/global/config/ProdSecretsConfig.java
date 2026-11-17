@@ -1,5 +1,7 @@
 package com.minierp.backend.global.config;
 
+import com.minierp.backend.global.security.PasswordPolicy;
+import org.springframework.util.StringUtils;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -17,6 +19,13 @@ public class ProdSecretsConfig {
             for (String key : List.of("DB_APP_USERNAME", "DB_APP_PASSWORD", "DB_MIGRATOR_USERNAME",
                     "DB_MIGRATOR_PASSWORD", "JWT_SECRET")) {
                 requireSetting(environment, key);
+            }
+            var initialAdminKeys = List.of("INITIAL_ADMIN_LOGIN_ID", "INITIAL_ADMIN_NAME", "INITIAL_ADMIN_EMAIL",
+                    "INITIAL_ADMIN_PASSWORD");
+            // clear-initial-password.sh intentionally leaves the other three values in place.
+            if (initialAdminKeys.stream().allMatch(key -> StringUtils.hasText(environment.getProperty(key)))
+                    && !PasswordPolicy.accepts(environment.getProperty("INITIAL_ADMIN_PASSWORD"))) {
+                throw new IllegalStateException("Invalid production setting: INITIAL_ADMIN_PASSWORD");
             }
             if (environment.getProperty("app.mail.enabled", Boolean.class, false)) {
                 for (String key : List.of("SMTP_HOST", "SMTP_PORT", "SMTP_USERNAME", "SMTP_PASSWORD",
