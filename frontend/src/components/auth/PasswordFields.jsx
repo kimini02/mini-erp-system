@@ -1,7 +1,8 @@
 import { Check, Circle } from 'lucide-react';
 import { PASSWORD_RULES } from '@/lib/password';
 import { cn } from '@/lib/cn';
-import { Field, Input } from '@/components/ui';
+import { Field } from '@/components/ui';
+import PasswordInput from './PasswordInput';
 
 /** 새 비밀번호 + 확인 입력과 정책 체크 목록 */
 export default function PasswordFields({ value, confirmValue, onChange, onConfirmChange, idPrefix = 'pw' }) {
@@ -10,9 +11,9 @@ export default function PasswordFields({ value, confirmValue, onChange, onConfir
   return (
     <div className="space-y-4">
       <Field label="새 비밀번호" htmlFor={`${idPrefix}-new`} required>
-        <Input
+        <PasswordInput
           id={`${idPrefix}-new`}
-          type="password"
+          label="새 비밀번호"
           autoComplete="new-password"
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -46,9 +47,9 @@ export default function PasswordFields({ value, confirmValue, onChange, onConfir
         required
         error={mismatch ? '비밀번호가 서로 다릅니다.' : undefined}
       >
-        <Input
+        <PasswordInput
           id={`${idPrefix}-confirm`}
-          type="password"
+          label="새 비밀번호 확인"
           autoComplete="new-password"
           value={confirmValue}
           onChange={(e) => onConfirmChange(e.target.value)}

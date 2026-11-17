@@ -3,7 +3,8 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import AuthLayout from '@/components/layout/AuthLayout';
 import PasswordFields from '@/components/auth/PasswordFields';
-import { Button, Field, Input } from '@/components/ui';
+import { Button, Field } from '@/components/ui';
+import PasswordInput from '@/components/auth/PasswordInput';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
 import { isValidPassword } from '@/lib/password';
@@ -66,9 +67,9 @@ export default function ChangePasswordPage() {
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <Field label="현재 비밀번호" htmlFor="pw-current" required>
-          <Input
+          <PasswordInput
             id="pw-current"
-            type="password"
+            label="현재 비밀번호"
             autoComplete="current-password"
             value={current}
             onChange={(e) => setCurrent(e.target.value)}

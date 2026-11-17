@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Eye, EyeOff, AlertCircle, Info } from 'lucide-react';
+import { AlertCircle, Info } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import AuthLayout, { AuthLinks } from '@/components/layout/AuthLayout';
 import { Button, Field, Input } from '@/components/ui';
+import PasswordInput from '@/components/auth/PasswordInput';
 
 const REASON_MESSAGES = {
   revoked: '계정 상태나 비밀번호가 바뀌어 로그아웃되었습니다. 다시 로그인해 주세요.',
@@ -19,7 +20,6 @@ export default function LoginPage() {
 
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -70,25 +70,14 @@ export default function LoginPage() {
         </Field>
 
         <Field label="비밀번호" htmlFor="password">
-          <Input
+          <PasswordInput
             id="password"
-            type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호를 입력하세요"
             autoComplete="current-password"
             className="h-11"
             required
-            trailing={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="rounded p-1 text-gray-400 hover:text-gray-600"
-                aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            }
           />
         </Field>
 

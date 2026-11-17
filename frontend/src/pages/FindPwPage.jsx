@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, CheckCircle2, Eye, EyeOff, Info } from 'lucide-react';
-import axios from '@/api/axios';
+import { Check, CheckCircle2, Info } from 'lucide-react';
+import { authApi } from '@/api/auth';
+import PasswordFields from '@/components/auth/PasswordFields';
+import { isValidPassword } from '@/lib/password';
+import { getErrorCode, getErrorMessage } from '@/lib/errors';
 import AuthLayout, { AuthLinks } from '@/components/layout/AuthLayout';
 import { Button, Field, Input } from '@/components/ui';
 import { toast } from '@/lib/toast';
@@ -41,90 +44,88 @@ const Stepper = ({ currentStep }) => (
 export default function FindPwPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1:본인확인, 2:인증번호, 3:재설정, 4:완료
-  const [showPw, setShowPw] = useState(false); // 비밀번호 보이기/숨기기
-  const [targetUser, setTargetUser] = useState(null); // 찾은 유저의 정보를 임시 저장 (id 포함)
+  const [resetProof, setResetProof] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [formData, setFormData] = useState({ email: '', authCode: '', newPassword: '', confirmPassword: '' });
 
-  // 입력 폼 상태 관리
-  const [formData, setFormData] = useState({
-    userId: '',
-    email: '',
-    authCode: '',
-    newPassword: '',
-    confirmPassword: '',
-  });
-
-  // 입력값 변경 핸들러
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  /**
-   * STEP 1: 사용자 확인 및 인증번호 발송
-   */
+  // The same message is shown whether an account exists or not.
+  const requestCode = async () => {
+    const result = await authApi.requestPasswordReset(formData.email);
+    setNotice(result.message);
+    setResetProof('');
+    setFormData((prev) => ({ ...prev, authCode: '' }));
+  };
+
   const handleVerifyUser = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     try {
-      // 아이디와 이메일이 동시에 일치하는 유저 조회
-      const response = await axios.get(`/users?userId=${formData.userId}&email=${formData.email}`);
-
-      if (response.data && response.data.length > 0) {
-        setTargetUser(response.data[0]); // 유저 객체 저장 (patch 통신 시 id 필요)
-        setStep(2);
-      } else {
-        toast.error('일치하는 사용자 정보가 없습니다. 다시 확인해주세요.');
-      }
+      await requestCode();
+      setStep(2);
     } catch (error) {
-      console.error('사용자 확인 중 에러 발생:', error);
-      toast.error('서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      toast.error(getErrorMessage(error));
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  /**
-   * STEP 2: 인증번호 확인
-   */
-  const handleVerifyCode = (e) => {
+  const handleVerifyCode = async (e) => {
     e.preventDefault();
-    // 가짜 서버이므로 데모 번호 123456으로 고정
-    if (formData.authCode === '123456') {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const result = await authApi.verifyPasswordReset(formData.email, formData.authCode);
+      setResetProof(result.resetProof);
       setStep(3);
-    } else {
-      toast.error('인증번호가 일치하지 않습니다.');
+    } catch (error) {
+      const code = getErrorCode(error);
+      toast.error(['OTP_INVALID', 'OTP_EXPIRED', 'INVALID_RESET_REQUEST'].includes(code)
+        ? '이메일과 인증번호를 확인하거나 인증번호를 다시 요청해 주세요.'
+        : getErrorMessage(error));
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  /**
-   * STEP 2-1: 인증번호 재발송
-   */
-  const handleResendCode = () => {
-    setFormData((prev) => ({ ...prev, authCode: '' })); // 입력창 초기화
-    toast.info('인증번호를 다시 발송했습니다.');
+  const handleResendCode = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await requestCode();
+      toast.info('인증번호 발송을 다시 요청했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  /**
-   * STEP 3: 실제 비밀번호 재설정 (PATCH)
-   */
+  const canReset = isValidPassword(formData.newPassword) && formData.newPassword === formData.confirmPassword;
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (formData.newPassword !== formData.confirmPassword) {
-      toast.error('비밀번호가 서로 일치하지 않습니다.');
-      return;
-    }
-    if (formData.newPassword.length < 4) {
-      toast.error('비밀번호는 최소 4자 이상이어야 합니다.');
-      return;
-    }
-
+    if (submitting || !canReset) return;
+    setSubmitting(true);
     try {
-      // 해당 유저 데이터만 부분 수정(PATCH)
-      await axios.patch(`/users/${targetUser.id}`, {
-        password: formData.newPassword,
-      });
-
-      setStep(4); // 완료 화면으로 이동
+      await authApi.confirmPasswordReset(resetProof, formData.newPassword, formData.confirmPassword);
+      setResetProof('');
+      setFormData((prev) => ({ ...prev, authCode: '', newPassword: '', confirmPassword: '' }));
+      setStep(4);
     } catch (error) {
-      console.error('비밀번호 변경 중 에러 발생:', error);
-      toast.error('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+      toast.error(getErrorMessage(error));
+      if (getErrorCode(error) === 'RESET_PROOF_INVALID') {
+        setResetProof('');
+        setFormData((prev) => ({ ...prev, authCode: '', newPassword: '', confirmPassword: '' }));
+        setStep(1);
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -161,28 +162,19 @@ export default function FindPwPage() {
       {/* STEP 1: 본인확인 */}
       {step === 1 && (
         <form onSubmit={handleVerifyUser} className="space-y-4">
-          <Field label="아이디" htmlFor="userId">
-            <Input
-              id="userId"
-              value={formData.userId}
-              onChange={handleChange}
-              placeholder="아이디"
-              required
-              className="h-11"
-            />
-          </Field>
           <Field label="이메일" htmlFor="email">
             <Input
               id="email"
               type="email"
+              disabled={submitting}
               value={formData.email}
               onChange={handleChange}
-              placeholder="가입 시 입력한 이메일"
+              placeholder="등록된 이메일"
               required
               className="h-11"
             />
           </Field>
-          <Button type="submit" size="lg" block className="!mt-6">
+          <Button type="submit" size="lg" block loading={submitting} className="!mt-6">
             인증번호 발송
           </Button>
         </form>
@@ -194,15 +186,22 @@ export default function FindPwPage() {
           <p className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-[13px] text-blue-800">
             <Info size={16} className="mt-px shrink-0 text-blue-600" />
             <span>
-              <b className="font-medium">{formData.email}</b>(으)로 인증번호를 보냈습니다. (데모: 123456)
+              {notice} 메일을 받지 못했다면 입력한 이메일과 스팸함을 확인해 주세요.
             </span>
           </p>
+          {(import.meta.env.MODE === 'mock' || import.meta.env.VITE_USE_MOCK === 'true') && (
+            <p className="text-xs text-gray-500">목 모드 인증번호: 123456 (실제 메일은 보내지 않습니다.)</p>
+          )}
           <Field label="인증번호" htmlFor="authCode">
             <div className="flex gap-2">
               <div className="flex-1">
                 <Input
                   id="authCode"
                   maxLength={6}
+                  minLength={6}
+                  pattern="[0-9]{6}"
+                  autoComplete="one-time-code"
+                  required
                   value={formData.authCode}
                   onChange={handleChange}
                   placeholder="6자리 숫자"
@@ -210,13 +209,16 @@ export default function FindPwPage() {
                   className="h-11 tracking-[0.2em]"
                 />
               </div>
-              <Button variant="secondary" size="lg" onClick={handleResendCode}>
+              <Button variant="secondary" size="lg" onClick={handleResendCode} disabled={submitting}>
                 재발송
               </Button>
             </div>
           </Field>
-          <Button type="submit" size="lg" block className="!mt-6">
+          <Button type="submit" size="lg" block loading={submitting} className="!mt-6">
             인증 확인
+          </Button>
+          <Button variant="ghost" block disabled={submitting} onClick={() => setStep(1)}>
+            이메일 다시 입력
           </Button>
         </form>
       )}
@@ -224,39 +226,14 @@ export default function FindPwPage() {
       {/* STEP 3: 새 비밀번호 설정 */}
       {step === 3 && (
         <form onSubmit={handleResetPassword} className="space-y-4">
-          <Field label="새 비밀번호" htmlFor="newPassword">
-            <Input
-              id="newPassword"
-              type={showPw ? 'text' : 'password'}
-              value={formData.newPassword}
-              onChange={handleChange}
-              placeholder="8자 이상 권장"
-              autoComplete="new-password"
-              className="h-11"
-              trailing={
-                <button
-                  type="button"
-                  onClick={() => setShowPw(!showPw)}
-                  className="rounded p-1 text-gray-400 hover:text-gray-600"
-                  aria-label={showPw ? '비밀번호 숨기기' : '비밀번호 보기'}
-                >
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              }
-            />
-          </Field>
-          <Field label="새 비밀번호 확인" htmlFor="confirmPassword">
-            <Input
-              id="confirmPassword"
-              type={showPw ? 'text' : 'password'}
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="한 번 더 입력"
-              autoComplete="new-password"
-              className="h-11"
-            />
-          </Field>
-          <Button type="submit" size="lg" block className="!mt-6">
+          <PasswordFields
+            value={formData.newPassword}
+            confirmValue={formData.confirmPassword}
+            onChange={(value) => setFormData((prev) => ({ ...prev, newPassword: value }))}
+            onConfirmChange={(value) => setFormData((prev) => ({ ...prev, confirmPassword: value }))}
+            idPrefix="reset"
+          />
+          <Button type="submit" size="lg" block loading={submitting} disabled={!canReset} className="!mt-6">
             비밀번호 재설정
           </Button>
         </form>

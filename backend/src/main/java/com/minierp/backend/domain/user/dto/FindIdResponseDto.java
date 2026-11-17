@@ -7,9 +7,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class FindIdResponseDto {
-    private final String loginId;
     private final String message;
-    public static FindIdResponseDto of(String loginId) {
-        return new FindIdResponseDto(loginId, "아이디를 찾았습니다");
+    public static FindIdResponseDto success() {
+        return new FindIdResponseDto("입력하신 정보와 일치하는 계정이 있으면 이메일로 아이디를 보냈습니다.");
     }
 }
