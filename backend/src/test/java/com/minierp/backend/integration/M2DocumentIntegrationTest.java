@@ -277,13 +277,19 @@ class M2DocumentIntegrationTest extends MariaDbIntegrationTest {
         assertThat(fallback.path("finalLine").get(0).path("id").asLong()).isEqualTo(chief.getId());
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", employee.getId());
         var self = result(postAs("/api/v1/approval-documents/line-preview", employeeToken, preview));
-        assertThat(self.path("rows").get(0).path("status").asText()).isEqualTo("SKIPPED");
+        // KI-15: a self head escalates to the active superior instead of approving immediately.
+        assertThat(self.path("rows").get(0).path("status").asText()).isEqualTo("FALLBACK");
+        assertThat(self.path("finalLine").get(0).path("id").asLong()).isEqualTo(chief.getId());
         long auto = leave(start, start);
         assertThat(
                 result(postAs("/api/v1/approval-documents/" + auto + "/submit", employeeToken, null))
                         .path("status")
                         .asText())
-                .isEqualTo("APPROVED");
+                .isEqualTo("IN_PROGRESS");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE document_id=? AND entry_type='USE'",
+                Integer.class, auto)).isZero();
+        assertThat(result(postAs("/api/v1/approval-documents/" + auto + "/approve", chiefToken, null))
+                .path("status").asText()).isEqualTo("APPROVED");
         assertThat(
                 jdbc.queryForObject("SELECT COUNT(*) FROM leave_ledger WHERE document_id=? AND entry_type='USE'",
                         Integer.class, auto))

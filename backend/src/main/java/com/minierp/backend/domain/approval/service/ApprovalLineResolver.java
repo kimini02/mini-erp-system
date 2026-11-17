@@ -64,22 +64,35 @@ public class ApprovalLineResolver {
                         Long department = draftDepartment;
                         if (type.equals("UPPER_DEPT_HEAD")) {
                             department = parent(department);
+                            if (department == null) {
+                                resolved.add(new Resolved(((Number) step.get("step_order")).intValue(), kind, null,
+                                        manual == null ? "RULE" : "MANUAL", label(type), "NO_UPPER_DEPT", false,
+                                        "상위 부서가 없어 건너뜁니다."));
+                                continue;
+                            }
                         }
                         String sourceDepartment = department == null
                                 ? null
                                 : (String) queries.findDepartmentName(department).get("name");
                         person = null;
+                        Map<String, Object> self = null;
                         Set<Long> visited = new HashSet<>();
                         while (department != null && visited.add(department)) {
                             var departmentRow = queries.findDepartmentHead(department);
                             if (departmentRow.get("head_user_id") != null) {
                                 var candidate = getPerson(number(departmentRow, "head_user_id"));
                                 if ("ACTIVE".equals(candidate.get("status"))) {
-                                    person = candidate;
-                                    break;
+                                    if (kind.equals("APPROVER") && bool(form, "skip_self")
+                                            && number(candidate, "id") == drafter) {
+                                        self = candidate;
+                                    } else {
+                                        person = candidate;
+                                        break;
+                                    }
                                 }
                             }
-                            if (!bool(form, "fallback_to_upper")) {
+                            // A self approver always searches upward; vacant-head fallback keeps its own option.
+                            if (self == null && !bool(form, "fallback_to_upper")) {
                                 break;
                             }
                             department = departmentRow.get("parent_id") == null
@@ -88,10 +101,18 @@ public class ApprovalLineResolver {
                             fallback = true;
                         }
                         if (person == null) {
-                            throw new BusinessException(ErrorCode.APPROVER_NOT_FOUND);
+                            if (self == null) {
+                                throw new BusinessException(ErrorCode.APPROVER_NOT_FOUND);
+                            }
+                            // No active superior exists: preserve the original SELF snapshot and skip rule.
+                            person = self;
+                            fallback = false;
                         }
                         if (fallback) {
-                            note = sourceDepartment + " 부서장이 비어 있어 " + person.get("department") + " 부서장에게 넘어갑니다.";
+                            note = self == null
+                                    ? sourceDepartment + " 부서장이 비어 있어 " + person.get("department") + " 부서장에게 넘어갑니다."
+                                    : sourceDepartment + " 부서장이 기안자 본인이어서 상위 "
+                                            + person.get("department") + " 부서장에게 넘어갑니다.";
                         }
                     }
                     default -> throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
