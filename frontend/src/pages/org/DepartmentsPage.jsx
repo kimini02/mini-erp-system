@@ -27,6 +27,7 @@ import {
   Th,
   Tr,
 } from '@/components/ui';
+import PositionCard from './departments/PositionCard';
 import WorkScheduleCard from './departments/WorkScheduleCard';
 import TreeNode from './departments/TreeNode';
 import DepartmentFormModal from './departments/DepartmentFormModal';
@@ -36,6 +37,7 @@ import DepartmentHeadModal from './departments/DepartmentHeadModal';
 export default function DepartmentsPage() {
   const navigate = useNavigate();
   const can = useAuthStore((s) => s.can);
+  const canView = can(MENU.DEPARTMENT, 'V');
   const canCreate = can(MENU.DEPARTMENT, 'C');
   const canUpdate = can(MENU.DEPARTMENT, 'U');
   const canDelete = can(MENU.DEPARTMENT, 'D');
@@ -92,6 +94,7 @@ export default function DepartmentsPage() {
   );
 
   useEffect(() => {
+    if (!canView) return;
     loadTree()
       .then((t) => setSelectedId((prev) => prev ?? t.children[0]?.id ?? t.id))
       .catch((err) => setLoadError(getErrorMessage(err)));
@@ -99,11 +102,11 @@ export default function DepartmentsPage() {
       .getDefault()
       .then(setDefaultSchedule)
       .catch(() => {});
-  }, [loadTree]);
+  }, [loadTree, canView]);
 
   useEffect(() => {
-    loadDetail(selectedId);
-  }, [selectedId, loadDetail]);
+    if (canView) loadDetail(selectedId);
+  }, [selectedId, loadDetail, canView]);
 
   const refresh = async (nextId = selectedId) => {
     await loadTree();
@@ -166,6 +169,15 @@ export default function DepartmentsPage() {
     }
   };
 
+  if (!canView) {
+    return (
+      <>
+        <PageHeader title="부서 관리" description="회사 직급을 확인합니다." />
+        <PositionCard canCreate={canCreate} canUpdate={canUpdate} canDelete={canDelete} />
+      </>
+    );
+  }
+
   if (loadError) {
     return (
       <EmptyState icon={FolderTree} title="조직도를 불러오지 못했습니다" description={loadError} className="py-24" />
@@ -207,7 +219,7 @@ export default function DepartmentsPage() {
           </div>
         </Card>
 
-        <div className="space-y-4 lg:col-span-8">
+        <div className="min-w-0 space-y-4 lg:col-span-8">
           {!detail ? (
             <Card>
               <PageLoader />
@@ -406,6 +418,7 @@ export default function DepartmentsPage() {
               )}
             </>
           )}
+          <PositionCard canCreate={canCreate} canUpdate={canUpdate} canDelete={canDelete} />
         </div>
       </div>
 

@@ -20,6 +20,10 @@ export const workScheduleApi = {
 
 export const positionApi = {
   list: () => unwrap(api.get('/positions')),
+  create: (body) => unwrap(api.post('/positions', body)),
+  update: (id, body) => unwrap(api.patch(`/positions/${id}`, body)),
+  saveOrder: (order) => unwrap(api.put('/positions/order', order)),
+  remove: (id) => unwrap(api.delete(`/positions/${id}`)),
 };
 
 export const holidayApi = {

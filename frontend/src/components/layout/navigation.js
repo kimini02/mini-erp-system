@@ -77,7 +77,7 @@ const NAVIGATION = [
   {
     title: '조직 관리',
     items: [
-      { label: '부서 관리', path: '/org/departments', icon: Network, visible: (ctx) => ctx.can(MENU.DEPARTMENT) },
+      { label: '부서 관리', path: '/org/departments', icon: Network },
       { label: '사원 관리', path: '/org/employees', icon: Users, visible: (ctx) => ctx.can(MENU.EMPLOYEE) },
       { label: '역할·권한', path: '/org/roles', icon: KeyRound, visible: (ctx) => ctx.can(MENU.ROLE) },
     ],

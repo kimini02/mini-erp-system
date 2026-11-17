@@ -4,6 +4,7 @@ import { installM2 } from './m2';
 import { installM3 } from './m3';
 import { installM4 } from './m4';
 import { installRecovery } from './recovery';
+import { installPositions } from './positions';
 
 /**
  * 개발용 가짜 서버 (VITE_USE_MOCK=true).
@@ -430,7 +431,7 @@ route('PUT', '/work-schedules/default', (ctx) => {
 });
 
 // 직급
-route('GET', '/positions', () => [...db.positions].sort((a, b) => a.rankOrder - b.rankOrder));
+installPositions({ route, db, need, fail, created });
 
 // 사원
 route('GET', '/users', (ctx) => {

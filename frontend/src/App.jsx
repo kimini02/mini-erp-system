@@ -141,14 +141,7 @@ function App() {
               </RequirePermission>
             }
           />
-          <Route
-            path="/org/departments"
-            element={
-              <RequirePermission menu={MENU.DEPARTMENT}>
-                <DepartmentsPage />
-              </RequirePermission>
-            }
-          />
+          <Route path="/org/departments" element={<DepartmentsPage />} />
           <Route
             path="/org/employees"
             element={
