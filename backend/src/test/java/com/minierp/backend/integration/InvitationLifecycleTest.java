@@ -250,4 +250,35 @@ class InvitationLifecycleTest extends MariaDbIntegrationTest {
         invalid(stale);
         assertThat(users.findById(employee.getId()).orElseThrow().getUserPw()).isNull();
     }
+    @Test
+    void registrationMailIncludesGeneratedLoginIdAndSetupLink() throws Exception {
+        var response = mvc.perform(post("/api/v1/users")
+                        .header("Authorization", "Bearer " + chiefToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(Map.of("name", "등록 메일 검증",
+                                "email", UUID.randomUUID() + "@example.test", "hireDate", LocalDate.now(clock).toString(),
+                                "departmentId", 2, "positionId", 1, "roleCodes", List.of("EMPLOYEE")))))
+                .andExpect(status().isCreated()).andReturn().getResponse();
+        var employee = mapper.readTree(response.getContentAsString()).path("data");
+        assertThat(sent).hasSize(1);
+        assertThat(sent.get(0).getText()).contains("로그인 아이디: " + employee.path("loginId").asText(),
+                "http://localhost:5173/password/setup?setupToken=" + linkToken(0));
+        assertThat(tokens.owner(linkToken(0))).isEqualTo(employee.path("id").asLong());
+    }
+
+    @Test
+    void reinvitationApiIncludesSameEmployeeIdAndNewSetupLink() throws Exception {
+        var employee = register();
+        String original = linkToken(0);
+        mvc.perform(post("/api/v1/users/" + employee.getId() + "/invitation")
+                        .header("Authorization", "Bearer " + chiefToken))
+                .andExpect(status().isOk());
+        assertThat(sent).hasSize(2);
+        assertThat(sent.get(1).getText()).contains("로그인 아이디: " + employee.getLoginId(),
+                "http://localhost:5173/password/setup?setupToken=" + linkToken(1));
+        assertThat(sent.get(1).getTo()).containsExactly(users.findById(employee.getId()).orElseThrow().getUserEmail());
+        assertThat(linkToken(1)).isNotEqualTo(original);
+        assertThat(tokens.owner(original)).isNull();
+    }
+
 }
