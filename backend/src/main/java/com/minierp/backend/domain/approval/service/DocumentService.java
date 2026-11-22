@@ -337,14 +337,15 @@ public class DocumentService {
         var form = resolver.getForm((String) document.get("form_code"));
         var user = resolver.getPerson(access.actor());
         var manual = bool(document, "manual_line") ? manual(id) : null;
-        var resolved = checkDraftLine(form, access.actor(), number(user, "department_id"), manual);
+        var resolved = resolver.resolveLine(form, access.actor(), number(user, "department_id"), manual);
         long newId = insertDraft(form, (String) document.get("title"), access.actor(), number(user, "department_id"),
                 manual != null, id);
         handler((String) document.get("form_code"))
                 .copyBody(id,
                         new ApprovalDocument(newId, access.actor(), number(user, "department_id"),
                                 (String) document.get("form_code")));
-        storeLines(newId, resolved, false);
+        // Rule-based drafts still take their persisted line snapshot only when submitted.
+        storeLines(newId, manual == null ? List.of() : resolved, false);
         return new ApprovalDraftResponseDto(newId, "DRAFT");
     }
 
