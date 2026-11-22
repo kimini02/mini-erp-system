@@ -203,17 +203,38 @@ class ApprovalSelfEscalationTest extends MariaDbIntegrationTest {
                 .isEqualTo("DRAFT");
     }
 
-    @Test
-    void selfWithNoActiveUpperHeadKeepsSelfSkip() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"OVERTIME", "ATTENDANCE_FIX"})
+    void selfWithNoActiveUpperHeadRejectsPreviewAndSubmission(String form) throws Exception {
         var inactiveHead = person("inactive-head", UserRole.USER);
         jdbc.update("UPDATE users SET status='ON_LEAVE',department_id=1 WHERE id=?", inactiveHead.getId());
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=1", inactiveHead.getId());
-        var preview = preview("OVERTIME", leader);
-        assertThat(preview.path("error").isNull()).isTrue();
-        assertThat(ids(preview.path("finalLine"))).isEmpty();
-        var submitted = data(postAs("/api/v1/approval-documents/" + draft("OVERTIME", leader) + "/submit", leader, null));
-        assertThat(submitted.path("status").asText()).isEqualTo("APPROVED");
-        assertThat(submitted.path("line").get(0).path("skipReason").asText()).isEqualTo("SELF");
+        assertLeaderSubmissionRejected(form);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"OVERTIME", "ATTENDANCE_FIX"})
+    void selfWithVacantUpperHeadRejectsPreviewAndSubmission(String form) throws Exception {
+        jdbc.update("UPDATE departments SET head_user_id=NULL WHERE id=1");
+        assertLeaderSubmissionRejected(form);
+    }
+
+    void assertLeaderSubmissionRejected(String form) throws Exception {
+        var preview = preview(form, leader);
+        long id = draft(form, leader);
+        var response = postAs("/api/v1/approval-documents/" + id + "/submit", leader, null)
+                .andReturn().getResponse();
+        var body = mapper.readTree(response.getContentAsString());
+        Assertions.assertAll(
+                () -> assertThat(preview.path("error").isNull()).isFalse(),
+                () -> assertThat(preview.path("rows").get(0).path("status").asText()).isEqualTo("ERROR"),
+                () -> assertThat(ids(preview.path("finalLine"))).isEmpty(),
+                () -> assertThat(response.getStatus()).isEqualTo(422),
+                () -> assertThat(body.path("error").path("code").asText()).isEqualTo("APPROVER_NOT_FOUND"),
+                () -> assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?", String.class, id))
+                        .isEqualTo("DRAFT"),
+                () -> assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM approval_lines WHERE document_id=?",
+                        Integer.class, id)).isZero());
     }
 
     @Test

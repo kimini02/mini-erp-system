@@ -20,3 +20,5 @@ REFACTORING_CLASSPATH=target/refactoring-candidate/classpath.txt \
 M5ProductionTest#<before-all>의 예외는 workflow_app·workflow_migrator의 정확한 두 CREATE USER 문(각 count=1)만 서로 교환되고 나머지 원본 항목이 모두 동일한 경우로 한정한다. 프레임 전체의 순서 변경을 허용하지 않는다. 모든 순서 예외에서도 SQL별 횟수 차이는 실패한다. 원본 SQL은 삭제하지 않는다. 유일한 호출 수 제외는 정확히 일치하는 INNODB_LOCK_WAITS 진단 폴링문이다. 엄격 목록과 26개 프레임 분류는 보고서의 ‘2차 보완’ 절, 규칙과 재비교 결과는 manifest.json에 기록한다.
 
 자세한 기록 방식·실험·한계는 docs/refactoring/R-01-review-hardening.md를 참조한다.
+
+KI-15 이후 `M2DocumentIntegrationTest#lineRulesHandleNormalSelfFallbackAndDuplicateApprovers`·`M2ReviewTest#fallbackExplainsSourceAndDestinationAndSkippedLineHasReason`·`M3BatchTest#batchFinalizesAbsenceLeaveMissingAndLateHalfApprovalIdempotently`의 차이는 본인 결재 상향에 따른 의도된 차이다. 기준선 파일은 유지하며 상세 항목은 `docs/troubleshooting/KI-15-self-approval-escalation.md`를 따른다.

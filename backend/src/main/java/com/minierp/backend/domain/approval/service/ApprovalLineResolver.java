@@ -76,6 +76,7 @@ public class ApprovalLineResolver {
                                 : (String) queries.findDepartmentName(department).get("name");
                         person = null;
                         Map<String, Object> self = null;
+                        boolean encounteredUnavailableHead = false;
                         Set<Long> visited = new HashSet<>();
                         while (department != null && visited.add(department)) {
                             var departmentRow = queries.findDepartmentHead(department);
@@ -89,7 +90,11 @@ public class ApprovalLineResolver {
                                         person = candidate;
                                         break;
                                     }
+                                } else {
+                                    encounteredUnavailableHead = true;
                                 }
+                            } else {
+                                encounteredUnavailableHead = true;
                             }
                             // A self approver always searches upward; vacant-head fallback keeps its own option.
                             if (self == null && !bool(form, "fallback_to_upper")) {
@@ -101,10 +106,10 @@ public class ApprovalLineResolver {
                             fallback = true;
                         }
                         if (person == null) {
-                            if (self == null) {
+                            if (self == null || encounteredUnavailableHead) {
                                 throw new BusinessException(ErrorCode.APPROVER_NOT_FOUND);
                             }
-                            // No active superior exists: preserve the original SELF snapshot and skip rule.
+                            // Only a path consisting entirely of the drafter can keep the SELF skip.
                             person = self;
                             fallback = false;
                         }
