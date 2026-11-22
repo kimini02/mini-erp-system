@@ -41,7 +41,7 @@ public class ApprovalLineResolver {
         if (manual != null && !bool(form, "allow_line_edit")) {
             throw new BusinessException(ErrorCode.LINE_EDIT_NOT_ALLOWED);
         }
-        List<Map<String, Object>> steps = resolveSteps(form, manual);
+        List<Map<String, Object>> steps = resolveSteps(form, manual, drafter);
         List<Resolved> resolved = new ArrayList<>();
         Set<Long> seen = new HashSet<>();
         for (var step : steps) {
@@ -160,10 +160,52 @@ public class ApprovalLineResolver {
                 throw new ResolutionFailure(resolved, ((Number) step.get("step_order")).intValue(), type, kind);
             }
         }
+        validateRemainingApprovers(resolved, drafter);
         return resolved;
     }
 
-    private List<Map<String, Object>> resolveSteps(Map<String, Object> form, List<ManualStep> manual) {
+    private void validateManualApprovers(List<ManualStep> manual, long drafter) {
+        if (manual.stream().anyMatch(step -> "APPROVER".equals(step.lineKind()) && step.userId() == drafter)) {
+            throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS, "본인은 결재자로 지정할 수 없습니다.");
+        }
+    }
+
+    private void validateRemainingApprovers(List<Resolved> resolved, long drafter) {
+        if (resolved.stream().anyMatch(step -> "APPROVER".equals(step.kind()) && step.skipReason() == null)) {
+            return;
+        }
+        // Recheck current organization independently of rule/manual resolution and its skipped snapshots.
+        try {
+            var person = getPerson(drafter);
+            Long department = number(person, "department_id");
+            boolean allHeadsAreSelf = "ACTIVE".equals(person.get("status"));
+            Set<Long> visited = new HashSet<>();
+            while (allHeadsAreSelf && department != null) {
+                if (!visited.add(department)) {
+                    allHeadsAreSelf = false;
+                    break;
+                }
+                var row = queries.findDepartmentHead(department);
+                if (row.get("head_user_id") == null || number(row, "head_user_id") != drafter) {
+                    allHeadsAreSelf = false;
+                    break;
+                }
+                department = row.get("parent_id") == null ? null : number(row, "parent_id");
+            }
+            if (allHeadsAreSelf) {
+                return;
+            }
+        } catch (BusinessException ex) {
+            if (ex.getErrorCode() != ErrorCode.APPROVER_NOT_FOUND) {
+                throw ex;
+            }
+        }
+        int order = resolved.stream().mapToInt(Resolved::order).max().orElse(0) + 1;
+        throw new ResolutionFailure(resolved, order, "FINAL_APPROVER", "APPROVER");
+    }
+
+    private List<Map<String, Object>> resolveSteps(
+            Map<String, Object> form, List<ManualStep> manual, long drafter) {
         List<Map<String, Object>> steps;
         if (manual != null) {
             if (manual.stream()
@@ -173,6 +215,7 @@ public class ApprovalLineResolver {
                     || manual.stream().noneMatch(manualStep -> "APPROVER".equals(manualStep.lineKind()))) {
                 throw new BusinessException(ErrorCode.INVALID_APPROVAL_STEPS);
             }
+            validateManualApprovers(manual, drafter);
             steps = new ArrayList<>();
             int stepOrder = 0;
             for (var manualStep : manual) {
@@ -211,6 +254,7 @@ public class ApprovalLineResolver {
                 case "DEPT_HEAD" -> "기안자의 부서장";
                 case "UPPER_DEPT_HEAD" -> "기안자의 상위 부서장";
                 case "ROLE" -> "역할 담당자";
+                case "FINAL_APPROVER" -> "최종 결재자 확인";
                 default -> "지정 사원";
             };
             rows.add(new ApprovalLinePreviewResponseDto.Row(ex.order, ex.kind, label, null, "ERROR", ex.getMessage()));

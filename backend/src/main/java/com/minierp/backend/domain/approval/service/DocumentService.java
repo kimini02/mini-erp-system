@@ -344,6 +344,7 @@ public class DocumentService {
                 .copyBody(id,
                         new ApprovalDocument(newId, access.actor(), number(user, "department_id"),
                                 (String) document.get("form_code")));
+        // Rule-based drafts still take their persisted line snapshot only when submitted.
         storeLines(newId, resolved, false);
         return new ApprovalDraftResponseDto(newId, "DRAFT");
     }
