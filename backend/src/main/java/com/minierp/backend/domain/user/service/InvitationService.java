@@ -45,7 +45,7 @@ public class InvitationService {
                     .build()
                     .encode()
                     .toUriString();
-            mail.sendInvitationMail(event.email(), link);
+            mail.sendInvitationMail(event.email(), user.getLoginId(), link);
             event.result().invitationDelivered();
         } catch (RuntimeException ex) {
             // Do not log the exception: SMTP/Redis exceptions can include message bodies or tokens.

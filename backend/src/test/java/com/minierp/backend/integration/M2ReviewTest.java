@@ -50,7 +50,12 @@ class M2ReviewTest extends ApprovalApiTestSupport {
         assertThat(preview.path("rows").get(0).path("note").asText()).contains("부서장이 비어 있어", "부서장에게 넘어갑니다.");
         jdbc.update("UPDATE departments SET head_user_id=? WHERE id=2", employee.getId());
         long id = draft("LEAVE", leaveBody("ANNUAL", start, start));
-        assertThat(submit(id).path("line").get(0).path("skipReason").asText()).isEqualTo("SELF");
+        // KI-15: a superior exists, so this self step is now pending for that superior.
+        var submitted = submit(id);
+        assertThat(submitted.path("status").asText()).isEqualTo("IN_PROGRESS");
+        assertThat(submitted.path("line").get(0).path("status").asText()).isEqualTo("PENDING");
+        assertThat(submitted.path("line").get(0).path("skipReason").isNull()).isTrue();
+        assertThat(submitted.path("line").get(0).path("approver").path("id").asLong()).isEqualTo(chief.getId());
     }
 
     @Test

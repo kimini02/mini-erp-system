@@ -86,7 +86,9 @@ public class DocumentService {
     private void storeLines(long id, List<ApprovalLineResolver.Resolved> resolved, boolean submitted) {
         boolean pending = false;
         for (var resolvedStep : resolved) {
-            if (resolvedStep.kind().equals("REFERENCE") && resolvedStep.skipReason() != null) {
+            // Like NO_REFERENCE, a skipped rule without a person has no snapshot row to store.
+            if (resolvedStep.skipReason() != null
+                    && (resolvedStep.person() == null || resolvedStep.kind().equals("REFERENCE"))) {
                 continue;
             }
             String status = null;

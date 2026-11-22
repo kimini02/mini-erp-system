@@ -43,7 +43,10 @@ class M3BatchTest extends AttendanceTestSupport {
                         Map.of("formCode", "LEAVE", "title", "병가", "body", leaveBody("SICK", date, date))))
                 .path("id")
                 .asLong();
-        data(postAs("/api/v1/approval-documents/" + sick + "/submit", leaderToken, null));
+        // KI-15: the leader's own sick leave now needs the superior's approval before the batch sees leave.
+        assertThat(data(postAs("/api/v1/approval-documents/" + sick + "/submit", leaderToken, null))
+                .path("status").asText()).isEqualTo("IN_PROGRESS");
+        data(postAs("/api/v1/approval-documents/" + sick + "/approve", chiefToken, null));
         at(date.plusDays(1), LocalTime.of(0, 10));
         batch.runPreviousDay();
         assertThat(row(employee.getId(), date).get("out_result")).isEqualTo("ON_TIME");

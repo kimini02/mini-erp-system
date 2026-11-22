@@ -27,6 +27,7 @@ import {
   Th,
   Tr,
 } from '@/components/ui';
+import PositionCard from './departments/PositionCard';
 import WorkScheduleCard from './departments/WorkScheduleCard';
 import TreeNode from './departments/TreeNode';
 import DepartmentFormModal from './departments/DepartmentFormModal';
@@ -207,7 +208,7 @@ export default function DepartmentsPage() {
           </div>
         </Card>
 
-        <div className="space-y-4 lg:col-span-8">
+        <div className="min-w-0 space-y-4 lg:col-span-8">
           {!detail ? (
             <Card>
               <PageLoader />
@@ -406,6 +407,7 @@ export default function DepartmentsPage() {
               )}
             </>
           )}
+          <PositionCard canCreate={canCreate} canUpdate={canUpdate} canDelete={canDelete} />
         </div>
       </div>
 
