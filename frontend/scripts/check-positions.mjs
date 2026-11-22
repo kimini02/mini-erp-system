@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
@@ -11,6 +11,13 @@ const root = resolve(import.meta.dirname, '..');
 const temporary = await mkdtemp(join(tmpdir(), 'position-check-'));
 const require = createRequire(import.meta.url);
 try {
+  // 화면 경로는 DEPARTMENT V로 보호한다. GET /positions의 로그인 전용 권한과 구별한다.
+  const appSource = await readFile(join(root, 'src/App.jsx'), 'utf8');
+  assert.match(
+    appSource,
+    /path="\/org\/departments"\s+element=\{\s+<RequirePermission menu=\{MENU.DEPARTMENT\}>/,
+    '/org/departments must require DEPARTMENT V',
+  );
   const outfile = join(temporary, 'api.cjs');
   await build({
     entryPoints: [join(root, 'src/api/org.js')],
@@ -174,6 +181,9 @@ try {
   await build({
     stdin: {
       contents: `export { default as View } from './src/pages/org/departments/PositionCardView.jsx';
+      export { RequirePermission } from './src/components/layout/guards.jsx';
+      export { getNavigation } from './src/components/layout/navigation.js';
+      export { MENU } from './src/lib/permissions.js';
       export { createElement } from 'react'; export { renderToStaticMarkup } from 'react-dom/server';`,
       resolveDir: root,
       loader: 'jsx',
@@ -184,39 +194,70 @@ try {
     format: 'cjs',
     jsx: 'automatic',
     alias: { '@': join(root, 'src') },
+    plugins: [
+      {
+        name: 'permission-fixture',
+        setup(bundler) {
+          bundler.onResolve({ filter: /\/store\/authStore(?:\.js)?$/ }, () => ({
+            path: 'auth',
+            namespace: 'permission-fixture',
+          }));
+          bundler.onLoad({ filter: /.*/, namespace: 'permission-fixture' }, () => ({
+            contents: 'export const useAuthStore = selector => selector({ can: globalThis.positionCan });',
+          }));
+        },
+      },
+    ],
   });
-  const { View, createElement, renderToStaticMarkup } = require(renderFile);
-  const render = (props) =>
-    renderToStaticMarkup(
-      createElement(View, {
-        positions: saved,
-        editing: null,
-        name: '',
-        error: '',
-        notice: '',
-        dirty: false,
-        onNameChange() {},
-        onEditNameChange() {},
-        ...props,
-      }),
+  const { View, RequirePermission, getNavigation, MENU, createElement, renderToStaticMarkup } = require(renderFile);
+  const view = (props) =>
+    createElement(View, {
+      positions: saved,
+      editing: null,
+      name: '',
+      error: '',
+      notice: '',
+      dirty: false,
+      onNameChange() {},
+      onEditNameChange() {},
+      ...props,
+    });
+  const render = (props) => renderToStaticMarkup(view(props));
+  for (let mask = 0; mask < 16; mask += 1) {
+    const canView = !!(mask & 1),
+      canCreate = !!(mask & 2),
+      canUpdate = !!(mask & 4),
+      canDelete = !!(mask & 8);
+    const actions = new Set(['V', 'C', 'U', 'D'].filter((_, index) => mask & (1 << index)));
+    globalThis.positionCan = (menu, action = 'V') => menu === MENU.DEPARTMENT && actions.has(action);
+    const navigation = getNavigation({ can: globalThis.positionCan });
+    assert.equal(
+      navigation.flatMap((group) => group.items).some((item) => item.path === '/org/departments'),
+      canView,
     );
-  for (let mask = 0; mask < 8; mask += 1) {
-    const canCreate = !!(mask & 1),
-      canUpdate = !!(mask & 2),
-      canDelete = !!(mask & 4);
-    const html = render({ canCreate, canUpdate, canDelete });
-    assert.equal(html.includes('직급 추가'), canCreate);
-    assert.equal(html.includes('이름 변경'), canUpdate);
-    assert.equal(html.includes('순서 저장'), canUpdate);
-    assert.equal(html.includes('위로 이동'), canUpdate);
-    assert.equal(html.includes('사원 삭제'), canDelete);
-    assert.match(html, /사원/); // 보기에는 쓰기 권한이 필요 없다.
-    assert.match(html, /낮은 직급 → 높은 직급/);
+    const html = renderToStaticMarkup(
+      createElement(RequirePermission, { menu: MENU.DEPARTMENT }, view({ canCreate, canUpdate, canDelete })),
+    );
+    assert.equal(html.includes('aria-label="직급 관리"'), canView);
+    assert.equal(html.includes('직급 추가'), canView && canCreate);
+    assert.equal(html.includes('이름 변경'), canView && canUpdate);
+    assert.equal(html.includes('순서 저장'), canView && canUpdate);
+    assert.equal(html.includes('위로 이동'), canView && canUpdate);
+    assert.equal(html.includes('사원 삭제'), canView && canDelete);
+    if (canView) {
+      assert.match(html, /낮은 직급 → 높은 직급/);
+      if (canUpdate) assert.match(html, /aria-label="사원 이름 변경"/);
+    } else {
+      assert.match(html, /이 화면을 볼 권한이 없습니다/);
+    }
   }
   assert.match(render({ notice: POSITION_ORDER_NOTICE }), /새 직급은 맨 앞에 들어갑니다/);
   assert.match(render({ error: inUse.message }), /role="alert"[^>]*>이 직급을 쓰는 사원이 있어 삭제할 수 없습니다/);
-  console.log('POSITION_VIEW permission_combinations=8/8 addition_notice=PASS server_409_message=PASS');
+  console.log(
+    'POSITION_VIEW permission_combinations=16/16 menu_and_route=PASS rename_label=PASS addition_notice=PASS server_409_message=PASS',
+  );
 } finally {
   delete globalThis.positionRequests;
+  delete globalThis.positionCan;
   await rm(temporary, { recursive: true, force: true });
 }

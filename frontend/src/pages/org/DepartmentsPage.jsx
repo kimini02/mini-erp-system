@@ -37,7 +37,6 @@ import DepartmentHeadModal from './departments/DepartmentHeadModal';
 export default function DepartmentsPage() {
   const navigate = useNavigate();
   const can = useAuthStore((s) => s.can);
-  const canView = can(MENU.DEPARTMENT, 'V');
   const canCreate = can(MENU.DEPARTMENT, 'C');
   const canUpdate = can(MENU.DEPARTMENT, 'U');
   const canDelete = can(MENU.DEPARTMENT, 'D');
@@ -94,7 +93,6 @@ export default function DepartmentsPage() {
   );
 
   useEffect(() => {
-    if (!canView) return;
     loadTree()
       .then((t) => setSelectedId((prev) => prev ?? t.children[0]?.id ?? t.id))
       .catch((err) => setLoadError(getErrorMessage(err)));
@@ -102,11 +100,11 @@ export default function DepartmentsPage() {
       .getDefault()
       .then(setDefaultSchedule)
       .catch(() => {});
-  }, [loadTree, canView]);
+  }, [loadTree]);
 
   useEffect(() => {
-    if (canView) loadDetail(selectedId);
-  }, [selectedId, loadDetail, canView]);
+    loadDetail(selectedId);
+  }, [selectedId, loadDetail]);
 
   const refresh = async (nextId = selectedId) => {
     await loadTree();
@@ -168,15 +166,6 @@ export default function DepartmentsPage() {
       toast.error(getErrorMessage(err));
     }
   };
-
-  if (!canView) {
-    return (
-      <>
-        <PageHeader title="부서 관리" description="회사 직급을 확인합니다." />
-        <PositionCard canCreate={canCreate} canUpdate={canUpdate} canDelete={canDelete} />
-      </>
-    );
-  }
 
   if (loadError) {
     return (

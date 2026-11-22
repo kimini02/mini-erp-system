@@ -109,6 +109,7 @@ export default function PositionCardView({
                             variant="secondary"
                             size="sm"
                             icon={Pencil}
+                            aria-label={`${position.name} 이름 변경`}
                             disabled={unavailable || editingNow || dirty}
                             onClick={() => onEdit(position)}
                           >

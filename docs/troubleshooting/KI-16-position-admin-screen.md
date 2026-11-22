@@ -8,7 +8,7 @@
 
 - 기존 부서 관리 화면에 WorkScheduleCard와 같은 Card·Field·Input·Button을 사용하는 회사 공통 직급 카드를 추가했다. 부서 선택과 무관하게 한 번 로드하며 서버 목록 순서를 그대로 표시한다.
 - 추가는 DEPARTMENT C, 이름 변경·순서 저장은 U, 삭제는 D일 때만 버튼을 표시한다. 최종 권한은 서버가 검사한다. 목 서버도 쓰기 전에 같은 권한을 확인한다.
-- 기존 부서 관리 경로와 메뉴에는 DEPARTMENT V 검사가 있어 로그인만으로 직급을 보라는 이번 지시와 달랐다. **새 메뉴·라우트는 만들지 않고** 기존 경로의 외부 V 검사를 카드 안쪽으로 옮겼다. 로그인은 기존 RequireAuth가 보장한다. DEPARTMENT V가 없으면 직급 카드만 표시하고 부서 트리·상세·근무시간 요청 및 표시를 생략한다. 부서 정보의 기존 보기 범위는 넓히지 않는다. 기존 메뉴 항목은 로그인 사용자에게 표시한다.
+- **2026-11-22 정정:** `GET /positions`의 로그인 전용 권한과 화면 경로 권한을 구별한다. 부서 관리 메뉴·경로는 기존 DEPARTMENT V가 필요하고, 그 안에서 C/U/D에 따라 직급 버튼을 표시한다. 처음에는 “보기: 로그인한 사람 모두”를 화면에도 적용했으나 리뷰에서 API 권한이라는 뜻을 확인해 원복했다. API·권한 시드·메뉴 항목 자체는 변경하지 않는다.
 - 순서 이동은 위·아래 버튼으로 화면 상태만 바꾼다. 순서 저장 시 전체 목록을 `[{id, rankOrder: 1}, …]`로 PUT한다. 취소는 서버에서 받은 순서로 돌리고, 페이지를 떠나면 로컬 상태가 사라진다. 추가·이름 변경·삭제는 각각 즉시 저장되는 동작임을 카드에 표시한다. 미저장 순서가 있을 때 다른 편집을 막아 변경을 조용히 덮어쓰지 않는다.
 - 추가 성공 후 rankOrder=0 목록을 다시 조회하고 순서 확인 안내를 표시한다. C만 있는 사람에게는 순서 권한이 있는 관리자에게 요청하라고 안내한다. 이름은 인라인으로 수정하며 삭제는 공용 확인창을 거친다. 오류는 서버 메시지를 카드 안 role=alert로 표시한다.
 - API 쓰기 뒤 목록 재조회에 실패하면 옛 목록으로 다시 쓰지 않도록 비활성화하고 재조회 버튼을 제공한다. 새 캐시·폴링은 추가하지 않았다.
@@ -48,7 +48,7 @@ exit 1
 
 화면 자체가 없어 API 연결부터 실패한 것이다. 기존 backend 동작을 실패로 바꾸지는 않았다.
 
-## 검증 결과
+## 최초 구현 검증 결과 (2026-11-17)
 
 검증 사본: `/private/tmp/ki16-position-screen/frontend`. lockfile 그대로 `npm ci --offline --ignore-scripts --no-audit --no-fund`로 기존 의존성 244개를 설치했다. 새 라이브러리와 lockfile 변경은 없다.
 
@@ -64,7 +64,9 @@ POSITION_VIEW permission_combinations=8/8 addition_notice=PASS server_409_messag
 
 쓰기 거절 후 데이터 무변경, 201·rank 0, 중복/빈 이름, 목록 이동 전 서버 순서 유지, 전체 순서 본문, 순서 중 잘못된 id/중복 id의 원자적 거절, 이름 변경, 퇴사자를 포함한 사용 중 직급 409, 미사용 직급 삭제를 검사한다. 렌더링은 C/U/D 8개 조합에서 추가·이름·이동·저장·삭제 버튼 표시와 안내·오류 메시지를 확인한다.
 
-### 목 브라우저
+### 목 브라우저 — 최초 구현 당시 기록
+
+아래는 7de5cc0 당시의 검증이다. login_only 결과는 당시의 잘못된 화면 권한을 검증한 것이므로 현재 완료 증거로 사용하지 않는다. 권한 원복 후의 검증은 맨 아래 리뷰 보완 절을 따른다.
 
 별도 임시 Chrome 프로필과 외부 사본의 `npm run dev:mock`(127.0.0.1:5189)에서 확인했다. API 기본 주소를 같은 목 개발 서버의 `/api/v1`로 지정해 실제 localhost:8080 서버에 가지 않도록 했다. 등록된 가상 계정·목 데이터만 사용했다.
 
@@ -76,7 +78,7 @@ POSITION_BROWSER delete_409=PASS delete_unused=PASS employee_options=PASS login_
 - 새 직급 생성 뒤 맨 앞과 안내 확인, 관리소장 → 대표 이름 변경, 전체 순서 저장, 취소, 이동 후 다른 페이지로 떠났다 돌아와 저장된 순서 확인.
 - 사용 중 사원 직급은 확인창 뒤 409 메시지, 미사용 직급은 삭제.
 - 별도 새로고침 없이 사원 등록 모달의 직급 선택지에서 대표 이름·새 순서·삭제 결과 확인.
-- DEPARTMENT V/C/U/D 모두 없는 로그인 상태에서 기존 메뉴로 진입해 직급은 보이고 부서 정보·쓰기 버튼은 없는지 확인.
+- 당시에는 DEPARTMENT V/C/U/D 모두 없는 로그인 상태에도 메뉴와 직급이 보였으나, 이 동작은 2026-11-22 리뷰 보완에서 제거했다.
 - 첫 브라우저 점검은 사원 페이지의 목록 로딩 전에 옵션을 단언해 실패했다. 하네스에서 옵션 응답 완료를 기다리도록 고친 뒤 위 결과가 모두 통과했다. 제품 코드 수정은 없었다.
 
 | 뷰포트 너비 | 문서 scrollWidth | 직급 카드 scrollWidth / clientWidth |
@@ -88,7 +90,7 @@ POSITION_BROWSER delete_409=PASS delete_unused=PASS employee_options=PASS login_
 
 기본·모바일 스크린샷도 확인했다. UI는 줄바꿈·min-w-0·버튼 묶음 wrap으로 가로 넘침을 방지한다. 브라우저 로그·스크린샷은 외부 검증 폴더에 있고, 실제 API에서의 화면 확인은 요청대로 Claude 리뷰에 남긴다.
 
-### 백엔드·범위
+### 최초 화면 추가 당시의 백엔드·범위
 
 이번 추가는 frontend와 이 문서뿐이다. 9dd304d 이후 backend 변경 0이며 앞 세 건의 최종 Java 17·UTC·Testcontainers 전체 **370/0/0/0**, 67개 클래스, 10:15분 결과를 함께 사용한다. 기준선 3개·backend/md·마이그레이션·시드·포트폴리오 재현 항목은 변경하지 않았다. 별도로 변경된 KI-10 문서는 이번 커밋에 포함하지 않는다.
 
@@ -97,3 +99,42 @@ POSITION_BROWSER delete_409=PASS delete_unused=PASS employee_options=PASS login_
 ## 남은 한계
 
 실제 API를 붙인 화면 확인은 리뷰에서 수행한다. 동시에 다른 관리자가 직급을 편집하는 경우 서버의 현재 계약을 그대로 따른다(새 버전 검증이나 잠금 API를 추가하지 않음). 목의 이름 중복 검사는 MariaDB 문자 비교를 완전히 구현한 것은 아니다. 알림·폴링·토큰 동작은 이번 범위 밖이다.
+
+
+## 2026-11-22 리뷰 보완 — 메뉴·경로 권한 원복
+
+### 원인·수정
+
+“보기: 로그인한 사람 모두”는 직급 GET API 권한이었는데 프론트 경로까지 열었다. App.jsx의 /org/departments를 RequirePermission(MENU.DEPARTMENT)으로 다시 감싸고, navigation.js의 기존 visible 조건을 되돌렸다. DepartmentsPage의 canView 조기 분기와 useEffect 조건을 제거했다. 직급 카드는 부서 관리 화면 안에만 있고 API GET 권한은 변경하지 않았다.
+
+C/U/D 버튼 조건과 목 서버 권한은 그대로다. 선택 요청대로 이름 변경 버튼에 직급명을 포함한 aria-label(예: `사원 이름 변경`)을 추가했다. 새 메뉴·라우트·라이브러리는 추가하지 않았다.
+
+### 수정 전 실패·점검 방식
+
+외부 archive의 기존 화면에 새 스크립트만 넣어 실행했다.
+
+```text
+AssertionError [ERR_ASSERTION]: /org/departments must require DEPARTMENT V
+exit 1
+```
+
+check-positions.mjs는 App의 경로가 실제 RequirePermission으로 감싸져 있는지 먼저 확인한다. 실제 getNavigation과 RequirePermission을 기존 esbuild로 불러오고 권한 저장소만 테스트 값으로 대체한다. V/C/U/D **16개 조합**에서 메뉴 노출·경로 렌더 결과와 추가/이름/이동/저장/삭제 버튼을 검사한다. V 없이 C/U/D만 있어도 화면은 거절된다. V만 있으면 읽기만 가능하다. 이름 변경 버튼의 직급별 접근성 라벨도 확인한다.
+
+이전 API 요청 본문·목 권한 4종·추가 안내·409 오류 검사는 그대로다. 공통 가드나 권한 로직을 테스트 사본으로 다시 구현하지 않고 실제 컴포넌트를 사용한다. 실제 브라우저 상호작용 검사는 이번 보완에서 다시 실행하지 않았다.
+
+외부 사본 `/private/tmp/onboarding-review-20261122/candidate/frontend`에서 다음을 실행했다. lockfile에 있는 기존 의존성 244개만 설치했으며 새 라이브러리·lockfile 변경은 없다.
+
+```text
+npm run build: exit 0 (6.04 s)
+npm run lint: exit 0 (오류·경고 없음)
+node scripts/check-positions.mjs: exit 0
+POSITION_API methods=5 order_body=PASS
+POSITION_MOCK permissions=4/4 create_201_rank_zero=PASS rename=PASS order_atomic=PASS delete_409=PASS
+POSITION_VIEW permission_combinations=16/16 menu_and_route=PASS rename_label=PASS addition_notice=PASS server_409_message=PASS
+```
+
+App.jsx와 navigation.js는 직급 화면 추가 전 9dd304d의 파일과 바이트 단위로 같고, DepartmentsPage에는 canView가 없으며 직급 카드와 기존 C/U/D 검사는 유지된다. 이번 백엔드 공석 정정 커밋은 `c537e39`이며 전체 UTC 테스트는 **373/0/0/0**, 67개 클래스, 08:33분이다. 상세 근거는 KI-15의 같은 날짜 리뷰 보완 절을 따른다.
+
+### 범위·남은 한계·커밋
+
+이 프론트 보완에서 백엔드 API·목 GET 계약·시드·폴링·배지는 바꾸지 않았다. 실제 API 화면 점검은 리뷰에 남긴다. 커밋은 이 보완 절과 같은 `fix(frontend): 부서 관리 메뉴·경로 권한 원복`이다. 미커밋 KI-10은 포함하지 않았으며 병합·푸시·배포·다음 단계는 진행하지 않는다.
