@@ -238,10 +238,21 @@ class SelfApprovalInvariantTest extends MariaDbIntegrationTest {
             }
         }
         selfRule(type, employee);
+        if (entry.equals("RESUBMIT")) {
+            long originalId = id;
+            var copy = data(postAs("/api/v1/approval-documents/" + id + "/resubmit", employee, null)
+                    .andExpect(status().isCreated()));
+            assertThat(copy.path("status").asText()).isEqualTo("DRAFT");
+            id = copy.path("id").asLong();
+            assertThat(id).isNotEqualTo(originalId);
+            assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?",
+                    String.class, originalId)).isEqualTo("REJECTED");
+            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM approval_lines WHERE document_id=?",
+                    Integer.class, id)).isZero();
+        }
         var beforeCounts = mutationCounts();
         var preview = preview("GENERAL", employee);
-        var result = postAs("/api/v1/approval-documents/" + id
-                + (entry.equals("RESUBMIT") ? "/resubmit" : "/submit"), employee, null)
+        var result = postAs("/api/v1/approval-documents/" + id + "/submit", employee, null)
                 .andReturn().getResponse();
         long documentId = id;
         Assertions.assertAll(
@@ -253,11 +264,46 @@ class SelfApprovalInvariantTest extends MariaDbIntegrationTest {
                         .isEqualTo("APPROVER_NOT_FOUND"),
                 () -> assertThat(mutationCounts()).isEqualTo(beforeCounts),
                 () -> assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?",
-                        String.class, documentId)).isEqualTo(entry.equals("RESUBMIT") ? "REJECTED" : "DRAFT"));
-        if (!entry.equals("RESUBMIT")) {
-            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM approval_lines WHERE document_id=?",
-                    Integer.class, id)).isZero();
-        }
+                        String.class, documentId)).isEqualTo("DRAFT"));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM approval_lines WHERE document_id=?",
+                Integer.class, id)).isZero();
+    }
+
+    @Test
+    void rejectedRuleDraftCanBeCopiedWhileUpperDepartmentHeadIsVacant() throws Exception {
+        long original = draft("LEAVE", employee);
+        data(postAs("/api/v1/approval-documents/" + original + "/submit", employee, null));
+        data(postAs("/api/v1/approval-documents/" + original + "/reject", leader, Map.of("comment", "반려")));
+        var originalLines = jdbc.queryForList("SELECT * FROM approval_lines WHERE document_id=? ORDER BY id",
+                original);
+        jdbc.update("UPDATE departments SET head_user_id=NULL WHERE id=1");
+        // A copied rule draft, just like a new draft, resolves its line only at submission.
+        postAs("/api/v1/approval-documents", employee,
+                Map.of("formCode", "LEAVE", "title", "새 임시 문서", "body", body("LEAVE")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("data.status").value("DRAFT"));
+        var copied = data(postAs("/api/v1/approval-documents/" + original + "/resubmit", employee, null)
+                .andExpect(status().isCreated()));
+        long copyId = copied.path("id").asLong();
+        assertThat(copyId).isNotEqualTo(original);
+        assertThat(copied.path("status").asText()).isEqualTo("DRAFT");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM approval_lines WHERE document_id=?",
+                Integer.class, copyId)).isZero();
+        assertThat(jdbc.queryForObject("SELECT resubmitted_from_id FROM approval_documents WHERE id=?",
+                Long.class, copyId)).isEqualTo(original);
+        var beforeCounts = mutationCounts();
+        postAs("/api/v1/approval-documents/" + copyId + "/submit", employee, null)
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("error.code").value("APPROVER_NOT_FOUND"));
+        assertThat(mutationCounts()).isEqualTo(beforeCounts);
+        assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?", String.class, copyId))
+                .isEqualTo("DRAFT");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM approval_lines WHERE document_id=?",
+                Integer.class, copyId)).isZero();
+        assertThat(jdbc.queryForObject("SELECT status FROM approval_documents WHERE id=?", String.class, original))
+                .isEqualTo("REJECTED");
+        assertThat(jdbc.queryForList("SELECT * FROM approval_lines WHERE document_id=? ORDER BY id", original))
+                .isEqualTo(originalLines);
     }
 
     @ParameterizedTest

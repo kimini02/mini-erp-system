@@ -28,9 +28,9 @@ ROLE·USER마다 별도 예외를 덧붙이는 방법은 새 규칙이 생길 �
 
 - `ApprovalLineResolver.validateManualApprovers`: 직접 지정의 APPROVER가 기안자면 기존 INVALID_APPROVAL_STEPS와 `본인은 결재자로 지정할 수 없습니다.`로 400. 구조 검증과 기존 권한·allow_line_edit 검사는 유지한다. REFERENCE의 본인 제외도 유지한다.
 - `ApprovalLineResolver.validateRemainingApprovers`: 건너뛰지 않은 APPROVER가 있으면 기존 처리. 없으면 getPerson으로 **현재 기안자 부서·재직 상태를 다시 읽고**, 그 부서부터 부모 부서들을 순회한다. 모든 부서장이 재직 기안자 자신이어야 통과한다. 타인·공석·비재직·부서 없음·순환은 즉시 승인을 허용하지 않는다. 동일한 사람이 모든 부서의 부서장인지 확인하므로 그 사람의 ACTIVE 검사는 한 번이면 된다. 역할 코드나 부서 id=1 같은 지름길은 사용하지 않는다.
-- 위 최종 판단 함수는 resolveLine 끝에서 한 번만 호출한다. 문서·양식 미리보기, 상신, 재상신이 모두 이 경로를 사용한다. 단계별 KI-15 공석 검사도 유지한다.
-- 최종 검사 실패는 기존 ResolutionFailure로 전달한다. 미리보기에는 `최종 결재자 확인` ERROR 줄과 error를 반환하고 finalLine은 비운다. 상신·재상신은 기존 APPROVER_NOT_FOUND(422)로 끝난다. 새 오류 코드는 없다.
-- 재상신은 이 서비스에서 **반려/회수 원본을 새 DRAFT로 복사**하는 동작이다. 규칙선도 복사 전에 검사하도록 최소 변경했다. 실패 시 원본은 REJECTED이고 새 DRAFT는 만들지 않는다. 성공한 규칙선의 저장 시점은 여전히 다음 상신 시점이며, 새 임시 문서에 규칙 스냅샷을 미리 저장하지 않는다.
+- 위 최종 판단 함수는 resolveLine 끝에서 한 번만 호출한다. 문서·양식 미리보기, 상신(재기안 복사본의 상신 포함), 직접 지정 결재선 복사가 이 경로를 사용한다. 규칙 결재선의 재기안 복사는 임시 저장이므로 해석하지 않는다. 단계별 KI-15 공석 검사도 유지한다.
+- 최종 검사 실패는 기존 ResolutionFailure로 전달한다. 미리보기에는 `최종 결재자 확인` ERROR 줄과 error를 반환하고 finalLine은 비운다. 상신(복사본 포함)은 기존 APPROVER_NOT_FOUND(422)로 끝난다. 직접 지정 복사도 기존 A·B 검사를 적용한다. 새 오류 코드는 없다.
+- `resubmit`은 이 서비스에서 **반려/회수 원본을 새 DRAFT로 복사**하는 동작이다. 리뷰 보완으로 `checkDraftLine`을 다시 사용한다. 직접 지정선만 복사 전에 A·B를 검사하며, 규칙선은 공석·USER/ROLE 본인 여부와 관계없이 복사 201 DRAFT를 허용하고 새 결재선을 저장하지 않는다. 규칙 결재선은 복사본을 상신할 때 해석하고 B를 검사한다. 직접 지정 본인 때문에 복사가 거절되면 원본은 REJECTED 그대로이고 새 문서를 만들지 않는다.
 - 검사는 문서번호 발급·결재선 저장·문서 상태 변경·알림·연차 후처리 전에 끝난다. 기존 사용자 행 잠금과 트랜잭션 경계는 유지한다.
 - `skip_self=false`인 **규칙선**에서는 본인이 PENDING으로 남으므로 B가 차단하지 않는다. **직접 지정선**의 본인 금지는 skip_self와 별개로 A가 적용한다.
 
@@ -42,7 +42,7 @@ ROLE·USER마다 별도 예외를 덧붙이는 방법은 새 규칙이 생길 �
 |---|---|---|---|
 | 직접 지정 본인만 | SELF로 제외 후 즉시 승인 가능 | 모든 입구 400 INVALID_APPROVAL_STEPS | A 입구 7개 × 본인만 |
 | 직접 지정 본인+타인 | 본인을 제외하고 진행 | 모든 입구 400 | A 입구 7개 × 본인+타인 |
-| ROLE 유일 담당자=기안자 | 미리보기 정상·상신 즉시 승인 | 미리보기 ERROR·상신 422·DRAFT·새 결재선 0 | NEW / RESUBMIT / REVISED_SUBMIT |
+| ROLE 유일 담당자=기안자 | 미리보기 정상·상신 즉시 승인 | 미리보기 ERROR·규칙선 복사 201 DRAFT·상신 422·DRAFT·결재선 0 | NEW / RESUBMIT / REVISED_SUBMIT |
 | USER 지정 사원=기안자 | ROLE과 같음 | ROLE과 같음 | NEW / RESUBMIT / REVISED_SUBMIT |
 | 본인 참조+다른 결재자 | 본인 참조 제외 | 그대로, 타인 결재 진행 | ownReferenceIsSilentlyOmitted |
 | 대표 규칙 기안 LEAVE·GENERAL·OVERTIME·ATTENDANCE_FIX | 즉시 승인 | 그대로, 대표 휴가 USE -1·잔여 9 유지 | 기존 회사 계층 12개 행 중 대표 4개 |
@@ -58,9 +58,11 @@ ROLE·USER마다 별도 예외를 덧붙이는 방법은 새 규칙이 생길 �
 
 A의 7개 입구: CREATE(POST 임시 저장), UPDATE(PUT 임시 수정), PREVIEW, SUBMIT, RESUBMIT, REVISED_UPDATE(반려 후 새 임시본 수정), REVISED_SUBMIT(반려 후 새 임시본 상신). 각각 본인만/본인+타인을 검사해 14개다. 과거 직접 지정 자기 결재선은 기존 정상 문서 생성·반려 후 테스트 DB의 해당 선만 바꿔 재현한다.
 
-B의 USER·ROLE 각각에서 NEW, 반려 원본 RESUBMIT, 재기안 임시본 REVISED_SUBMIT을 검사한다. 실패 요청 앞뒤 문서·결재선·이력·알림·연차 원장 행 수가 같다. A는 기존 선 내용까지 같음을 확인한다. 재기안 임시본은 DRAFT, 반려 원본의 재상신 거절은 REJECTED 그대로이며 새 문서는 0개다.
+B의 USER·ROLE 각각에서 NEW, RESUBMIT(규칙이 본인으로 바뀐 뒤 복사), REVISED_SUBMIT(복사한 뒤 규칙이 본인으로 바뀜)을 검사한다. 두 복사는 모두 201 DRAFT·새 결재선 0개이며, 이어지는 상신이 422로 차단된다. 실패한 상신 앞뒤 문서·결재선·이력·알림·연차 원장 행 수가 같다. 원본은 REJECTED, 복사본은 DRAFT로 남는다. A의 직접 지정 본인 RESUBMIT은 계속 400이며, 새 문서가 없고 기존 선 내용까지 같음을 확인한다.
 
-## 수정 전 실패·수정 후 검증
+## 초기 구현의 수정 전 실패·수정 후 검증 (fb62706)
+
+아래 33개·406개 결과와 초기 변이 결과는 최초 구현 당시 기록이다. 당시 USER·ROLE의 RESUBMIT을 422로 기대한 부분은 잘못된 계약이었으며, 아래 리뷰 보완에서 복사 201·복사본 상신 422로 바로잡았다. 최신 검증은 마지막 리뷰 보완 절을 따른다.
 
 처음 30개 테스트를 수정 전 코드에 넣었을 때 25개 실패했다. 현재 부서 재확인·전체 경로 동일인 허용·대사 회귀를 더한 **최종 동일 테스트 33개**도 수정 전 코드에서 다시 실행해 아래 결과를 확인했다. 새 운영 클래스에 의존하지 않아 수정 전 코드에서도 컴파일됐다.
 
@@ -193,9 +195,9 @@ responses.json    2e2acc5d706ea90531d44a7f957938f5e9a67a0d3e049d8fde0fc8b41dddce
 masked-fields.txt 7c4c8e12a7287aafc91ce4073f0ab047be4086f390cd26bc9901669acee5156e
 ```
 
-SQL은 동작 변경으로 증가할 수 있다. `rejectWithdrawAndResubmitKeepLedgerInvariantAndOriginalDocument`는 272→276회로, 재상신에서 규칙을 확인하는 양식 단계·부서명·부서장·사원 조회가 각 1회 추가됐다. 별도의 동시 문서번호 테스트에서 `select @@session.tx_isolation`만 6→5회로 달랐다(총 369→368). 해당 연결 초기화/트랜잭션 조회의 실행 시점 차이는 이번 기록으로 원인을 확정하지 않았으며, 쿼리를 제거하거나 비교 규칙을 느슨하게 바꾸지 않았다. 기존 응답 137건의 차이 0과 전체 SQL 동일성은 구별한다.
+초기 구현 fb62706에서 `rejectWithdrawAndResubmitKeepLedgerInvariantAndOriginalDocument`는 272→276회였다. 재기안 복사에서 불필요하게 규칙을 확인해 양식 단계·부서명·부서장·사원 조회가 각 1회 추가된 회귀였다. 이번 리뷰 보완으로 복사 시 규칙 해석을 제거했으며 재측정 수치는 아래 보완 절에 남긴다. 별도의 동시 문서번호 테스트에서 `select @@session.tx_isolation`만 6→5회로 달랐다(총 369→368). 해당 연결 초기화/트랜잭션 조회의 실행 시점 차이는 이번 기록으로 원인을 확정하지 않았으며, 쿼리를 제거하거나 비교 규칙을 느슨하게 바꾸지 않았다. 기존 응답 137건의 차이 0과 전체 SQL 동일성은 구별한다.
 
-## 전체 실행·기준선·커밋
+## 초기 구현의 전체 실행·기준선·커밋 (fb62706)
 
 | 검증 | 결과 |
 |---|---|
@@ -232,5 +234,72 @@ npm run lint
 
 - 이번 변경은 모든 자기 결재를 금지하는 정책이 아니다. 관리자 설정 skip_self=false의 규칙선은 본인 PENDING을 유지하며, B의 조직 조건을 만족한 기안은 즉시 승인한다.
 - 현재 조직을 다시 읽지만 기존 조직 변경과 결재선 확정 사이에 새 트리 잠금이나 이력 테이블을 추가하지 않았다. 동시 조직 변경을 직렬화하는 별도 정책은 이번 범위에서 바꾸지 않았다.
+- B의 조직 확인은 잠금 없이 읽으므로, 부서장 변경과 동시에 상신하면 변경 전 조직 기준으로 판단될 수 있다(기존 결재선 계산과 같은 성질).
 - 과거 PENDING·과거 조직 조건을 정확히 재구성할 데이터가 없어 대사 결과의 역사적 위반 확정은 불가능하다. 후보를 확인한 뒤 별도 결정을 해야 한다. 기존 데이터는 고치지 않았다.
 - 실제 사용자 화면·운영 서버·실제 SMTP 검증, 배포, 병합·푸시는 수행하지 않았다. 포트폴리오 재현 항목·양식 시드·마이그레이션·backend/md·기준선·기록 정책·.claude는 바꾸지 않았다. 기존 미커밋 KI-10 문서는 이번 커밋에서 제외했다.
+
+
+## 리뷰 보완 — 규칙 결재선의 재기안은 임시 복사 (2026-11-22)
+
+### 증상·재현·원인
+
+LEAVE를 사원이 상신하고 팀장이 반려한 뒤 최상위 부서장을 비우면, 새 임시 저장은 가능하지만 반려 문서의 재기안 복사가 422 APPROVER_NOT_FOUND로 막혔다. USER·ROLE이 기안자만 가리키도록 바뀐 경우도 복사부터 막혔다.
+
+재기안 복사와 복사본 상신을 같은 검증 시점으로 취급해 `resubmitDocument`에서 `checkDraftLine`을 `resolveLine`으로 바꾼 것이 원인이다. 복사는 DRAFT를 만드는 동작이며, 규칙 해석과 B 검사는 실제 상신에 필요하다.
+
+### 선택한 방법·버린 방법
+
+- `resubmitDocument`를 `checkDraftLine`으로 되돌렸다. 반환한 resolved를 그대로 storeLines에 넘긴다. 규칙선이면 빈 목록, 직접 지정선이면 기존 A·B 검사를 마친 목록이므로 별도의 조건 분기도 필요 없다.
+- 직접 지정 본인 복사의 400과 상신 시 B 검사는 유지했다. 부서장 공석만 별도 예외로 두는 방법은 USER·ROLE 복사에도 불필요한 검사 시점을 남기므로 버렸다. A·B 검사 자체를 제거하는 방법도 자기 승인을 다시 허용하므로 버렸다.
+- 양식·조직·잠금·마이그레이션·ErrorCode·프론트는 변경하지 않았다.
+
+### 수정 전 실패 출력
+
+`fb62706` 외부 archive에 변경한 테스트만 넣고 Java 17·UTC·Testcontainers로 먼저 실행했다. 34개 중 정확히 아래 3개가 실패했다.
+
+```text
+ruleSelfWithoutPendingIsRejectedAtPreviewAndSubmission(String, String)[2] (USER/RESUBMIT)
+Status expected:<201> but was:<422>
+ruleSelfWithoutPendingIsRejectedAtPreviewAndSubmission(String, String)[5] (ROLE/RESUBMIT)
+Status expected:<201> but was:<422>
+rejectedRuleDraftCanBeCopiedWhileUpperDepartmentHeadIsVacant
+Status expected:<201> but was:<422>
+Tests run: 34, Failures: 3, Errors: 0, Skipped: 0
+BUILD FAILURE / Maven 25.694 s
+```
+
+USER·ROLE의 RESUBMIT 행은 복사 201 DRAFT·결재선 0개를 확인한 뒤, 그 복사본을 실제 상신해 422·DRAFT 유지·결재선 0개를 확인한다. REVISED_SUBMIT은 복사 후 규칙이 바뀌는 기존 사례를 유지한다. A의 직접 지정 RESUBMIT 2개 행은 400 기대를 그대로 둔다.
+
+새 LEAVE 공석 회귀는 새 임시 저장·재기안 복사 모두 201임을 확인한다. 복사본은 별도 id와 resubmitted_from_id를 가지며 결재선은 0개다. 복사본 상신은 422이고, 실패 전후 문서·결재선·이력·알림·연차 원장 행 수가 같고 원본의 REJECTED 상태·기존 결재선도 유지된다.
+
+### 수정 후·변이·전체 결과
+
+| 실행 | 테스트/실패/오류/건너뜀 | Maven 시간·설명 |
+|---|---|---|
+| 수정 전 fb62706 + 변경 테스트 | 34/3/0/0 | 25.694 s; USER·ROLE 복사와 공석 LEAVE 복사 201 기대 실패 |
+| 수정 후 KI-17 + 기존 KI-15 | 54/0/0/0 | 32.311 s; KI-17 34개 + KI-15 20개 |
+| A만 끈 외부 변이 사본 | 34/15/0/0 | 35.833 s; 기대한 검증 실패, 종료 코드 1 |
+| B만 끈 외부 변이 사본 | 34/11/0/0 | 58.126 s; 기대한 검증 실패, 종료 코드 1 |
+| 최종 전체 UTC | **407/0/0/0** | **10:59 min**, 68개 클래스; 기존 406개 + 새 공석 회귀 1개, BUILD SUCCESS |
+
+A 변이의 실패 15개는 everyManualEntranceRejectsSelfApprover 14개와 manualSelfIsRejectedEvenWhenSkipSelfIsDisabled다. 직접 지정 RESUBMIT의 두 행도 포함한다. B 변이의 실패 11개는 ruleSelfWithoutPendingIsRejectedAtPreviewAndSubmission 6개, zeroApproverChecksActualHierarchyDespiteUserRule 4개, finalCheckUsesCurrentDepartmentRatherThanDraftSnapshot 1개다. RESUBMIT의 USER·ROLE 두 행은 이제 복사가 아니라 **복사본 상신이 차단되지 않아** 실패한다. 새 LEAVE 공석 회귀는 기존 단계별 공석 검사에서도 상신이 차단되므로 두 변이 모두 통과한다.
+
+A·B 호출을 각 사본에서 한 줄씩만 제거했고 원본 검사 코드나 기록 정책은 바꾸지 않았다. 변이 사본은 커밋하지 않는다.
+
+기존 `rejectWithdrawAndResubmitKeepLedgerInvariantAndOriginalDocument` 메서드를 동일한 기록기로 단독 실행했다. 수정 전 277회 → 수정 후 273회이며, 양식 단계·부서명·부서장·사원 조회가 각각 1회 줄었다. 기존 문서의 276회/272회 기록과 대조하면 이번 단독 실행에서는 양쪽 모두 `select @@session.tx_isolation`이 0→1회인 차이만 있다. 따라서 그 조회를 빼거나 수치를 보정하지 않고 실제 관측 277→273을 기록하며, 본문에서 설명했던 불필요한 규칙 해석 4회가 제거됐음을 확인한다.
+
+단독 실행은 전후 각각 1/0/0/0(Maven 30.295 s / 1:39 min)이며, 응답 13건은 기록된 본문 원문을 포함해 동일하다. 기록 옵션을 켠 단독 실행 시간은 성능 개선 수치로 해석하지 않는다. 기준선·비교 규칙·기록 정책은 바꾸지 않았다. 기록 파일은 외부 사본의 target/ki17-resubmit-record와 record-before.log·record-after.log에 있다.
+
+### 실행·커밋·보존 범위
+
+실행 폴더는 `/private/tmp/ki17-resubmit-review-20261122`다. 모든 테스트 실행은 외부 archive에서 Java 17과 `-Duser.timezone=UTC`로 수행했고 Testcontainers만 사용했다. 원시 로그는 red.log, targeted.log, mutant-a.log, mutant-b.log, full.log에 있으며 테스트용 요청이 들어 있을 수 있어 원문 전체를 커밋하지 않았다.
+
+```bash
+# 외부 사본의 backend에서
+JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home \
+  ./mvnw -Duser.timezone=UTC -Dtest=SelfApprovalInvariantTest,ApprovalSelfEscalationTest test
+JAVA_HOME=/Users/kimmini/Library/Java/JavaVirtualMachines/ms-17.0.16/Contents/Home \
+  ./mvnw -Duser.timezone=UTC test
+```
+
+변경은 DocumentService.java, SelfApprovalInvariantTest.java, 이 KI-17 기록의 세 파일이며, `fix(api): 규칙 결재선 재기안 복사의 상신 검사 회귀 수정` 커밋에 포함한다. 프론트는 바꾸지 않아 이번 보완에서 build·lint를 다시 실행하지 않았다. 기준선 파일·기록 정책·backend/md·미커밋 KI-10 문서는 보존했다. 병합·푸시·배포 및 실제 DB·Redis·서버 접속은 하지 않았다. 다음 단계는 시작하지 않았다.
