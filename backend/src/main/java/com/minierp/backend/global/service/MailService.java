@@ -33,7 +33,7 @@ public class MailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setFrom(resolvedFrom);
-        message.setSubject("[Mini ERP] 비밀번호 재설정 인증번호");
+        message.setSubject("[WorkFlow] 비밀번호 재설정 인증번호");
         message.setText(buildVerificationCodeBody(verificationCode));
         try {
             mailSender.send(message);
@@ -91,7 +91,7 @@ public class MailService {
     }
 
     private String buildVerificationCodeBody(String verificationCode) {
-        return "안녕하세요. Mini ERP 비밀번호 재설정 인증번호입니다.\n\n" + "인증번호: " + verificationCode + "\n" + "유효시간: 5분\n\n"
+        return "안녕하세요. WorkFlow 비밀번호 재설정 인증번호입니다.\n\n" + "인증번호: " + verificationCode + "\n" + "유효시간: 5분\n\n"
                 + "본인이 요청하지 않았다면 이 메일을 무시해주세요.";
     }
 }
